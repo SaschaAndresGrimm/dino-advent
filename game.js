@@ -186,64 +186,64 @@ const WORLDS = [
   { name: 'Dschungel', speed: 270, segs: 24, patterns: ['rock', 'rock', 'pit', 'pit', 'amber', 'raptor', 'plat', 'boulder'],
     startTip: 'Willkommen im Dschungel! Sammle Bernstein und finde die 3 Dino-Eier.',
     riddles: [
-      { q: 'Ein Bauer hat 10 Schafe. Alle bis auf 7 laufen weg. Wie viele Schafe hat er noch?', a: ['7', '3', '10'], ok: 0, why: '„Alle bis auf 7“ heisst: 7 Schafe bleiben da!' },
-      { q: 'Was ist schwerer: ein Kilo Federn oder ein Kilo Steine?', a: ['Beide gleich schwer', 'Die Steine', 'Die Federn'], ok: 0, why: 'Ein Kilo ist ein Kilo – egal ob Federn oder Steine!' },
-      { q: 'Fabios Mami hat zwei Kinder. Eines heisst Fabio. Wie heisst das andere?', a: ['Oli', 'Chili', 'Goetti'], ok: 0, why: 'Na klar – das bist DU!' },
-      { q: 'Ich habe drei Hörner, aber ich bin kein Nashorn. Wer bin ich?', a: ['Triceratops', 'Stegosaurus', 'T-Rex'], ok: 0, why: '„Tri“ heisst drei – Triceratops heisst „Drei-Horn-Gesicht“!' },
-      { q: 'Was gehört dir, wird aber von anderen viel öfter benutzt als von dir?', a: ['Dein Name', 'Dein Velo', 'Deine Zahnbürste'], ok: 0, why: 'Alle rufen dich beim Namen – du selbst sagst ihn fast nie!' },
-      { q: 'Was hat Beine, kann aber nicht laufen?', a: ['Ein Tisch', 'Ein Raptor', 'Ein Hase'], ok: 0, why: 'Ein Tisch hat vier Beine – und bleibt trotzdem immer stehen!' },
-      { q: 'Wie viele Beine haben 2 Hasen und 1 T-Rex zusammen?', a: ['10', '12', '8'], ok: 0, why: 'Jeder Hase hat 4 Beine, der T-Rex läuft auf 2: 4 + 4 + 2 = 10!' },
-      { q: 'Welcher Dino hatte einen langen Hals und frass Blätter ganz oben in den Bäumen?', a: ['Brachiosaurus', 'T-Rex', 'Velociraptor'], ok: 0, why: 'Der Brachiosaurus war ein Pflanzenfresser mit einem Riesenhals!' },
+      { q: 'Ein Velo und eine Glocke kosten zusammen 110 Franken. Das Velo kostet 100 Franken mehr. Was kostet die Glocke?', a: ['5 Franken', '10 Franken', '1 Franken'], ok: 0, why: 'Glocke 5 + Velo 105 = 110 – und 105 ist genau 100 mehr als 5!' },
+      { q: 'Welche Zahl kommt als Nächstes? 1, 2, 4, 7, 11, …', a: ['16', '15', '14'], ok: 0, why: 'Es kommt jedes Mal eins mehr dazu: +1, +2, +3, +4 – und jetzt +5. 11 + 5 = 16!' },
+      { q: 'Ein Seerosenblatt verdoppelt sich jeden Tag. Nach 10 Tagen ist der Teich voll. Wann war er halb voll?', a: ['Am 9. Tag', 'Am 5. Tag', 'Am 8. Tag'], ok: 0, why: 'Am 10. Tag verdoppelt es sich noch einmal – also war der Teich am 9. Tag halb voll!' },
+      { q: 'Lia hat 3 Schwestern. Jede Schwester hat einen Bruder. Wie viele Kinder sind es insgesamt?', a: ['5', '7', '4'], ok: 0, why: 'Lia und ihre 3 Schwestern sind 4 Mädchen – und alle haben denselben Bruder. Also 5 Kinder!' },
+      { q: 'Wie oft kannst du 10 von 100 abziehen?', a: ['Einmal', '10 Mal', '9 Mal'], ok: 0, why: 'Nach dem ersten Mal ziehst du von 90 ab – nicht mehr von 100!' },
+      { q: 'Welcher passt nicht dazu: Triceratops, Stegosaurus, Pteranodon?', a: ['Pteranodon', 'Stegosaurus', 'Triceratops'], ok: 0, why: 'Der Pteranodon ist ein Flugsaurier – die anderen beiden sind echte Dinosaurier!' },
+      { q: 'Ich bin eine Zahl. Verdoppelst du mich und zählst 4 dazu, kommt 20 heraus. Wer bin ich?', a: ['8', '12', '10'], ok: 0, why: '8 + 8 = 16, und 16 + 4 = 20!' },
+      { q: 'Was kommt als Nächstes? M, D, M, D, F, S, …', a: ['S', 'M', 'D'], ok: 0, why: 'Das sind die Wochentage: Montag, Dienstag, Mittwoch, Donnerstag, Freitag, Samstag – und dann Sonntag!' },
       { q: 'Ein Dino-Ei braucht 3 Tage zum Schlüpfen. Wie lange brauchen 3 Eier, die zusammen im Nest liegen?', a: ['3 Tage', '9 Tage', '6 Tage'], ok: 0, why: 'Alle drei Eier brüten gleichzeitig – also schlüpfen sie alle nach 3 Tagen!' },
-      { q: 'Ein Raptor hat 3 Krallen an jeder Hand. Wie viele Krallen hat er an beiden Händen?', a: ['6', '3', '10'], ok: 0, why: '3 Krallen links plus 3 Krallen rechts = 6!' },
+      { q: 'Wenn gestern Sonntag war: Welcher Tag ist übermorgen?', a: ['Mittwoch', 'Dienstag', 'Donnerstag'], ok: 0, why: 'Gestern Sonntag, heute Montag, morgen Dienstag – übermorgen Mittwoch!' },
     ],
     sky: ['#0f3b3a', '#8cc49b'], far: '#2f6a50', mid: '#1f4a38', ground: '#4a3020', top: '#3f9b3a', dots: '#3a2416', edge: '#2e1d12', plat: '#6b4a2b', platTop: '#4caf50',
     rock: '#7b6b5a', deco: '#173d2c', volcS: 0.45, volcCol: '#35544a', egg: '#f6e7b0', eggSpot: '#6aa84f' },
   { name: 'Canyon', speed: 295, segs: 30, patterns: ['rock', 'rock2', 'pit', 'pit', 'raptor', 'ptero', 'swoop', 'boulder', 'plat', 'amber', 'low', 'low'],
     startTip: 'Der heisse Canyon! Neue Fähigkeit: Halte DUCKEN gedrückt – so kommst du unter tiefen Felsen und Flugsauriern durch.',
     riddles: [
-      { q: 'Ein Hahn legt ein Ei genau auf die Spitze vom Dach. Auf welche Seite rollt es?', a: ['Hähne legen keine Eier!', 'Nach links', 'Nach rechts'], ok: 0, why: 'Eier legen nur Hennen. Ein Hahn legt gar keine Eier!' },
-      { q: 'Du rennst um die Wette und überholst den Zweiten. Auf welchem Platz bist du jetzt?', a: ['Zweiter', 'Erster', 'Dritter'], ok: 0, why: 'Du nimmst seinen Platz ein – also bist du jetzt Zweiter!' },
-      { q: 'Was hat ganz viele Zähne, kann aber nicht beissen?', a: ['Ein Kamm', 'Ein Hai', 'Ein T-Rex'], ok: 0, why: 'Ein Kamm hat viele Zähne – aber er beisst nie!' },
-      { q: 'Ich kann fliegen und lebte bei den Dinos – aber ich bin gar kein Dinosaurier. Wer bin ich?', a: ['Pteranodon', 'Velociraptor', 'Stegosaurus'], ok: 0, why: 'Der Pteranodon war ein Flugsaurier – das ist kein Dinosaurier!' },
-      { q: 'Wie viele Eier kannst du auf einen leeren Magen essen?', a: ['Eins', 'Drei', 'Zehn'], ok: 0, why: 'Nach dem ersten Ei ist dein Magen nicht mehr leer!' },
-      { q: 'Was reist um die ganze Welt und bleibt trotzdem immer in der Ecke?', a: ['Eine Briefmarke', 'Ein Flugsaurier', 'Ein Rucksack'], ok: 0, why: 'Die Briefmarke klebt in der Ecke vom Brief – und reist mit ihm überallhin!' },
-      { q: 'Ein Flugsaurier fliegt 3 Stunden zum Meer und 3 Stunden zurück. Wie lange fliegt er insgesamt?', a: ['6 Stunden', '3 Stunden', '9 Stunden'], ok: 0, why: '3 Stunden hin plus 3 Stunden zurück = 6 Stunden!' },
-      { q: 'Welcher Dino hatte grosse Platten auf dem Rücken?', a: ['Stegosaurus', 'Triceratops', 'Brachiosaurus'], ok: 0, why: 'Der Stegosaurus hatte Knochenplatten auf dem Rücken und Stacheln am Schwanz!' },
-      { q: 'Mamis Mami ist deine …?', a: ['Grossmutter', 'Tante', 'Schwester'], ok: 0, why: 'Die Mami von deiner Mami ist deine Grossmutter!' },
-      { q: 'Was ist voller Löcher und hält trotzdem Wasser?', a: ['Ein Schwamm', 'Ein Sieb', 'Ein Netz'], ok: 0, why: 'Ein Schwamm hat viele Löcher – und saugt sich trotzdem voll Wasser!' },
+      { q: 'Ein Flugsaurier fliegt 3 km nach Norden, dann 3 km nach Osten und dann 3 km nach Süden. Wie weit ist er vom Start weg?', a: ['3 km', '0 km', '9 km'], ok: 0, why: 'Norden und Süden heben sich auf – übrig bleiben die 3 km nach Osten!' },
+      { q: 'Bei einem Rennen überholst du den Letzten. Auf welchem Platz bist du jetzt?', a: ['Das geht gar nicht!', 'Vorletzter', 'Letzter'], ok: 0, why: 'Hinter dem Letzten ist niemand – du kannst ihn gar nicht überholen!' },
+      { q: 'Ein Elektrozug fährt nach Süden, der Wind weht nach Norden. In welche Richtung zieht der Rauch?', a: ['Es gibt keinen Rauch', 'Nach Norden', 'Nach Süden'], ok: 0, why: 'Ein Elektrozug macht gar keinen Rauch!' },
+      { q: 'Welche Zahl kommt als Nächstes? 3, 6, 12, 24, …', a: ['48', '36', '30'], ok: 0, why: 'Jedes Mal wird verdoppelt: 24 + 24 = 48!' },
+      { q: 'Eine Schnecke klettert eine 5 m hohe Wand hoch: tagsüber 3 m rauf, nachts 2 m runter. Wann ist sie oben?', a: ['Am 3. Tag', 'Am 5. Tag', 'Am 4. Tag'], ok: 0, why: 'Nach 2 Tagen und 2 Nächten ist sie auf 2 m. Am 3. Tag klettert sie 3 m – und ist oben!' },
+      { q: 'Wie viele Monate haben 31 Tage?', a: ['7', '6', '5'], ok: 0, why: 'Januar, März, Mai, Juli, August, Oktober und Dezember – das sind 7!' },
+      { q: 'Der Vater von Tim hat 4 Söhne. Drei heissen Nord, Süd und Ost. Wie heisst der vierte?', a: ['Tim', 'West', 'Mitte'], ok: 0, why: 'Es ist doch der Vater von Tim – der vierte Sohn heisst Tim!' },
+      { q: 'Wie viele Minuten sind eine Viertelstunde plus eine halbe Stunde?', a: ['45', '40', '35'], ok: 0, why: '15 + 30 = 45 Minuten!' },
+      { q: 'Welcher dieser Dinos hat am spätesten gelebt?', a: ['T-Rex', 'Stegosaurus', 'Brachiosaurus'], ok: 0, why: 'Der T-Rex lebte ganz am Ende der Dinozeit. Stegosaurus und Brachiosaurus lebten viele Millionen Jahre früher!' },
+      { q: 'Was ist die Hälfte von doppelt so viel wie 7?', a: ['7', '14', '3,5'], ok: 0, why: 'Doppelt so viel wie 7 ist 14 – und die Hälfte davon ist wieder 7!' },
     ],
     sky: ['#d9702e', '#f7d08a'], far: '#c0643a', mid: '#9a4a2a', ground: '#b5603a', top: '#d98b4e', dots: '#8e4526', edge: '#6e2f17', plat: '#8b4a2b', platTop: '#e0a060',
     rock: '#8d5a3b', deco: '#7a3a1e', volcS: 0.65, volcCol: '#9c5a3c', mesa: true, egg: '#cfe8ff', eggSpot: '#e07b39' },
   { name: 'Eiszeit', speed: 315, segs: 34, patterns: ['rock', 'rock2', 'pit', 'icicle', 'icicle', 'raptor', 'ptero', 'boulder', 'plat', 'amber', 'low', 'compy', 'compy', 'geode'],
     startTip: 'Brrr, die Eiszeit! Neue Fähigkeit: Spring hoch und drück STAMPF – das knackt Bernstein-Steine und plättet Kompsis!',
     riddles: [
-      { q: 'Wie viele Monate im Jahr haben 28 Tage?', a: ['Alle 12', 'Nur einer', 'Zwei'], ok: 0, why: 'Jeder Monat hat mindestens 28 Tage – also alle 12!' },
-      { q: 'Je mehr du davon wegnimmst, desto grösser wird es. Was ist es?', a: ['Ein Loch', 'Ein Schneemann', 'Ein Berg'], ok: 0, why: 'Je mehr Erde du wegschaufelst, desto grösser wird das Loch!' },
-      { q: 'Was wird immer nasser, je mehr es trocknet?', a: ['Ein Handtuch', 'Die Sonne', 'Ein Eiszapfen'], ok: 0, why: 'Das Handtuch trocknet dich ab – und wird dabei selbst nass!' },
-      { q: 'Chili frisst jeden Tag 2 Karotten. Wie viele Karotten sind das in einer ganzen Woche?', a: ['14', '12', '9'], ok: 0, why: 'Eine Woche hat 7 Tage: 7 mal 2 = 14 Karotten!' },
-      { q: 'Was hat einen Hals, aber keinen Kopf?', a: ['Eine Flasche', 'Ein Brachiosaurus', 'Ein Schneemann'], ok: 0, why: 'Eine Flasche hat einen Flaschenhals – aber keinen Kopf!' },
-      { q: 'Ein Schneemann besteht aus 3 Kugeln. Wie viele Kugeln brauchst du für 4 Schneemänner?', a: ['12', '7', '9'], ok: 0, why: '4 Schneemänner mal 3 Kugeln = 12 Kugeln!' },
-      { q: 'Welcher Monat hat den kürzesten Namen?', a: ['Mai', 'Februar', 'Juni'], ok: 0, why: '„Mai“ hat nur 3 Buchstaben! Der Februar hat zwar die wenigsten Tage – aber den längeren Namen.' },
-      { q: 'Welches Tier lebte in der Eiszeit und hatte ein dickes, zotteliges Fell?', a: ['Mammut', 'Krokodil', 'Kamel'], ok: 0, why: 'Das Wollhaarmammut hielt sich mit dickem Fell warm!' },
-      { q: 'Was wird kleiner, wenn es warm wird?', a: ['Ein Eiszapfen', 'Ein Kuchen im Ofen', 'Ein Pullover'], ok: 0, why: 'Wenn es warm wird, schmilzt der Eiszapfen und wird immer kleiner!' },
-      { q: 'Was kannst du fangen, aber nicht werfen?', a: ['Einen Schnupfen', 'Einen Schneeball', 'Einen Ball'], ok: 0, why: 'Einen Schnupfen fängst du dir ein – werfen kannst du ihn nicht!' },
+      { q: 'Das Thermometer zeigt −3 Grad. Dann wird es 8 Grad wärmer. Wie warm ist es jetzt?', a: ['5 Grad', '11 Grad', '−11 Grad'], ok: 0, why: 'Von −3 sind es 3 Grad bis 0 – und dann noch 5 weiter: 5 Grad!' },
+      { q: 'In einer Kiste liegen rote und blaue Socken. Wie viele musst du blind herausnehmen, damit sicher 2 gleiche dabei sind?', a: ['3', '2', '4'], ok: 0, why: 'Es gibt nur 2 Farben – bei 3 Socken sind darum sicher 2 gleich!' },
+      { q: '8 Pinguine stehen in einer Reihe, zwischen je zwei ist 1 Meter Platz. Wie lang sind alle Lücken zusammen?', a: ['7 Meter', '8 Meter', '9 Meter'], ok: 0, why: 'Zwischen 8 Pinguinen gibt es nur 7 Lücken!' },
+      { q: 'Ein Mammut ist doppelt so schwer wie ein Nashorn. Zusammen wiegen sie 9 Tonnen. Wie schwer ist das Mammut?', a: ['6 Tonnen', '4,5 Tonnen', '3 Tonnen'], ok: 0, why: 'Nashorn 3 Tonnen + Mammut 6 Tonnen = 9 Tonnen!' },
+      { q: '4 Raptoren fangen in 4 Minuten 4 Käfer. Wie lange brauchen 8 Raptoren für 8 Käfer?', a: ['4 Minuten', '8 Minuten', '2 Minuten'], ok: 0, why: 'Jeder Raptor braucht 4 Minuten für seinen Käfer – egal wie viele mitmachen!' },
+      { q: 'Welche Zahl kommt als Nächstes? 1, 1, 2, 3, 5, 8, …', a: ['13', '11', '10'], ok: 0, why: 'Jede Zahl ist die Summe der zwei davor: 5 + 8 = 13!' },
+      { q: 'Ein Schneemann schmilzt jeden Tag auf die Hälfte. Am 4. Tag ist er 10 cm hoch. Wie hoch war er am 1. Tag?', a: ['80 cm', '40 cm', '160 cm'], ok: 0, why: 'Rückwärts verdoppeln: 10 → 20 → 40 → 80 cm!' },
+      { q: 'Was ist schwerer: 1 Liter Wasser oder 1 Liter Eis?', a: ['1 Liter Wasser', '1 Liter Eis', 'Beide gleich'], ok: 0, why: 'Eis ist leichter als Wasser – darum schwimmen Eisberge oben!' },
+      { q: 'Es ist 10 Uhr. Wie spät ist es in 100 Minuten?', a: ['11:40 Uhr', '11:00 Uhr', '12:00 Uhr'], ok: 0, why: '100 Minuten sind 1 Stunde und 40 Minuten: 11:40 Uhr!' },
+      { q: 'Ein Eisbär steht genau auf dem Nordpol. In welche Richtung schaut er, egal wie er sich dreht?', a: ['Nach Süden', 'Nach Norden', 'Nach Osten'], ok: 0, why: 'Vom Nordpol aus geht jede Richtung nach Süden!' },
     ],
     sky: ['#0b1f3f', '#5d86b8'], far: '#c9dcf0', mid: '#8fb0d6', ground: '#5f7591', top: '#f4f8ff', dots: '#4b5f7a', edge: '#3c4f68', plat: '#9fc3e6', platTop: '#ffffff',
     rock: '#7f93ab', deco: '#1d3b4f', volcS: 0.85, volcCol: '#3a4f6e', stars: true, snow: true, egg: '#e8f4ff', eggSpot: '#5aa0e0' },
   { name: 'Vulkan', speed: 335, segs: 36, patterns: ['pit', 'pit', 'geyser', 'geyser', 'raptor', 'ptero', 'swoop', 'boulder', 'rock2', 'plat', 'low', 'compy', 'compy', 'geode'],
     startTip: 'Der Vulkan! Neu: Feuer-Chilis! Damit kann {rex} Feuer spucken. Und irgendwo hier ist das goldene Ei…',
     riddles: [
-      { q: 'Ein T-Rex wiegt 7 Tonnen. Wie viel wiegt er, wenn er auf einem Bein steht?', a: ['7 Tonnen', '3,5 Tonnen', '14 Tonnen'], ok: 0, why: 'Er wird doch nicht leichter, nur weil er ein Bein hebt!' },
+      { q: 'Ben ist grösser als Ana. Ana ist kleiner als Max, aber grösser als Lou. Wer ist am kleinsten?', a: ['Lou', 'Ana', 'Max'], ok: 0, why: 'Ben und Max sind grösser als Ana, und Ana ist grösser als Lou – also ist Lou am kleinsten!' },
+      { q: 'Vulkan A bricht alle 12 Jahre aus, Vulkan B alle 8 Jahre. Heute beide. In wie vielen Jahren wieder beide?', a: ['24 Jahre', '20 Jahre', '96 Jahre'], ok: 0, why: '24 kommt in beiden Reihen zuerst vor: 12, 24 … und 8, 16, 24!' },
+      { q: 'Ich bin eine dreistellige Zahl. Alle meine Ziffern sind gleich und zusammen ergeben sie 3. Wer bin ich?', a: ['111', '300', '333'], ok: 0, why: '1 + 1 + 1 = 3 – und alle Ziffern sind gleich!' },
       { q: 'Welcher Dino hat NICHT zur gleichen Zeit gelebt wie der T-Rex?', a: ['Stegosaurus', 'Triceratops', 'Ankylosaurus'], ok: 0, why: 'Der Stegosaurus lebte viel früher. Zwischen ihm und dem T-Rex liegt mehr Zeit als zwischen dem T-Rex und uns!' },
       { q: 'Was kommt einmal in jeder Minute vor, zweimal in jedem Moment, aber nie in tausend Jahren?', a: ['Der Buchstabe M', 'Ein Meteorit', 'Ein Vulkanausbruch'], ok: 0, why: '„Minute“ hat ein M, „Moment“ hat zwei M – und in „tausend Jahren“ ist gar kein M!' },
-      { q: 'Welches Tier von heute ist ein Verwandter der Dinosaurier?', a: ['Huhn', 'Hase', 'Goldfisch'], ok: 0, wrongMsg: { 1: 'Chili: Hey! Ich bin doch kein Dino!' }, why: 'Vögel stammen von den Dinosauriern ab – auch das Huhn!' },
-      { q: 'Der Kiwi ist ein Vogel. Was kann er aber NICHT?', a: ['Fliegen', 'Laufen', 'Eier legen'], ok: 0, why: 'Kiwis haben nur winzige Flügel – fliegen können sie nicht!' },
-      { q: 'Welche Zahl kommt als Nächstes: 2, 4, 6, 8, …?', a: ['10', '9', '12'], ok: 0, why: 'Es kommt immer 2 dazu: 8 + 2 = 10!' },
-      { q: 'Wenn du mich weitererzählst, bin ich weg. Was bin ich?', a: ['Ein Geheimnis', 'Ein Kuchen', 'Ein Ball'], ok: 0, why: 'Ein Geheimnis, das du weitererzählst, ist kein Geheimnis mehr!' },
-      { q: 'Was ist das grösste Tier, das je gelebt hat?', a: ['Blauwal', 'Brachiosaurus', 'T-Rex'], ok: 0, why: 'Der Blauwal ist sogar noch grösser als die grössten Dinosaurier!' },
-      { q: 'Konnten echte Dinosaurier Feuer spucken?', a: ['Nein', 'Ja', 'Nur am Sonntag'], ok: 0, why: 'Nein! Feuer spucken kann nur dein T-Rex hier im Spiel – mit einer Feuer-Chili.' },
-      { q: 'Was läuft und läuft, hat aber keine Beine?', a: ['Die Zeit', 'Ein Raptor', 'Ein Velo'], ok: 0, why: 'Die Zeit läuft immer weiter – ganz ohne Beine!' },
+      { q: 'Welches dieser Tiere ist am nächsten mit dem T-Rex verwandt?', a: ['Huhn', 'Krokodil', 'Eidechse'], ok: 0, why: 'Überraschung: Vögel stammen von den Dinos ab – das Huhn ist näher verwandt als Krokodil und Eidechse!' },
+      { q: 'Ein voller Krug Lava wiegt 10 kg, halb voll wiegt er 6 kg. Wie schwer ist der leere Krug?', a: ['2 kg', '5 kg', '4 kg'], ok: 0, why: 'Die halbe Lava wiegt 10 − 6 = 4 kg, also die ganze 8 kg. Für den Krug bleiben 2 kg!' },
+      { q: 'Welche Zahl kommt als Nächstes? 2, 3, 5, 7, 11, …', a: ['13', '15', '12'], ok: 0, why: 'Das sind Primzahlen – man kann sie nur durch 1 und sich selbst teilen. Die nächste ist 13!' },
+      { q: 'Ein Brett ist 2 Meter lang. Du sägst es in Stücke von 50 cm. Wie oft musst du sägen?', a: ['3 Mal', '4 Mal', '2 Mal'], ok: 0, why: 'Es gibt 4 Stücke – dafür brauchst du nur 3 Schnitte!' },
+      { q: 'Ein T-Rex-Zahn wächst jeden Monat 1 cm. Ein neuer ist 3 cm lang. Wie lang ist er in einem halben Jahr?', a: ['9 cm', '6 cm', '4 cm'], ok: 0, why: 'Ein halbes Jahr sind 6 Monate: 3 cm + 6 cm = 9 cm!' },
     ],
     sky: ['#1a0505', '#8a2a10'], far: '#3a0f0a', mid: '#250807', ground: '#2a1a16', top: '#4a2a20', dots: '#ff5a1f', edge: '#170c0a', plat: '#3a2722', platTop: '#ff7a2a',
     rock: '#4a3a36', deco: '#140404', volcS: 1.25, volcCol: '#1c0807', lava: true, egg: '#ffd9c2', eggSpot: '#c0392b' },
@@ -1383,7 +1383,7 @@ function revealEgg(s) {
 const lastRiddle = {};
 function openRiddle() {
   toasts = []; const pool = WORLDS[G.wi].riddles;
-  if (!Array.isArray(save.riddleSeen)) save.riddleSeen = [[], [], [], []];
+  if (!Array.isArray(save.riddleSeen) || save.riddleVer !== 2) { save.riddleSeen = [[], [], [], []]; save.riddleVer = 2; }
   let seen = (save.riddleSeen[G.wi] || []).filter(i => i < pool.length);
   const prev = seen[seen.length - 1];
   if (seen.length >= pool.length) seen = [];
@@ -1860,14 +1860,16 @@ function drawOverlay() {
     panel(110, 40, 740, 460); drawPortrait('goetti', 180, 112, 46);
     button('🔊 Vorlesen', 660, 56, 170, 42, () => speak(o.solved ? r.why : r.q + ' ' + o.order.map(i => r.a[i]).join('? Oder ') + '?'), { size: 18, color: '#e0d2b0' });
     txt('Goettis Rätsel-Tor', 250, 86, 22, '#8a6a3a', 'left');
-    wrapLines(r.q, 560, 28).forEach((l, i) => txt(l, 250, 122 + i * 34, 28, '#3b2410', 'left'));
+    const qs = wrapLines(r.q, 560, 28).length > 3 ? 24 : 28, ql = wrapLines(r.q, 560, qs), by = Math.max(230, 122 + ql.length * (qs + 6));
+    ql.forEach((l, i) => txt(l, 250, 122 + i * (qs + 6), qs, '#3b2410', 'left'));
     if (!o.solved) {
-      o.order.forEach((ai, j) => { const bad = o.wrong.includes(ai); button((bad ? '✗ ' : '') + r.a[ai], 230, 230 + j * 80, 500, 64, () => { if (!bad) answer(ai); }, { color: bad ? '#e8b4b4' : '#f4b400', size: 30 }); });
+      o.order.forEach((ai, j) => { const bad = o.wrong.includes(ai); button((bad ? '✗ ' : '') + r.a[ai], 230, by + j * 76, 500, 62, () => { if (!bad) answer(ai); }, { color: bad ? '#e8b4b4' : '#f4b400', size: 30 }); });
       if (o.msg) txt(o.msg, W / 2, 478, 22, '#b03a2e');
     } else {
       rr(230, 228, 500, 64, 26); ctx.fillStyle = '#9be38a'; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,.3)'; ctx.stroke();
       txt('✓ ' + r.a[r.ok], W / 2, 261, 30, '#17420f');
-      wrapLines(r.why, 600, 24).forEach((l, i) => txt(l, W / 2, 330 + i * 32, 24, '#3b2410', 'center', 'normal'));
+      const ws = wrapLines(r.why, 600, 24).length > 2 ? 20 : 24;
+      wrapLines(r.why, 600, ws).forEach((l, i) => txt(l, W / 2, 326 + i * (ws + 6), ws, '#3b2410', 'center', 'normal'));
       button('Tor öffnen!', W / 2 - 140, 418, 280, 62, openGate, { size: 28 });
     }
     ctx.restore();
