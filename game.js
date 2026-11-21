@@ -991,12 +991,12 @@ function drawHeart(x, y, s, full) {
   ctx.fillStyle = full ? '#ff4d5e' : 'rgba(0,0,0,.35)'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#fff'; ctx.stroke(); ctx.restore();
 }
 
-function drawPortrait(who, cx, cy, r) {
+function drawPortrait(who, cx, cy, r, still) {
   ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2);
   const bg = { kiwi: '#e8f5d0', goetti: '#cfe3b0', chili: '#ffe0c2', rex: '#bfe6cf', mami: '#ead7f5', papi: '#d3e6fb', fabio: '#ffe6c4' }[who] || '#eee';
   ctx.fillStyle = bg; ctx.fill(); ctx.clip();
   if (who === 'goetti') { drawGoettiHead(cx, cy + r * 0.25, r * 0.55); }
-  else if (who === 'chili') { const s = r / 26; drawChili(cx - 10 * s, cy + 30 * s, s, T * 3); }
+  else if (who === 'chili') { const s = r / 26; drawChili(cx - 10 * s, cy + 30 * s, s, still ? 0 : T * 3); }
   else if (who === 'rex') { const s = r / 42; drawRex(cx - 88 * s, cy + 104 * s, s * 0.95, 0, 0.3 + 0.2 * Math.sin(T * 8)); }
   else if (who === 'mami' || who === 'papi') { const s = r / 34; drawLongneck(cx - 72 * s, cy + 146 * s, s, who === 'mami' ? '#b07cc6' : '#4f8fd6', T * 2); }
   else if (who === 'kiwi') { const s = r / 22; drawKiwi(cx - 16 * s, cy + 22 * s, s, T * 6); }
@@ -2099,6 +2099,7 @@ function updatePlay(dt) {
   let spd = (G.startT > 0 || G.stopped) ? 0 : L.speed * (L.endless ? 1 + clamp((p.wx - 200) / 50000, 0, 0.7) : 1 + 0.1 * clamp(p.wx / L.gateX, 0, 1));
   if (p.y > GROUND + 5) spd = 0;
   p.dashCd = Math.max(0, (p.dashCd || 0) - dt); if (p.dashT > 0) { p.dashT -= dt; spd *= 2.4; if (Math.random() < 0.7) burst(p.wx - 20, p.y - 20 - Math.random() * 60, 1, ['#fff', '#ffe08a'], 80, -40, 5, 0.35); }
+  if (G.stopped && G.bossStarted) { const off = p.dashT > 0 ? Math.sin(Math.PI * (1 - p.dashT / 0.4)) * 240 : 0; p.wx += off - (p.lungeOff || 0); p.lungeOff = off; } else p.lungeOff = 0; // in a boss fight FLITZ lunges forward and back
   p.gliding = !!(G.sk.glide && !L.swim && G.holdJump != null && !p.onGround && !p.stomp && p.vy > 40);
   p.wx += spd * dt; p.ph += dt * (spd > 0 ? 13 : 2);
   // physics
@@ -2120,11 +2121,12 @@ function updatePlay(dt) {
     toast(fmt('Feuer-Chili! {rex} kann Feuer spucken!'), '#ffb030');
     if (!G.pepperHint) { G.pepperHint = true; G.tip = { text: 'Feuer-Chili! Drück FEUER! (Echte Dinos konnten kein Feuer spucken – aber {rex} schon!)'.replace('{rex}', save.rexName || 'Rexi'), t: 5 }; }
   }
-  for (const h of L.hearts) if (!h.got && Math.abs(h.x - p.wx - 10) < 52 && Math.abs(h.y - (p.y - 50)) < 70) {
+  for (const h of L.hearts) if (!h.got) { const mx = p.wx + 10 - h.x, my = p.y - 50 - h.y; if (Math.abs(mx) < 170 && Math.abs(my) < 150) { h.x += mx * Math.min(1, dt * 5); h.y += my * Math.min(1, dt * 3); } } // hearts are drawn to Rex
+  for (const h of L.hearts) if (!h.got && Math.abs(h.x - p.wx - 10) < 60 && Math.abs(h.y - (p.y - 50)) < 80) {
     h.got = true; SFX.power(); burst(h.x, h.y, 26, ['#ff5a7a', '#ffb4c4', '#fff'], 320, 300, 7, 0.9);
     if (p.hearts < 3) { p.hearts++; toast('Ein Herz zurück!', '#ff8a9a'); } else { G.amber += 5; toast('Alle Herzen voll – 5 Bernstein extra!', '#ffe08a'); }
   }
-  if (G.stopped && G.bossStarted) for (const a of L.amb.concat(L.hearts)) if (!a.got && a.x > p.wx + 10) a.x = Math.max(p.wx + 10, a.x - 240 * dt);
+  if (G.stopped && G.bossStarted) for (const a of L.amb.concat(L.hearts)) if (!a.got && a.x > p.wx + 10) a.x = Math.max(p.wx + 10, a.x - 240 * dt); if (G.stopped && G.bossStarted) for (const a of L.amb) if (!a.got && Math.abs(a.x - p.wx - 10) < 90) a.y += (clamp(a.y, GROUND - 150, GROUND - 40) - a.y) * Math.min(1, dt * 6);
   for (const f of G.fireballs) {
     f.x += f.vx * dt; f.y = Math.min(GROUND - 38, f.y + f.vy * dt); f.life -= dt;
     for (let k = 0; k < 2; k++) { const l = 0.2 + Math.random() * 0.2; G.flames.push({ x: f.x - 8, y: f.y + (Math.random() - 0.5) * 14, vx: 120 + Math.random() * 120, vy: -60 - Math.random() * 60, life: l, max: l, r: 6 + Math.random() * 6 }); }
@@ -2147,7 +2149,7 @@ function updatePlay(dt) {
   G.flames = G.flames.filter(f => f.life > 0);
   if (p.y > H + 120) pitFall();
   p.inv -= dt; p.roarT -= dt; p.roarCd -= dt;
-  G.cam = p.wx - 270;
+  G.cam = p.wx - (p.lungeOff || 0) - 270;
   if (G.endless) { let tr = 1; for (const tx of L.tierX) if (p.wx >= tx) tr++; if (tr > G.tier) { G.tier = tr; SFX.power(); G.shake = Math.max(G.shake, 0.3); toast(['', '', 'Stufe 2 – mehr Gegner!', 'Stufe 3 – neue Gefahren!', 'Stufe 4 – doppelte Gefahren!'][tr] || `Stufe ${tr} – nur für Profis!`, '#ff9a5a'); }
     G.score = Math.max(G.score, Math.floor((p.wx - 200) / 25) + G.amber * 3); if (G.score >= G.heartAt) { G.heartAt += 500; if (p.hearts < 3) { p.hearts++; SFX.power(); toast('Ein Herz zurück!', '#ff8a9a'); } else toast(G.score + ' Punkte!', '#ffe08a'); } }
   // tips, checkpoints
@@ -2294,7 +2296,7 @@ function updateBoss(dt) {
   const goBack = () => { b.state = 'back'; b.t = 0; };
   const projY = lane => swim ? GROUND - 30 - lane * 95 : (lane ? GROUND - 95 : GROUND - 22);
   const mkMinion = (k, i) => {
-    const x = b.x - 50 - i * (k === 'compy' || k === 'crab' ? 235 : k === 'raptor' ? 300 : 200);
+    const x = Math.max(b.x, home) - 50 - i * (k === 'compy' || k === 'crab' ? 235 : k === 'raptor' ? 300 : 200);
     if (k === 'crab') return { type: 'compy', crab: true, x, spd: 175 + (3 - b.hp) * 12, ph: i, alpha: 1, minion: true };
     if (k === 'sword') return { type: 'sword', x, y: GROUND - 60 - Math.random() * 230, spd: 300, ph: 0, alpha: 1, minion: true };
     if (k === 'jelly') return { type: 'jelly', x, y0: 190 + Math.random() * 200, amp: 40, ph: Math.random() * 6, y: 220, minion: true };
@@ -2352,7 +2354,8 @@ function updateBoss(dt) {
       if (roarHits()) bossHurt(b, b.x); else if (b.t > (ty === 'leap' ? 3.4 : 2.6)) { toast('Zu langsam!', '#ffb4a8'); goBack(); }
     } break;
     case 'back': b.x += 700 * dt; b.y = 0; if (b.x >= home) { b.x = home; b.state = 'taunt'; b.t = 0; } break;
-    case 'stagger': // between phases: he roars, the heart drops, the next phase starts
+    case 'stagger': // between phases: he roars, the heart drops, he walks back home, the next phase starts
+      b.x = Math.min(home, b.x + 500 * dt); b.y = 0;
       if (b.t > 2.2) { b.phase++; startBossPhase(b); } break;
     case 'duel': { // final roar duel (king only): tap BRÜLL to push him back
       b.duelT += dt; b.meter = clamp(b.meter - dt * 0.3, 0, 1); b.x = p.wx + 120 + 300 * b.meter; b.y = 0;
@@ -2676,7 +2679,7 @@ function drawPlay() {
   if (p.fireT > 0) { const g = ctx.createRadialGradient(p.wx - cam + 10, p.y - 60, 10, p.wx - cam + 10, p.y - 60, 120); g.addColorStop(0, `rgba(${fireOf(save.equip.fire || 0).glow},${0.3 + 0.12 * Math.sin(T * 10)})`); g.addColorStop(1, `rgba(${fireOf(save.equip.fire || 0).b},0)`); ctx.fillStyle = g; ctx.fillRect(p.wx - cam - 110, p.y - 180, 240, 240); }
   const spinA = p.stomp && p.spin < 1 ? (3 * p.spin * p.spin - 2 * p.spin * p.spin * p.spin) * Math.PI * 2 : 0, scx = p.wx - cam + 4, scy = p.y - 66;
   if (spinA) { ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.beginPath(); ctx.arc(scx, scy, 104, spinA - Math.PI / 2 - 1.3, spinA - Math.PI / 2); ctx.stroke(); ctx.save(); ctx.translate(scx, scy); ctx.rotate(spinA); ctx.translate(-scx, -scy); }
-  const dU = p.dashT > 0 ? 1 - p.dashT / 0.4 : 0, dOff = p.dashT > 0 && G.stopped ? Math.sin(dU * Math.PI) * 80 : 0;
+  const dU = p.dashT > 0 ? 1 - p.dashT / 0.4 : 0, dOff = 0;
   if (p.dashT > 0) {
     const cxp = p.wx - cam + 4 + dOff, cyp = p.y - 55, fade = Math.sin(dU * Math.PI);
     ctx.save(); ctx.lineCap = 'round';
@@ -2882,7 +2885,7 @@ function drawOverlay() {
     txt(`Bernstein: +${G.amber}`, W / 2, 362, 20, '#6b4a2b', 'center', 'normal');
     button('Nochmal!', 250, 384, 220, 56, () => startLevel(G.wi, true)); button('Karte', 490, 384, 220, 56, () => go('map'), { color: '#e0d2b0' });
   } else if (o.type === 'retry') {
-    panel(220, 110, 520, 320); drawPortrait('chili', W / 2, 180, 50);
+    panel(220, 110, 520, 320); drawPortrait('chili', W / 2, 180, 50, true);
     txt('Oh nein! Nicht aufgeben!', W / 2, 262, 32, '#3b2410');
     txt('Chili meint: Nochmal ab dem letzten Fähnchen!', W / 2, 300, 22, '#6b4a2b', 'center', 'normal');
     button('Nochmal!', 290, 340, 200, 62, retry); button('Karte', 510, 340, 160, 62, () => go('map'), { color: '#e0d2b0' });

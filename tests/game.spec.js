@@ -369,3 +369,18 @@ test('crab boss (day 6): no duck shots, crabs not dinos, spaced out, pickups dri
   expect(r.minGap).toBeGreaterThanOrEqual(200);
   expect(r.heartDist).toBeLessThan(100);
 });
+
+test('boss fights: FLITZ lunges forward and back, the boss walks home between phases, hearts are drawn to Rex', async ({ game }) => {
+  await game.open({ learned: { dash: 1 } });
+  const r = await game.eval(() => {
+    const d = window.__dino; d.startLevel(17); const G = d.G, L = G.L, p = G.p; G.startT = 0; G.coach = null; p.inv = 99; p.wx = L.bossX - 5;
+    for (let i = 0; i < 400 && !(G.boss && G.boss.state === 'taunt'); i++) d.updatePlay(1 / 60);
+    const x0 = p.wx; d.dash(); let far = 0; for (let i = 0; i < 40; i++) { d.updatePlay(1 / 60); far = Math.max(far, p.wx - x0); } const back = p.wx - x0;
+    const b = G.boss; b.phase = 1; b.x = p.wx + 250; b.state = 'stagger'; b.t = 0; for (let i = 0; i < 140; i++) d.updatePlay(1 / 60); const bossDist = b.x - p.wx;
+    const h = { x: p.wx + 150, y: 260, got: false }; L.hearts.push(h); p.hearts = 1; for (let i = 0; i < 90; i++) d.updatePlay(1 / 60);
+    return { far, back, bossDist, got: h.got };
+  });
+  expect(r.far).toBeGreaterThan(150); expect(Math.abs(r.back)).toBeLessThan(5);
+  expect(r.bossDist).toBeGreaterThan(500);
+  expect(r.got).toBe(true);
+});

@@ -23,7 +23,7 @@ Run both check and test before every commit. Playwright needs `npx playwright in
 - A new obstacle type needs three places: the `switch (o.type)` in `updatePlay`, `drawObstacle`, and the interactions (`roar`, fireball loop, `dashBreak`). Then add a pattern in `buildLevel`'s `P`, put it in the `WORLDS[...].patterns` lists, classify it in `HARD`/`COMBO` if needed, and teach the bot.
 - Anything with state that a respawn can break (crumbling platforms, fallen meteors) must be reset in `retry()` and `pitFall()`.
 - Hints must come early: `firstTip` uses `x - 1200`; tutorial coach points are 150 to 300 px before the obstacle. Hints and coach must never mention a skill the player has not learned yet (`SKILL_DAYS`: dash 4, duck 7, swim 10, stomp 13, glide 16, fire 19).
-- Boss fights: Rex stands still. Collectibles must come to him. Enemy waves need wide spacing (200+ px) so a jump fits between them.
+- Boss fights: Rex stands still (FLITZ lunges him forward and back). Collectibles must come to him (they drift and hearts are magnetic). The boss must walk back to `home` between phases. Enemy waves need wide spacing (200+ px) so a jump fits between them.
 - Do not draw over the HUD area at the top centre (eggs, progress bar). Messages go at the bottom.
 
 ## Testing pitfalls
