@@ -2092,6 +2092,13 @@ function buildLevel(wi, endless, LV) { // LV = the calendar level spec (or undef
   const HARD = ['raptor2', 'hopper2', 'plant', 'meteors', 'crumble', 'bounceUp', 'raptor', 'ptero', 'swoop', 'compy', 'geyser', 'geode', 'pitRock', 'lowRock', 'compyRun', 'sword', 'jellies', 'avalanche'], COMBO = ['pitRock', 'lowRock', 'compyRun', 'meteors', 'hopper2', 'raptor2', 'bounceUp'];
   const NEEDS = { low: 'duck', lowRock: 'duck', swoop: 'duck', geode: 'stomp', wall: 'dash', widegap: 'glide', updraft: 'glide' };
   const pickPattern = () => { let pool = th.patterns.filter(k => !NEEDS[k] || SK[NEEDS[k]]); const tier = endless ? curTier : (LV ? Math.min(LV.maxTier, 1 + Math.floor(segI * 3 / n)) : 3); const easy = pool.filter(k => !HARD.includes(k)), mid = pool.filter(k => !COMBO.includes(k)); if (tier === 1 && easy.length) pool = easy.filter(k => k !== 'amber').length ? easy.filter(k => k !== 'amber') : easy; else if (tier === 2 && mid.length) pool = mid; return pool[Math.floor(R() * pool.length)]; };
+  // a smash-with-roar obstacle needs the roar to charge again (3 s): never put two of them closer than that allows
+  const ROAR = ['boulder', 'rockwall'], ROARGAP = 3 * L.speed * 1.15 + 80;
+  const placeSeg = x0 => {
+    let pk = pickPattern();
+    if (ROAR.includes(pk)) { let last = -1e9; for (const o of L.obs) if (o.type === 'boulder' && o.x < x0 + 200) last = Math.max(last, o.x); if (x0 + 60 - last < ROARGAP) { for (let t = 0; t < 12 && ROAR.includes(pk); t++) pk = pickPattern(); if (ROAR.includes(pk)) pk = th.patterns.find(k => !ROAR.includes(k) && (!NEEDS[k] || SK[NEEDS[k]])) || 'amber'; } }
+    return P[pk](x0);
+  };
   for (let i = 0; i < n; i++) {
     segI = i;
     if (endless && i > 0 && i % 26 === 0) { curTier++; L.tierX.push(x); }
@@ -2123,8 +2130,8 @@ function buildLevel(wi, endless, LV) { // LV = the calendar level spec (or undef
       [[40, 90], [250, 150], [460, 100], [650, 160]].forEach(([dx, h], k) => { L.plats.push({ x: x + dx, y: GROUND - h, w: 130 }); amberRow(x + dx + 20, 3, GROUND - h - 40, 40); });
       w = 820;
     } else {
-      w = P[pickPattern()](x);
-      if (endless && curTier >= 4 && R() < 0.4) { x += w + 170; w = P[pickPattern()](x); } // doubled-up dangers
+      w = placeSeg(x);
+      if (endless && curTier >= 4 && R() < 0.4) { x += w + 170; w = placeSeg(x); } // doubled-up dangers
     }
     x += w + (260 + R() * 200) * (endless ? Math.max(0.6, 1 - 0.07 * (curTier - 1)) : (LV ? 0.82 + 0.1 * Math.min(1, (dayN - 1) / 12) : 1));
   }
