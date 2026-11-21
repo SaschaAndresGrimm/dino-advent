@@ -2773,21 +2773,26 @@ function drawObstacle(o, cam, th) {
       rockTheme(x, o);
       break;
     }
-    case 'boulder': {
+    case 'boulder': { // a lumpy rock in the colours of its world (not an egg shape)
+      const A = ART(G.wi), cy = GROUND - o.h / 2 + 4, seed = Math.floor(o.x) % 7;
+      const bc = { 0: '#7d8076', 1: '#b8683c', 2: '#5a6a84', 3: '#3a2a26', 5: '#c9a874', 6: '#8a5f7a', 7: '#7f8896' }[A] || '#7d7d86';
+      const bp = () => { ctx.beginPath(); for (let k = 0; k <= 28; k++) { const a = k / 28 * Math.PI * 2, r = 1 + 0.06 * Math.sin(k * 1.9 + seed) + 0.04 * Math.sin(k * 4.3 + seed * 2); ctx.lineTo(x + Math.cos(a) * o.w / 2 * r, cy + Math.sin(a) * o.h / 2 * r * (Math.sin(a) > 0 ? 0.98 : 1)); } ctx.closePath(); };
       shadow(x, GROUND + 2, o.w * 0.65, 0.35);
-      ell(x, GROUND - o.h / 2 + 4, o.w / 2, o.h / 2, 0, ART(G.wi) === 3 ? '#3a2a26' : ART(G.wi) === 2 ? '#5a6a84' : '#7d7d86'); ctx.beginPath(); ctx.ellipse(x, GROUND - o.h / 2 + 4, o.w / 2, o.h / 2, 0, 0, Math.PI * 2); rim();
-      { const bc = ART(G.wi) === 3 ? '#3a2a26' : ART(G.wi) === 2 ? '#5a6a84' : '#7d7d86', cy = GROUND - o.h / 2 + 4, A = ART(G.wi);
-        ctx.save(); ctx.beginPath(); ctx.ellipse(x, cy, o.w / 2, o.h / 2, 0, 0, Math.PI * 2); ctx.clip();
-        const g = ctx.createRadialGradient(x - o.w * 0.18, cy - o.h * 0.25, 4, x, cy, o.h * 0.78); g.addColorStop(0, shade(bc, 1.5)); g.addColorStop(0.55, bc); g.addColorStop(1, shade(bc, 0.45)); ctx.fillStyle = g; ctx.fillRect(x - o.w, cy - o.h, o.w * 2, o.h * 2);
-        ctx.fillStyle = 'rgba(0,0,0,.13)'; for (const [dx, dy, rx, ry] of [[0.18, 0.12, 0.2, 0.1], [-0.2, 0.28, 0.16, 0.08], [0.05, -0.25, 0.14, 0.07], [0.26, -0.1, 0.1, 0.12]]) { ctx.beginPath(); ctx.ellipse(x + o.w * dx, cy + o.h * dy, o.w * rx, o.h * ry, 0.4, 0, 7); ctx.fill(); }
-        ctx.strokeStyle = 'rgba(255,255,255,.12)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x - o.w * 0.4, cy + o.h * 0.1); ctx.quadraticCurveTo(x, cy + o.h * 0.02, x + o.w * 0.4, cy + o.h * 0.12); ctx.stroke();
-        if (A === 0 || A === 5 || A === 6) { ell(x + o.w * 0.12, cy - o.h * 0.44, o.w * 0.3, o.h * 0.1, -0.1, '#4fae48'); for (let i = 0; i < 4; i++) circle(x - o.w * 0.1 + i * o.w * 0.09, cy - o.h * 0.42 + (i % 2) * 3, 3, '#86dc66'); }
-        else if (A === 2) { ell(x, cy - o.h * 0.44, o.w * 0.36, o.h * 0.12, 0, '#fff'); }
-        ctx.restore(); ctx.beginPath(); ctx.ellipse(x, cy, o.w / 2, o.h / 2, 0, 0, Math.PI * 2); rim(); }
+      bp(); ctx.fillStyle = bc; ctx.fill(); rim();
+      ctx.save(); bp(); ctx.clip();
+      const g = ctx.createRadialGradient(x - o.w * 0.18, cy - o.h * 0.25, 4, x, cy, o.h * 0.78); g.addColorStop(0, shade(bc, 1.5)); g.addColorStop(0.55, bc); g.addColorStop(1, shade(bc, 0.45)); ctx.fillStyle = g; ctx.fillRect(x - o.w, cy - o.h, o.w * 2, o.h * 2);
+      ctx.fillStyle = 'rgba(0,0,0,.13)'; for (const [dx, dy, rx, ry] of [[0.18, 0.12, 0.2, 0.1], [-0.2, 0.28, 0.16, 0.08], [0.05, -0.25, 0.14, 0.07], [0.26, -0.1, 0.1, 0.12]]) { ctx.beginPath(); ctx.ellipse(x + o.w * dx, cy + o.h * dy, o.w * rx, o.h * ry, 0.4, 0, 7); ctx.fill(); }
+      ctx.strokeStyle = 'rgba(255,255,255,.12)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x - o.w * 0.4, cy + o.h * 0.1); ctx.quadraticCurveTo(x, cy + o.h * 0.02, x + o.w * 0.4, cy + o.h * 0.12); ctx.stroke();
+      if (A === 1) { ctx.strokeStyle = 'rgba(90,30,10,.28)'; ctx.lineWidth = 3; for (let k = -2; k <= 2; k++) { ctx.beginPath(); ctx.moveTo(x - o.w / 2, cy + k * o.h * 0.17); ctx.quadraticCurveTo(x, cy + k * o.h * 0.17 + 6, x + o.w / 2, cy + k * o.h * 0.17 - 2); ctx.stroke(); } } // sandstone strata
+      if (A === 0) { ell(x + o.w * 0.12, cy - o.h * 0.44, o.w * 0.3, o.h * 0.1, -0.1, '#4fae48'); for (let i = 0; i < 4; i++) circle(x - o.w * 0.1 + i * o.w * 0.09, cy - o.h * 0.42 + (i % 2) * 3, 3, '#86dc66'); }
+      else if (A === 5) { for (let i = 0; i < 6; i++) circle(x - o.w * 0.3 + i * o.w * 0.12, cy + o.h * (0.1 + (i % 3) * 0.12), 2.4, 'rgba(120,90,50,.5)'); }
+      else if (A === 6) { for (let i = 0; i < 9; i++) { const bx = x - o.w * 0.36 + (i % 5) * o.w * 0.18, by = cy - o.h * 0.25 + Math.floor(i / 5) * o.h * 0.3 + (i % 2) * 6; circle(bx, by, 4.2, '#f0d8e4'); circle(bx, by, 1.8, 'rgba(80,30,60,.6)'); } }
+      else if (A === 2 || A === 7) { ell(x, cy - o.h * 0.44, o.w * 0.38, o.h * 0.13, 0, '#fff'); }
+      ctx.restore(); bp(); rim();
+      if (A === 6) { ctx.lineCap = 'round'; for (let i = 0; i < 4; i++) { const bx = x - o.w * 0.25 + i * o.w * 0.17, sw = Math.sin(T * 2 + i) * 3; ctx.strokeStyle = i % 2 ? '#ff8a6a' : '#ffb347'; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(bx, cy - o.h * 0.46); ctx.quadraticCurveTo(bx + sw, cy - o.h * 0.58, bx + sw * 1.5, cy - o.h * 0.68); ctx.stroke(); circle(bx + sw * 1.5, cy - o.h * 0.68, 3.4, '#ffe1c8'); } ctx.lineCap = 'butt'; }
       ell(x - 14, GROUND - o.h * 0.66, o.w * 0.2, o.h * 0.14, -0.4, 'rgba(255,255,255,.22)');
-      ctx.strokeStyle = ART(G.wi) === 3 ? `rgba(255,110,20,${0.6 + 0.4 * Math.sin(T * 4)})` : 'rgba(0,0,0,.35)'; ctx.lineWidth = 3;
+      ctx.strokeStyle = A === 3 ? `rgba(255,110,20,${0.6 + 0.4 * Math.sin(T * 4)})` : 'rgba(0,0,0,.35)'; ctx.lineWidth = 3;
       ctx.beginPath(); ctx.moveTo(x - 10, GROUND - o.h + 14); ctx.lineTo(x + 4, GROUND - o.h * 0.6); ctx.lineTo(x - 6, GROUND - o.h * 0.4); ctx.lineTo(x + 12, GROUND - o.h * 0.15); ctx.stroke();
-      if (ART(G.wi) === 2) ell(x, GROUND - o.h + 8, o.w * 0.35, 9, 0, '#fff');
       break;
     }
     case 'low': drawLow(o, x); break;
@@ -3055,7 +3060,7 @@ function drawLow(o, x) {
   } else if (wi === 1) { // rock overhang
     ctx.fillStyle = hgrad(x0, x0 + w, '#d27a45', '#a5532f', '#6e2f17'); ctx.beginPath(); ctx.moveTo(x0 + 20, -10); ctx.lineTo(x0 + w - 10, -10); ctx.lineTo(x0 + w + 10, b - 70); ctx.lineTo(x0 + w + 20, b - 10); ctx.lineTo(x0 + w - 20, b + 4); ctx.lineTo(x0 + 30, b); ctx.lineTo(x0 - 20, b - 20); ctx.lineTo(x0, b - 90); ctx.closePath(); ctx.fill();
     ctx.strokeStyle = 'rgba(90,30,10,.3)'; ctx.lineWidth = 2; for (let y = 30; y < b; y += 24) { ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x0 + w + 10, y + 3); ctx.stroke(); }
-  } else if (wi === 2) { // frozen rock hanging from above, ice slab with icicles
+  } else if (wi === 2 || wi === 4) { // frozen rock hanging from above, ice slab with icicles (also in the Christmas night)
     ctx.fillStyle = hgrad(x0 + 30, x0 + w - 30, '#4d6a8f', '#33496a', '#22324a'); ctx.beginPath(); ctx.moveTo(x0 + 34, -10); ctx.lineTo(x0 + w - 30, -10); ctx.lineTo(x0 + w - 44, b - 70); ctx.lineTo(x0 + 48, b - 60); ctx.closePath(); ctx.fill();
     ctx.fillStyle = 'rgba(255,255,255,.85)'; for (let y = 40; y < b - 80; y += 70) ell(x0 + w / 2 - 8, y, 18, 5, 0.2, 'rgba(255,255,255,.7)');
     rr(x0 - 12, b - 52, w + 24, 46, 14); ctx.fillStyle = vgrad(b - 52, b - 6, '#ffffff', '#bfe0fa', '#7fb0dd'); ctx.fill();
@@ -3326,7 +3331,7 @@ function drawHUD() {
   }
   if (G.banner) { const bn = G.banner, u = clamp(bn.t / 2.6, 0, 1), pop = 1 + 0.35 * clamp((bn.t - 2.2) / 0.4, 0, 1), al = clamp(bn.t * 2, 0, 1) * clamp((2.6 - bn.t) * 6, 0, 1); ctx.save(); ctx.globalAlpha = al; ctx.translate(W / 2, 128); ctx.scale(pop, pop); otxt(bn.text, 0, 0, 56, bn.col, '#000', 11); otxt(bn.sub, 0, 46, 28, '#fff', '#000', 8); ctx.restore(); }
   if (G.boss && G.boss.state === 'duel') { const b = G.boss; ctx.globalAlpha = 0.6 + 0.4 * Math.sin(T * 18); otxt('BRÜLL! BRÜLL! BRÜLL!', W / 2, 330, 40, '#ffe27a', '#7a1000', 9); ctx.globalAlpha = 1; }
-  if (G.tip) { ctx.globalAlpha = clamp(G.tip.t * 2, 0, 1); const x0 = G.sk.dash && G.sk.duck && !G.L.swim ? 258 : 190, x1 = 790, lines = wrapLines(G.tip.text, x1 - x0 - 92, 17), h = 16 + lines.length * 22, tipY = H - h - 6; rr(x0, tipY, x1 - x0, h, 16); ctx.fillStyle = 'rgba(255,247,224,.95)'; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = '#6b4a2b'; ctx.stroke(); drawPortrait('goetti', x0 + 36, tipY + h / 2, 24); lines.forEach((l, i) => txt(l, (x0 + 68 + x1 - 12) / 2, tipY + 20 + i * 22, 17, '#3b2410')); ctx.globalAlpha = 1; }
+  if (G.tip && !G.overlay) { ctx.globalAlpha = clamp(G.tip.t * 2, 0, 1); const x0 = G.sk.dash && G.sk.duck && !G.L.swim ? 258 : 190, x1 = 790, lines = wrapLines(G.tip.text, x1 - x0 - 92, 17), h = 16 + lines.length * 22, tipY = H - h - 6; rr(x0, tipY, x1 - x0, h, 16); ctx.fillStyle = 'rgba(255,247,224,.95)'; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = '#6b4a2b'; ctx.stroke(); drawPortrait('goetti', x0 + 36, tipY + h / 2, 24); lines.forEach((l, i) => txt(l, (x0 + 68 + x1 - 12) / 2, tipY + 20 + i * 22, 17, '#3b2410')); ctx.globalAlpha = 1; }
   if (G.overlay) return;
   // pause
   circle(W - 44, 40, 26, 'rgba(0,0,0,.4)'); ctx.fillStyle = '#fff'; ctx.fillRect(W - 53, 28, 7, 24); ctx.fillRect(W - 42, 28, 7, 24);
@@ -3487,7 +3492,7 @@ function drawOverlay() {
     for (let k = 0; k < 3; k++) { const got = G.eggsGot[k] || save.lvE[G.li][k]; drawEgg(W / 2 - 290 + k * 52, 150, 21, got ? th.egg : '#ddd', got ? th.eggSpot : '#ccc', got ? 0.4 : 0, Math.sin(T * 3 + k) * (got ? 0.1 : 0)); }
     txt(`${save.lvE[G.li].filter(Boolean).length} von 3 Eiern`, W / 2 - 238, 196, 16, '#6b4a2b', 'center', 'normal');
     if (u <= 0) drawEgg(W / 2, 148, 30, th.egg, th.eggSpot, 0.6, Math.sin(T * 14) * 0.2);
-    else { const sc = G.newCard ? (u < 1 ? 0.3 + u * 0.95 : 1 + 0.03 * Math.sin(T * 6)) : 1; ctx.save(); ctx.translate(W / 2, 148); ctx.rotate((hash(G.li * 3 + 1) - 0.5) * 0.08); ctx.scale(sc, sc); rr(-62, -46, 124, 92, 12); ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.save(); ctx.translate(2, 4); ctx.fill(); ctx.restore(); ctx.fillStyle = '#fffaf0'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#8a6a3a'; ctx.stroke(); rr(-56, -40, 112, 62, 8); ctx.fillStyle = th.sky[1]; ctx.fill(); drawCardArt(G.li, 0, -10, 104, false); txt(FACTS[G.li].name, 0, 36, FACTS[G.li].name.length > 11 ? 14 : 17, '#2b1a00'); if (G.newCard && u >= 1) { ctx.save(); ctx.translate(46, -42); ctx.rotate(0.35); rr(-20, -10, 40, 20, 5); ctx.fillStyle = '#e53935'; ctx.fill(); txt('NEU', 0, 1, 13, '#fff'); ctx.restore(); } ctx.restore(); }
+    else { const sc = G.newCard ? (u < 1 ? 0.3 + u * 0.95 : 1 + 0.03 * Math.sin(T * 6)) : 1; ctx.save(); ctx.translate(W / 2, 152); ctx.rotate((hash(G.li * 3 + 1) - 0.5) * 0.08); ctx.scale(sc * 1.3, sc * 1.3); rr(-62, -46, 124, 92, 12); ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.save(); ctx.translate(2, 4); ctx.fill(); ctx.restore(); ctx.fillStyle = '#fffaf0'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#8a6a3a'; ctx.stroke(); rr(-56, -40, 112, 62, 8); ctx.fillStyle = th.sky[1]; ctx.fill(); drawCardArt(G.li, 0, -10, 104, false); txt(FACTS[G.li].name, 0, 36, FACTS[G.li].name.length > 11 ? 14 : 17, '#2b1a00'); if (G.newCard && u >= 1) { ctx.save(); ctx.translate(46, -42); ctx.rotate(0.35); rr(-20, -10, 40, 20, 5); ctx.fillStyle = '#e53935'; ctx.fill(); txt('NEU', 0, 1, 13, '#fff'); ctx.restore(); } ctx.restore(); }
     drawAmber(W / 2 + 232, 150, 20); txt('+' + G.amber, W / 2 + 232, 190, 22, '#8a5a00');
     for (let k = 0; k < 3; k++) {
       const x = W / 2 - 200 + k * 200, on = save.lvM[G.li][k], isNew = G.newMedals.includes(k);
@@ -3527,8 +3532,8 @@ function drawDialog() {
   drawPortrait(l.who, bx + 78, by + bh / 2, 56);
   const nm = typeof WHO[l.who] === 'function' ? WHO[l.who]() : WHO[l.who];
   setFont(20); const nw = ctx.measureText(nm).width + 26; rr(bx + 150, by - 16, nw, 32, 14); ctx.fillStyle = '#6b4a2b'; ctx.fill(); txt(nm, bx + 150 + nw / 2, by, 20, '#fff7e0');
-  const lines = wrapLines(s, bw - 200, 26); let left = n;
-  lines.forEach((ln, i) => { if (left <= 0) return; txt(ln.slice(0, left), bx + 150, by + 42 + i * 34, 26, '#3b2410', 'left'); left -= ln.length + 1; });
+  let fs = 26, lines = wrapLines(s, bw - 200, fs); if (lines.length > 3) { fs = 22; lines = wrapLines(s, bw - 200, fs); } let left = n; const lh = lines.length > 3 ? 29 : 34;
+  lines.forEach((ln, i) => { if (left <= 0) return; txt(ln.slice(0, left), bx + 150, by + 38 + i * lh, fs, '#3b2410', 'left'); left -= ln.length + 1; });
   if (n >= s.length && Math.sin(T * 6) > 0) txt('weiter ▶', bx + bw - 70, by + bh - 22, 18, '#8a6a3a');
 }
 const nameBox = document.getElementById('nameBox'), nameInput = document.getElementById('nameInput'), nameOk = document.getElementById('nameOk'), nameLabel = document.getElementById('nameLabel');
@@ -3593,8 +3598,8 @@ function startStory() {
       { who: 'goetti', text: '{rex} – super Name! Und Chili kommt auch mit. Mit der Hasennase findet Chili jedes versteckte Ei!' },
       { who: 'chili', text: 'Schnupper, schnupper… Chili ist bereit!' },
       { who: 'goetti', text: 'Jeden Tag bis Weihnachten öffnet sich eine neue Tür in meinem Adventskalender – hinter jeder wartet ein Abenteuer! Und am Schluss wartet das goldene Ei… Los geht\'s!' },
-    ], () => go('map'));
-  }));
+    ], () => go('map'), true);
+  }), true);
 }
 function drawNZFlag(x, y, w, h, t, pole = 70) { // flag on a pole, waving a little
   ctx.save(); ctx.translate(x, y);
@@ -3622,7 +3627,10 @@ function treeFern(x, b, h) { // New Zealand tree fern: slim trunk with a crown o
   }
 }
 function drawStory() {
+  const bi = dialog ? dialog.i : 0, ph2 = !!save.rexName, quake = !ph2 && bi === 2, roar = ph2 && bi === 0;
+  ctx.save(); if (quake || roar) ctx.translate(Math.sin(T * 47) * (quake ? 3 : 2), Math.cos(T * 39) * 2);
   drawBackground(0, 0); drawGround(0, EMPTY, 0);
+  ctx.save(); ctx.translate(690, GROUND); ctx.scale(0.78, 0.78); ctx.translate(-690, -GROUND); // the station, a little smaller so the top dialog never hides its flag
   ctx.fillStyle = hgrad(560, 820, '#86603a', '#6b4a2b', '#4a3020'); rr(560, 250, 260, 190, 10); ctx.fill();
   ctx.strokeStyle = 'rgba(0,0,0,.2)'; ctx.lineWidth = 2; for (let yy = 270; yy < 440; yy += 20) { ctx.beginPath(); ctx.moveTo(562, yy); ctx.lineTo(818, yy); ctx.stroke(); }
   ctx.fillStyle = '#4a3020'; ctx.beginPath(); ctx.moveTo(540, 255); ctx.lineTo(690, 170); ctx.lineTo(840, 255); ctx.fill();
@@ -3630,12 +3638,23 @@ function drawStory() {
   rr(720, 320, 60, 120, 6); ctx.fillStyle = '#3b2410'; ctx.fill();
   rr(600, 212, 180, 40, 8); ctx.fillStyle = '#f3dcc4'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#6b4a2b'; ctx.stroke(); txt('Dino-Station', 690, 226, 17, '#3b2410'); txt('Neuseeland', 690, 243, 14, '#2a5aa0');
   drawNZFlag(692, 112, 72, 46, T, 12);
+  ctx.restore();
   shadow(486, GROUND + 2, 34, 0.3); shadow(246, GROUND + 2, 64, 0.3); shadow(386, GROUND + 2, 26, 0.3);
   treeFern(70, GROUND + 4, 150); treeFern(905, GROUND + 4, 125);
-  shadow(620, GROUND + 2, 26, 0.3); oKiwi(620, GROUND, 1.5, T * 3, true);
+  const hop = !ph2 && bi === 1 ? Math.abs(Math.sin(T * 6)) * 26 : 0; // the kiwi hops but cannot fly
+  shadow(620, GROUND + 2, 26 - hop * 0.3, 0.3); oKiwi(620, GROUND - hop, 1.5, T * 3, true);
+  if (!ph2 && bi === 1) { ctx.save(); ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = 3; ctx.lineCap = 'round'; for (let k = 0; k < 3; k++) { const a = 0.4 + k * 0.5; ctx.beginPath(); ctx.arc(620, GROUND - 30 - hop, 54 + k * 8, Math.PI + a, Math.PI + a + 0.3); ctx.stroke(); } ctx.restore(); }
   oGoetti(480, GROUND, 1.2, true);
-  oRex(240, GROUND, 1.15, T * 2, save.rexName ? 0.2 : 0, Object.assign(rexLook(0), { rider: true }));
-  oChili(380, GROUND, 1.4, T * 3);
+  if (!ph2 && bi === 3) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; const g = ctx.createLinearGradient(0, 40, 0, GROUND); g.addColorStop(0, 'rgba(255,230,140,0)'); g.addColorStop(1, 'rgba(255,230,140,.35)'); ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(220, 40); ctx.lineTo(290, 40); ctx.lineTo(340, GROUND); ctx.lineTo(170, GROUND); ctx.fill(); ctx.restore(); for (let k = 0; k < 5; k++) { const a = T * 2 + k * 1.26, r = 70 + 8 * Math.sin(T * 5 + k); drawStar(255 + Math.cos(a) * r, 310 + Math.sin(a) * r * 0.9, 7 + 3 * Math.sin(T * 6 + k), '#ffe27a'); } }
+  oRex(240, GROUND, 1.15, T * 2, roar ? 0.9 : save.rexName ? 0.2 : 0, Object.assign(rexLook(0), { rider: true }));
+  if (!ph2 && bi === 4) otxt('?', 300, 214 + Math.sin(T * 4) * 8, 58, '#ffd34d', '#3b1d00', 10);
+  if (roar) for (let k = 0; k < 3; k++) { const u = ((T * 1.6 + k / 3) % 1); ctx.strokeStyle = `rgba(255,240,200,${0.8 * (1 - u)})`; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(330, 372, 30 + u * 110, -0.9, 0.9); ctx.stroke(); }
+  if (ph2 && bi === 2) chiliFx.dig = true; oChili(380, GROUND, 1.4, T * 3); chiliFx.dig = false;
+  if (quake) { // the volcano shook: eggs roll away across the ground
+    for (let k = 0; k < 5; k++) { const x = W + 40 - ((T * 150 + k * 210) % (W + 240)), pal = [['#f6e7b0', '#6aa84f'], ['#cfe8ff', '#e07b39'], ['#ffe9c2', '#d63a3a']][k % 3]; shadow(x, GROUND + 4, 14, 0.25); drawEgg(x, GROUND - 14, 15, pal[0], pal[1], 0, -x * 0.04); }
+    for (let k = 0; k < 14; k++) { const u = (T * 0.8 + k * 0.173) % 1; ctx.globalAlpha = 1 - u; circle(760 + Math.sin(k * 7) * 40, 230 - u * 160, 3 + k % 3, k % 2 ? '#ff9a3a' : '#ffd34d'); } ctx.globalAlpha = 1;
+  }
+  ctx.restore();
   vignette(0);
 }
 
