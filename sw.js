@@ -1,5 +1,5 @@
 // Offline support: network first (so updates arrive), cache as fallback.
-const CACHE = 'olis-dino-v12';
+const CACHE = 'olis-dino-v13';
 const FILES = ['./', 'index.html', 'game.js', 'manifest.webmanifest', 'icon.svg', 'icon-192.png', 'icon-512.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => Promise.allSettled(FILES.map(f => c.add(f)))).then(() => self.skipWaiting()));

@@ -1939,7 +1939,7 @@ function breakGeode(o) {
 }
 function squashCompy(o, bounce) {
   o.flat = 1.1; SFX.boing(); burst(o.x, GROUND - 14, 10, ['#d8e85a', '#fff'], 220, 600, 6, 0.5);
-  G.L.amb.push({ x: o.x + 60, y: GROUND - 110, got: false });
+  G.L.amb.push({ x: G.stopped ? G.p.wx + 10 : o.x + 60, y: GROUND - 110, got: false });
   if (bounce) { const p = G.p; p.vy = -720; p.jumps = 1; p.stomp = false; p.spin = 1; }
 }
 function shootFire() {
@@ -2006,8 +2006,8 @@ const BOSS_KINDS = {
     { name: 'Felsenhagel', type: 'volley', say: 'Felsen! Weich aus – und brüll, wenn er erschöpft ist!' },
     { name: 'Das Rudel', type: 'summon', say: 'Er ruft sein Rudel! Spring drauf, brüll sie weg – dann kommt er selbst!' },
     { name: 'Vulkanwut', type: 'leap', say: 'Die Lava kocht! Spring, wenn der Boden glüht!' }] },
-  crab: { name: 'Krabbenkönig', duel: false, minions: ['compy', 'compy', 'compy', 'compy', 'compy'], phases: [
-    { name: 'Kokosnuss-Hagel', type: 'volley', say: 'Kokosnüsse! Spring drüber oder dich ducken – und brüll, wenn er erschöpft ist!' },
+  crab: { name: 'Krabbenkönig', duel: false, minions: ['crab', 'crab', 'crab', 'crab', 'crab'], phases: [
+    { name: 'Kokosnuss-Hagel', type: 'volley', say: 'Kokosnüsse! Spring drüber – und brüll, wenn er erschöpft ist!' },
     { name: 'Die Krabbenarmee', type: 'summon', say: 'Seine Krabben kommen! Hüpf auf ihre Köpfe – dann greift der König selbst an!' }] },
   kraken: { name: 'Das Seeungeheuer', duel: false, minions: ['sword', 'jelly', 'jelly', 'sword'], phases: [
     { name: 'Tintenkugeln', type: 'volley', say: 'Tintenkugeln! Schwimm hoch oder runter – und brüll, wenn er erschöpft ist!' },
@@ -2124,6 +2124,7 @@ function updatePlay(dt) {
     h.got = true; SFX.power(); burst(h.x, h.y, 26, ['#ff5a7a', '#ffb4c4', '#fff'], 320, 300, 7, 0.9);
     if (p.hearts < 3) { p.hearts++; toast('Ein Herz zurück!', '#ff8a9a'); } else { G.amber += 5; toast('Alle Herzen voll – 5 Bernstein extra!', '#ffe08a'); }
   }
+  if (G.stopped && G.bossStarted) for (const a of L.amb.concat(L.hearts)) if (!a.got && a.x > p.wx + 10) a.x = Math.max(p.wx + 10, a.x - 240 * dt);
   for (const f of G.fireballs) {
     f.x += f.vx * dt; f.y = Math.min(GROUND - 38, f.y + f.vy * dt); f.life -= dt;
     for (let k = 0; k < 2; k++) { const l = 0.2 + Math.random() * 0.2; G.flames.push({ x: f.x - 8, y: f.y + (Math.random() - 0.5) * 14, vx: 120 + Math.random() * 120, vy: -60 - Math.random() * 60, life: l, max: l, r: 6 + Math.random() * 6 }); }
@@ -2196,7 +2197,7 @@ function updatePlay(dt) {
       case 'raptor': case 'ptero': case 'compy':
         if (o.flat) { o.flat -= dt; if (o.flat <= 0) { o.flat = 0; o.scared = true; o.vx = 300; o.vy = -300; } break; }
         if (o.scared) { o.x += o.vx * dt; o.vy += 900 * dt; if (o.type !== 'ptero') o.yOff = (o.yOff || 0) + o.vy * dt; else o.y += (o.vy - 300) * dt; o.alpha -= dt * 1.3; o.ph += dt * 18; if (o.alpha <= 0) o.dead = true; break; }
-        if (d < 760) { o.x -= o.spd * dt; o.ph += dt * (o.type === 'ptero' ? 9 : o.type === 'compy' ? 20 : 15); }
+        if (d < 760 || o.minion) { o.x -= o.spd * dt; o.ph += dt * (o.type === 'ptero' ? 9 : o.type === 'compy' ? 20 : 15); }
         if (o.type === 'compy') {
           hb = { x: o.x - 20, y: GROUND - 46, w: 40, h: 44 };
           if (p.inv <= 0 && overlap(pb, hb) && p.vy > 0 && p.y <= hb.y + 30) { squashCompy(o, true); hb = null; }
@@ -2228,12 +2229,12 @@ function updatePlay(dt) {
         break;
       case 'wall': hb = { x: o.x - o.w / 2, y: GROUND - o.h, w: o.w, h: o.h }; break;
       case 'tide': if (d < 720) o.moving = true; if (o.moving) o.x -= 210 * dt; hb = { x: o.x - 70, y: GROUND - 118, w: 110, h: 118 }; break;
-      case 'rollrock': if (d < 760) { o.x -= 250 * dt; o.rot = (o.rot || 0) - dt * 7; } hb = { x: o.x - 30, y: GROUND - 64, w: 60, h: 64 }; break;
+      case 'rollrock': if (d < 760 || o.minion) { o.x -= 250 * dt; o.rot = (o.rot || 0) - dt * 7; } hb = { x: o.x - 30, y: GROUND - 64, w: 60, h: 64 }; break;
       case 'urchin': hb = { x: o.x - 20, y: GROUND - 40, w: 40, h: 40 }; break;
       case 'jelly': o.y = o.y0 + Math.sin(T * 2 + o.ph) * o.amp; hb = { x: o.x - 22, y: o.y - 24, w: 44, h: 48 }; break;
       case 'sword':
         if (o.scared) { o.x += o.vx * dt; o.vy += 600 * dt; o.y += o.vy * dt; o.alpha -= dt * 1.2; if (o.alpha <= 0) o.dead = true; break; }
-        if (d < 800) o.x -= o.spd * dt; hb = { x: o.x - 40, y: o.y - 12, w: 80, h: 24 }; break;
+        if (d < 800 || o.minion) o.x -= o.spd * dt; hb = { x: o.x - 40, y: o.y - 12, w: 80, h: 24 }; break;
       case 'cgate': { const r1 = { x: o.x - 30, y: -30, w: 60, h: o.gapY + 30 }, r2 = { x: o.x - 30, y: o.gapY + o.gapH, w: 60, h: GROUND - (o.gapY + o.gapH) + 20 }; if (p.inv <= 0 && overlap(pb, r1) || p.inv <= 0 && overlap(pb, r2)) hurt(); break; }
       case 'updraft': if (Math.abs(o.x - p.wx) < o.w / 2 && !p.onGround) { p.vy -= (p.gliding ? 2600 : 1300) * dt; p.vy = Math.max(p.vy, -460); if (Math.random() < 0.5) burst(o.x + (Math.random() - 0.5) * o.w, GROUND - Math.random() * 120, 1, ['#fff', '#cfe8ff'], 60, -260, 5, 0.7); } break;
       case 'icicle':
@@ -2293,7 +2294,8 @@ function updateBoss(dt) {
   const goBack = () => { b.state = 'back'; b.t = 0; };
   const projY = lane => swim ? GROUND - 30 - lane * 95 : (lane ? GROUND - 95 : GROUND - 22);
   const mkMinion = (k, i) => {
-    const x = b.x - 50 - i * (k === 'compy' ? 85 : 120);
+    const x = b.x - 50 - i * (k === 'compy' || k === 'crab' ? 235 : k === 'raptor' ? 300 : 200);
+    if (k === 'crab') return { type: 'compy', crab: true, x, spd: 175 + (3 - b.hp) * 12, ph: i, alpha: 1, minion: true };
     if (k === 'sword') return { type: 'sword', x, y: GROUND - 60 - Math.random() * 230, spd: 300, ph: 0, alpha: 1, minion: true };
     if (k === 'jelly') return { type: 'jelly', x, y0: 190 + Math.random() * 200, amp: 40, ph: Math.random() * 6, y: 220, minion: true };
     if (k === 'ptero') return { type: 'ptero', x, y: GROUND - 165, baseY: GROUND - 165, spd: 200, ph: i, alpha: 1, minion: true };
@@ -2306,7 +2308,7 @@ function updateBoss(dt) {
       if (b.t > (b.phase === 0 ? 1.0 : 0.9)) {
         b.n++; b.t = 0;
         if (ty === 'charge') b.state = 'charge';
-        else if (ty === 'volley') { b.state = 'volley'; const len = 3 + (3 - b.hp) + (b.phase > 0 ? 1 : 0); b.volley = { seq: Array.from({ length: Math.min(6, len) }, () => swim ? Math.floor(Math.random() * 4) : (Math.random() < 0.5 ? 0 : 1)), i: 0, next: 0.2 }; }
+        else if (ty === 'volley') { b.state = 'volley'; const len = 3 + (3 - b.hp) + (b.phase > 0 ? 1 : 0); b.volley = { seq: Array.from({ length: Math.min(6, len) }, () => swim ? Math.floor(Math.random() * 4) : (G.sk.duck && Math.random() < 0.5 ? 1 : 0)), i: 0, next: 0.2 }; }
         else if (ty === 'summon') b.state = 'summon';
         else if (ty === 'lane') { b.state = 'lanes'; b.laneN = 0; b.laneNext = 0.2; }
         else { b.state = 'crouch'; b.landX = p.wx + 250; }
@@ -2329,11 +2331,11 @@ function updateBoss(dt) {
     } break;
     case 'summon':
       if (!b.summoned) {
-        b.summoned = true; b.t = 0; SFX.roar(); G.shake = 0.4; const base = K.minions, n = b.hp === 3 ? 4 : b.hp === 2 ? 5 : 6;
+        b.summoned = true; b.t = 0; SFX.roar(); G.shake = 0.4; const base = K.minions, n = b.hp === 3 ? 3 : b.hp === 2 ? 4 : 5;
         for (let i = 0; i < n; i++) L.obs.push(mkMinion(base[i % base.length], i));
         toast('Seine Helfer kommen!', '#ffe08a');
       }
-      if (b.t > 2.2 && (b.t > 7 || !L.obs.some(o => o.minion && !o.dead && !o.scared && !o.flat && o.x > G.cam))) { b.summoned = false; b.state = b.kind === 'kraken' ? 'lanes' : 'charge'; b.laneN = 0; b.laneNext = 0.2; b.t = 0; toast('Jetzt kommt der Boss selbst!', '#ffb4a8'); }
+      if (b.t > 2.2 && (b.t > 10 || !L.obs.some(o => o.minion && !o.dead && !o.scared && !o.flat && o.x > G.cam))) { b.summoned = false; b.state = b.kind === 'kraken' ? 'lanes' : 'charge'; b.laneN = 0; b.laneNext = 0.2; b.t = 0; toast('Jetzt kommt der Boss selbst!', '#ffb4a8'); }
       break;
     case 'crouch': // leap: a shadow marks the landing spot, then he jumps
       if (b.t > 0.75) { b.state = 'leap'; b.t = 0; b.fromX = b.x; SFX.jump(); }
@@ -2366,6 +2368,19 @@ function updateBoss(dt) {
 
 
 // ---------- the three new bosses (drawn facing +x, feet at y = 0; the caller flips them to face the player) ----------
+function drawSmallCrab(x, y, o) {
+  const ph = o.ph || 0, flat = o.flat > 0, t = T * 14 + ph * 2;
+  ctx.save(); ctx.globalAlpha = o.alpha == null ? 1 : clamp(o.alpha, 0, 1); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  if (!o.yOff) shadow(x, y + 2, 30, 0.25);
+  if (flat) { ell(x, y - 8, 36, 9, 0, '#e0402a'); ell(x, y - 10, 22, 5, 0, '#ff9a7a'); circle(x - 12, y - 14, 4, '#fff'); circle(x + 12, y - 14, 4, '#fff'); ctx.restore(); return; }
+  ctx.translate(x, y); ctx.strokeStyle = '#8a2014'; ctx.lineWidth = 4;
+  for (const sd of [-1, 1]) for (let i = 0; i < 3; i++) { const k = Math.sin(t + i * 1.6 + sd) * 5; ctx.beginPath(); ctx.moveTo(sd * (10 + i * 7), -12); ctx.lineTo(sd * (24 + i * 9), -8 + k); ctx.lineTo(sd * (28 + i * 9), 0); ctx.stroke(); }
+  for (const sd of [-1, 1]) { const up = Math.sin(t * 0.5 + sd) * 6; ctx.strokeStyle = '#c0301c'; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(sd * 20, -24); ctx.lineTo(sd * 32, -34 - up); ctx.stroke(); ctx.fillStyle = '#ee4a30'; ctx.beginPath(); ctx.arc(sd * 36, -40 - up, 11, 0.4, Math.PI * 2 - 0.4); ctx.lineTo(sd * 36, -40 - up); ctx.fill(); ctx.lineWidth = 2.5; ctx.strokeStyle = '#6a1408'; ctx.stroke(); }
+  ell(0, -22, 28, 19, 0, vgrad(-42, -4, '#ff8a6a', '#e0402a', '#a82a1a')); ctx.beginPath(); ctx.ellipse(0, -22, 28, 19, 0, 0, 7); ctx.lineWidth = 3; ctx.strokeStyle = '#6a1408'; ctx.stroke();
+  for (const sd of [-1, 1]) { ctx.strokeStyle = '#c0301c'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(sd * 8, -34); ctx.lineTo(sd * 9, -46); ctx.stroke(); circle(sd * 9, -48, 6, '#fff'); circle(sd * 9 - 1, -48, 3, '#222'); }
+  ctx.lineWidth = 2.5; ctx.strokeStyle = '#4a0e06'; ctx.beginPath(); ctx.arc(0, -22, 9, 0.2 * Math.PI, 0.8 * Math.PI); ctx.stroke();
+  ctx.restore();
+}
 function drawCrabKing(x, y, s, ph, flip, o = {}) {
   ctx.save(); ctx.translate(x, y); ctx.scale(flip ? -s : s, s); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
   const col = vgrad(-120, 0, '#ff8a6a', '#e0402a', '#9a2418'), dark = '#6a1408', snap = Math.sin(ph * 0.6) * 0.5 + 0.5;
@@ -2502,7 +2517,7 @@ function drawObstacle(o, cam, th) {
       const by = GROUND - 66 - Math.abs(Math.sin(T * 5)) * 8; ctx.fillStyle = 'rgba(255,255,255,.9)'; ctx.beginPath(); ctx.moveTo(x - 10, by - 10); ctx.lineTo(x + 10, by - 10); ctx.lineTo(x, by + 4); ctx.fill();
       break;
     }
-    case 'compy': if (!o.yOff) shadow(x, GROUND + 2, 22, 0.22); oCompy(x, GROUND + (o.yOff || 0), 1.3, o.ph, !o.scared, { alpha: o.alpha, flat: o.flat > 0 }); break;
+    case 'compy': if (o.crab) { drawSmallCrab(x, GROUND + (o.yOff || 0), o); break; } if (!o.yOff) shadow(x, GROUND + 2, 22, 0.22); oCompy(x, GROUND + (o.yOff || 0), 1.3, o.ph, !o.scared, { alpha: o.alpha, flat: o.flat > 0 }); break;
     case 'raptor': if (!o.yOff) shadow(x, GROUND + 2, 34, 0.25 * (o.alpha == null ? 1 : Math.max(0, o.alpha))); oRaptor(x, GROUND + (o.yOff || 0), 1.05, o.ph, !o.scared, { alpha: o.alpha }); break;
     case 'ptero': ell(x, GROUND + 2, 26, 5, 0, 'rgba(0,0,0,.15)'); oPtero(x, o.y, 1.45, o.ph, !o.scared, { alpha: o.alpha }); break;
     case 'icicle': {
@@ -2661,10 +2676,22 @@ function drawPlay() {
   if (p.fireT > 0) { const g = ctx.createRadialGradient(p.wx - cam + 10, p.y - 60, 10, p.wx - cam + 10, p.y - 60, 120); g.addColorStop(0, `rgba(${fireOf(save.equip.fire || 0).glow},${0.3 + 0.12 * Math.sin(T * 10)})`); g.addColorStop(1, `rgba(${fireOf(save.equip.fire || 0).b},0)`); ctx.fillStyle = g; ctx.fillRect(p.wx - cam - 110, p.y - 180, 240, 240); }
   const spinA = p.stomp && p.spin < 1 ? (3 * p.spin * p.spin - 2 * p.spin * p.spin * p.spin) * Math.PI * 2 : 0, scx = p.wx - cam + 4, scy = p.y - 66;
   if (spinA) { ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.beginPath(); ctx.arc(scx, scy, 104, spinA - Math.PI / 2 - 1.3, spinA - Math.PI / 2); ctx.stroke(); ctx.save(); ctx.translate(scx, scy); ctx.rotate(spinA); ctx.translate(-scx, -scy); }
-  if (p.dashT > 0) for (let gi = 1; gi <= 3; gi++) { ctx.globalAlpha = 0.28 / gi; oRex(p.wx - cam - gi * 38, p.y, 0.92, p.ph, 0.05, Object.assign(rexLook(G.wi), { rider: true, air: !p.onGround })); ctx.globalAlpha = 1; }
+  const dU = p.dashT > 0 ? 1 - p.dashT / 0.4 : 0, dOff = p.dashT > 0 && G.stopped ? Math.sin(dU * Math.PI) * 80 : 0;
+  if (p.dashT > 0) {
+    const cxp = p.wx - cam + 4 + dOff, cyp = p.y - 55, fade = Math.sin(dU * Math.PI);
+    ctx.save(); ctx.lineCap = 'round';
+    for (let i = 0; i < 16; i++) { const ly = 40 + hash(i * 13.7) * (H - 120), len = 110 + hash(i * 3.1) * 200, lx = (((hash(i * 7.7) * (W + 400) - T * 2800 * (0.7 + hash(i) * 0.6)) % (W + 400)) + W + 400) % (W + 400) - 200; ctx.strokeStyle = `rgba(255,255,255,${0.32 * fade})`; ctx.lineWidth = 2 + hash(i * 5) * 3; ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(lx + len, ly); ctx.stroke(); }
+    const gc = ctx.createLinearGradient(cxp - 260, 0, cxp - 20, 0); gc.addColorStop(0, 'rgba(255,210,90,0)'); gc.addColorStop(1, `rgba(255,170,40,${0.6 * fade})`); ctx.fillStyle = gc; ctx.beginPath(); ctx.moveTo(cxp - 10, cyp - 78); ctx.quadraticCurveTo(cxp - 150, cyp - 40, cxp - 260, cyp + 4); ctx.quadraticCurveTo(cxp - 150, cyp + 30, cxp - 10, cyp + 56); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = `rgba(255,255,255,${0.7 * fade})`; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(cxp + 60, cyp, 30 + dU * 90, -1.1, 1.1); ctx.stroke();
+    ctx.restore();
+    if (p.onGround && Math.random() < 0.9) burst(p.wx - 30, GROUND, 1, ['#d8c3a5', '#fff', '#ffe08a'], 160, 200, 6, 0.4);
+  }
+  if (p.dashT > 0) for (let gi = 1; gi <= 3; gi++) { ctx.globalAlpha = 0.3 / gi; oRex(p.wx - cam + dOff - gi * 44, p.y, 0.92, p.ph, 0.05, Object.assign(rexLook(G.wi), { rider: true, air: !p.onGround })); ctx.globalAlpha = 1; }
   if (L.swim || p.gliding) { ctx.save(); const rcx = p.wx - cam + 4, rcy = p.y - 60; ctx.translate(rcx, rcy); ctx.rotate(L.swim ? clamp(p.vy / 900, -0.4, 0.4) : 0.05); ctx.translate(-rcx, -rcy); G._tilt = true; }
   if (p.gliding) { const gx2 = p.wx - cam + 4, gy2 = p.y - 205; ctx.fillStyle = vgrad(gy2 - 28, gy2 + 6, '#ff6a5a', '#c0302a'); ctx.beginPath(); ctx.moveTo(gx2 - 70, gy2 + 8); ctx.quadraticCurveTo(gx2, gy2 - 52, gx2 + 70, gy2 + 8); ctx.quadraticCurveTo(gx2, gy2 - 6, gx2 - 70, gy2 + 8); ctx.fill(); ctx.strokeStyle = '#4a0a08'; ctx.lineWidth = 3; ctx.stroke(); ctx.fillStyle = '#fff'; for (const dx of [-42, -14, 14, 42]) { ctx.beginPath(); ctx.moveTo(gx2 + dx, gy2 + 1); ctx.quadraticCurveTo(gx2 + dx * 0.6, gy2 - 36, gx2 + dx * 0.4, gy2 - 40); ctx.quadraticCurveTo(gx2 + dx * 0.5, gy2 - 20, gx2 + dx + 12, gy2 + 3); ctx.fill(); } ctx.strokeStyle = 'rgba(40,20,10,.7)'; ctx.lineWidth = 2; for (const dx of [-60, -20, 20, 60]) { ctx.beginPath(); ctx.moveTo(gx2 + dx, gy2 + 6); ctx.lineTo(gx2 + 4 + dx * 0.05, p.y - 150); ctx.stroke(); } }
-  if (!(p.inv > 0 && Math.sin(T * 30) > 0.3)) oRex(p.wx - cam, p.y, 0.92, p.ph, p.roarT > 0 || p.breathT > 0 ? 1 : 0.05, Object.assign(rexLook(G.wi), { rider: true, vy: p.vy, sq: p.anti > 0 ? p.anti / 0.09 * 0.13 : !p.onGround ? -clamp(Math.abs(p.vy) / 1400, 0, 1) * 0.1 : (p.land > 0 ? p.land / 0.16 * 0.14 : 0), hurt: p.hitT > 0 && !G.overlay ? p.hitT / 0.45 : 0, air: !p.onGround, duck: p.duck, stomp: p.stomp && p.spin >= 1, fire: p.fireT > 0 }));
+  if (p.dashT > 0) { ctx.save(); const px = p.wx - cam + 4; ctx.translate(px + dOff, p.y); ctx.rotate(0.1); ctx.scale(1.12, 0.92); ctx.translate(-px, -p.y); }
+  if (!(p.inv > 0 && Math.sin(T * 30) > 0.3)) oRex(p.wx - cam,  p.y, 0.92, p.ph, p.roarT > 0 || p.breathT > 0 ? 1 : 0.05, Object.assign(rexLook(G.wi), { rider: true, vy: p.vy, sq: p.anti > 0 ? p.anti / 0.09 * 0.13 : !p.onGround ? -clamp(Math.abs(p.vy) / 1400, 0, 1) * 0.1 : (p.land > 0 ? p.land / 0.16 * 0.14 : 0), hurt: p.hitT > 0 && !G.overlay ? p.hitT / 0.45 : 0, air: !p.onGround, duck: p.duck, stomp: p.stomp && p.spin >= 1, fire: p.fireT > 0 }));
+  if (p.dashT > 0) ctx.restore();
   if (spinA) ctx.restore();
   if (G._tilt) { ctx.restore(); G._tilt = false; }
   if (G.entering) { ctx.restore(); drawGate(L, cam, true); } // the frame closes over the heroes as they walk in

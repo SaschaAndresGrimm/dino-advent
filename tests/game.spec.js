@@ -351,3 +351,21 @@ test('the first calendar levels are varied: at least 6 kinds of obstacles on day
   const kinds = await game.eval(() => { const d = window.__dino, k = new Set(); for (let li = 0; li < 3; li++) { d.startLevel(li); for (const o of d.G.L.obs) k.add(o.type); if (d.G.L.plats.some(p => p.crumble)) k.add('crumble'); } return [...k]; });
   expect(kinds.length).toBeGreaterThanOrEqual(6);
 });
+
+test('crab boss (day 6): no duck shots, crabs not dinos, spaced out, pickups drift to a standing Rex', async ({ game }) => {
+  await game.open({});
+  const r = await game.eval(() => {
+    const d = window.__dino; d.startLevel(5); const G = d.G, L = G.L, p = G.p; G.startT = 0; p.inv = 99; p.wx = L.bossX - 5;
+    for (let i = 0; i < 400 && !(G.boss && G.boss.state === 'taunt'); i++) d.updatePlay(1 / 60);
+    const b = G.boss; b.phase = 0; b.hp = 3; b.state = 'taunt'; b.t = 5; d.updatePlay(1 / 60);
+    const lanes = b.volley ? b.volley.seq.slice() : [];
+    b.phase = 1; b.hp = 3; b.state = 'summon'; b.summoned = false; d.updatePlay(1 / 60);
+    const m = L.obs.filter(o => o.minion), xs = m.map(o => o.x).sort((a, c) => a - c);
+    L.hearts.push({ x: p.wx + 240, y: 340, got: false }); for (let i = 0; i < 120; i++) d.updatePlay(1 / 60);
+    return { lanes, crabs: m.every(o => o.crab), n: m.length, minGap: Math.min(...xs.slice(1).map((x, i) => x - xs[i])), heartDist: L.hearts[L.hearts.length - 1].x - p.wx };
+  });
+  expect(r.lanes.every(l => l === 0)).toBe(true);
+  expect(r.crabs).toBe(true); expect(r.n).toBeGreaterThanOrEqual(3);
+  expect(r.minGap).toBeGreaterThanOrEqual(200);
+  expect(r.heartDist).toBeLessThan(100);
+});
