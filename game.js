@@ -35,6 +35,7 @@ while (save.riddleSeen.length < 8) save.riddleSeen.push([]);
 if (!save.owned) save.owned = { skin: [0], hat: [0], fire: [0] };
 if (!save.equip) save.equip = { skin: 0, hat: 0, fire: 0 };
 if (!save.best) save.best = []; while (save.best.length < 8) save.best.push(0);
+if (!save.board) save.board = []; while (save.board.length < 8) save.board.push([]); if (!save.nick) save.nick = '';
 function writeSave() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) {} }
 
 // =====================================================================
@@ -211,6 +212,7 @@ function ico(kind, cx, cy, s) {
   if (kind === 'book') { rr(-13, -14, 26, 28, 3); ctx.fillStyle = '#7b3f1d'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#3b1d0a'; ctx.stroke(); ctx.fillStyle = '#ffe9a8'; ctx.fillRect(-10, -11, 20, 22); ctx.fillStyle = '#2e8b57'; ctx.beginPath(); ctx.ellipse(0, -1, 6, 5, 0, 0, Math.PI * 2); ctx.fill(); ctx.fillStyle = '#7b3f1d'; ctx.fillRect(-13, -2, 4, 4); }
   else if (kind === 'amber') drawAmber(0, 0, 13);
   else if (kind === 'loop') { ctx.lineWidth = 5; ctx.strokeStyle = '#1d4a78'; ctx.beginPath(); ctx.moveTo(0, 0); ctx.bezierCurveTo(6, -12, 16, -12, 16, 0); ctx.bezierCurveTo(16, 12, 6, 12, 0, 0); ctx.bezierCurveTo(-6, -12, -16, -12, -16, 0); ctx.bezierCurveTo(-16, 12, -6, 12, 0, 0); ctx.stroke(); }
+  else if (kind === 'trophy') { ctx.fillStyle = '#ffd34d'; ctx.strokeStyle = '#7a5400'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(-10, -12); ctx.lineTo(10, -12); ctx.quadraticCurveTo(10, 6, 0, 8); ctx.quadraticCurveTo(-10, 6, -10, -12); ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.arc(-11, -6, 6, Math.PI * 0.5, Math.PI * 1.5); ctx.moveTo(11, -12); ctx.arc(11, -6, 6, -Math.PI * 0.5, Math.PI * 0.5); ctx.stroke(); ctx.fillRect(-2.5, 8, 5, 6); ctx.strokeRect(-2.5, 8, 5, 6); rr(-8, 14, 16, 4, 2); ctx.fill(); ctx.stroke(); }
   else if (kind === 'star') drawStar(0, 1, 15, '#ffd34d');
   else if (kind === 'back') { ctx.lineWidth = 6; ctx.strokeStyle = '#2b1a00'; ctx.beginPath(); ctx.moveTo(8, -11); ctx.lineTo(-7, 0); ctx.lineTo(8, 11); ctx.stroke(); }
   else if (kind === 'lock') { ctx.lineWidth = 4.5; ctx.strokeStyle = '#e8e8e8'; ctx.beginPath(); ctx.arc(0, -5, 7, Math.PI, 0); ctx.stroke(); rr(-10, -4, 20, 16, 3); ctx.fillStyle = '#d8d8d8'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#6a6a6a'; ctx.stroke(); circle(0, 4, 2.4, '#6a6a6a'); }
@@ -2270,6 +2272,11 @@ function endRun() {
   const prev = save.best[G.wi] || 0, isNew = G.score > prev;
   if (isNew) { save.best[G.wi] = G.score; } save.amber += G.amber; writeSave();
   G.overlay = { type: 'endover', isNew, prev, t: 0 }; SFX.wrong(); if (isNew) setTimeout(SFX.right, 350);
+  const wi = G.wi, sc = G.score;
+  if (boardQualifies(wi, sc)) setTimeout(() => {
+    if (!G || !G.overlay || G.overlay.type !== 'endover') return;
+    askName('In der Bestenliste! Wie heisst du?', save.nick || 'Oli', name => { const r = boardAdd(wi, cleanNick(name).name, sc); if (G && G.overlay && G.overlay.type === 'endover') G.overlay.rank = r; SFX.right(); }, v => { const c = cleanNick(v); return c.ok ? '' : c.msg; });
+  }, 1300);
 }
 function resetCrumble(L) { for (const pl of L.plats) if (pl.crumble) { pl.gone = false; pl.t = null; pl.y = pl.y0; pl.fv = 0; } }
 function safeSpawn(x) { // never respawn in or right next to a pit: step back until there is room to run
@@ -3462,8 +3469,8 @@ function drawOverlay() {
     txt('Endlos-Lauf zu Ende!', W / 2, 232, 32, '#3b2410');
     txt(`${G.score} Punkte`, W / 2, 284, 46, '#c0701a');
     txt(o.isNew ? 'Neuer Rekord!' : `Rekord: ${o.prev}`, W / 2, 330, 24, o.isNew ? '#2e7d32' : '#6b4a2b');
-    txt(`Bernstein: +${G.amber}`, W / 2, 362, 20, '#6b4a2b', 'center', 'normal');
-    button('Nochmal!', 250, 384, 220, 56, () => startLevel(G.wi, true)); button('Karte', 490, 384, 220, 56, () => go('map'), { color: '#e0d2b0' });
+    txt(`Bernstein: +${G.amber}` + (o.rank ? `  ·  Bestenliste: Platz ${o.rank}` : ''), W / 2, 362, 20, o.rank ? '#2e7d32' : '#6b4a2b', 'center', o.rank ? 'bold' : 'normal');
+    button('Nochmal!', 236, 384, 150, 56, () => startLevel(G.wi, true), { size: 24 }); button('Bestenliste', 394, 384, 190, 56, () => { boardTab = G.wi; go('board'); }, { size: 22, color: '#ffe08a', icon: icon('trophy') }); button('Karte', 592, 384, 124, 56, () => go('map'), { color: '#e0d2b0', size: 24 });
   } else if (o.type === 'retry') {
     panel(220, 110, 520, 320); drawPortrait('chili', W / 2, 180, 50, true);
     txt('Oh nein! Nicht aufgeben!', W / 2, 262, 32, '#3b2410');
@@ -3564,11 +3571,12 @@ function drawDialog() {
 }
 const nameBox = document.getElementById('nameBox'), nameInput = document.getElementById('nameInput'), nameOk = document.getElementById('nameOk'), nameLabel = document.getElementById('nameLabel');
 function nameOpen() { return nameBox.style.display === 'flex'; }
-function askName(label, def, cb) {
-  nameLabel.textContent = label; nameInput.value = ''; nameInput.placeholder = def; nameBox.style.display = 'flex';
+function askName(label, def, cb, validate) {
+  nameLabel.textContent = label; nameLabel.style.color = ''; nameInput.value = ''; nameInput.placeholder = def; nameBox.style.display = 'flex';
   setTimeout(() => nameInput.focus(), 60);
   const finish = () => {
     let v = nameInput.value.trim().slice(0, 14); if (!v) v = def; v = v.charAt(0).toUpperCase() + v.slice(1);
+    if (validate) { const msg = validate(v); if (msg) { nameLabel.textContent = msg; nameLabel.style.color = '#b3261e'; SFX.wrong(); return; } }
     nameBox.style.display = 'none'; nameInput.blur(); nameOk.onclick = null; nameInput.onkeydown = null; audio(); SFX.right(); cb(v);
   };
   nameOk.onclick = finish;
@@ -3855,15 +3863,61 @@ function drawDoorOverlay() { // the door shakes, glows at the seam, swings open 
   }
   buttons.unshift({ x: 0, y: 0, w: W, h: H, cb: () => {}, silent: true });
 }
+let parentClearT = -99;
 function drawParentPanel() {
-  panel(240, 100, 480, 340); txt('Elternmodus', W / 2, 145, 34, '#3b2410'); txt(`Heute offen: ${adventDay()} von 24 Türen`, W / 2, 190, 22, '#6b4a2b', 'center', 'normal');
+  panel(240, 92, 480, 392); txt('Elternmodus', W / 2, 145, 34, '#3b2410'); txt(`Heute offen: ${adventDay()} von 24 Türen`, W / 2, 190, 22, '#6b4a2b', 'center', 'normal');
   txt(save.dayOverride == null ? 'Es gilt das Datum des Geräts.' : 'Das Datum ist manuell eingestellt.', W / 2, 220, 16, '#8a6a3a', 'center', 'normal');
   button('−', 300, 244, 110, 56, () => { save.dayOverride = clamp(adventDay() - 1, 0, 24); writeSave(); }, { size: 34 });
   button('+', 550, 244, 110, 56, () => { save.dayOverride = clamp(adventDay() + 1, 0, 24); writeSave(); }, { size: 34 });
   button('Alle Türen öffnen', 300, 316, 360, 46, () => { save.dayOverride = 24; writeSave(); }, { size: 22, color: '#ffe08a' });
   button('Datum des Geräts nutzen', 300, 372, 360, 46, () => { save.dayOverride = null; writeSave(); }, { size: 20, color: '#e0d2b0' });
-  button('Schliessen', W / 2 - 80, 450, 160, 44, () => { parentMode = false; }, { size: 20 });
+  const armed = T - parentClearT < 4;
+  button(armed ? 'Wirklich leeren? Nochmal tippen' : 'Bestenliste leeren', 300, 428, 360, 42, () => { if (armed) { save.board = save.board.map(() => []); boardNewT = 0; writeSave(); parentClearT = -99; toast('Bestenliste geleert.', '#ffe08a'); } else parentClearT = T; }, { size: 18, color: armed ? '#e57373' : '#e0d2b0', textColor: armed ? '#fff' : undefined });
+  button('Schliessen', W / 2 - 80, 488, 160, 40, () => { parentMode = false; }, { size: 20 });
   buttons.unshift({ x: 0, y: 0, w: W, h: H, cb: () => {}, silent: true });
+}
+// ---------- local Bestenliste (per device) ----------
+const BAD_WORDS = ['scheiss', 'schei\u00dfe', 'scheisse', 'arsch', 'fotze', 'votze', 'wichs', 'hurensohn', 'hure', 'nutte', 'schlampe', 'fick', 'titten', 'pimmel', 'nazi', 'hitler', 'neger', 'spast', 'mongo', 'kacke', 'pisse', 'fuck', 'shit', 'bitch', 'cunt', 'pussy', 'whore', 'slut', 'rape', 'nigg', 'fag', 'porn', 'sex', 'penis', 'vagina', 'dildo', 'asshole'];
+function cleanNick(raw) { // returns { ok, name, msg }
+  let name = String(raw || '').replace(/[^A-Za-z0-9\u00c4\u00d6\u00dc\u00e4\u00f6\u00fc\u00df _.\-]/g, '').replace(/\s+/g, ' ').trim().slice(0, 12);
+  if (!name) return { ok: false, name, msg: 'Bitte gib einen Spitznamen ein.' };
+  const low = String(raw).toLowerCase();
+  if (/@|https?:|www\.|\.(com|de|ch|at|net|org)\b|\d{4,}/.test(low)) return { ok: false, name, msg: 'Bitte nur einen Spitznamen – keinen echten Namen, keine Adresse und keine Nummer.' };
+  const norm = String(raw).slice(0, 40).toLowerCase().replace(/[0134578@$!]/g, c => ({ 0: 'o', 1: 'i', 3: 'e', 4: 'a', 5: 's', 7: 't', 8: 'b', '@': 'a', $: 's', '!': 'i' })[c]).replace(/[^a-z\u00e4\u00f6\u00fc\u00df]/g, '').replace(/(.)\1+/g, '$1');
+  const bad = BAD_WORDS.some(w => norm.includes(w.replace(/(.)\1+/g, '$1')));
+  if (bad) return { ok: false, name, msg: 'Dieser Name geht leider nicht – such dir einen anderen Spitznamen!' };
+  return { ok: true, name };
+}
+function boardQualifies(wi, sc) { const b = save.board[wi]; return sc > 0 && (b.length < 10 || sc > b[b.length - 1].s); }
+let boardNewT = 0;
+function boardAdd(wi, name, sc) { // returns the rank (1-based) or 0 when it did not make the top 10
+  const e = { n: name, s: sc, t: Date.now() }, b = save.board[wi]; b.push(e); b.sort((x, y) => y.s - x.s || x.t - y.t); if (b.length > 10) b.length = 10;
+  save.nick = name; writeSave(); boardNewT = e.t; return b.indexOf(e) + 1;
+}
+function boardAll() { const all = []; save.board.forEach((b, wi) => b.forEach(e => all.push(Object.assign({ wi }, e)))); return all.sort((x, y) => y.s - x.s || x.t - y.t).slice(0, 10); }
+let boardTab = -1; // -1 = all worlds together
+function drawBoard() {
+  leatherCover();
+  const px = 70, py = 66, pw = W - 140, ph = 396; rr(px, py, pw, ph, 22); ctx.fillStyle = '#fff3d6'; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = '#8a6a3a'; ctx.stroke();
+  otxt('Bestenliste', W / 2, 40, 38, '#ffd34d', '#3b1d00', 9);
+  const nTabs = WORLDS.length + 1, ti = boardTab + 1, title = boardTab < 0 ? 'Alle Welten' : WORLDS[boardTab].name;
+  button('‹', px + 14, py + 12, 60, 46, () => { boardTab = (boardTab + 1 + nTabs - 1) % nTabs - 1; SFX.click && SFX.click(); }, { size: 34, color: '#e0d2b0' });
+  button('›', px + pw - 74, py + 12, 60, 46, () => { boardTab = (boardTab + 1 + 1) % nTabs - 1; SFX.click && SFX.click(); }, { size: 34, color: '#e0d2b0' });
+  txt(title, W / 2, py + 35, 30, '#3b2410'); txt('Auf diesem Gerät · Endlos-Lauf', W / 2, py + 62, 15, '#8a6a3a', 'center', 'normal');
+  const rows = boardTab < 0 ? boardAll() : save.board[boardTab].map(e => Object.assign({ wi: boardTab }, e));
+  if (!rows.length) { txt('Noch kein Eintrag.', W / 2, 250, 26, '#6b4a2b'); txt('Starte einen Endlos-Lauf und sei der Erste!', W / 2, 288, 20, '#8a6a3a', 'center', 'normal'); }
+  const pulse = 0.5 + 0.5 * Math.sin(T * 5);
+  rows.forEach((e, i) => {
+    const y = 156 + i * 29.5, mine = e.t === boardNewT;
+    rr(px + 24, y - 13, pw - 48, 27, 10); ctx.fillStyle = mine ? `rgba(255,211,77,${0.45 + 0.3 * pulse})` : i % 2 ? 'rgba(138,106,58,.08)' : 'rgba(138,106,58,.15)'; ctx.fill();
+    if (i < 3) { circle(px + 52, y, 11, ['#ffd34d', '#d7dbe0', '#d89a5a'][i]); ctx.lineWidth = 2; ctx.strokeStyle = ['#a8780a', '#7a8088', '#8a5424'][i]; ctx.stroke(); txt(String(i + 1), px + 52, y + 1, 15, '#3b2410'); }
+    else txt(String(i + 1), px + 52, y + 1, 16, '#6b4a2b');
+    txt(e.n, px + 82, y + 1, 20, '#2b1a00', 'left');
+    if (boardTab < 0) txt(WORLDS[e.wi].name, px + 330, y + 1, 14, '#8a6a3a', 'left', 'normal');
+    txt(String(e.s), px + pw - 48, y + 1, 21, '#c0701a', 'right');
+  });
+  button('Zurück', 80, H - 70, 180, 50, () => go('map'), { size: 22, icon: icon('back') });
+  button('Endlos-Lauf', W - 280, H - 70, 200, 50, () => { go('map'); endlessPick = true; }, { size: 22, color: '#9fd3ff', icon: icon('loop') });
 }
 let endlessPick = false;
 function themeOpenForEndless(wi) { return save.finished || LEVELS.some(l => l.wi === wi && save.lvDone[l.li]); }
@@ -3905,7 +3959,7 @@ function drawMap() { // the advent calendar
   button('Dino-Buch', 24, H - 82, 210, 60, () => { bookSel = -1; go('book'); }, { icon: icon('book') });
   button('Laden', 24, H - 150, 210, 56, () => go('shop'), { color: '#ffe08a', icon: icon('amber') });
   if (save.newGifts.length) { ctx.save(); ctx.translate(214, H - 146 + Math.sin(T * 6) * 2); ctx.rotate(0.3); rr(-24, -11, 48, 22, 6); ctx.fillStyle = '#e53935'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#fff'; ctx.stroke(); txt('NEU', 0, 1, 14, '#fff'); ctx.restore(); }
-  if (save.lvDone.some(Boolean) || save.finished) button('Endlos-Lauf', W - 274, H - 150, 250, 56, () => { endlessPick = true; }, { color: '#9fd3ff', icon: icon('loop') });
+  if (save.lvDone.some(Boolean) || save.finished) { button('Endlos', W - 274, H - 150, 176, 56, () => { endlessPick = true; }, { color: '#9fd3ff', icon: icon('loop'), size: 24 }); button('', W - 92, H - 150, 68, 56, () => { boardTab = -1; go('board'); }, { color: '#ffe08a', icon: icon('trophy') }); }
   if (save.finished) button('Weihnachts-Ende', W - 274, H - 82, 250, 60, () => startEnding(), { color: '#e57373', textColor: '#fff', icon: icon('star'), size: 21 });
   if (endlessPick) drawEndlessPicker();
   if (doorOverlay) drawDoorOverlay();
@@ -4512,6 +4566,7 @@ function frame(now) {
   else if (scene === 'story') drawStory();
   else if (scene === 'map') drawMap();
   else if (scene === 'book') drawBook();
+  else if (scene === 'board') drawBoard();
   else if (scene === 'shop') drawShop();
   else if (scene === 'sheet') drawSheet();
   else if (scene === 'play') drawPlay();
@@ -4526,5 +4581,5 @@ function frame(now) {
 requestAnimationFrame(frame);
 
 // debug hook for testing in the browser console
-window.__dino = { get scene() { return scene; }, get doorOverlay() { return doorOverlay; }, get buttons() { return buttons; }, pitFall, get lowfx() { return LOWFX; }, set lowfx(v) { LOWFX = v; }, get G() { return G; }, get E() { return E; }, save, startLevel, startEnding, go, jump, roar, updatePlay, updateEnding, answer, retry, tapEgg, openGate, playTreasure, drawPlay, duckDown, duckUp, shootFire, drawShop, buildSong, dash, LEVELS, adventDay, openDoorGift, giftFor, clickDoor, skillsFor, bookOpen(i) { bookSel = i; }, sheet(p) { sheetPage = p || 'hero'; scene = 'sheet'; } };
+window.__dino = { cleanNick, boardAdd, boardQualifies, boardAll, endRun, get scene() { return scene; }, get doorOverlay() { return doorOverlay; }, get buttons() { return buttons; }, pitFall, get lowfx() { return LOWFX; }, set lowfx(v) { LOWFX = v; }, get G() { return G; }, get E() { return E; }, save, startLevel, startEnding, go, jump, roar, updatePlay, updateEnding, answer, retry, tapEgg, openGate, playTreasure, drawPlay, duckDown, duckUp, shootFire, drawShop, buildSong, dash, LEVELS, adventDay, openDoorGift, giftFor, clickDoor, skillsFor, bookOpen(i) { bookSel = i; }, sheet(p) { sheetPage = p || 'hero'; scene = 'sheet'; } };
 })();

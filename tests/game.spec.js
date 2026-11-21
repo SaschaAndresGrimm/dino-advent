@@ -409,3 +409,20 @@ test('safety net: the third retry at one checkpoint gives a shield that absorbs 
   expect(h.hearts).toBe(3);
   expect(game.errors).toEqual([]);
 });
+
+test('local Bestenliste: nickname filter, top 10 per world, ranks and persistence', async ({ game, page }) => {
+  await game.open();
+  const r = await game.eval(() => {
+    const d = window.__dino, ok = n => d.cleanNick(n).ok;
+    const names = { fine: ok('Oli') && ok('Rex-Fan') && ok('Schwanzflosse'), blocked: !ok('Fuck') && !ok('sch3i$$e') && !ok('a@b.de') && !ok('Max 1234567') && !ok('') };
+    for (let i = 1; i <= 12; i++) d.boardAdd(0, 'P' + i, i * 100);
+    const top = d.save.board[0];
+    return { names, len: top.length, first: top[0].s, last: top[9].s, qualifies: d.boardQualifies(0, 350) && !d.boardQualifies(0, 250) && !d.boardQualifies(0, 0), rank: d.boardAdd(0, 'Neu', 1250), all: d.boardAll().length, saved: JSON.parse(localStorage.getItem('olisDinoRettung.v1')).board[0].length };
+  });
+  expect(r.names).toEqual({ fine: true, blocked: true });
+  expect(r.len).toBe(10); expect(r.first).toBe(1200); expect(r.last).toBe(300);
+  expect(r.qualifies).toBe(true); expect(r.rank).toBe(1); expect(r.all).toBe(10); expect(r.saved).toBe(10);
+  await game.eval(() => { const d = window.__dino; d.go('board'); }); await page.waitForTimeout(300);
+  expect(await game.eval(() => window.__dino.scene)).toBe('board');
+  expect(game.errors).toEqual([]);
+});
