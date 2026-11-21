@@ -450,3 +450,29 @@ test('story: day briefing plays once before a level, a boss unlocks a map dialog
   expect(await game.eval(() => window.__dino.fmt('{oli}'))).toBe('Mia');
   expect(game.errors).toEqual([]);
 });
+
+test('Tages-Lauf: same seed every start, one +20 bonus per day, streak counts, daily board is separate', async ({ game }) => {
+  await game.open({ lvDone: Array(24).fill(1) });
+  const r = await game.eval(() => {
+    const d = window.__dino, sig = () => d.G.L.obs.slice(0, 10).map(o => o.type + Math.round(o.x)).join();
+    d.startDaily(); const a = sig(), daily1 = d.G.daily; d.startDaily(); const b = sig();
+    const amber0 = d.save.amber; d.G.startT = 0; d.G.score = 500; d.G.p.wx = 200 + 500 * 25; d.endRun(); const gain1 = d.save.amber - amber0;
+    d.startDaily(); d.G.startT = 0; d.G.score = 100; d.G.p.wx = 300; const amber1 = d.save.amber; d.endRun(); const gain2 = d.save.amber - amber1;
+    return { same: a === b, daily1, gain1, gain2, streak: d.save.dailyStreak, bestWorld: d.save.best.some(Boolean), dailyBest: d.save.dailyBest };
+  });
+  expect(r.same).toBe(true); expect(r.daily1).toBe(true);
+  expect(r.gain1).toBeGreaterThanOrEqual(20); expect(r.gain2).toBeLessThan(20);
+  expect(r.streak).toBe(1); expect(r.bestWorld).toBe(false); expect(r.dailyBest).toBe(500);
+  expect(game.errors).toEqual([]);
+});
+
+test('settings: separate music and effect volume, calm mode removes shake', async ({ game }) => {
+  await game.open();
+  const r = await game.eval(() => {
+    const d = window.__dino; d.save.volSfx = 0; d.save.volMusic = 4; d.save.calm = true;
+    d.startLevel(0); const G = d.G; G.startT = 0; G.coach = null; G.shake = 1; d.drawPlay();
+    return { vol: [d.save.volMusic, d.save.volSfx], calm: d.save.calm };
+  });
+  expect(r).toEqual({ vol: [4, 0], calm: true });
+  expect(game.errors).toEqual([]);
+});

@@ -35,8 +35,10 @@ while (save.riddleSeen.length < 8) save.riddleSeen.push([]);
 if (!save.owned) save.owned = { skin: [0], hat: [0], fire: [0] };
 if (!save.equip) save.equip = { skin: 0, hat: 0, fire: 0 };
 if (!save.best) save.best = []; while (save.best.length < 8) save.best.push(0);
+if (save.volMusic == null) save.volMusic = 4; if (save.volSfx == null) save.volSfx = 4; if (!save.calm) save.calm = false;
+if (!save.dailyLast) save.dailyLast = 0; if (!save.dailyStreak) save.dailyStreak = 0; if (!save.dailyBoardDay) save.dailyBoardDay = 0; if (!save.installHint) save.installHint = false;
 if (!save.storySeen) save.storySeen = {}; if (!save.afterNew) save.afterNew = 0; if (!save.oliName) save.oliName = '';
-if (!save.board) save.board = []; while (save.board.length < 8) save.board.push([]); if (!save.nick) save.nick = '';
+if (!save.board) save.board = []; while (save.board.length < 9) save.board.push([]); if (!save.nick) save.nick = '';
 function writeSave() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) {} }
 
 // =====================================================================
@@ -48,8 +50,10 @@ function audio() {
   if (AC && AC.state === 'suspended') AC.resume();
   return AC;
 }
+let bus = 'sfx'; // musicTick switches this to 'music' so the two volumes are separate
+const busGain = () => (bus === 'music' ? save.volMusic : save.volSfx) / 4;
 function tone(freq, dur, type = 'sine', vol = 0.2, slideTo = null, delay = 0) {
-  if (save.muted || !AC) return;
+  if (save.muted || !AC) return; vol *= busGain(); if (vol <= 0.0005) return;
   const t = AC.currentTime + delay, o = AC.createOscillator(), g = AC.createGain();
   o.type = type; o.frequency.setValueAtTime(freq, t);
   if (slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, t + dur);
@@ -58,7 +62,7 @@ function tone(freq, dur, type = 'sine', vol = 0.2, slideTo = null, delay = 0) {
 }
 let noiseBuf = null;
 function noise(dur, vol = 0.3, freq = 800, delay = 0) {
-  if (save.muted || !AC) return;
+  if (save.muted || !AC) return; vol *= busGain(); if (vol <= 0.0005) return;
   const t = AC.currentTime + delay;
   if (!noiseBuf) { const n = Math.floor(AC.sampleRate * 2), d = (noiseBuf = AC.createBuffer(1, n, AC.sampleRate)).getChannelData(0); for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1; }
   const src = AC.createBufferSource(); src.buffer = noiseBuf;
@@ -164,7 +168,7 @@ function musicTick(key, level = 0) {
   if (!AC || !key || !SONGS[key]) { if (mus.key != null) mus.saved[mus.key] = { bar: mus.bar, step: mus.step }; mus.key = null; return; }
   if (mus.key !== key) { if (mus.key != null) mus.saved[mus.key] = { bar: mus.bar, step: mus.step }; mus.key = key; const sv = mus.saved[key]; mus.bar = sv ? sv.bar : 0; mus.step = sv ? sv.step : 0; mus.next = AC.currentTime + 0.1; }
   if (mus.next < AC.currentTime - 0.05) mus.next = AC.currentTime + 0.05; // after a background pause
-  const m = SONGS[key], bars = buildSong(key), st = 60 / m.bpm / 4;
+  const m = SONGS[key], bars = buildSong(key), st = 60 / m.bpm / 4; bus = 'music';
   while (mus.next < AC.currentTime + 0.45) { // scheduling ahead keeps the music steady even when a frame is slow
     const bar = bars[mus.bar % bars.length], i = mus.step, d = mus.next - AC.currentTime, b = bar.bass[i], l = bar.lead[i], ld = bar.leadDur && bar.leadDur[i];
     if (b != null) tone(m.root / 2 * Math.pow(2, b / 12), st * 2.2, 'triangle', 0.055, null, d);
@@ -176,6 +180,7 @@ function musicTick(key, level = 0) {
     if (m.bells && i % 4 === 0) { noise(0.05, 0.05, 9000, d); tone(3100, 0.08, 'triangle', 0.012, null, d); } // sleigh bells
     mus.next += st; mus.step++; if (mus.step >= 16) { mus.step = 0; mus.bar = (mus.bar + 1) % bars.length; }
   }
+  bus = 'sfx';
 }
 // =====================================================================
 // Helpers
@@ -2020,7 +2025,7 @@ function oGoetti(x, y, s, wave) { const [bx, by, bw, bh] = obox(s, false, -36, 6
 // Level generation
 // =====================================================================
 function buildLevel(wi, endless, LV) { // LV = the calendar level spec (or undefined for endless runs)
-  const th = WORLDS[wi], R = rng(endless ? (Date.now() & 0xffffff) + wi : (LV ? 777 + LV.li * 1013 + 91 : 777 + wi * 1013));
+  const th = WORLDS[wi], R = rng(endless ? (dailySeed ? dailySeed * 8 + wi : (Date.now() & 0xffffff) + wi) : (LV ? 777 + LV.li * 1013 + 91 : 777 + wi * 1013));
   const dayN = LV ? LV.day : 99, first = LV ? LV.sub === 0 : true, SK = skillsFor(LV ? LV.li : null, wi), bossKind = LV ? LV.boss : null;
   const L = { wi, li: LV ? LV.li : -1, speed: th.speed * (LV ? LV.speedMul : 1), swim: !!th.swim, bossKind, pits: [], obs: [], amb: [], plats: [], eggs: [], spots: [], tips: [], cps: [], coach: [], seen: {}, peppers: [], hearts: [] };
   const amberRow = (x, n, y = GROUND - 45, dx = 48) => { for (let i = 0; i < n; i++) L.amb.push({ x: x + i * dx, y, got: false }); };
@@ -2191,6 +2196,7 @@ function buildLevel(wi, endless, LV) { // LV = the calendar level spec (or undef
 // =====================================================================
 let scene = 'title', G = null, fadeT = 0;
 function go(s) {
+  settingsOpen = false;
   if (scene === 'shop' && s !== 'shop' && save.newGifts.length) { save.newGifts = []; writeSave(); }
   scene = s; shopConfirm = null; endlessPick = false; doorOverlay = null; parentMode = false; titlePress = 0; fadeT = 1; if (s === 'shop') { shopTab = 0; shopPage = 0; shopSel = save.equip.skin; shopTalk = { t: 4, text: 'Willkommen! Such dir etwas aus.' }; } parts = []; dialog = null; toasts = [];
   if (s === 'map' && save.afterNew > 0 && save.treasureNew < 0) { const d = save.afterNew; save.afterNew = 0; writeSave(); startDialog(DAY_AFTER[d] || []); }
@@ -2311,10 +2317,12 @@ function hurt(force) {
 }
 function endRun() {
   G.score = Math.max(G.score, Math.floor((G.p.wx - 200) / 25) + G.amber * 3);
-  const prev = save.best[G.wi] || 0, isNew = G.score > prev;
-  if (isNew) { save.best[G.wi] = G.score; } save.amber += G.amber; writeSave();
-  G.overlay = { type: 'endover', isNew, prev, t: 0 }; SFX.wrong(); if (isNew) setTimeout(SFX.right, 350);
-  const wi = G.wi, sc = G.score;
+  const prev = G.daily ? (save.dailyBest || 0) : (save.best[G.wi] || 0), isNew = G.score > prev;
+  if (isNew) { if (G.daily) save.dailyBest = G.score; else save.best[G.wi] = G.score; } save.amber += G.amber;
+  let bonus = 0; if (G.daily && save.dailyLast !== dayKey()) { save.dailyStreak = save.dailyLast === prevDayKey() ? save.dailyStreak + 1 : 1; save.dailyLast = dayKey(); bonus = 20; save.amber += bonus; }
+  writeSave();
+  G.overlay = { type: 'endover', isNew, prev, t: 0, bonus, streak: G.daily ? save.dailyStreak : 0 }; SFX.wrong(); if (isNew) setTimeout(SFX.right, 350);
+  const wi = G.daily ? 8 : G.wi, sc = G.score; if (G.daily) dailyRefresh();
   if (boardQualifies(wi, sc)) setTimeout(() => {
     if (!G || !G.overlay || G.overlay.type !== 'endover') return;
     askName('In der Bestenliste! Wie heisst du?', save.nick || save.oliName || 'Oli', name => { const r = boardAdd(wi, cleanNick(name).name, sc); if (G && G.overlay && G.overlay.type === 'endover') G.overlay.rank = r; SFX.right(); }, v => { const c = cleanNick(v); return c.ok ? '' : c.msg; });
@@ -3235,7 +3243,7 @@ function drawPlay() {
   perfWatch(); chiliFx.dive = ART(G.wi) === 6;
   TOD = [0, 1, 5, 7].includes(ART(G.wi)) ? todU() : 0;
   ctx.save();
-  if (G.shake > 0 && !G.overlay) ctx.translate((Math.random() - 0.5) * 16 * G.shake, (Math.random() - 0.5) * 16 * G.shake);
+  if (G.shake > 0 && !G.overlay && !save.calm) ctx.translate((Math.random() - 0.5) * 16 * G.shake, (Math.random() - 0.5) * 16 * G.shake);
   drawBackground(ART(G.wi), cam);
   if (G.wi === 4) { drawAurora(); }
   if (L.bossKind === 'king') drawFamilyCliff(L, cam);
@@ -3368,6 +3376,7 @@ function drawPlay() {
   }
   G.flyEggs = G.flyEggs.filter(f => f.t < 1);
   for (let k = 0; k < 3; k++) G.slotPop[k] = Math.max(0, G.slotPop[k] - DT * 1.5);
+  if (G.hitFlash > 0 && save.calm) G.hitFlash = 0;
   if (G.hitFlash > 0) { G.hitFlash -= DT; const g = ctx.createRadialGradient(W / 2, H / 2, H * 0.35, W / 2, H / 2, H * 0.95); g.addColorStop(0, 'rgba(255,0,0,0)'); g.addColorStop(1, `rgba(255,0,0,${Math.max(0, G.hitFlash)})`); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H); }
   if (G.coach && !G.overlay) drawCoach();
   // start banner
@@ -3502,18 +3511,20 @@ function stoneTablet(x, y, w, h) {
 }
 function drawOverlay() {
   const o = G.overlay, th = WORLDS[G.wi];
+  if (settingsOpen && o.type === 'pause') { drawSettings(); return; }
   if (o.type === 'pause') {
     panel(280, 100, 400, 350); txt('Pause', W / 2, 155, 44, '#3b2410');
     button('Weiter spielen', 330, 200, 300, 64, () => { G.overlay = null; });
-    button(save.muted ? 'Ton: aus' : 'Ton: an', 330, 284, 300, 56, () => { save.muted = !save.muted; writeSave(); }, { color: '#e0d2b0', size: 24 });
+    button('Einstellungen', 330, 284, 300, 56, () => { settingsOpen = true; }, { color: '#e0d2b0', size: 24 });
     button('Zur Karte', 330, 360, 300, 64, () => go('map'), { color: '#e0d2b0' });
   } else if (o.type === 'endover') {
     o.t += DT; panel(220, 90, 520, 360); drawPortrait('chili', W / 2, 160, 46);
     txt('Endlos-Lauf zu Ende!', W / 2, 232, 32, '#3b2410');
     txt(`${G.score} Punkte`, W / 2, 284, 46, '#c0701a');
-    txt(o.isNew ? 'Neuer Rekord!' : `Rekord: ${o.prev}`, W / 2, 330, 24, o.isNew ? '#2e7d32' : '#6b4a2b');
-    txt(`Bernstein: +${G.amber}` + (o.rank ? `  ·  Bestenliste: Platz ${o.rank}` : ''), W / 2, 362, 20, o.rank ? '#2e7d32' : '#6b4a2b', 'center', o.rank ? 'bold' : 'normal');
-    button('Nochmal!', 236, 384, 150, 56, () => startLevel(G.wi, true), { size: 24 }); button('Bestenliste', 394, 384, 190, 56, () => { boardTab = G.wi; go('board'); }, { size: 22, color: '#ffe08a', icon: icon('trophy') }); button('Karte', 592, 384, 124, 56, () => go('map'), { color: '#e0d2b0', size: 24 });
+    txt(o.isNew ? 'Neuer Rekord!' : `Rekord: ${o.prev}`, W / 2, 322, 24, o.isNew ? '#2e7d32' : '#6b4a2b');
+    if (o.bonus) txt(`Tages-Bonus: +${o.bonus} Bernstein · Serie: ${o.streak} ${o.streak === 1 ? 'Tag' : 'Tage'}`, W / 2, 346, 16, '#8a5a00');
+    txt(`Bernstein: +${G.amber}` + (o.rank ? `  ·  Bestenliste: Platz ${o.rank}` : ''), W / 2, 368, 20, o.rank ? '#2e7d32' : '#6b4a2b', 'center', o.rank ? 'bold' : 'normal');
+    button('Nochmal!', 236, 392, 150, 54, () => { if (G.daily) startDaily(); else startLevel(G.wi, true); }, { size: 24 }); button('Bestenliste', 394, 392, 190, 54, () => { boardTab = G.daily ? 8 : G.wi; go('board'); }, { size: 22, color: '#ffe08a', icon: icon('trophy') }); button('Karte', 592, 392, 124, 54, () => go('map'), { color: '#e0d2b0', size: 24 });
   } else if (o.type === 'retry') {
     panel(220, 110, 520, 320); drawPortrait('chili', W / 2, 180, 50, true);
     txt('Oh nein! Nicht aufgeben!', W / 2, 262, 32, '#3b2410');
@@ -3914,6 +3925,27 @@ function drawDoorOverlay() { // the door shakes, glows at the seam, swings open 
   }
   buttons.unshift({ x: 0, y: 0, w: W, h: H, cb: () => {}, silent: true });
 }
+function installHintVisible() { try { const ua = navigator.userAgent || '', ios = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); return ios && !navigator.standalone && !window.matchMedia('(display-mode: standalone)').matches && !save.installHint && scene === 'map' && !dialog && !endlessPick && !doorOverlay && !parentMode && !settingsOpen; } catch (e) { return false; } }
+function drawInstallHint() {
+  const y = H - 74; rr(150, y, 660, 64, 16); ctx.fillStyle = 'rgba(255,247,224,.97)'; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = '#6b4a2b'; ctx.stroke();
+  txt('Tipp: Teilen-Knopf → „Zum Home-Bildschirm“.', 450, y + 21, 19, '#3b2410'); txt('So bleibt dein Spielstand sicher und das Spiel läuft auch ohne Internet.', 450, y + 46, 15, '#6b4a2b', 'center', 'normal');
+  button('OK', 740, y + 6, 60, 50, () => { save.installHint = true; writeSave(); }, { size: 20 });
+}
+let settingsOpen = false;
+function segBar(label, y, get, set) { // five tappable segments, 0 = silent
+  txt(label, 270, y + 22, 24, '#3b2410', 'left');
+  for (let k = 0; k <= 5; k++) { const x = 440 + k * 46, on = get() >= k && k > 0, cur = get() === k; rr(x, y, 40, 44, 10); ctx.fillStyle = k === 0 ? (get() === 0 ? '#e57373' : '#e0d2b0') : on ? '#ffd34d' : '#e6dcc4'; ctx.fill(); ctx.lineWidth = cur ? 4 : 2.5; ctx.strokeStyle = cur ? '#8a5a00' : '#8a6a3a'; ctx.stroke(); if (k === 0) txt('0', x + 20, y + 23, 20, '#6b4a2b'); else { rr(x + 11, y + 22 - k * 2.2, 18, k * 4.4 + 6, 4); ctx.fillStyle = on ? '#8a5a00' : '#b8a888'; ctx.fill(); } buttons.push({ x, y, w: 40, h: 44, cb: () => { set(k); writeSave(); if (k) { if (label === 'Effekte') SFX.right(); } } }); }
+}
+function drawSettings() {
+  panel(230, 90, 500, 360); txt('Einstellungen', W / 2, 135, 36, '#3b2410');
+  segBar('Musik', 170, () => save.volMusic, v => { save.volMusic = v; });
+  segBar('Effekte', 232, () => save.volSfx, v => { save.volSfx = v; });
+  button(save.calm ? 'Ruhiger Modus: an' : 'Ruhiger Modus: aus', 270, 300, 420, 50, () => { save.calm = !save.calm; writeSave(); }, { size: 22, color: save.calm ? '#d4f2bd' : '#e0d2b0' });
+  txt('Ruhig = kein Wackeln und kein rotes Aufblitzen.', W / 2, 372, 15, '#8a6a3a', 'center', 'normal');
+  button(save.muted ? 'Ton ganz aus ✓' : 'Ton ganz ausschalten', 270, 392, 250, 44, () => { save.muted = !save.muted; writeSave(); }, { size: 18, color: save.muted ? '#e57373' : '#e0d2b0', textColor: save.muted ? '#fff' : undefined });
+  button('Fertig', 540, 392, 150, 44, () => { settingsOpen = false; }, { size: 22 });
+  buttons.unshift({ x: 0, y: 0, w: W, h: H, cb: () => {}, silent: true });
+}
 let parentClearT = -99;
 function drawParentPanel() {
   panel(240, 92, 480, 392); txt('Elternmodus', W / 2, 145, 34, '#3b2410'); txt(`Heute offen: ${adventDay()} von 24 Türen`, W / 2, 190, 22, '#6b4a2b', 'center', 'normal');
@@ -3945,17 +3977,18 @@ function boardAdd(wi, name, sc) { // returns the rank (1-based) or 0 when it did
   const e = { n: name, s: sc, t: Date.now() }, b = save.board[wi]; b.push(e); b.sort((x, y) => y.s - x.s || x.t - y.t); if (b.length > 10) b.length = 10;
   save.nick = name; writeSave(); boardNewT = e.t; return b.indexOf(e) + 1;
 }
-function boardAll() { const all = []; save.board.forEach((b, wi) => b.forEach(e => all.push(Object.assign({ wi }, e)))); return all.sort((x, y) => y.s - x.s || x.t - y.t).slice(0, 10); }
+function boardAll() { const all = []; save.board.slice(0, 8).forEach((b, wi) => b.forEach(e => all.push(Object.assign({ wi }, e)))); return all.sort((x, y) => y.s - x.s || x.t - y.t).slice(0, 10); }
 let boardTab = -1; // -1 = all worlds together
 function drawBoard() {
   leatherCover();
   const px = 70, py = 66, pw = W - 140, ph = 396; rr(px, py, pw, ph, 22); ctx.fillStyle = '#fff3d6'; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = '#8a6a3a'; ctx.stroke();
   otxt('Bestenliste', W / 2, 40, 38, '#ffd34d', '#3b1d00', 9);
-  const nTabs = WORLDS.length + 1, ti = boardTab + 1, title = boardTab < 0 ? 'Alle Welten' : WORLDS[boardTab].name;
+  const nTabs = WORLDS.length + 2, title = boardTab < 0 ? 'Alle Welten' : boardTab === 8 ? 'Tages-Lauf heute' : WORLDS[boardTab].name; if (boardTab === 8) dailyRefresh();
   button('‹', px + 14, py + 12, 60, 46, () => { boardTab = (boardTab + 1 + nTabs - 1) % nTabs - 1; SFX.click && SFX.click(); }, { size: 34, color: '#e0d2b0' });
   button('›', px + pw - 74, py + 12, 60, 46, () => { boardTab = (boardTab + 1 + 1) % nTabs - 1; SFX.click && SFX.click(); }, { size: 34, color: '#e0d2b0' });
-  txt(title, W / 2, py + 35, 30, '#3b2410'); txt('Auf diesem Gerät · Endlos-Lauf', W / 2, py + 62, 15, '#8a6a3a', 'center', 'normal');
+  txt(title, W / 2, py + 35, 30, '#3b2410'); txt(boardTab === 8 ? `Heute: ${WORLDS[dailyWorld()].name} · neuer Lauf jeden Tag` : 'Auf diesem Gerät · Endlos-Lauf', W / 2, py + 62, 15, '#8a6a3a', 'center', 'normal');
   const rows = boardTab < 0 ? boardAll() : save.board[boardTab].map(e => Object.assign({ wi: boardTab }, e));
+  const stBar = boardTab === 8 && save.dailyStreak ? `Deine Serie: ${save.dailyStreak} ${save.dailyStreak === 1 ? 'Tag' : 'Tage'}` : '';
   if (!rows.length) { txt('Noch kein Eintrag.', W / 2, 250, 26, '#6b4a2b'); txt('Starte einen Endlos-Lauf und sei der Erste!', W / 2, 288, 20, '#8a6a3a', 'center', 'normal'); }
   const pulse = 0.5 + 0.5 * Math.sin(T * 5);
   rows.forEach((e, i) => {
@@ -3967,19 +4000,28 @@ function drawBoard() {
     if (boardTab < 0) txt(WORLDS[e.wi].name, px + 330, y + 1, 14, '#8a6a3a', 'left', 'normal');
     txt(String(e.s), px + pw - 48, y + 1, 21, '#c0701a', 'right');
   });
+  if (stBar) txt(stBar, W / 2, H - 45, 20, '#ffd34d');
   button('Zurück', 80, H - 70, 180, 50, () => go('map'), { size: 22, icon: icon('back') });
   button('Endlos-Lauf', W - 280, H - 70, 200, 50, () => { go('map'); endlessPick = true; }, { size: 22, color: '#9fd3ff', icon: icon('loop') });
 }
+// ---------- Tages-Lauf: one endless run per day with the same seed for everybody ----------
+const dayKey = () => { const d = new Date(); return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate(); };
+const prevDayKey = () => { const d = new Date(); d.setDate(d.getDate() - 1); return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate(); };
+function dailyWorld() { const open = WORLDS.map((_, i) => i).filter(themeOpenForEndless); const d = new Date(); const n = Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 864e5); return open.length ? open[n % open.length] : 0; }
+function dailyRefresh() { if (save.dailyBoardDay !== dayKey()) { save.board[8] = []; save.dailyBoardDay = dayKey(); writeSave(); } }
+let dailySeed = 0;
+function startDaily() { dailyRefresh(); dailySeed = dayKey(); const wi = dailyWorld(); startLevel(wi, true); dailySeed = 0; if (G) G.daily = true; }
 let endlessPick = false;
 function themeOpenForEndless(wi) { return save.finished || LEVELS.some(l => l.wi === wi && save.lvDone[l.li]); }
 function drawEndlessPicker() {
   buttons = [];
-  panel(150, 40, 660, 460); txt('Endlos-Lauf', W / 2, 85, 38, '#3b2410'); txt('Wähle ein Thema – schlag deinen Rekord!', W / 2, 122, 20, '#6b4a2b', 'center', 'normal');
+  panel(150, 24, 660, 492); txt('Endlos-Lauf', W / 2, 70, 38, '#3b2410'); txt('Wähle ein Thema – schlag deinen Rekord!', W / 2, 108, 20, '#6b4a2b', 'center', 'normal');
   WORLDS.forEach((th, i) => {
-    const open = themeOpenForEndless(i), x = 180 + (i % 2) * 310, y = 146 + Math.floor(i / 2) * 62;
+    const open = themeOpenForEndless(i), x = 180 + (i % 2) * 310, y = 128 + Math.floor(i / 2) * 58;
     button(`${th.name}${save.best[i] ? ' · ' + save.best[i] : ''}`, x, y, 290, 52, () => { if (open) { endlessPick = false; startLevel(i, true); } else { SFX.wrong(); toast('Erst ein Level dieses Themas schaffen!', '#ffb4a8'); } }, { size: 22, color: open ? '#f4b400' : '#c8c0a8', icon: open ? null : icon('lock') });
   });
-  button('Zurück', W / 2 - 80, 146 + 4 * 62 + 8, 160, 42, () => { endlessPick = false; }, { size: 20, color: '#e0d2b0' });
+  { const done = save.dailyLast === dayKey(), wi = dailyWorld(); button(`Tages-Lauf: ${WORLDS[wi].name}` + (save.dailyStreak && (done || save.dailyLast === prevDayKey()) ? ` · Serie ${save.dailyStreak}` : ''), 180, 372, 600, 46, () => { endlessPick = false; startDaily(); }, { size: 21, color: done ? '#d4f2bd' : '#ffb27a', icon: icon('star') }); if (!done) txt('Heute noch nicht gespielt: +20 Bernstein!', W / 2, 432, 15, '#8a5a00', 'center', 'normal'); else txt('Heute schon gespielt – morgen gibt es einen neuen Lauf.', W / 2, 432, 15, '#6b4a2b', 'center', 'normal'); }
+  button('Zurück', W / 2 - 80, 456, 160, 40, () => { endlessPick = false; }, { size: 20, color: '#e0d2b0' });
 }
 function drawMap() { // the advent calendar
   const today = adventDay();
@@ -4006,7 +4048,7 @@ function drawMap() { // the advent calendar
   drawAmber(W - 210, 36, 14); otxt(String(save.amber), W - 188, 37, 24, '#ffe08a', 'rgba(0,0,0,.7)', 5, 'left');
   drawMedal(W - 318, 44, 12, 1, true); otxt(`${save.lvM.flat().reduce((a, b) => a + b, 0)}/72`, W - 298, 37, 24, '#ffe08a', 'rgba(0,0,0,.7)', 5, 'left');
   drawChest();
-  button(save.muted ? 'Ton aus' : 'Ton an', W - 130, 16, 112, 42, () => { save.muted = !save.muted; writeSave(); }, { size: 18, color: '#e0d2b0' });
+  button(save.muted ? 'Ton aus' : 'Ton', W - 130, 16, 112, 42, () => { settingsOpen = true; }, { size: 18, color: '#e0d2b0' });
   button('Dino-Buch', 24, H - 82, 210, 60, () => { bookSel = -1; go('book'); }, { icon: icon('book') });
   button('Laden', 24, H - 150, 210, 56, () => go('shop'), { color: '#ffe08a', icon: icon('amber') });
   if (save.newGifts.length) { ctx.save(); ctx.translate(214, H - 146 + Math.sin(T * 6) * 2); ctx.rotate(0.3); rr(-24, -11, 48, 22, 6); ctx.fillStyle = '#e53935'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#fff'; ctx.stroke(); txt('NEU', 0, 1, 14, '#fff'); ctx.restore(); }
@@ -4015,6 +4057,8 @@ function drawMap() { // the advent calendar
   if (endlessPick) drawEndlessPicker();
   if (doorOverlay) drawDoorOverlay();
   if (parentMode) drawParentPanel();
+  if (installHintVisible()) drawInstallHint();
+  if (settingsOpen) drawSettings();
   if (titlePress && T - titlePress > 1.4 && !parentMode) { parentMode = true; titlePress = 0; SFX.click(); }
 }
 
@@ -4633,5 +4677,5 @@ function frame(now) {
 requestAnimationFrame(frame);
 
 // debug hook for testing in the browser console
-window.__dino = { get dialog() { return dialog; }, DAY_STORY, DAY_AFTER, launchLevel, finishLevel, fmt, cleanNick, boardAdd, boardQualifies, boardAll, endRun, get scene() { return scene; }, get doorOverlay() { return doorOverlay; }, get buttons() { return buttons; }, pitFall, get lowfx() { return LOWFX; }, set lowfx(v) { LOWFX = v; }, get G() { return G; }, get E() { return E; }, save, startLevel, startEnding, go, jump, roar, updatePlay, updateEnding, answer, retry, tapEgg, openGate, playTreasure, drawPlay, duckDown, duckUp, shootFire, drawShop, buildSong, dash, LEVELS, adventDay, openDoorGift, giftFor, clickDoor, skillsFor, bookOpen(i) { bookSel = i; }, sheet(p) { sheetPage = p || 'hero'; scene = 'sheet'; } };
+window.__dino = { startDaily, dailyWorld, dayKey, get dialog() { return dialog; }, DAY_STORY, DAY_AFTER, launchLevel, finishLevel, fmt, cleanNick, boardAdd, boardQualifies, boardAll, endRun, get scene() { return scene; }, get doorOverlay() { return doorOverlay; }, get buttons() { return buttons; }, pitFall, get lowfx() { return LOWFX; }, set lowfx(v) { LOWFX = v; }, get G() { return G; }, get E() { return E; }, save, startLevel, startEnding, go, jump, roar, updatePlay, updateEnding, answer, retry, tapEgg, openGate, playTreasure, drawPlay, duckDown, duckUp, shootFire, drawShop, buildSong, dash, LEVELS, adventDay, openDoorGift, giftFor, clickDoor, skillsFor, bookOpen(i) { bookSel = i; }, sheet(p) { sheetPage = p || 'hero'; scene = 'sheet'; } };
 })();

@@ -31,6 +31,8 @@ Run both check and test before every commit. Playwright needs `npx playwright in
 
 - **Story:** the Krallenkönig stole the dino family's golden egg; the bosses of days 6, 12 and 18 each hold a piece of his map. `DAY_STORY[day]` is a short Goetti dialog played once before a level (via `launchLevel`, tracked in `save.storySeen`), `DAY_AFTER` plays on the map after the first boss win (`save.afterNew`), `TEASERS` replace the results-screen line on days 5, 11, 17 and 23. Use `{oli}` (player name, asked in the intro, default Oli), `{rex}` and `{baby}` in texts, never a hard-coded name. Keep every new story line German, short and Swiss-spelled (ss, no ß).
 
+- **Settings and daily run:** `save.volMusic`/`save.volSfx` (0-5, 4 = normal) scale `tone()`/`noise()` through `bus` (`musicTick` sets `bus = 'music'`); `save.calm` disables screen shake and the red hit flash. Tages-Lauf = an endless run seeded by `dayKey()` (`startDaily`), world chosen by `dailyWorld()`, +20 amber and a streak once per day, daily board is `save.board[8]` and resets each day. The iPad install hint shows once on the map (`save.installHint`).
+
 ## Testing pitfalls
 - `tests/levels.spec.js` has a bot (`PLAY`) that must be able to finish every level. New obstacles usually need a rule there. If it fails with `done:false, steps:60000` the bot is stuck: step it in small chunks and print position, nearby pits/platforms/obstacles.
 - Tests run with service workers blocked and a fake clock only where they say so (`calendar.spec.js`).
