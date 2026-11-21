@@ -7,10 +7,10 @@ test('title screen loads without errors', async ({ game, page }) => {
   expect(game.errors).toEqual([]);
 });
 
-for (const wi of [0, 1, 2, 3, 4]) {
-  test(`world ${wi + 1} plays for 3 s without errors`, async ({ game, page }) => {
+for (const li of [0, 3, 6, 9, 12, 15, 18, 21, 23]) {
+  test(`level ${li + 1} plays for 3 s without errors`, async ({ game, page }) => {
     await game.open();
-    await game.start(wi);
+    await game.start(li);
     await page.waitForTimeout(3000);
     const r = await game.eval(() => ({ wx: window.__dino.G.p.wx, scene: window.__dino.scene }));
     expect(r.scene).toBe('play');
@@ -19,10 +19,10 @@ for (const wi of [0, 1, 2, 3, 4]) {
   });
 }
 
-test('old 4-world save is migrated to 5 worlds', async ({ game }) => {
-  await game.open({ eggs: [[1, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], medals: [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], riddleSeen: [[], [], [], []] });
-  const r = await game.eval(() => { const s = window.__dino.save; return [s.eggs.length, s.medals.length, s.riddleSeen.length, !!s.owned, s.best.length]; });
-  expect(r).toEqual([5, 5, 5, true, 5]);
+test('an old 4-world save is upgraded to the 24-day calendar and keeps name, amber and cosmetics', async ({ game }) => {
+  await game.open({ eggs: [[1, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], medals: [[0, 0, 0]], riddleSeen: [[], [], [], []], amber: 77, owned: { skin: [0, 1], hat: [0], fire: [0] } });
+  const r = await game.eval(() => { const s = window.__dino.save; return { lv: [s.lvE.length, s.lvM.length, s.lvDone.length], riddle: s.riddleSeen.length, best: s.best.length, amber: s.amber, name: s.rexName, skins: s.owned.skin, gifts: Array.isArray(s.gifts) }; });
+  expect(r).toEqual({ lv: [24, 24, 24], riddle: 8, best: 8, amber: 77, name: 'Rexi', skins: [0, 1], gifts: true });
 });
 
 test('map, book and shop render without errors', async ({ game, page }) => {
@@ -36,7 +36,7 @@ test('map, book and shop render without errors', async ({ game, page }) => {
 
 test('riddle: wrong answer locks buttons and costs amber; hint crosses out a wrong answer', async ({ game, page }) => {
   await game.open({ amber: 10 });
-  await game.start(1);
+  await game.start(6);
   await game.eval(() => { const G = window.__dino.G; G.p.wx = G.L.gateX - 215; });
   await page.waitForFunction(() => window.__dino.G.overlay && window.__dino.G.overlay.type === 'riddle');
   const r = await game.eval(() => {
@@ -62,18 +62,17 @@ test('shop: select to preview, buy only with enough amber, then equip and persis
   await game.open({ amber: 200 });
   await game.eval(() => window.__dino.go('shop'));
   await page.waitForTimeout(300);
-  const card = i => [440 + i * 126 + 59, 176 + 60];            // item card centres (logical px)
-  const buy = [440 + 248, 362 + 30];                            // the confirm button
-  // Blau (120): select it, then confirm
-  await page.mouse.click(...card(1)); await page.mouse.click(...buy);
+  const card = j => [440 + (j % 4) * 126 + 59, 168 + Math.floor(j / 4) * 96 + 44];  // item card centres (logical px)
+  const buy = [440 + 248, 402 + 28];                                                  // the confirm button
+  await page.mouse.click(...card(1)); await page.mouse.click(...buy);               // Blau (120)
   let r = await game.eval(() => ({ amber: window.__dino.save.amber, skin: window.__dino.save.equip.skin, owned: window.__dino.save.owned.skin }));
   expect(r).toEqual({ amber: 80, skin: 1, owned: [0, 1] });
-  // Gold (600) is too expensive: selecting and confirming changes nothing
-  await page.mouse.click(...card(3)); await page.mouse.click(...buy);
+  await page.mouse.click(...card(3)); await page.mouse.click(...buy);               // Gold (600): too expensive
   r = await game.eval(() => ({ amber: window.__dino.save.amber, skin: window.__dino.save.equip.skin }));
   expect(r).toEqual({ amber: 80, skin: 1 });
-  // an owned item is equipped without paying: go back to Gruen
-  await page.mouse.click(...card(0)); await page.mouse.click(...buy);
+  await page.mouse.click(...card(4)); await page.mouse.click(...buy);               // a calendar gift cannot be bought
+  expect(await game.eval(() => window.__dino.save.equip.skin)).toBe(1);
+  await page.mouse.click(...card(0)); await page.mouse.click(...buy);               // an owned item is equipped for free
   expect(await game.eval(() => window.__dino.save.equip.skin)).toBe(0);
   const stored = await page.evaluate(k => JSON.parse(localStorage.getItem(k)), KEY);
   expect(stored.equip.skin).toBe(0);
@@ -81,10 +80,10 @@ test('shop: select to preview, buy only with enough amber, then equip and persis
 });
 
 test('book: found cards open, NEU is cleared once seen', async ({ game, page }) => {
-  await game.open({ eggs: [[1, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]] });
+  await game.open({ lvDone: [1, ...new Array(23).fill(0)] });
   await game.eval(() => window.__dino.go('book'));
   await page.waitForTimeout(300);
-  await page.mouse.click(32 + 82, 104 + 56); // first card
+  await page.mouse.click(28 + 71, 94 + 45); // first card
   expect(await game.eval(() => window.__dino.save.bookSeen[0])).toBe(true);
   await page.waitForTimeout(200);
   expect(game.errors).toEqual([]);
@@ -92,7 +91,7 @@ test('book: found cards open, NEU is cleared once seen', async ({ game, page }) 
 
 test('roar: 3 s cooldown, smashes boulders but not small rocks', async ({ game }) => {
   await game.open();
-  await game.start(1);
+  await game.start(6);
   const r = await game.eval(() => {
     const d = window.__dino, G = d.G, p = G.p;
     G.L.obs.length = 0;
@@ -106,7 +105,7 @@ test('roar: 3 s cooldown, smashes boulders but not small rocks', async ({ game }
 
 test('combo patterns exist in worlds 2-4 and levels build', async ({ game }) => {
   await game.open();
-  const r = await game.eval(() => [1, 2, 3, 4].map(wi => { window.__dino.startLevel(wi); const L = window.__dino.G.L; return L.obs.length > 10 && L.pits.length > 0; }));
+  const r = await game.eval(() => [6, 12, 18, 21].map(li => { window.__dino.startLevel(li); const L = window.__dino.G.L; return L.obs.length > 10 && L.pits.length > 0; }));
   expect(r).toEqual([true, true, true, true]);
 });
 
@@ -115,7 +114,7 @@ const BOT = `
   (maxSteps) => {
     const d = window.__dino, G = d.G, p = G.p, L = G.L, seen = { phases: new Set(), states: new Set(), minions: 0, hazards: new Set() };
     let ducking = false;
-    for (let i = 0; i < maxSteps && !G.golden; i++) {
+    for (let i = 0; i < maxSteps && !G.golden && !G.bossDone; i++) {
       const b = G.boss;
       if (b) {
         seen.phases.add(b.phase); seen.states.add(b.state);
@@ -132,13 +131,13 @@ const BOT = `
       p.hearts = 99;
       d.updatePlay(1 / 60);
     }
-    return { phases: [...seen.phases], states: [...seen.states], hazards: [...seen.hazards], minions: seen.minions > 0, golden: !!G.golden };
+    return { phases: [...seen.phases], states: [...seen.states], hazards: [...seen.hazards], minions: seen.minions > 0, golden: !!G.golden, done: !!G.bossDone };
   }`;
 
 test('boss fight: 4 phases and a roar duel can be won, with every attack type appearing', async ({ game, page }) => {
   test.setTimeout(120000);
   await game.open();
-  await game.start(3);
+  await game.start(23);
   await game.eval(() => { const G = window.__dino.G; G.p.wx = G.L.bossX - 30; });
   const r = await page.evaluate(`(${BOT})(20000)`);
   expect(r.golden).toBe(true);
@@ -149,10 +148,31 @@ test('boss fight: 4 phases and a roar duel can be won, with every attack type ap
   expect(game.errors).toEqual([]);
 });
 
+for (const [li, kind, phases, states] of [
+  [5, 'crab', [0, 1], ['volley', 'summon', 'charge', 'tired', 'stagger', 'flee']],
+  [11, 'kraken', [0, 1, 2], ['volley', 'lanes', 'summon', 'tired', 'stagger', 'flee']],
+  [17, 'queen', [0, 1, 2], ['volley', 'crouch', 'leap', 'summon', 'charge', 'tired', 'stagger', 'flee']],
+]) {
+  test(`mini boss day ${li + 1} (${kind}): can be beaten phase by phase and then the way is free`, async ({ game, page }) => {
+    test.setTimeout(120000);
+    await game.open();
+    await game.start(li);
+    expect(await game.eval(() => window.__dino.G.L.bossKind)).toBe(kind);
+    await game.eval(() => { const G = window.__dino.G; G.p.wx = G.L.bossX - 30; });
+    const r = await page.evaluate(`(${BOT})(20000)`);
+    expect(r.done).toBe(true);
+    expect(r.golden).toBe(false);
+    expect(r.phases).toEqual(phases);
+    expect(r.states).toEqual(expect.arrayContaining(states));
+    expect(await game.eval(() => window.__dino.G.stopped)).toBe(false);
+    expect(game.errors).toEqual([]);
+  });
+}
+
 test('boss fight lasts long enough to be exciting (more than a minute of game time)', async ({ game, page }) => {
   test.setTimeout(120000);
   await game.open();
-  await game.start(3);
+  await game.start(23);
   await game.eval(() => { const G = window.__dino.G; G.p.wx = G.L.bossX - 30; });
   await page.evaluate(`(${BOT})(20000)`);
   expect(await game.eval(() => window.__dino.G.t)).toBeGreaterThan(55);
@@ -160,7 +180,7 @@ test('boss fight lasts long enough to be exciting (more than a minute of game ti
 
 test('boss: losing in phase 3 restarts that phase with full boss hp, not the whole fight', async ({ game, page }) => {
   await game.open();
-  await game.start(3);
+  await game.start(23);
   await game.eval(() => { const G = window.__dino.G; G.p.wx = G.L.bossX - 30; });
   await page.evaluate(() => { const d = window.__dino, G = d.G; for (let i = 0; i < 600; i++) { G.p.hearts = 99; d.updatePlay(1 / 60); } G.boss.phase = 2; G.boss.hp = 1; G.bossCp = 2; G.boss.state = 'taunt'; G.p.hearts = 1; G.p.inv = 0; G.p.y = 900; for (let i = 0; i < 5; i++) d.updatePlay(1 / 60); });
   expect(await game.eval(() => window.__dino.G.overlay && window.__dino.G.overlay.type)).toBe('retry');
@@ -189,14 +209,14 @@ test('world 5 is locked until the story is finished', async ({ game, page }) => 
 });
 
 test('finishing a level shows results and the button returns to the map', async ({ game, page }) => {
-  await game.open({ unlocked: 0, finished: false });
+  await game.open({ finished: false });
   await game.start(0);
   await game.eval(() => { const G = window.__dino.G; G.atGate = true; G.gateOpening = true; G.gateOpen = 1; G.stopped = false; G.p.wx = G.L.gateX + 250; });
   await page.waitForFunction(() => window.__dino.G.overlay && window.__dino.G.overlay.type === 'complete');
   await page.waitForTimeout(300);
   await page.mouse.click(480, 453);
   expect(await game.eval(() => window.__dino.scene)).toBe('map');
-  expect(await game.eval(() => window.__dino.save.unlocked)).toBe(1);
+  expect(await game.eval(() => window.__dino.save.lvDone[0])).toBe(1);
   expect(game.errors).toEqual([]);
 });
 
@@ -229,7 +249,7 @@ test('Christmas level (world 5) plays with sound on and is not black', async ({ 
   await page.addInitScript(FAKE_AUDIO);
   await game.open({ finished: true, babyName: 'Bibo', treasures: [1, 1, 1, 1] });
   await page.mouse.click(10, 10); // unlock audio like a real tap would
-  await game.start(4);
+  await game.start(21);
   await page.waitForTimeout(1500);
   const r = await game.eval(() => { const c = document.getElementById('game'), x = c.getContext('2d'); return { px: Array.from(x.getImageData(c.width / 2, c.height * 0.8, 1, 1).data).slice(0, 3), tones: window.__tones }; });
   expect(r.px.some(v => v > 5)).toBe(true);   // the frame loop is alive and drawing
@@ -246,7 +266,7 @@ test('every world and the map have a long song with valid notes, and tension lay
 
 test('losing: the screen stops shaking once the retry overlay is up', async ({ game, page }) => {
   await game.open();
-  await game.start(1);
+  await game.start(6);
   await game.eval(() => { const G = window.__dino.G; G.p.hearts = 1; G.p.inv = 0; G.shake = 0.5; G.p.y = 900; });
   await page.waitForFunction(() => window.__dino.G.overlay && window.__dino.G.overlay.type === 'retry');
   await page.waitForTimeout(600);
@@ -255,9 +275,9 @@ test('losing: the screen stops shaking once the retry overlay is up', async ({ g
 
 test('hearts come back: pickups, checkpoint flags; full hearts turn into amber', async ({ game }) => {
   await game.open();
-  await game.start(1);
+  await game.start(6);
   const r = await game.eval(() => {
-    const d = window.__dino, G = d.G, p = G.p, L = G.L; const out = { hearts: L.hearts.length };
+    const d = window.__dino, G = d.G, p = G.p, L = G.L; const out = { hearts: L.hearts.length }; L.obs.length = 0; L.pits.length = 0;
     p.hearts = 1; const h = L.hearts[0]; p.wx = h.x - 10; p.y = h.y + 50; d.updatePlay(1 / 60); out.afterPickup = p.hearts;
     p.hearts = 1; const cp = L.cps.find(c => !c.on); p.wx = cp.x + 1; d.updatePlay(1 / 60); out.flag = p.hearts;
     const h2 = L.hearts[1]; p.hearts = 3; const a0 = G.amber; p.wx = h2.x - 10; p.y = h2.y + 50; d.updatePlay(1 / 60); out.full = [p.hearts, G.amber - a0];
@@ -275,4 +295,31 @@ test('melodies are singable: stepwise phrases, sustained notes, no shrill or jum
   expect(r.maxLeap).toBeLessThanOrEqual(6);
   expect(r.maxNote).toBeLessThanOrEqual(28);
   expect(r.share).toBeGreaterThan(0.3);
+});
+
+test('door overlay has a back button, and nobody shakes after losing', async ({ game, page }) => {
+  await game.open({});
+  await game.eval(() => { const d = window.__dino; d.save.dayOverride = 24; d.go('map'); d.clickDoor(5); });
+  await page.waitForTimeout(300);
+  const back = await game.eval(() => { const d = window.__dino; const b = d.buttons.find(b => b.label === 'Zurück'); if (!b) return false; b.cb(); return d.doorOverlay === null; });
+  expect(back).toBe(true);
+  await game.eval(() => { const d = window.__dino; d.startLevel(0); const G = d.G; G.startT = 0; G.p.hitT = 0.4; G.overlay = { type: 'retry', t: 0 }; });
+  await page.waitForTimeout(200);
+  expect(await game.eval(() => window.__dino.G.shake)).toBeLessThan(0.5);
+});
+
+test('falling into a pit respawns far back, on the ground, with a pause and protection', async ({ game }) => {
+  await game.open({});
+  const r = await game.eval(() => { const d = window.__dino; d.startLevel(0); const G = d.G, L = G.L, p = G.p; G.startT = 0; const pit = L.pits[0]; p.wx = pit.x + 40; p.y = 500; d.pitFall(); return { gap: pit.x - p.wx, y: p.y, startT: G.startT, inv: p.inv }; });
+  expect(r.gap).toBeGreaterThan(400);
+  expect(r.y).toBe(440);
+  expect(r.startT).toBeGreaterThan(1);
+  expect(r.inv).toBeGreaterThan(2.5);
+});
+
+test('skill hints appear well before the obstacle', async ({ game }) => {
+  await game.open({});
+  const r = await game.eval(() => { const d = window.__dino; d.startLevel(3); const L = d.G.L, w = L.obs.find(o => o.type === 'wall'); return { coach: L.coach.length ? L.coach[0].x : null, gap: w ? w.x - L.coach[0].x : 0 }; });
+  expect(r.coach).not.toBeNull();
+  expect(r.gap).toBeGreaterThanOrEqual(450);
 });

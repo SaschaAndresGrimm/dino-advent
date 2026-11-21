@@ -1,5 +1,25 @@
 # Olis Dino-Rettung
 
+**An advent calendar game: a new level opens every day from 1 to 24 December 2026.** Each door hides a level (about 2 minutes), a daily cosmetic gift and one dino card. The last door (24 December) holds the boss fight, the golden egg and the Christmas ending.
+
+## Advent calendar
+- **Doors:** day N opens on December N (device date, `ADVENT_START` in `game.js`). Missed days stay playable. Before 1 December the calendar shows a countdown.
+- **Parent mode:** press and hold the "Adventskalender" title for 1.5 s. Set the day with − / +, open all doors, or go back to the device date. For testing you can also open the game with `?day=12`.
+- **Gifts:** the first time a door opens, its gift is added to the shop (11 hats, 6 skins, 4 fire colours, 3 amber bonuses). The shop shows unopened gifts as "Tür N".
+- **Themes and skills** (`LEVELS`, `LEVEL_THEMES` and `SKILL_DAYS` in `game.js`):
+
+| Days | Theme | New skill | Boss |
+|---|---|---|---|
+| 1–3 | Jungle | jump, double jump, roar | |
+| 4–6 | Beach | **FLITZ** (dash through walls and waves) | Crab King (6) |
+| 7–9 | Canyon | duck | |
+| 10–12 | Underwater | **swim** (tap = up, TAUCHEN = down) | Sea monster (12) |
+| 13–15 | Ice Age | stomp | |
+| 16–18 | Mountains | **glide** (hold the screen in the air) | Eagle queen (18) |
+| 19–21 | Volcano | fire chili | |
+| 22–24 | Christmas night | everything | Krallenkönig (24) |
+
+
 A Christmas runner game for Oli: a T-Rex he names himself, Chili the rabbit, Goetti's dino station, 4 worlds plus a bonus Christmas-night world, a boss, an endless run, an amber shop and a Christmas ending. The game text is in German. There's no build step and no external assets: plain HTML, Canvas and synthesised sound.
 
 ## Run locally
@@ -7,7 +27,8 @@ A Christmas runner game for Oli: a T-Rex he names himself, Chili the rabbit, Goe
 python3 -m http.server 8765
 ```
 Then open http://localhost:8765. Controls:
-- Tap or Space: jump (tap twice for a double jump)
+- Tap or Space: jump (tap twice for a double jump; hold in the air to glide from day 16; tap to swim underwater)
+- **FLITZ** button or F: dash (from day 4)
 - **DUCKEN** button (bottom left) or ↓ / S: hold to duck under low branches, ledges and low-flying pterosaurs. Press it in the air to **STAMPF!** (ground pound): it cracks amber stones and flattens Kompsis.
 - **BRÜLL!** button or R: roar (scares raptors and pterosaurs, smashes big boulders; 3 s cooldown, 1 s in the boss fight). Small rocks and icicles need a jump, a stomp or fire. After picking up a **Feuer-Chili** it becomes **FEUER!** for 8 seconds and shoots fireballs.
 - Esc: pause
@@ -53,4 +74,4 @@ Each cleared phase drops a heart. If you lose, you restart at the phase you were
 ## Tests
 Needs Node. One-time setup: `npm install && npx playwright install chromium`.
 - `npm run check`: syntax check of `game.js` and `sw.js`
-- `npm test`: 16 headless browser tests in `tests/` (all worlds, riddle lock, shop, roar, boss fight bot, endless run, save migration). It starts its own server on port 8790.
+- `npm test`: headless browser tests in `tests/`: an autoplayer that completes all 24 levels, bots for all four boss fights, the calendar and date logic with a mocked clock, gifts, shop, riddles, endless run and save migration. It starts its own server on port 8790.
