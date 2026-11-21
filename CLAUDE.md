@@ -26,6 +26,8 @@ Run both check and test before every commit. Playwright needs `npx playwright in
 - Boss fights: Rex stands still (FLITZ lunges him forward and back). Collectibles must come to him (they drift and hearts are magnetic). The boss must walk back to `home` between phases. Enemy waves need wide spacing (200+ px) so a jump fits between them.
 - Do not draw over the HUD area at the top centre (eggs, progress bar, boss bar). Hint boxes go at the bottom (max 3 lines, they must stay below the ground line); boss banners sit at y=128, boss toasts at y=300. Keep Chili at 145 px behind Rex so the two silhouettes do not merge.
 
+- **Kid-friendliness helpers:** `chiliSay(text, force)` shows a rate-limited speech bubble from Chili; `cheer()` celebrates the first successful use of a taught move; the third retry at the same checkpoint sets `G.shield` (absorbs one hit, `hurt()` checks it). `save.newGifts` (`"key:index"`) drives the NEU badges on the map and in the shop and is cleared when the shop closes.
+
 ## Testing pitfalls
 - `tests/levels.spec.js` has a bot (`PLAY`) that must be able to finish every level. New obstacles usually need a rule there. If it fails with `done:false, steps:60000` the bot is stuck: step it in small chunks and print position, nearby pits/platforms/obstacles.
 - Tests run with service workers blocked and a fake clock only where they say so (`calendar.spec.js`).

@@ -387,3 +387,25 @@ test('boss fights: FLITZ lunges forward and back, the boss walks home between ph
   expect(r.bossDist).toBeGreaterThan(500);
   expect(r.got).toBe(true);
 });
+
+test('safety net: the third retry at one checkpoint gives a shield that absorbs one hit; Chili speaks', async ({ game }) => {
+  await game.open();
+  await game.start(0);
+  const r = await game.eval(() => {
+    const d = window.__dino, G = d.G, p = G.p; const out = {};
+    out.greeting = !!G.chiliSay;
+    for (let i = 0; i < 2; i++) { p.hearts = 1; p.inv = 0; d.retry(); } out.afterTwo = !!G.shield;
+    p.hearts = 1; p.inv = 0; d.retry(); out.afterThree = !!G.shield;
+    p.hearts = 3; p.inv = 0; p.dashT = 0; G.chiliCd = 0; G.chiliSay = null; G.p.inv = 0;
+    // a hit with the shield up costs no heart; the next one does and Chili comments
+    const before = p.hearts; window.__dino.pitFall && 0;
+    return Object.assign(out, { before });
+  });
+  expect(r.greeting).toBe(true);
+  expect(r.afterTwo).toBe(false);
+  expect(r.afterThree).toBe(true);
+  const h = await game.eval(() => { const d = window.__dino, G = d.G, p = G.p, L = G.L; p.hearts = 3; p.inv = 0; p.dashT = 0; const o = { type: 'rock', x: p.wx + 5, w: 40, h: 40 }; L.obs.push(o); for (let i = 0; i < 30; i++) d.updatePlay(1 / 60); return { hearts: p.hearts, shield: G.shield }; });
+  expect(h.shield).toBe(false);
+  expect(h.hearts).toBe(3);
+  expect(game.errors).toEqual([]);
+});

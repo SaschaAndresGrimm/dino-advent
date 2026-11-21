@@ -29,7 +29,7 @@ try { const s = JSON.parse(localStorage.getItem(SAVE_KEY)); if (s) save = Object
 // calendar progress: one entry per level (24 days). Old 4-world saves keep names, amber and shop items but start the calendar fresh.
 if (!save.lvE) save.lvE = []; if (!save.lvM) save.lvM = []; if (!save.lvDone) save.lvDone = [];
 while (save.lvE.length < 24) { save.lvE.push([0, 0, 0]); save.lvM.push([0, 0, 0]); save.lvDone.push(0); }
-if (!save.gifts) save.gifts = []; if (save.dayOverride === undefined) save.dayOverride = null;
+if (!save.gifts) save.gifts = []; if (!save.newGifts) save.newGifts = []; if (save.dayOverride === undefined) save.dayOverride = null;
 save.learned = Object.assign({ duck: 0, stomp: 0, fire: 0, dash: 0, swim: 0, glide: 0 }, save.learned);
 while (save.riddleSeen.length < 8) save.riddleSeen.push([]);
 if (!save.owned) save.owned = { skin: [0], hat: [0], fire: [0] };
@@ -456,7 +456,7 @@ function giftFor(day) { // the cosmetic (or amber) hidden behind a door
 }
 function openDoorGift(day) { // first opening of a door: add the gift to the player's collection
   if (save.gifts.includes(day)) return null; const g = giftFor(day); if (!g) return null;
-  save.gifts.push(day); if (g.key === 'amber') save.amber += g.n; else if (!save.owned[g.key].includes(g.i)) save.owned[g.key].push(g.i); writeSave(); return g;
+  save.gifts.push(day); if (g.key !== 'amber') save.newGifts.push(g.key + ':' + g.i); if (g.key === 'amber') save.amber += g.n; else if (!save.owned[g.key].includes(g.i)) save.owned[g.key].push(g.i); writeSave(); return g;
 }
 function hslHex(h, sat, l) { l /= 100; const a = sat / 100 * Math.min(l, 1 - l), f = n => { const k = (n + h / 30) % 12, c = l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1)); return Math.round(255 * c).toString(16).padStart(2, '0'); }; return `#${f(0)}${f(8)}${f(4)}`; }
 
@@ -2148,6 +2148,7 @@ function buildLevel(wi, endless, LV) { // LV = the calendar level spec (or undef
 // =====================================================================
 let scene = 'title', G = null, fadeT = 0;
 function go(s) {
+  if (scene === 'shop' && s !== 'shop' && save.newGifts.length) { save.newGifts = []; writeSave(); }
   scene = s; shopConfirm = null; endlessPick = false; doorOverlay = null; parentMode = false; titlePress = 0; fadeT = 1; if (s === 'shop') { shopTab = 0; shopPage = 0; shopSel = save.equip.skin; shopTalk = { t: 4, text: 'Willkommen! Such dir etwas aus.' }; } parts = []; dialog = null; toasts = [];
   if (s === 'map' && save.treasureNew >= 0) { const k = save.treasureNew; save.treasureNew = -1; writeSave(); chestPop[k] = 1; startDialog([{ who: k === 3 ? 'kiwi' : 'goetti', text: k === 3 ? 'Kiwi! Kiwi! (Kiwi hüpft vor Freude.)' : TREASURES[k].line }].concat(k === 3 ? [{ who: 'goetti', text: TREASURES[3].line }] : [])); }
 }
@@ -2162,12 +2163,23 @@ function startLevel(arg, endless) { // endless: arg = theme index. otherwise arg
     chili: { wx: 95, y: GROUND, ph: 0, dig: null, digT: 0 }, cp: 200, rings: [],
     boss: null, bossStarted: false, golden: null, gotGolden: false, atGate: false, gateT: 0, gateOpening: false, gateOpen: 0, finished: false,
     coach: null, flyEggs: [], slotPop: [0, 0, 0], hitFlash: 0, endless: !!endless, score: 0, heartAt: 500, tier: 1 };
+  if (!endless) { G.chiliSay = { text: 'Los geht\'s, Oli!', t: 2.6 }; G.chiliCd = 4; }
   if (endless) { G.tip = { text: 'Endlos-Lauf! Es wird immer schneller und gefährlicher. Alle 500 Punkte gibt es ein Herz zurück.', t: 5 }; G.startT = 1.2; }
 }
 
+const pick = a => a[Math.floor(Math.random() * a.length)];
+function chiliSay(text, force) { // short speech bubble from Chili, rate-limited so it never nags
+  if (!G || G.endless) return; if (!force && G.chiliCd > 0) return;
+  G.chiliSay = { text, t: 2.6 }; G.chiliCd = 6;
+}
+function cheer() { // the first time a new move works: a small celebration
+  const p = G.p; SFX.right(); burst(p.wx + 20, p.y - 100, 30, ['#ffd740', '#fff', '#69f0ae', '#40c4ff', '#ff8a9a'], 380, 500, 7, 1);
+  G.rings.push({ x: p.wx + 20, y: p.y - 90, r: 12, a: 1, c: '255,230,120' }); toast(pick(['Super!', 'Toll gemacht!', 'Genau so!', 'Perfekt!']), '#ffe08a'); chiliSay(pick(['Juhu, Oli!', 'Das war klasse!']), true);
+}
 function jump() {
   const p = G.p; if (G.startT > 0.3) return;
-  if (G.coach) { if (G.coach.type !== 'jump' && G.coach.type !== 'glide') return; G.coach = null; }
+  let learned = false; if (G.coach) { if (G.coach.type !== 'jump' && G.coach.type !== 'glide') return; learned = true; G.coach = null; }
+  if (learned) setTimeout(() => { if (G && scene === 'play') cheer(); }, 260);
   if (G.L.swim) { p.vy = -380; p.jumps = 0; p.onGround = false; p.anti = 0.05; SFX.jump2(); burst(p.wx + 10, p.y - 40, 5, ['#e8ffff', '#fff'], 90, -60, 5, 0.6); return; }
   if (p.onGround || p.coyote > 0) { p.anti = 0.09; p.vy = -900; p.jumps = 1; p.coyote = 0; p.onGround = false; SFX.jump(); burst(p.wx, GROUND, 6, ['#d8c3a5', '#b39b7a'], 120, 300, 5, 0.4); }
   else if (p.jumps < 2) { p.vy = -760; p.jumps = 2; SFX.jump2(); G.rings.push({ x: p.wx, y: p.y, r: 10, a: 0.8, c: '255,255,255' }); }
@@ -2175,14 +2187,14 @@ function jump() {
 function duckDown(id) {
   if (!G || scene !== 'play' || G.overlay || !G.sk.duck) return;
   const p = G.p; G.duckHeld = id;
-  if (G.coach) { if (G.coach.type !== 'duck' && G.coach.type !== 'stomp') return; G.coach = null; }
+  if (G.coach) { if (G.coach.type !== 'duck' && G.coach.type !== 'stomp') return; G.coach = null; setTimeout(() => { if (G && scene === 'play') cheer(); }, 260); }
   if (G.startT > 0.3) return;
   if (!p.onGround && !p.stomp && G.sk.stomp && !G.L.swim) { p.stomp = true; p.spin = 0; p.vy = Math.min(p.vy, -380); tone(300, 0.3, 'triangle', 0.08, 900); }
   else if (p.onGround) SFX.duck();
 }
 function dash() {
   const p = G.p; if (!G || scene !== 'play' || G.overlay || !G.sk.dash || G.L.swim || p.dashCd > 0 || G.startT > 0.3) return;
-  if (G.coach) { if (G.coach.type !== 'dash') return; G.coach = null; }
+  if (G.coach) { if (G.coach.type !== 'dash') return; G.coach = null; setTimeout(() => { if (G && scene === 'play') cheer(); }, 260); }
   p.dashT = 0.4; p.dashCd = 1.7; SFX.dash(); G.rings.push({ x: p.wx + 20, y: p.y - 60, r: 12, a: 0.9, c: '255,255,255' });
 }
 function dashBreak(o) { // the dash smashes obstacles and sends enemies flying
@@ -2246,9 +2258,11 @@ function roar() {
 }
 function hurt(force) {
   const p = G.p; if (!force && (p.inv > 0 || p.dashT > 0)) return;
+  if (!force && G.shield) { G.shield = false; p.inv = 1.2; SFX.smash(); G.rings.push({ x: p.wx, y: p.y - 70, r: 30, a: 1, c: '150,220,255' }); burst(p.wx, p.y - 70, 24, ['#bfe9ff', '#fff', '#7fd0ff'], 320, 200, 6, 0.8); toast('Der Schutzschild hat dich gerettet!', '#9fd3ff'); return; }
   p.hearts--; p.hitT = 0.45; G.hits = (G.hits || 0) + 1; p.inv = 1.8; SFX.hurt(); G.shake = p.hearts <= 0 ? 0 : 0.35; G.hitFlash = 0.45;
   try { if (navigator.vibrate) navigator.vibrate(180); } catch (e) {}
   if (!force) p.vy = Math.min(p.vy, -450);
+  chiliSay(pick(['Aua! Nicht aufgeben!', 'Weiter geht\'s, Oli!', 'Du schaffst das!']), true);
   if (p.hearts <= 0) { if (G.endless) endRun(); else G.overlay = { type: 'retry' }; }
 }
 function endRun() {
@@ -2273,6 +2287,8 @@ function pitFall() {
 }
 function retry() {
   const p = G.p, L = G.L;
+  const fk = G.bossStarted ? 'b' + (G.bossCp || 0) : String(G.cp); G.fails = G.fails || {}; G.fails[fk] = (G.fails[fk] || 0) + 1;
+  if (G.fails[fk] >= 3 && !G.endless && !G.shield) { G.shield = true; G.fails[fk] = 0; setTimeout(() => { if (G && scene === 'play') toast('Chili schenkt dir einen Schutzschild!', '#9fd3ff'); }, 700); }
   G.overlay = null; p.hearts = 3; p.inv = 2; p.wx = G.bossStarted ? G.cp : safeSpawn(G.cp); p.y = GROUND; p.vy = 0; p.roarCd = 0; p.stomp = false; p.spin = 1; G.duckHeld = null; G.fireballs = []; G.flames = [];
   G.chili.wx = p.wx - 145; G.chili.dig = null; resetCrumble(L);
   for (const s of L.spots) if (s.state === 'dig') s.state = 'idle';
@@ -2323,7 +2339,7 @@ function bossHurt(b, bx) { // a successful roar: flash, shake, count down this p
   } else { b.state = 'stagger'; b.t = 0; toast('Phase geschafft! Ein Herz fällt herunter!', '#ff8a9a'); }
 }
 function revealEgg(s) {
-  G.chili.joy = 0.9;
+  G.chili.joy = 0.9; chiliSay('Ein Ei! Ich hab es gerochen!', true);
   const e = G.L.eggs[s.k]; e.hidden = false; e.popping = true; e.ty = e.y; e.x0 = s.x; e.x = s.x; e.y = GROUND - 10; e.vy = -900; e.vx = (G.p.wx + 640 - s.x) / 1.1; SFX.pop();
   burst(s.x, GROUND - 5, 20, ['#8b5a2b', '#a0703a', '#ffe08a'], 260, 900, 7, 0.8);
 }
@@ -2373,6 +2389,7 @@ function updatePlay(dt) {
   for (const c of L.coach) if (!c.done && p.wx >= c.x) { c.done = true; G.coach = c; }
   if (G.coach) return; // freeze-frame until Oli does the move
   if (G.freeze > 0) { G.freeze -= dt; return; }
+  if (G.chiliSay) { G.chiliSay.t -= dt; if (G.chiliSay.t <= 0) G.chiliSay = null; } if (G.chiliCd > 0) G.chiliCd -= dt;
   G.t += dt; if (G.slowT > 0) { G.slowT -= dt; dt *= 0.3; } if (G.banner) { G.banner.t -= dt; if (G.banner.t <= 0) G.banner = null; }
   if (G.tip) { G.tip.t -= dt; if (G.tip.t <= 0) G.tip = null; }
   if (G.startT > 0) G.startT -= dt;
@@ -2434,7 +2451,7 @@ function updatePlay(dt) {
     G.score = Math.max(G.score, Math.floor((p.wx - 200) / 25) + G.amber * 3); if (G.score >= G.heartAt) { G.heartAt += 500; if (p.hearts < 3) { p.hearts++; SFX.power(); toast('Ein Herz zurück!', '#ff8a9a'); } else toast(G.score + ' Punkte!', '#ffe08a'); } }
   // tips, checkpoints
   for (const t of L.tips) if (!t.shown && p.wx >= t.x) { t.shown = true; G.tip = { text: t.text, t: 6.5 }; }
-  for (const c of L.cps) if (!c.on && p.wx >= c.x) { c.on = true; G.cp = c.x; SFX.flag(); if (p.hearts < 3) { p.hearts++; toast('Fähnchen erreicht – ein Herz zurück!', '#ff8a9a'); } else toast('Fähnchen erreicht!', '#ffe08a'); }
+  for (const c of L.cps) if (!c.on && p.wx >= c.x) { c.on = true; G.cp = c.x; SFX.flag(); chiliSay(pick(['Fähnchen! Weiter so!', 'Pfoten hoch, Oli!', 'Prima, das war stark!'])); if (p.hearts < 3) { p.hearts++; toast('Fähnchen erreicht – ein Herz zurück!', '#ff8a9a'); } else toast('Fähnchen erreicht!', '#ffe08a'); }
   // amber
   for (const a of L.amb) if (!a.got && Math.abs(a.x - p.wx - 10) < 42 && Math.abs(a.y - (p.y - 50)) < 62) { a.got = true; G.amber++; G.combo = G.t - (G.lastAmb || -9) < 0.6 ? Math.min(G.combo + 1, 8) : 0; G.lastAmb = G.t; if (G.combo > 0) tone(880 * Math.pow(1.0595, G.combo * 2), 0.12, 'triangle', 0.1); else SFX.amber(); burst(a.x, a.y, 6, ['#ffd166', '#ff9f1c'], 150, 200, 4, 0.4); }
   // eggs
@@ -3216,6 +3233,7 @@ function drawPlay() {
   // chili
   if (G.entering) { const u = clamp(G.entering, 0, 1), gx = L.gateX - cam, k = 1 - 0.62 * u; ctx.save(); ctx.translate(gx, GROUND); ctx.scale(k, k); ctx.translate(-gx, -GROUND); ctx.globalAlpha = 1 - 0.7 * u * u; }
   const c = G.chili; shadow(c.wx - cam + 6, GROUND + 2, 22 * clamp(1 - (GROUND - c.y) / 200, 0.4, 1), 0.25); chiliFx.vy = c.vy || 0; chiliFx.dig = !!c.dig; chiliFx.scared = G.p.hitT > 0 && !G.overlay ? G.p.hitT / 0.45 : 0; chiliFx.joy = c.joy > 0 ? c.joy / 0.9 : 0; oChili(c.wx - cam, c.y, 1.25, c.ph, c.dig ? false : (G.bossStarted && !G.golden));
+  if (G.chiliSay && !G.overlay) { const cs = G.chiliSay, bx = clamp(c.wx - cam, 70, W - 200), by = c.y - 92, al = clamp(cs.t * 3, 0, 1) * clamp((2.6 - cs.t) * 6, 0, 1); setFont(17); const bw = ctx.measureText(cs.text).width + 26; ctx.save(); ctx.globalAlpha = al; rr(bx - bw / 2 + 30, by - 17, bw, 34, 15); ctx.fillStyle = '#fff'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#6b4a2b'; ctx.stroke(); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.moveTo(bx - 4, by + 15); ctx.lineTo(bx + 4, by + 28); ctx.lineTo(bx + 16, by + 15); ctx.fill(); txt(cs.text, bx + 30, by, 17, '#3b2410'); ctx.restore(); }
   if (c.dig) otxt('!', c.wx - cam + 20, c.y - 70 - Math.abs(Math.sin(T * 10)) * 6, 36, '#ffd34d', '#3b1d00', 6);
   // baby + kiwi followers
   if (save.treasures[3]) oKiwi(p.wx - cam - 225, GROUND - (G.startT > 0 || G.stopped ? 0 : Math.abs(Math.sin(p.ph * 0.7 + 1)) * 12), 1.1, p.ph * 1.3);
@@ -3241,6 +3259,7 @@ function drawPlay() {
   if (p.dashT > 0) { ctx.save(); const px = p.wx - cam + 4; ctx.translate(px + dOff, p.y); ctx.rotate(0.1); ctx.scale(1.12, 0.92); ctx.translate(-px, -p.y); }
   if (!(p.inv > 0 && Math.sin(T * 30) > 0.3)) oRex(p.wx - cam,  p.y, 0.92, p.ph, p.roarT > 0 || p.breathT > 0 ? 1 : 0.05, Object.assign(rexLook(G.wi), { rider: true, vy: p.vy, sq: p.anti > 0 ? p.anti / 0.09 * 0.13 : !p.onGround ? -clamp(Math.abs(p.vy) / 1400, 0, 1) * 0.1 : (p.land > 0 ? p.land / 0.16 * 0.14 : 0), hurt: p.hitT > 0 && !G.overlay ? p.hitT / 0.45 : 0, air: !p.onGround, duck: p.duck, stomp: p.stomp && p.spin >= 1, fire: p.fireT > 0 }));
   if (p.dashT > 0) ctx.restore();
+  if (G.shield && !G.overlay) { const sx = p.wx - cam + 4, sy = p.y - 84, pu = 1 + 0.03 * Math.sin(T * 5); ctx.save(); ctx.translate(sx, sy); ctx.scale(pu, pu); const sg = ctx.createRadialGradient(0, 0, 36, 0, 0, 116); sg.addColorStop(0, 'rgba(150,220,255,.04)'); sg.addColorStop(1, 'rgba(150,220,255,.34)'); ctx.fillStyle = sg; ctx.beginPath(); ctx.ellipse(0, 0, 124, 102, 0, 0, Math.PI * 2); ctx.fill(); ctx.strokeStyle = 'rgba(210,240,255,.85)'; ctx.lineWidth = 3; ctx.stroke(); ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.beginPath(); ctx.ellipse(-64, -52, 18, 8, -0.7, 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
   if (spinA) ctx.restore();
   if (G._tilt) { ctx.restore(); G._tilt = false; }
   if (G.entering) { ctx.restore(); drawGate(L, cam, true); } // the frame closes over the heroes as they walk in
@@ -3510,6 +3529,10 @@ function drawOverlay() {
     if (G.newTreasure) { drawTreasure(G.L.treasure.k, W / 2 - 200, 380, 0.8); txt(TREASURES[G.L.treasure.k].name + ' gefunden!', W / 2 + 20, 384, 26, '#2e7d32'); }
     else { const tk = lv.treasure; const nextOpen = lv.day < 24 && lv.day === adventDay(); const missing = 3 - save.lvE[G.li].filter(Boolean).length;
       txt(nextOpen ? `Morgen öffnet sich Tür ${lv.day + 1} – bis dann!` : tk >= 0 && !save.treasures[tk] ? 'Goetti vermisst hier noch etwas … Schau mal ganz weit oben!' : missing ? 'Chili schnuppert: Hier sind noch Eier versteckt!' : 'Super gemacht!', W / 2, 384, 19, '#6b4a2b', 'center', 'normal'); }
+    { const hop = Math.abs(Math.sin(T * 7)) * 16, hop2 = Math.abs(Math.sin(T * 7 + 1.2)) * 14; shadow(240, 506, 52 - hop * 0.6, 0.25); shadow(724, 506, 22, 0.25);
+      oRex(240, 502 - hop, 0.55, T * 8, 0.85, Object.assign(rexLook(G.wi), { rider: true, vy: -200 }));
+      chiliFx.joy = 1; oChili(724, 504 - hop2, 1.0, T * 12, true); chiliFx.joy = 0;
+      if (Math.sin(T * 7) > 0.9) burst(G.cam + 250, 440, 2, ['#ffd740', '#fff', '#ff8a9a'], 140, 300, 5, 0.6); }
     if (lv.day === 24) button('Weiter!', W / 2 - 150, 422, 300, 62, () => startEnding(), { color: '#e57373', textColor: '#fff' });
     else button('Zur Karte', W / 2 - 150, 422, 300, 62, () => go('map'));
   }
@@ -3821,8 +3844,15 @@ function drawDoorOverlay() { // the door shakes, glows at the seam, swings open 
   if (tt > 0 && tt < 3) { ctx.save(); ctx.beginPath(); ctx.rect(262, 62, 436, 416); ctx.clip(); const cols = ['#ff5252', '#ffd740', '#69f0ae', '#40c4ff', '#e040fb', '#fff']; for (let i = 0; i < 44; i++) { const vx = (hash(i * 2.3) - 0.5) * 460, vy = -300 - hash(i * 5.1) * 240, x = cx + vx * tt, y = cy + vy * tt + 560 * tt * tt; ctx.globalAlpha = clamp((3 - tt) * 1.2, 0, 1); ctx.save(); ctx.translate(x, y); ctx.rotate(tt * (4 + hash(i) * 8) + i); ctx.fillStyle = cols[i % 6]; ctx.fillRect(-4, -2.2, 8, 4.4); ctx.restore(); } ctx.restore(); ctx.globalAlpha = 1; }
   const label = { hat: 'Neuer Hut', skin: 'Neue Farbe', fire: 'Neue Feuerfarbe', amber: 'Bernstein-Schatz' }[o.g.key];
   if (u >= 1) { txt(label + '!', W / 2, 352, 22, '#2e7d32'); txt(o.g.name, W / 2, 386, 32, '#3b2410'); txt('Du findest es im Laden.', W / 2, 418, 16, '#8a6a3a', 'center', 'normal'); }
-  button('Zurück', 270, 432, 150, 44, () => { doorOverlay = null; }, { size: 22 });
-  button('Los geht\'s!', 435, 432, 255, 44, () => { doorOverlay = null; startLevel(o.i); }, { size: 24, icon: icon('play'), disabled: u < 1 });
+  const cosm = o.g.key !== 'amber', worn = cosm && save.equip[o.g.key] === o.g.i;
+  if (cosm) {
+    button('Zurück', 268, 432, 100, 44, () => { doorOverlay = null; }, { size: 19 });
+    button(worn ? 'Angelegt ✓' : 'Anziehen', 376, 432, 140, 44, () => { save.equip[o.g.key] = o.g.i; save.newGifts = save.newGifts.filter(k => k !== o.g.key + ':' + o.g.i); writeSave(); SFX.right(); }, { size: 19, color: worn ? '#d4f2bd' : '#9fd3ff', disabled: u < 1 || worn });
+    button('Los geht\'s!', 524, 432, 170, 44, () => { doorOverlay = null; startLevel(o.i); }, { size: 20, icon: icon('play'), disabled: u < 1 });
+  } else {
+    button('Zurück', 270, 432, 150, 44, () => { doorOverlay = null; }, { size: 22 });
+    button('Los geht\'s!', 435, 432, 255, 44, () => { doorOverlay = null; startLevel(o.i); }, { size: 24, icon: icon('play'), disabled: u < 1 });
+  }
   buttons.unshift({ x: 0, y: 0, w: W, h: H, cb: () => {}, silent: true });
 }
 function drawParentPanel() {
@@ -3874,6 +3904,7 @@ function drawMap() { // the advent calendar
   button(save.muted ? 'Ton aus' : 'Ton an', W - 130, 16, 112, 42, () => { save.muted = !save.muted; writeSave(); }, { size: 18, color: '#e0d2b0' });
   button('Dino-Buch', 24, H - 82, 210, 60, () => { bookSel = -1; go('book'); }, { icon: icon('book') });
   button('Laden', 24, H - 150, 210, 56, () => go('shop'), { color: '#ffe08a', icon: icon('amber') });
+  if (save.newGifts.length) { ctx.save(); ctx.translate(214, H - 146 + Math.sin(T * 6) * 2); ctx.rotate(0.3); rr(-24, -11, 48, 22, 6); ctx.fillStyle = '#e53935'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#fff'; ctx.stroke(); txt('NEU', 0, 1, 14, '#fff'); ctx.restore(); }
   if (save.lvDone.some(Boolean) || save.finished) button('Endlos-Lauf', W - 274, H - 150, 250, 56, () => { endlessPick = true; }, { color: '#9fd3ff', icon: icon('loop') });
   if (save.finished) button('Weihnachts-Ende', W - 274, H - 82, 250, 60, () => startEnding(), { color: '#e57373', textColor: '#fff', icon: icon('star'), size: 21 });
   if (endlessPick) drawEndlessPicker();
@@ -3946,6 +3977,7 @@ function drawShop() {
     if (!owned) { ctx.fillStyle = 'rgba(120,110,90,.35)'; ctx.fillRect(x, y, w, 54); }
     ctx.restore();
     if (!owned) ico('lock', x + w - 16, y + 16, 17);
+    if (save.newGifts.includes(key + ':' + i)) { ctx.save(); ctx.translate(x + 22, y + 14); ctx.rotate(-0.3); rr(-18, -9, 36, 18, 5); ctx.fillStyle = '#e53935'; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = '#fff'; ctx.stroke(); txt('NEU', 0, 1, 12, '#fff'); ctx.restore(); }
     txt(it.n, x + w / 2, y + 62, it.n.length > 9 ? 12 : 14, '#3b2410');
     if (eq) txt('Angelegt', x + w / 2, y + 77, 12, '#2e7d32'); else if (owned) txt('Gekauft', x + w / 2, y + 77, 12, '#6b4a2b', 'center', 'normal'); else if (it.gift) txt(`Tür ${it.gift}`, x + w / 2, y + 77, 13, '#6a4aa8'); else { drawAmber(x + w / 2 - 18, y + 76, 6); txt(String(cost), x + w / 2 - 8, y + 77, 14, can ? '#8a5a00' : '#a09070', 'left'); }
     buttons.push({ x, y, w, h, cb: () => { shopSel = i; shopSay(owned ? (eq ? 'Das trägst du gerade.' : 'Das steht dir gut!') : it.gift ? `Das findest du hinter Tür ${it.gift} im Kalender!` : can ? `Das kostet ${cost} Bernstein.` : 'Sammle noch etwas Bernstein!'); } });

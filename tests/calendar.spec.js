@@ -25,11 +25,11 @@ test('calendar: a closed door stays closed, an open door shows today\'s gift and
   expect(await game.eval(() => window.__dino.save.gifts)).toEqual([3]);
   expect(await game.eval(() => window.__dino.save.owned.fire.length)).toBe(2);
   expect(await game.eval(() => window.__dino.scene)).toBe('map');   // the reveal waits for the button
-  await click(page, 480, 454);                                       // "Los geht's!"
+  await click(page, 609, 454);                                       // "Los geht's!"
   expect(await game.eval(() => [window.__dino.scene, window.__dino.G.li])).toEqual(['play', 2]);
   // days that were missed stay playable: door 1 starts right away (its gift is only shown the first time)
   await game.eval(() => window.__dino.go('map')); await page.waitForTimeout(300);
-  await click(page, 34 + 50, 96 + 40); await page.waitForTimeout(1300); await click(page, 480, 454);
+  await click(page, 34 + 50, 96 + 40); await page.waitForTimeout(1300); await click(page, 609, 454);
   expect(await game.eval(() => [window.__dino.scene, window.__dino.G.li])).toEqual(['play', 0]);
   await game.eval(() => window.__dino.go('map')); await page.waitForTimeout(300);
   await click(page, 34 + 50, 96 + 40);                               // second time: no overlay, straight into the level
