@@ -686,7 +686,7 @@ function drawRex(x, y, s, ph, jaw, o = {}) {
 }
 
 function drawRaptor(x, y, s, ph, flip, o = {}) {
-  const c0 = o.col || '#b0653a', dark = o.dark || '#6a3418', boss = !!o.crown, feather = boss ? '#ffb02e' : '#f2a43a', belly = boss ? '#e8b69a' : '#f2dcae';
+  const c0 = o.col || '#b0653a', dark = o.dark || '#6a3418', boss = !!o.crown, feather = o.fea || (boss ? '#ffb02e' : '#f2a43a'), belly = o.belly || (boss ? '#e8b69a' : '#f2dcae');
   ctx.save(); ctx.translate(x, y); ctx.scale(flip ? -s : s, s);
   if (o.alpha != null) ctx.globalAlpha = Math.max(0, o.alpha);
   const col = vgrad(-100, -20, shade(c0, 1.35), c0, shade(c0, 0.62));
@@ -779,7 +779,7 @@ function drawPtero(x, y, s, ph, flip, o = {}) {
 
 function drawCompy(x, y, s, ph, flip, o = {}) {
   ctx.save(); ctx.translate(x, y); ctx.scale(flip ? -s : s, s * (o.flat ? 0.35 : 1));
-  const col = vgrad(-36, 0, '#dcec62', '#9cbf2e', '#5f7f17'), dark = '#4a6312';
+  const tn = o.tone || ['#dcec62', '#9cbf2e', '#5f7f17', '#4a6312'], col = vgrad(-36, 0, tn[0], tn[1], tn[2]), dark = tn[3];
   const leg = (p, c) => { const sw = Math.sin(p); ctx.strokeStyle = c; ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.beginPath(); ctx.moveTo(-2, -16); ctx.lineTo(-2 + sw * 7, -2 - Math.max(0, Math.cos(p)) * 4); ctx.lineTo(5 + sw * 7, 0); ctx.stroke(); };
   leg(ph + Math.PI, dark);
   ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(-6, -24); ctx.quadraticCurveTo(-26, -28, -42, -34 + Math.sin(ph) * 3); ctx.quadraticCurveTo(-24, -16, -6, -14); ctx.fill();
@@ -1965,7 +1965,7 @@ function obox(s, flip, x0, x1, y0, y1) { return flip ? [-x1 * s, y0 * s, (x1 - x
 function oRex(x, y, s, ph, jaw, o = {}) { const [bx, by, bw, bh] = obox(s, o.flip, -130, o.fire ? 152 : 118, o.rider ? (o.hat ? -182 : -174) : -142, 14); const a = o.alpha == null ? 1 : o.alpha; outlined('rex', x, y, bx, by, bw, bh, () => drawRex(x, y, s, ph, jaw, Object.assign({}, o, { alpha: null })), a); }
 function oRaptor(x, y, s, ph, flip, o = {}) { const [bx, by, bw, bh] = obox(s, flip, -114, 86, o.crown ? -124 : -106, 4); const a = o.alpha == null ? 1 : Math.max(0, o.alpha); outlined(o.crown ? 'boss' : 'raptor', x, y, bx, by, bw, bh, () => drawRaptor(x, y, s, ph, flip, Object.assign({}, o, { alpha: null })), a); }
 function oPtero(x, y, s, ph, flip, o = {}) { const [bx, by, bw, bh] = obox(s, flip, -34, 64, -58, 52); const a = o.alpha == null ? 1 : Math.max(0, o.alpha); outlined('ptero', x, y, bx, by, bw, bh, () => drawPtero(x, y, s, ph, flip, {}), a); }
-function oCompy(x, y, s, ph, flip, o = {}) { const [bx, by, bw, bh] = obox(s, flip, -46, 38, -56, 4); const a = o.alpha == null ? 1 : Math.max(0, o.alpha); outlined('compy', x, y, bx, by, bw, bh, () => drawCompy(x, y, s, ph, flip, { flat: o.flat }), a); }
+function oCompy(x, y, s, ph, flip, o = {}) { const [bx, by, bw, bh] = obox(s, flip, -46, 38, -56, 4); const a = o.alpha == null ? 1 : Math.max(0, o.alpha); outlined('compy', x, y, bx, by, bw, bh, () => drawCompy(x, y, s, ph, flip, { flat: o.flat, tone: o.tone }), a); }
 function oChili(x, y, s, ph, flip) { const [bx, by, bw, bh] = chiliFx.dive ? obox(s, flip, -34, 50, -78, 10) : obox(s, flip, -26, 38, -62, 4); outlined('chili', x, y, bx, by, bw, bh, () => drawChili(x, y, s, ph, flip)); }
 function oBaby(x, y, s, ph, flip) { const [bx, by, bw, bh] = obox(s, flip, -38, 32, -78, 4); outlined('baby', x, y, bx, by, bw, bh, () => drawBaby(x, y, s, ph, flip)); }
 function oKiwi(x, y, s, ph, flip) { const [bx, by, bw, bh] = obox(s, flip, -22, 44, -34, 4); outlined('kiwi', x, y, bx, by, bw, bh, () => drawKiwi(x, y, s, ph, flip)); }
@@ -2758,6 +2758,9 @@ function rockTheme(x, o) { // each world's rocks get their own surface: moss, st
   else if (A === 6) { for (let i = 0; i < 3; i++) { ctx.strokeStyle = ['#f0705a', '#b86ad0', '#f0c84a'][i]; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(x - w * 0.2 + i * 9, b - h * 0.85); ctx.quadraticCurveTo(x - w * 0.2 + i * 11 - 6, b - h - 8, x - w * 0.2 + i * 12 - 8, b - h - 14 - i * 3); ctx.stroke(); } }
   else if (A === 7) { ell(x - w * 0.05, b - h * 0.93, w * 0.34, 6, 0, '#fff'); ell(x - w * 0.2, b - h * 0.86, w * 0.12, 3, 0, '#dcecff'); }
 }
+// raptors and compys wear the colours of their world, so a snow raptor is not a jungle raptor
+function worldRaptor() { return ({ 1: { col: '#c98a4a', dark: '#7a4a1e', fea: '#e8553a' }, 2: { col: '#8fa6bf', dark: '#4a5f78', fea: '#e8f4ff', belly: '#f4f8ff' }, 3: { col: '#6a3a30', dark: '#2a1410', fea: '#ff7a2a', belly: '#b8745a' }, 5: { col: '#d4a15a', dark: '#8a5a24', fea: '#3fb59a' }, 7: { col: '#8a7a6a', dark: '#4a3e34', fea: '#d8e4f0', belly: '#e8e0d0' } })[ART(G.wi)] || {}; }
+function worldCompy() { return ({ 1: ['#f0cf6a', '#d9a232', '#8a6012', '#5a3e0a'], 2: ['#e4f2ff', '#9cc4e8', '#5f86b0', '#3a5a7a'], 3: ['#ffa468', '#d4541f', '#7a2a0f', '#4a1a0a'], 5: ['#8ae8cc', '#3fb59a', '#1f7a66', '#0f4a3e'], 7: ['#c4d2e0', '#8aa0b8', '#5a7088', '#3a4a5e'] })[ART(G.wi)]; }
 function drawObstacle(o, cam, th) {
   const x = o.x - cam;
   if (x < -150 || x > W + 150) return;
@@ -2921,8 +2924,8 @@ function drawObstacle(o, cam, th) {
       const by = GROUND - 66 - Math.abs(Math.sin(T * 5)) * 8; ctx.fillStyle = 'rgba(255,255,255,.9)'; ctx.beginPath(); ctx.moveTo(x - 10, by - 10); ctx.lineTo(x + 10, by - 10); ctx.lineTo(x, by + 4); ctx.fill();
       break;
     }
-    case 'compy': if (o.crab) { drawSmallCrab(x, GROUND + (o.yOff || 0), o); break; } if (!o.yOff) shadow(x, GROUND + 2, 22, 0.22); oCompy(x, GROUND + (o.yOff || 0), 1.3, o.ph, !o.scared, { alpha: o.alpha, flat: o.flat > 0 }); break;
-    case 'raptor': if (!o.yOff) shadow(x, GROUND + 2, 34, 0.25 * (o.alpha == null ? 1 : Math.max(0, o.alpha))); oRaptor(x, GROUND + (o.yOff || 0), 1.05, o.ph, !o.scared, { alpha: o.alpha }); break;
+    case 'compy': if (o.crab) { drawSmallCrab(x, GROUND + (o.yOff || 0), o); break; } if (!o.yOff) shadow(x, GROUND + 2, 22, 0.22); oCompy(x, GROUND + (o.yOff || 0), 1.3, o.ph, !o.scared, { alpha: o.alpha, flat: o.flat > 0, tone: worldCompy() }); break;
+    case 'raptor': if (!o.yOff) shadow(x, GROUND + 2, 34, 0.25 * (o.alpha == null ? 1 : Math.max(0, o.alpha))); oRaptor(x, GROUND + (o.yOff || 0), 1.05, o.ph, !o.scared, Object.assign({ alpha: o.alpha }, worldRaptor())); break;
     case 'ptero': ell(x, GROUND + 2, 26, 5, 0, 'rgba(0,0,0,.15)'); oPtero(x, o.y, 1.45, o.ph, !o.scared, { alpha: o.alpha }); break;
     case 'icicle': {
       ctx.fillStyle = '#5f7591'; rr(x - 75, -10, 150, 64, 20); ctx.fill(); ell(x, 50, 70, 10, 0, '#dfefff');
@@ -3762,7 +3765,7 @@ function drawDoor(i, today) {
   else { circle(w - 14, 22, 13, '#fff7e0'); ctx.lineWidth = 2; ctx.strokeStyle = '#2b1a0c'; ctx.stroke(); txt(String(day), w - 14, 23, 15, '#3b2410'); }
   if (!open) ico('lock', w / 2, h * 0.72, 20);
   if (isToday) { ctx.save(); ctx.translate(14, 14); ctx.rotate(-0.35); rr(-24, -9, 48, 18, 5); ctx.fillStyle = '#e53935'; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = '#fff'; ctx.stroke(); txt('HEUTE', 0, 1, 11, '#fff'); ctx.restore(); }
-  if (done) for (let k = 0; k < 3; k++) drawMedal(w / 2 - 22 + k * 22, h - 13, 7, k, save.lvM[i][k]);
+  if (done) { rr(w / 2 - 36, h - 23, 72, 20, 10); ctx.fillStyle = 'rgba(30,18,8,.6)'; ctx.fill(); for (let k = 0; k < 3; k++) drawMedal(w / 2 - 22 + k * 22, h - 13, 7, k, save.lvM[i][k]); }
   if (lv.boss && open) { drawStar(14, h - 14, 9, '#ff6a3a'); }
   ctx.restore();
   buttons.push({ x, y, w, h, cb: () => clickDoor(i) });
@@ -4043,10 +4046,15 @@ function drawMeteor(x, y, s) {
   for (const [dx, dy] of [[-60, -20], [-76, -34], [-50, -6]]) drawStar(dx, dy, 6, '#ffd34d');
   ctx.restore();
 }
-function drawFeathered(x, y, s) {
-  ctx.save(); ctx.translate(x, y); ctx.scale(s * 1.7, s * 1.7); ctx.translate(-4, 0);
-  for (const [dx, an, c] of [[-14, -1.2, '#3fa9f5'], [-8, -0.95, '#f2a43a'], [-2, -0.7, '#e84a6f'], [4, -0.45, '#f2d03a']]) { ctx.save(); ctx.translate(dx, -26); ctx.rotate(an); ctx.fillStyle = c; ctx.beginPath(); ctx.moveTo(-3, 0); ctx.quadraticCurveTo(-2, -26, 0, -32); ctx.quadraticCurveTo(4, -22, 4, 0); ctx.fill(); ctx.strokeStyle = 'rgba(0,0,0,.35)'; ctx.lineWidth = 1; ctx.stroke(); ctx.restore(); }
-  drawCompy(0, 0, 1, 0.4, false, {}); ctx.restore();
+function drawFeathered(x, y, s) { // a small feathered dinosaur: tail fan, wing feathers on the arm and a crest
+  ctx.save(); ctx.translate(x, y); ctx.scale(s * 1.7, s * 1.7); ctx.translate(-4, 0); ctx.lineCap = 'round';
+  const cols = ['#3fa9f5', '#f2a43a', '#e84a6f', '#f2d03a', '#6bd16b'];
+  const fea = (px, py, an, len, wd, c) => { ctx.save(); ctx.translate(px, py); ctx.rotate(an); ctx.fillStyle = vgrad(-wd, wd, shade(c, 1.25), c); ctx.beginPath(); ctx.moveTo(0, 0); ctx.quadraticCurveTo(len * 0.5, -wd, len, 0); ctx.quadraticCurveTo(len * 0.5, wd, 0, 0); ctx.fill(); ctx.strokeStyle = 'rgba(0,0,0,.3)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(2, 0); ctx.lineTo(len * 0.92, 0); ctx.stroke(); ctx.restore(); };
+  for (let i = 0; i < 5; i++) fea(-38, -31, Math.PI - 0.62 + i * 0.3, 46, 8, cols[i]); // tail fan
+  drawCompy(0, 0, 1, 0.4, false, { tone: ['#8aeed0', '#3fb59a', '#1f7a66', '#0f4a3e'] });
+  for (let i = 0; i < 5; i++) fea(9, -23, Math.PI - 0.05 - i * 0.2, 34 - i * 2, 6, cols[(i + 2) % 5]); // wing feathers
+  for (let i = 0; i < 3; i++) fea(16, -45, -2.15 + i * 0.4, 20, 4.5, cols[(i * 2) % 5]); // crest
+  ctx.restore();
 }
 function drawAmmonite(x, y, s) {
   ctx.save(); ctx.translate(x, y - 34 * s); ctx.scale(s, s);
@@ -4133,7 +4141,7 @@ function drawTheriz(x, y, s) {
   ctx.save(); ctx.translate(x, y); ctx.scale(s, s); ctx.lineCap = 'round';
   ctx.strokeStyle = '#8a5a3a'; ctx.lineWidth = 12; ctx.beginPath(); ctx.moveTo(-10, -22); ctx.lineTo(-12, -4); ctx.moveTo(12, -22); ctx.lineTo(14, -4); ctx.stroke(); ctx.lineWidth = 6; for (const fx of [-12, 14]) { ctx.beginPath(); ctx.moveTo(fx - 8, 0); ctx.lineTo(fx + 8, 0); ctx.stroke(); }
   ctx.fillStyle = '#b07a52'; ctx.beginPath(); ctx.moveTo(-26, -34); ctx.quadraticCurveTo(-58, -30, -66, -14); ctx.quadraticCurveTo(-40, -22, -22, -14); ctx.fill();
-  ell(0, -36, 30, 26, -0.1, vgrad(-62, -10, '#e0a878', '#b07a52', '#7a4a2a')); ctx.strokeStyle = '#f0c898'; ctx.lineWidth = 3; for (let i = 0; i < 6; i++) { ctx.beginPath(); ctx.moveTo(-18 + i * 7, -52); ctx.lineTo(-22 + i * 7, -40); ctx.stroke(); }
+  ell(0, -36, 34, 29, -0.1, vgrad(-62, -10, '#e0a878', '#b07a52', '#7a4a2a')); ctx.fillStyle = '#c99062'; for (let i = 0; i < 8; i++) { const a = -2.9 + i * 0.36; ctx.beginPath(); ctx.ellipse(Math.cos(a) * 34, -36 + Math.sin(a) * 29, 9, 5.5, a + 1.57, 0, 7); ctx.fill(); } ell(2, -26, 22, 12, 0, 'rgba(255,236,210,.28)'); ctx.strokeStyle = '#f0c898'; ctx.lineWidth = 3; for (let i = 0; i < 6; i++) { ctx.beginPath(); ctx.moveTo(-18 + i * 7, -52); ctx.lineTo(-22 + i * 7, -40); ctx.stroke(); }
   ctx.strokeStyle = '#b07a52'; ctx.lineWidth = 12; ctx.beginPath(); ctx.moveTo(20, -50); ctx.quadraticCurveTo(34, -62, 36, -82); ctx.stroke();
   ell(40, -88, 11, 9, 0.2, '#b07a52'); ctx.fillStyle = '#f2c13a'; ctx.beginPath(); ctx.moveTo(48, -90); ctx.lineTo(58, -86); ctx.lineTo(48, -83); ctx.fill(); circle(41, -90, 3.6, '#fff'); circle(41.8, -90, 2, '#222');
   ctx.strokeStyle = '#b07a52'; ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(20, -42); ctx.lineTo(40, -34); ctx.stroke();
