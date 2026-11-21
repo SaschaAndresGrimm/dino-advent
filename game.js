@@ -2666,7 +2666,7 @@ function drawHUD() {
   }
   if (G.banner) { const bn = G.banner, u = clamp(bn.t / 2.6, 0, 1), pop = 1 + 0.35 * clamp((bn.t - 2.2) / 0.4, 0, 1), al = clamp(bn.t * 2, 0, 1) * clamp((2.6 - bn.t) * 6, 0, 1); ctx.save(); ctx.globalAlpha = al; ctx.translate(W / 2, 215); ctx.scale(pop, pop); otxt(bn.text, 0, 0, 64, bn.col, '#000', 12); otxt(bn.sub, 0, 52, 30, '#fff', '#000', 8); ctx.restore(); }
   if (G.boss && G.boss.state === 'duel') { const b = G.boss; ctx.globalAlpha = 0.6 + 0.4 * Math.sin(T * 18); otxt('BRÜLL! BRÜLL! BRÜLL!', W / 2, 330, 40, '#ffe27a', '#7a1000', 9); ctx.globalAlpha = 1; }
-  if (G.tip) { ctx.globalAlpha = clamp(G.tip.t * 2, 0, 1); const tipY = G.boss && !G.golden ? 112 : 94, lines = wrapLines(G.tip.text, 480, 20), h = 18 + lines.length * 25; rr(W / 2 - 290, tipY, 580, h, 16); ctx.fillStyle = 'rgba(255,247,224,.95)'; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = '#6b4a2b'; ctx.stroke(); drawPortrait('goetti', W / 2 - 254, tipY + h / 2, 24); lines.forEach((l, i) => txt(l, W / 2 + 30, tipY + 22 + i * 25, 20, '#3b2410')); ctx.globalAlpha = 1; }
+  if (G.tip) { ctx.globalAlpha = clamp(G.tip.t * 2, 0, 1); const lines = wrapLines(G.tip.text, 480, 20), h = 18 + lines.length * 25, tipY = H - h - 8; rr(W / 2 - 290, tipY, 580, h, 16); ctx.fillStyle = 'rgba(255,247,224,.95)'; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = '#6b4a2b'; ctx.stroke(); drawPortrait('goetti', W / 2 - 254, tipY + h / 2, 24); lines.forEach((l, i) => txt(l, W / 2 + 30, tipY + 22 + i * 25, 20, '#3b2410')); ctx.globalAlpha = 1; }
   if (G.overlay) return;
   // pause
   circle(W - 44, 40, 26, 'rgba(0,0,0,.4)'); ctx.fillStyle = '#fff'; ctx.fillRect(W - 53, 28, 7, 24); ctx.fillRect(W - 42, 28, 7, 24);
