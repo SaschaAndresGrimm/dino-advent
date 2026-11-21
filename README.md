@@ -6,7 +6,11 @@ A Christmas runner game for Oli: a T-Rex he names himself, Chili the rabbit, Goe
 ```bash
 python3 -m http.server 8765
 ```
-Then open http://localhost:8765. Controls: tap or Space to jump (tap twice for a double jump), the **BRÜLL!** button or R to roar, and Esc to pause.
+Then open http://localhost:8765. Controls:
+- Tap or Space: jump (tap twice for a double jump)
+- **DUCKEN** button (bottom left) or ↓ / S: hold to duck under low branches, ledges and low-flying pterosaurs. Press it in the air to **STAMPF!** (ground pound): it cracks amber stones and flattens Kompsis.
+- **BRÜLL!** button or R: roar (scares raptors and pterosaurs, smashes rocks). After picking up a **Feuer-Chili** it becomes **FEUER!** for 8 seconds and shoots fireballs.
+- Esc: pause
 
 ## Put it on the tablet
 1. Host the folder on any static HTTPS host, such as GitHub Pages, Netlify or Cloudflare Pages. The service worker needs HTTPS for offline play.
