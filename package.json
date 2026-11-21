@@ -1,0 +1,12 @@
+{
+  "name": "olis-dino-rettung",
+  "private": true,
+  "scripts": {
+    "serve": "python3 -m http.server 8765",
+    "check": "node --check game.js && node --check sw.js",
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.1"
+  }
+}
