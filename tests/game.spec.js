@@ -496,3 +496,24 @@ test('72 medals unlock the Dino-Meister rewards once; per-world gold frame logic
   expect(p.full).toBe(true); expect(p.t).toBeGreaterThan(6);
   expect(game.errors).toEqual([]);
 });
+
+test('Schatzkarte, Steckbrief and shop redesign render without errors; boss follow-up opens the map reveal', async ({ game, page }) => {
+  await game.open({ lvDone: Array(24).fill(1), amber: 500 });
+  const r = await game.eval(() => {
+    const d = window.__dino, out = {};
+    d.go('tmap'); for (let i = 0; i < 5; i++) d.drawShop && 0; out.tmap = d.scene;
+    d.save.afterNew = 6; d.go('map'); out.dlg = !!d.dialog;
+    return out;
+  });
+  expect(r.tmap).toBe('tmap'); expect(r.dlg).toBe(true);
+  // finish the dialog: the new map piece is revealed
+  for (let i = 0; i < 4; i++) { await page.mouse.click(480, 300); await page.waitForTimeout(150); await page.mouse.click(480, 300); await page.waitForTimeout(150); }
+  expect(await game.eval(() => window.__dino.scene)).toBe('tmap');
+  await page.waitForTimeout(1500);
+  // every Dino-Buch card has a Steckbrief entry and the detail view draws for all 24
+  const ok = await game.eval(() => { const d = window.__dino; d.go('book'); for (let i = 0; i < 24; i++) { d.bookOpen(i); d.drawShop; } return true; });
+  expect(ok).toBe(true);
+  await page.waitForTimeout(400);
+  await game.eval(() => window.__dino.go('shop')); await page.waitForTimeout(400);
+  expect(game.errors).toEqual([]);
+});

@@ -221,6 +221,7 @@ function ico(kind, cx, cy, s) {
   else if (kind === 'amber') drawAmber(0, 0, 13);
   else if (kind === 'loop') { ctx.lineWidth = 5; ctx.strokeStyle = '#1d4a78'; ctx.beginPath(); ctx.moveTo(0, 0); ctx.bezierCurveTo(6, -12, 16, -12, 16, 0); ctx.bezierCurveTo(16, 12, 6, 12, 0, 0); ctx.bezierCurveTo(-6, -12, -16, -12, -16, 0); ctx.bezierCurveTo(-16, 12, -6, 12, 0, 0); ctx.stroke(); }
   else if (kind === 'trophy') { ctx.fillStyle = '#ffd34d'; ctx.strokeStyle = '#7a5400'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(-10, -12); ctx.lineTo(10, -12); ctx.quadraticCurveTo(10, 6, 0, 8); ctx.quadraticCurveTo(-10, 6, -10, -12); ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.arc(-11, -6, 6, Math.PI * 0.5, Math.PI * 1.5); ctx.moveTo(11, -12); ctx.arc(11, -6, 6, -Math.PI * 0.5, Math.PI * 0.5); ctx.stroke(); ctx.fillRect(-2.5, 8, 5, 6); ctx.strokeRect(-2.5, 8, 5, 6); rr(-8, 14, 16, 4, 2); ctx.fill(); ctx.stroke(); }
+  else if (kind === 'scroll') { ctx.fillStyle = '#f2dfb0'; ctx.strokeStyle = '#6b4a2b'; ctx.lineWidth = 2.5; rr(-12, -13, 24, 26, 3); ctx.fill(); ctx.stroke(); ctx.strokeStyle = '#c98a3a'; ctx.lineWidth = 2; ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.moveTo(-8, 6); ctx.quadraticCurveTo(-2, -6, 3, 2); ctx.lineTo(8, -7); ctx.stroke(); ctx.setLineDash([]); ctx.strokeStyle = '#d63a3a'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(4, -10); ctx.lineTo(10, -4); ctx.moveTo(10, -10); ctx.lineTo(4, -4); ctx.stroke(); }
   else if (kind === 'star') drawStar(0, 1, 15, '#ffd34d');
   else if (kind === 'back') { ctx.lineWidth = 6; ctx.strokeStyle = '#2b1a00'; ctx.beginPath(); ctx.moveTo(8, -11); ctx.lineTo(-7, 0); ctx.lineTo(8, 11); ctx.stroke(); }
   else if (kind === 'lock') { ctx.lineWidth = 4.5; ctx.strokeStyle = '#e8e8e8'; ctx.beginPath(); ctx.arc(0, -5, 7, Math.PI, 0); ctx.stroke(); rr(-10, -4, 20, 16, 3); ctx.fillStyle = '#d8d8d8'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#6a6a6a'; ctx.stroke(); circle(0, 4, 2.4, '#6a6a6a'); }
@@ -2212,6 +2213,7 @@ function buildLevel(wi, endless, LV) { // LV = the calendar level spec (or undef
 // =====================================================================
 let scene = 'title', G = null, fadeT = 0;
 function go(s) {
+  if (s === 'tmap') tmapT = 0;
   settingsOpen = false;
   if (scene === 'shop' && s !== 'shop' && save.newGifts.length) { save.newGifts = []; writeSave(); }
   scene = s; shopConfirm = null; endlessPick = false; doorOverlay = null; parentMode = false; titlePress = 0; fadeT = 1; if (s === 'shop') { shopTab = 0; shopPage = 0; shopSel = save.equip.skin; shopTalk = { t: 4, text: 'Willkommen! Such dir etwas aus.' }; } parts = []; dialog = null; toasts = [];
@@ -2221,7 +2223,7 @@ function go(s) {
     { who: 'papi', text: 'Und {rex} strahlt wie Gold!' },
     { who: 'goetti', text: 'Dafür habe ich etwas ganz Besonderes: den Dino-Meister-Anzug und die Meister-Krone. {rex} trägt sie schon – im Laden kannst du sie jederzeit wechseln!' },
   ]); }
-  if (s === 'map' && save.afterNew > 0 && save.treasureNew < 0) { const d = save.afterNew; save.afterNew = 0; writeSave(); startDialog(DAY_AFTER[d] || []); }
+  if (s === 'map' && save.afterNew > 0 && save.treasureNew < 0) { const d = save.afterNew; save.afterNew = 0; writeSave(); startDialog(DAY_AFTER[d] || [], () => { if (d === 6 || d === 12 || d === 18) { tmapNew = d / 6 - 1; go('tmap'); } }); }
   if (s === 'map' && save.treasureNew >= 0) { const k = save.treasureNew; save.treasureNew = -1; writeSave(); chestPop[k] = 1; startDialog([{ who: k === 3 ? 'kiwi' : 'goetti', text: k === 3 ? 'Kiwi! Kiwi! (Kiwi hüpft vor Freude.)' : TREASURES[k].line }].concat(k === 3 ? [{ who: 'goetti', text: TREASURES[3].line }] : []), () => { if (chestFull() && !save.chestSeen) { save.chestSeen = 1; writeSave(); startDialog([{ who: 'goetti', text: 'Meine Schatzkiste ist wieder voll! Gitarre, Velo, Angel und Kiwi – danke, {oli}!' }, { who: 'kiwi', text: 'Kiwi! Kiwi! (Kiwi macht einen Freudentanz.)' }], () => chestParty()); } }); }
 }
 
@@ -4047,6 +4049,77 @@ function dailyWorld() { const open = WORLDS.map((_, i) => i).filter(themeOpenFor
 function dailyRefresh() { if (save.dailyBoardDay !== dayKey()) { save.board[8] = []; save.dailyBoardDay = dayKey(); writeSave(); } }
 let dailySeed = 0;
 function startDaily() { dailyRefresh(); dailySeed = dayKey(); const wi = dailyWorld(); startLevel(wi, true); dailySeed = 0; if (G) G.daily = true; }
+// ---------- Schatzkarte: three torn pieces, one from each boss, lead to the golden egg ----------
+let tmapNew = -1, tmapT = 0, tmapLast = '';
+const TM_PATH = [[104, 396], [170, 332], [240, 388], [312, 298], [380, 372], [460, 302], [540, 362], [590, 252], [660, 332], [730, 262], [790, 362], [846, 226]];
+const TM_X = [70, 344, 618], TM_W = 268, TM_TOP = 92, TM_BOT = 436;
+const tmHave = k => !!save.lvDone[[5, 11, 17][k]];
+function tmPiecePath(k) { // a torn rectangle: jagged left and right edges
+  const x0 = TM_X[k], x1 = x0 + TM_W, pts = [], n = 12;
+  for (let i = 0; i <= n; i++) pts.push([x0 + (k ? 6 : 0) + (hash(k * 31 + i) - 0.5) * 12, TM_TOP + (TM_BOT - TM_TOP) * i / n]);
+  for (let i = n; i >= 0; i--) pts.push([x1 - (k < 2 ? 6 : 0) + (hash(k * 57 + i + 9) - 0.5) * 12, TM_TOP + (TM_BOT - TM_TOP) * i / n]);
+  ctx.beginPath(); pts.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.closePath();
+}
+function tmRoute(walk) { // dashed route, golden where the player has already been
+  const L = []; let tot = 0; for (let i = 1; i < TM_PATH.length; i++) { const d = Math.hypot(TM_PATH[i][0] - TM_PATH[i - 1][0], TM_PATH[i][1] - TM_PATH[i - 1][1]); L.push(d); tot += d; }
+  const line = (maxD) => { ctx.beginPath(); ctx.moveTo(TM_PATH[0][0], TM_PATH[0][1]); let acc = 0; for (let i = 1; i < TM_PATH.length; i++) { const a = TM_PATH[i - 1], b = TM_PATH[i]; if (acc + L[i - 1] <= maxD) { ctx.lineTo(b[0], b[1]); acc += L[i - 1]; } else { const u = (maxD - acc) / L[i - 1]; ctx.lineTo(a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u); break; } } };
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.setLineDash([9, 9]); ctx.strokeStyle = '#8a4a1c'; ctx.lineWidth = 4; line(tot); ctx.stroke(); ctx.setLineDash([]);
+  if (walk > 0) { ctx.strokeStyle = '#ffd34d'; ctx.lineWidth = 6; line(tot * walk); ctx.stroke(); ctx.strokeStyle = 'rgba(138,74,28,.65)'; ctx.lineWidth = 1.6; line(tot * walk); ctx.stroke(); }
+  let acc = 0, target = tot * walk, pos = TM_PATH[0]; for (let i = 1; i < TM_PATH.length; i++) { if (acc + L[i - 1] >= target) { const u = (target - acc) / L[i - 1]; pos = [TM_PATH[i - 1][0] + (TM_PATH[i][0] - TM_PATH[i - 1][0]) * u, TM_PATH[i - 1][1] + (TM_PATH[i][1] - TM_PATH[i - 1][1]) * u]; break; } acc += L[i - 1]; pos = TM_PATH[i]; }
+  return pos;
+}
+function tmInk(t, x, y, size = 17, col = '#6b3a14') { ctx.save(); ctx.translate(x, y); ctx.rotate(-0.04); txt(t, 0, 0, size, col); ctx.restore(); }
+function tmScenery(k) {
+  if (k === 0) {
+    ell(150, 232, 62, 52, 0, 'rgba(76,150,70,.55)'); palm(122, 250, 44, '#2f7a3a'); palm(160, 262, 54, '#2f7a3a'); palm(188, 244, 40, '#3a8a42'); tmInk('Dschungel', 150, 168);
+    ell(242, 412, 62, 26, 0, 'rgba(236,205,130,.85)'); ctx.strokeStyle = 'rgba(70,150,210,.8)'; ctx.lineWidth = 3; for (let i = 0; i < 4; i++) { ctx.beginPath(); ctx.arc(196 + i * 24, 440, 8, Math.PI, 0); ctx.stroke(); } tmInk('Strand', 242, 380);
+    ctx.fillStyle = 'rgba(206,110,60,.75)'; for (const [mx, mw, mh] of [[290, 40, 62], [326, 30, 44]]) { rr(mx - mw / 2, 330 - mh, mw, mh, 4); ctx.fill(); } cactus(284, 340, 26, '#5f7a2a', 2); tmInk('Canyon', 296, 266, 15);
+    ctx.fillStyle = '#6b3a14'; ctx.fillRect(102, 372, 3, 40); ctx.fillStyle = '#d63a3a'; ctx.beginPath(); ctx.moveTo(105, 372); ctx.lineTo(128, 379); ctx.lineTo(105, 387); ctx.fill(); tmInk('Start', 104, 424, 14);
+  } else if (k === 1) {
+    ell(430, 380, 74, 54, 0, 'rgba(70,150,210,.6)'); ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = 3; ctx.lineCap = 'round'; for (let i = 0; i < 5; i++) { ctx.beginPath(); ctx.arc(386 + i * 20, 360 + (i % 2) * 28, 7, Math.PI, 0); ctx.stroke(); }
+    ctx.strokeStyle = '#7a3a8a'; ctx.lineWidth = 6; for (let i = 0; i < 4; i++) { ctx.beginPath(); ctx.moveTo(420 + i * 14, 398); ctx.quadraticCurveTo(410 + i * 18, 372 - i * 3, 430 + i * 12, 350); ctx.stroke(); } circle(448, 394, 18, '#9a4aa8'); circle(442, 390, 3.4, '#fff'); circle(454, 390, 3.4, '#fff'); tmInk('Meer', 410, 424);
+    ell(540, 250, 56, 40, 0, 'rgba(225,240,255,.9)'); pine(520, 270, 40, '#2f6a50'); pine(556, 276, 34, '#3b7d5c'); tmInk('Eiszeit', 540, 206, 16);
+  } else {
+    ctx.fillStyle = 'rgba(130,150,175,.9)'; ctx.strokeStyle = '#6b3a14'; ctx.lineWidth = 2; for (const [mx, mh] of [[664, 96], [706, 120], [748, 84]]) { ctx.beginPath(); ctx.moveTo(mx - 40, 312); ctx.lineTo(mx, 312 - mh); ctx.lineTo(mx + 40, 312); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.moveTo(mx - 13, 312 - mh + 22); ctx.lineTo(mx, 312 - mh); ctx.lineTo(mx + 13, 312 - mh + 22); ctx.closePath(); ctx.fill(); ctx.fillStyle = 'rgba(130,150,175,.9)'; } tmInk('Berge', 700, 196, 16);
+    drawVolcano(786, 416, 0.55, '#7a3a2a', 1); tmInk('Vulkan', 786, 424, 15);
+    ctx.fillStyle = '#3b2a22'; ctx.strokeStyle = '#6b3a14'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(812, 258); ctx.quadraticCurveTo(812, 164, 850, 164); ctx.quadraticCurveTo(888, 164, 888, 258); ctx.closePath(); ctx.fill(); ctx.stroke(); tmInk('Höhle', 850, 150, 16);
+  }
+}
+function tmPieceFace(k, jig) { // the parchment itself, with a few stains and a darker edge
+  tmPiecePath(k); ctx.fillStyle = vgrad(TM_TOP, TM_BOT, '#f6e6bc', '#e9d09a', '#d9bb80'); ctx.fill();
+  ctx.save(); tmPiecePath(k); ctx.clip(); for (let i = 0; i < 9; i++) { ctx.globalAlpha = 0.07 + 0.05 * hash(i + k * 5); circle(TM_X[k] + hash(i + k * 11) * TM_W, TM_TOP + hash(i + k * 13 + 3) * (TM_BOT - TM_TOP), 18 + hash(i + 40) * 34, '#a86a28'); } ctx.globalAlpha = 1;
+  tmScenery(k); ctx.restore();
+  tmPiecePath(k); ctx.lineWidth = 3.5; ctx.strokeStyle = '#7a4a1c'; ctx.stroke(); ctx.save(); tmPiecePath(k); ctx.clip(); ctx.lineWidth = 14; ctx.strokeStyle = 'rgba(120,70,20,.22)'; tmPiecePath(k); ctx.stroke(); ctx.restore();
+}
+function drawTMap() {
+  if (tmapNew >= 0 || tmapLast !== 'x') tmapT += DT;
+  ctx.fillStyle = vgrad(0, H, '#4a2f1b', '#33200f'); ctx.fillRect(0, 0, W, H);
+  ctx.strokeStyle = 'rgba(0,0,0,.2)'; ctx.lineWidth = 2; for (let y = 20; y < H; y += 34) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y + (y % 68 ? 3 : -3)); ctx.stroke(); }
+  const got = [0, 1, 2].filter(tmHave).length, done = save.lvDone.filter(Boolean).length, walk = clamp((done - (save.lvDone[23] ? 0 : 0)) / 24, 0, 1), all = got === 3;
+  otxt('Die Schatzkarte', W / 2, 40, 38, '#ffd34d', '#3b1d00', 9);
+  txt(all ? 'Der Weg zum goldenen Ei ist frei!' : `${got} von 3 Kartenstücken gefunden`, W / 2, 76, 19, '#f2dfb0', 'center', 'normal');
+  for (let k = 0; k < 3; k++) {
+    const isNew = k === tmapNew, t = isNew ? tmapT : 9, fly = isNew ? clamp(t / 1.1, 0, 1) : 1, e = 1 + 2.70158 * Math.pow(fly - 1, 3) + 1.70158 * Math.pow(fly - 1, 2), cx = TM_X[k] + TM_W / 2, cy = (TM_TOP + TM_BOT) / 2, rot = (k - 1) * 0.012 + (isNew ? (1 - e) * 0.7 : 0), dy = isNew ? -(1 - e) * 460 : 0;
+    ctx.save(); ctx.translate(cx, cy + dy); ctx.rotate(rot); ctx.translate(-cx, -cy);
+    if (!tmHave(k)) { // an empty slot waiting for its piece
+      tmPiecePath(k); ctx.fillStyle = 'rgba(15,8,2,.5)'; ctx.fill(); ctx.setLineDash([10, 8]); ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(255,211,77,.7)'; ctx.stroke(); ctx.setLineDash([]);
+      otxt('?', cx, cy - 20, 90, 'rgba(255,225,150,.85)', '#3b1d00', 10); txt(`Kartenstück ${k + 1}`, cx, cy + 40, 22, '#f2dfb0'); txt(['Krabbenkönig · Tür 6', 'Seeungeheuer · Tür 12', 'Adlerkönigin · Tür 18'][k], cx, cy + 70, 16, '#d9bb80', 'center', 'normal');
+    } else {
+      ctx.save(); tmPiecePath(k); ctx.shadowColor = 'rgba(0,0,0,.55)'; ctx.shadowBlur = 16; ctx.shadowOffsetY = 6; ctx.fillStyle = '#e9d09a'; ctx.fill(); ctx.restore();
+      tmPieceFace(k);
+      ctx.save(); tmPiecePath(k); ctx.clip(); const pos = tmRoute(walk); ctx.restore(); if (k === 0) tmMarker = pos;
+    }
+    ctx.restore();
+  }
+  // the player's marker rides along the route; the golden egg waits at the X
+  if (tmHave(0) && tmMarker) { const [mx, my] = tmMarker; shadow(mx, my + 14, 14, 0.3); circle(mx, my - 6, 15, '#2e8b57'); ctx.lineWidth = 3; ctx.strokeStyle = '#fff'; ctx.stroke(); drawPortrait('rex', mx, my - 6, 13, true); }
+  if (tmHave(2)) { const ex = 846, ey = 226 + 6 * Math.sin(T * 3); if (save.lvDone[23]) { circle(ex, ey, 15, '#69f0ae'); ctx.strokeStyle = '#17420f'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(ex - 7, ey); ctx.lineTo(ex - 2, ey + 6); ctx.lineTo(ex + 8, ey - 6); ctx.stroke(); } else { ctx.save(); ctx.globalCompositeOperation = 'lighter'; const g = ctx.createRadialGradient(ex, ey, 2, ex, ey, 46); g.addColorStop(0, `rgba(255,230,120,${0.7 + 0.2 * Math.sin(T * 4)})`); g.addColorStop(1, 'rgba(255,230,120,0)'); ctx.fillStyle = g; ctx.fillRect(ex - 50, ey - 50, 100, 100); ctx.restore(); drawEgg(ex, ey, 16, '#ffd700', '#fff3b0', 0.4, Math.sin(T * 5) * 0.08); ctx.strokeStyle = '#d63a3a'; ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(ex - 22, ey + 22); ctx.lineTo(ex - 8, ey + 36); ctx.moveTo(ex - 8, ey + 22); ctx.lineTo(ex - 22, ey + 36); ctx.stroke(); } }
+  if (tmapNew >= 0 && tmapT > 1.0 && tmapT < 1.06) { SFX.right(); burst(TM_X[tmapNew] + TM_W / 2, 270, 46, ['#ffd740', '#fff', '#f2dfb0', '#ff8a9a'], 420, 500, 7, 1.2); }
+  if (tmapNew >= 0 && tmapT > 1.1) { ctx.globalAlpha = 0.75 + 0.25 * Math.sin(T * 6); otxt('Neues Kartenstück!', W / 2, 462, 28, '#ffd34d', '#3b1d00', 8); ctx.globalAlpha = 1; }
+  drawParts(0);
+  button(tmapNew >= 0 ? 'Weiter' : 'Zurück', W / 2 - 90, H - 50, 180, 42, () => { tmapNew = -1; go('map'); }, { size: 22, icon: icon(tmapNew >= 0 ? 'play' : 'back') });
+}
+let tmMarker = null;
 let endlessPick = false;
 function themeOpenForEndless(wi) { return save.finished || LEVELS.some(l => l.wi === wi && save.lvDone[l.li]); }
 function drawEndlessPicker() {
@@ -4089,7 +4162,8 @@ function drawMap() { // the advent calendar
   button('Laden', 24, H - 150, 210, 56, () => go('shop'), { color: '#ffe08a', icon: icon('amber') });
   if (save.newGifts.length) { ctx.save(); ctx.translate(214, H - 146 + Math.sin(T * 6) * 2); ctx.rotate(0.3); rr(-24, -11, 48, 22, 6); ctx.fillStyle = '#e53935'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#fff'; ctx.stroke(); txt('NEU', 0, 1, 14, '#fff'); ctx.restore(); }
   if (save.lvDone.some(Boolean) || save.finished) { button('Endlos', W - 274, H - 150, 176, 56, () => { endlessPick = true; }, { color: '#9fd3ff', icon: icon('loop'), size: 24 }); button('', W - 92, H - 150, 68, 56, () => { boardTab = -1; go('board'); }, { color: '#ffe08a', icon: icon('trophy') }); }
-  if (save.finished) button('Weihnachts-Ende', W - 274, H - 82, 250, 60, () => startEnding(), { color: '#e57373', textColor: '#fff', icon: icon('star'), size: 21 });
+  if (save.finished) button('Finale', W - 274, H - 82, 176, 60, () => startEnding(), { color: '#e57373', textColor: '#fff', icon: icon('star'), size: 22 });
+  button('', W - 92, H - 82, 68, 60, () => { tmapNew = -1; go('tmap'); }, { color: '#f2dfb0', icon: icon('scroll') });
   if (endlessPick) drawEndlessPicker();
   if (mapFW > 0) { mapFW -= DT; if (Math.random() < 0.09) { const c = ['#ff5252', '#ffd740', '#69f0ae', '#40c4ff', '#ea80fc', '#fff']; burst(100 + Math.random() * 760, 70 + Math.random() * 280, 36, [c[Math.floor(Math.random() * 6)], '#fff'], 300, 160, 5, 1.4); tone(220 + Math.random() * 220, 0.3, 'triangle', 0.04, 80); } }
   drawParts(0);
@@ -4117,35 +4191,65 @@ function drawFlameIcon(it, cx, cy, k) {
 const SHOP_TABS = [['Farbe', 'skin', SKINS], ['Hut', 'hat', HATS], ['Feuer', 'fire', FIRES]];
 let shopConfirm = null, shopTab = 0, shopPage = 0, shopSel = 0, shopTalk = { t: 0, text: 'Willkommen! Such dir etwas aus.' };
 function shopSay(text) { shopTalk = { t: 4, text }; }
+let shopBounce = 0;
+function drawAutoHatIcon(cx, cy, k) { // "Automatik": the world decides - sun on one side, snow on the other
+  ctx.save(); ctx.translate(cx, cy); ctx.scale(k, k);
+  circle(-9, 0, 11, '#ffd34d'); ctx.strokeStyle = '#f0a020'; ctx.lineWidth = 2.5; ctx.lineCap = 'round'; for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2; ctx.beginPath(); ctx.moveTo(-9 + Math.cos(a) * 14, Math.sin(a) * 14); ctx.lineTo(-9 + Math.cos(a) * 19, Math.sin(a) * 19); ctx.stroke(); }
+  ctx.save(); ctx.beginPath(); ctx.moveTo(4, -24); ctx.lineTo(30, -24); ctx.lineTo(30, 24); ctx.lineTo(-6, 24); ctx.closePath(); ctx.clip(); circle(12, 0, 17, '#cfe8ff'); ctx.restore();
+  ctx.strokeStyle = '#4a7ab0'; ctx.lineWidth = 2.5; for (let i = 0; i < 3; i++) { const a = i / 3 * Math.PI; ctx.beginPath(); ctx.moveTo(15 + Math.cos(a) * 12, Math.sin(a) * 12); ctx.lineTo(15 - Math.cos(a) * 12, -Math.sin(a) * 12); ctx.stroke(); }
+  ctx.restore();
+}
+function shopScene() {
+  // wallpaper: soft stripes with small diamonds, a darker wooden wainscot
+  ctx.fillStyle = vgrad(0, H, '#f9ecc9', '#f1dcaa', '#e2c488'); ctx.fillRect(0, 0, W, H);
+  for (let x = 0; x < W; x += 48) { ctx.fillStyle = (x / 48) % 2 ? 'rgba(255,255,255,.18)' : 'rgba(150,100,40,.06)'; ctx.fillRect(x, 60, 48, 330); }
+  ctx.fillStyle = 'rgba(150,100,40,.14)'; for (let y = 90; y < 380; y += 44) for (let x = 24 + (y / 44 % 2) * 24; x < W; x += 48) { ctx.beginPath(); ctx.moveTo(x, y - 6); ctx.lineTo(x + 5, y); ctx.lineTo(x, y + 6); ctx.lineTo(x - 5, y); ctx.fill(); }
+  ctx.fillStyle = vgrad(372, 450, '#a87644', '#7a5230'); ctx.fillRect(0, 372, W, 78); ctx.fillStyle = '#c99a62'; ctx.fillRect(0, 368, W, 8); ctx.strokeStyle = 'rgba(40,20,5,.3)'; ctx.lineWidth = 2; for (let x = 0; x <= W; x += 120) { ctx.beginPath(); ctx.moveTo(x, 376); ctx.lineTo(x, 450); ctx.stroke(); } ctx.strokeStyle = 'rgba(255,255,255,.12)'; for (let x = 8; x <= W; x += 120) { ctx.beginPath(); ctx.moveTo(x, 380); ctx.lineTo(x, 446); ctx.stroke(); }
+  awning(52);
+  // string lights under the awning
+  for (let i = 0; i < 17; i++) { const x = 20 + i * 56, y = 70 + Math.sin(i * 1.1) * 3, c = ['#ff5252', '#ffd34d', '#69f0ae', '#40c4ff'][i % 4], tw = 0.55 + 0.45 * Math.sin(T * 3 + i * 1.7); ctx.globalAlpha = 0.3 * tw; circle(x, y + 8, 12, c); ctx.globalAlpha = 1; ctx.fillStyle = '#2a2018'; ctx.fillRect(x - 1.5, y - 2, 3, 5); circle(x, y + 7, 4.4, c); circle(x - 1.2, y + 5.6, 1.4, 'rgba(255,255,255,.85)'); }
+  ctx.strokeStyle = '#2a2018'; ctx.lineWidth = 1.6; ctx.beginPath(); for (let i = 0; i <= 17; i++) { const x = 20 + i * 56, y = 68 + Math.sin(i * 1.1) * 3; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); } ctx.stroke();
+  // shelf with hats on stands, jars and a toy dino (left of the sign)
+  rr(10, 150, 286, 9, 3); ctx.fillStyle = '#8a5a2e'; ctx.fill(); ctx.fillStyle = '#5a3a1c'; ctx.fillRect(22, 159, 6, 12); ctx.fillRect(278, 159, 6, 12);
+  [['santa', 44], ['cowboy', 104], ['crown', 164], ['wizard', 224]].forEach(([k, x]) => { ctx.fillStyle = '#6b4a2b'; ctx.fillRect(x - 2, 136, 4, 14); circle(x, 134, 7, '#e8c9a0'); ctx.save(); ctx.translate(x, 150); drawHatIcon(k, 0, -34, 1.25); ctx.restore(); });
+  rr(254, 120, 26, 30, 6); ctx.fillStyle = 'rgba(255,255,255,.5)'; ctx.fill(); ctx.strokeStyle = '#6b4a2b'; ctx.lineWidth = 2; ctx.stroke(); drawAmber(267, 138, 7); ctx.fillStyle = '#6b4a2b'; ctx.fillRect(257, 116, 20, 6);
+  // small shelf: lantern, egg, jar (beside the cards)
+  rr(298, 258, 138, 9, 3); ctx.fillStyle = '#8a5a2e'; ctx.fill(); ctx.fillStyle = '#6b4a2b'; ctx.fillRect(310, 267, 6, 12); ctx.fillRect(418, 267, 6, 12);
+  rr(308, 226, 24, 32, 6); ctx.fillStyle = 'rgba(255,255,255,.5)'; ctx.fill(); ctx.strokeStyle = '#6b4a2b'; ctx.lineWidth = 2; ctx.stroke(); drawAmber(320, 244, 7); ctx.fillStyle = '#6b4a2b'; ctx.fillRect(310, 222, 20, 6);
+  drawEgg(366, 244, 13, '#7ad0a8', '#3a9a70', 0, 0.1);
+  rr(396, 230, 22, 28, 5); ctx.fillStyle = '#d9a23a'; ctx.fill(); ctx.stroke(); circle(407, 245, 6, '#fff3b0'); ctx.save(); ctx.globalCompositeOperation = 'lighter'; const lg = ctx.createRadialGradient(407, 245, 2, 407, 245, 40); lg.addColorStop(0, `rgba(255,220,120,${0.55 + 0.1 * Math.sin(T * 3)})`); lg.addColorStop(1, 'rgba(255,200,80,0)'); ctx.fillStyle = lg; ctx.fillRect(367, 205, 80, 80); ctx.restore(); ctx.strokeStyle = '#6b4a2b'; ctx.beginPath(); ctx.arc(407, 230, 7, Math.PI, 0); ctx.stroke();
+  // floor, rug and the spot-lit podium for Rex
+  ctx.fillStyle = vgrad(448, H, '#9a6a3a', '#6e4a28', '#4a301a'); ctx.fillRect(0, 448, W, H - 448); ctx.fillStyle = '#b98a54'; ctx.fillRect(0, 448, W, 8); ctx.strokeStyle = 'rgba(0,0,0,.2)'; ctx.lineWidth = 2; for (let y = 470; y < H; y += 22) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+  ell(262, 470, 178, 30, 0, '#8a2a32'); ell(262, 470, 160, 24, 0, '#a8404a'); ctx.strokeStyle = '#e8c070'; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(262, 470, 168, 27, 0, 0, Math.PI * 2); ctx.stroke();
+  ctx.save(); ctx.globalCompositeOperation = 'lighter'; const sp = ctx.createLinearGradient(0, 100, 0, 440); sp.addColorStop(0, 'rgba(255,240,180,0)'); sp.addColorStop(1, `rgba(255,236,160,${0.34 + 0.06 * Math.sin(T * 2) + 0.2 * shopBounce})`); ctx.fillStyle = sp; ctx.beginPath(); ctx.moveTo(240, 96); ctx.lineTo(284, 96); ctx.lineTo(380, 436); ctx.lineTo(144, 436); ctx.closePath(); ctx.fill(); ctx.restore();
+  ell(262, 436, 108, 15, 0, '#5a3a1c'); rr(154, 420, 216, 16, 8); ctx.fillStyle = vgrad(420, 436, '#c99a62', '#8a5a2e'); ctx.fill(); ctx.lineWidth = 2.5; ctx.strokeStyle = '#3a2410'; ctx.stroke(); ell(262, 420, 108, 14, 0, '#d9aa72'); ctx.strokeStyle = '#8a5a2e'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(262, 420, 100, 11, 0, 0, Math.PI * 2); ctx.stroke();
+  shopBounce = Math.max(0, shopBounce - DT * 2.2);
+}
+function shopCounter() { // the counter Goetti stands behind
+  rr(0, 394, 142, 58, 6); ctx.fillStyle = vgrad(394, 452, '#b98250', '#8a5a2e', '#5e3a1c'); ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = '#2b1a0c'; ctx.stroke();
+  ctx.fillStyle = '#d9aa72'; ctx.fillRect(-4, 386, 152, 12); ctx.strokeStyle = '#2b1a0c'; ctx.lineWidth = 2.5; ctx.strokeRect(-4, 386, 152, 12);
+  ctx.strokeStyle = 'rgba(0,0,0,.22)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(48, 400); ctx.lineTo(48, 450); ctx.moveTo(96, 400); ctx.lineTo(96, 450); ctx.stroke();
+  drawAmber(110, 377, 9); drawAmber(124, 381, 8); rr(10, 366, 20, 22, 5); ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.fill(); ctx.strokeStyle = '#6b4a2b'; ctx.lineWidth = 2; ctx.stroke(); drawAmber(20, 380, 6);
+}
 function drawShop() {
   // wall, awning, counter
-  ctx.fillStyle = vgrad(0, H, '#f6e7c4', '#f0d9a6', '#e2c488'); ctx.fillRect(0, 0, W, H);
-  ctx.strokeStyle = 'rgba(120,80,30,.12)'; ctx.lineWidth = 2; for (let x = 0; x < W; x += 60) { ctx.beginPath(); ctx.moveTo(x, 60); ctx.lineTo(x, 450); ctx.stroke(); }
-  awning(52);
-  { // shelf with jars, an egg and a lantern; two pictures on the wall
-    for (const [fx, kind] of [[310, 0], [378, 1]]) { rr(fx, 126, 56, 44, 4); ctx.fillStyle = '#6b4a2b'; ctx.fill(); ctx.fillStyle = kind ? '#d9ecff' : '#bfe3ff'; ctx.fillRect(fx + 5, 131, 46, 34); if (kind) { ctx.fillStyle = '#55555f'; for (let i = 0; i < 3; i++) { circle(fx + 18 + i * 10, 150 + (i % 2) * 6, 3.4, '#55555f'); } circle(fx + 40, 140, 3, '#55555f'); } else { ctx.fillStyle = '#6ac04a'; ctx.beginPath(); ctx.moveTo(fx + 5, 165); ctx.quadraticCurveTo(fx + 25, 140, fx + 51, 158); ctx.lineTo(fx + 51, 165); ctx.fill(); circle(fx + 40, 140, 5, '#ffd34d'); } }
-    rr(298, 240, 138, 9, 3); ctx.fillStyle = '#8a5a2e'; ctx.fill(); ctx.fillStyle = '#6b4a2b'; ctx.fillRect(310, 249, 6, 12); ctx.fillRect(418, 249, 6, 12);
-    rr(308, 208, 24, 32, 6); ctx.fillStyle = 'rgba(255,255,255,.5)'; ctx.fill(); ctx.strokeStyle = '#6b4a2b'; ctx.lineWidth = 2; ctx.stroke(); drawAmber(320, 226, 7); ctx.fillStyle = '#6b4a2b'; ctx.fillRect(310, 204, 20, 6);
-    drawEgg(366, 226, 13, '#7ad0a8', '#3a9a70', 0, 0.1);
-    rr(396, 212, 22, 28, 5); ctx.fillStyle = '#d9a23a'; ctx.fill(); ctx.stroke(); circle(407, 227, 6, '#fff3b0'); ctx.save(); ctx.globalCompositeOperation = 'lighter'; const lg = ctx.createRadialGradient(407, 227, 2, 407, 227, 30); lg.addColorStop(0, `rgba(255,220,120,${0.5 + 0.1 * Math.sin(T * 3)})`); lg.addColorStop(1, 'rgba(255,200,80,0)'); ctx.fillStyle = lg; ctx.fillRect(377, 197, 60, 60); ctx.restore(); ctx.strokeStyle = '#6b4a2b'; ctx.beginPath(); ctx.arc(407, 212, 7, Math.PI, 0); ctx.stroke();
-  }
-  ctx.fillStyle = vgrad(448, H, '#9a6a3a', '#6e4a28', '#4a301a'); ctx.fillRect(0, 448, W, H - 448); ctx.fillStyle = '#b98a54'; ctx.fillRect(0, 448, W, 8); ctx.strokeStyle = 'rgba(0,0,0,.2)'; ctx.lineWidth = 2; for (let y = 470; y < H; y += 22) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+  shopScene();
   woodFrame(300, 54, 360, 54, 14); txt('Bernstein-Laden', 480, 83, 30, '#3b2410');
   rr(756, 70, 176, 44, 22); ctx.fillStyle = 'rgba(40,24,10,.85)'; ctx.fill(); drawAmber(782, 92, 14); otxt(String(save.amber), 806, 93, 26, '#ffe08a', 'rgba(0,0,0,.7)', 5, 'left');
   const [label, key, list] = SHOP_TABS[shopTab];
   // live preview: equip the selection temporarily
   const bak = Object.assign({}, save.equip); save.equip[key] = shopSel;
-  shadow(260, 420, 90, 0.3);
-  oRex(262, 414, 0.85, T * 3, 0.1, Object.assign(rexLook(2), { rider: true, hat: rexLook(2).hat || null, fire: key === 'fire' }));
+  const hopY = shopBounce > 0 ? -26 * Math.sin(Math.PI * (1 - shopBounce)) : 0;
+  oRex(262, 418 + hopY, 0.85, T * 3, 0.1, Object.assign(rexLook(2), { rider: true, hat: rexLook(2).hat || null, fire: key === 'fire' }));
   Object.assign(save.equip, bak);
   if (key === 'fire') { // Rex breathes the selected fire so the colour can be judged
-    const f = fireOf(shopSel), cyc = (T % 2.6) / 2.6, mx = 262 + 116 * 0.85, my = 414 - 98 * 0.85;
+    const f = fireOf(shopSel), cyc = (T % 2.6) / 2.6, mx = 262 + 116 * 0.85, my = 418 - 98 * 0.85;
     ctx.save();
     if (cyc < 0.3) { const u = cyc / 0.3, len = 80 * (0.5 + u * 0.7); const g = ctx.createRadialGradient(mx, my, 2, mx, my, len); g.addColorStop(0, 'rgba(255,255,240,.95)'); g.addColorStop(0.25, `rgba(${f.a},.95)`); g.addColorStop(0.7, `rgba(${f.b},.75)`); g.addColorStop(1, `rgba(${f.c},0)`); ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(mx, my); for (let i = 0; i <= 10; i++) { const a = -0.3 + i * 0.06, r = len * (0.85 + 0.15 * Math.sin(T * 50 + i * 1.7)); ctx.lineTo(mx + Math.cos(a) * r, my + 6 + Math.sin(a) * r); } ctx.closePath(); ctx.fill(); }
     if (cyc > 0.06 && cyc < 0.85) { const q = (cyc - 0.06) / 0.79, bx = mx + 14 + q * 150, by = my + 6 + q * 26, fa = 1 - q * q, fl = 1 + 0.12 * Math.sin(T * 45); ctx.globalAlpha = fa; const g = ctx.createRadialGradient(bx, by, 2, bx, by, 34 * fl); g.addColorStop(0, 'rgba(255,255,235,1)'); g.addColorStop(0.3, `rgba(${f.a},1)`); g.addColorStop(0.65, `rgba(${f.b},.85)`); g.addColorStop(1, `rgba(${f.c},0)`); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(bx, by, 34 * fl, 0, Math.PI * 2); ctx.fill(); for (let k = 1; k <= 3; k++) { ctx.globalAlpha = fa * 0.5 / k; circle(bx - k * 14, by - k * 3 + Math.sin(T * 30 + k) * 3, 13 - k * 2.5, f.ball); } ctx.globalAlpha = 1; }
     ctx.restore();
   }
-  oGoetti(70, 440, 0.85, shopTalk.t > 0);
+  oGoetti(62, 420, 0.95, shopTalk.t > 0); shopCounter();
   if (shopTalk.t > 0 || true) { shopTalk.t = Math.max(0, shopTalk.t - DT); const lines = wrapLines(shopTalk.text, 230, 18); const bh = 20 + lines.length * 22; rr(20, 215 - bh + 10, 262, bh, 14); ctx.fillStyle = '#fffaf0'; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = '#6b4a2b'; ctx.stroke(); ctx.fillStyle = '#fffaf0'; ctx.beginPath(); ctx.moveTo(52, 225); ctx.lineTo(76, 225); ctx.lineTo(70, 252); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.fillRect(54, 223, 20, 4); lines.forEach((l, i) => txt(l, 151, 215 - bh + 32 + i * 22, 18, '#3b2410', 'center', 'normal')); }
   // tabs
   SHOP_TABS.forEach(([lb], i) => button(lb, 440 + i * 168, 118, 160, 44, () => { shopTab = i; shopPage = 0; shopSel = save.equip[SHOP_TABS[i][1]]; shopSay(i === 0 ? 'Welche Farbe darf es sein?' : i === 1 ? 'Ein Hut für Oli?' : 'Feuer in allen Farben!'); }, { size: 22, color: i === shopTab ? '#ffd34d' : '#d9c9a0' }));
@@ -4153,35 +4257,37 @@ function drawShop() {
   const PER = 8, pages = Math.ceil(list.length / PER); shopPage = clamp(shopPage, 0, pages - 1);
   list.forEach((it, i) => {
     if (Math.floor(i / PER) !== shopPage) return;
-    const j = i % PER, x = 440 + (j % 4) * 126, y = 168 + Math.floor(j / 4) * 96, w = 118, h = 88, owned = save.owned[key].includes(i), eq = save.equip[key] === i, cost = it.cost || 0, can = !it.gift && save.amber >= cost, sel = shopSel === i;
-    if (sel) { rr(x - 4, y - 4, w + 8, h + 8, 16); ctx.fillStyle = 'rgba(255,211,77,.55)'; ctx.fill(); }
+    const j = i % PER, x = 440 + (j % 4) * 126, y = 166 + Math.floor(j / 4) * 104, w = 118, h = 100, owned = save.owned[key].includes(i), eq = save.equip[key] === i, cost = it.cost || 0, can = !it.gift && save.amber >= cost, sel = shopSel === i;
+    if (sel) { rr(x - 4, y - 4, w + 8, h + 8, 16); ctx.fillStyle = `rgba(255,211,77,${0.5 + 0.15 * Math.sin(T * 5)})`; ctx.fill(); }
     ctx.save(); rr(x, y + 3, w, h, 14); ctx.fillStyle = 'rgba(0,0,0,.22)'; ctx.fill(); ctx.restore();
-    rr(x, y, w, h, 14); ctx.fillStyle = eq ? '#d4f2bd' : owned ? '#fffaf0' : it.gift ? (it.gift === 25 ? '#fff0b8' : '#e8e0f4') : can ? '#ffeab8' : '#e2d8c2'; ctx.fill(); ctx.lineWidth = sel ? 4 : 3; ctx.strokeStyle = sel ? '#e8a317' : eq ? '#2e7d32' : '#8a6a3a'; ctx.stroke();
-    ctx.save(); rr(x + 5, y + 5, w - 10, 46, 8); ctx.clip(); ctx.fillStyle = vgrad(y, y + 52, '#fffdf4', '#f0e2bf'); ctx.fillRect(x, y, w, 54);
-    if (key === 'skin') { oRex(x + w / 2 + 2, y + 44, 0.2, 0.5, 0.05, { body: it.body, dark: it.dark, belly: it.belly, rainbow: it.rainbow }); }
-    else if (key === 'hat') drawHatIcon(it.k, x + w / 2, y + 28, 0.95);
-    else drawFlameIcon(fireOf(i), x + w / 2, y + 30, 0.62);
-    if (!owned) { ctx.fillStyle = 'rgba(120,110,90,.35)'; ctx.fillRect(x, y, w, 54); }
+    rr(x, y, w, h, 14); ctx.fillStyle = eq ? '#d4f2bd' : owned ? '#fffaf0' : it.gift ? (it.gift === 25 ? '#fff0b8' : '#ece4f6') : can ? '#fff0c8' : '#e8dec8'; ctx.fill(); ctx.lineWidth = sel ? 4 : 3; ctx.strokeStyle = sel ? '#e8a317' : eq ? '#2e7d32' : '#8a6a3a'; ctx.stroke();
+    ctx.save(); rr(x + 5, y + 5, w - 10, 62, 9); ctx.clip(); ctx.fillStyle = vgrad(y, y + 68, '#fffdf4', '#f2e4c2'); ctx.fillRect(x, y, w, 70);
+    ctx.fillStyle = 'rgba(120,80,30,.12)'; ctx.beginPath(); ctx.ellipse(x + w / 2, y + 62, 34, 5, 0, 0, Math.PI * 2); ctx.fill();
+    if (key === 'skin') oRex(x + w / 2 + 6, y + 62, 0.3, 0.5 + T * 0.0, 0.05, { body: it.body, dark: it.dark, belly: it.belly, rainbow: it.rainbow, rider: true, hat: HATS[save.equip.hat] && HATS[save.equip.hat].k });
+    else if (key === 'hat') { if (it.k) { ctx.fillStyle = '#6b4a2b'; ctx.fillRect(x + w / 2 - 2, y + 40, 4, 22); rr(x + w / 2 - 14, y + 60, 28, 5, 2); ctx.fillStyle = '#8a5a2e'; ctx.fill(); circle(x + w / 2, y + 40, 9, '#e8c9a0'); drawHatIcon(it.k, x + w / 2, y + 22, 1.55); } else drawAutoHatIcon(x + w / 2, y + 34, 1.15); }
+    else drawFlameIcon(fireOf(i), x + w / 2, y + 36, 0.98);
+    if (!owned) { ctx.fillStyle = it.gift ? 'rgba(90,70,130,.30)' : 'rgba(120,110,90,.34)'; ctx.fillRect(x, y, w, 70); }
     ctx.restore();
-    if (!owned) ico('lock', x + w - 16, y + 16, 17);
-    if (save.newGifts.includes(key + ':' + i)) { ctx.save(); ctx.translate(x + 22, y + 14); ctx.rotate(-0.3); rr(-18, -9, 36, 18, 5); ctx.fillStyle = '#e53935'; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = '#fff'; ctx.stroke(); txt('NEU', 0, 1, 12, '#fff'); ctx.restore(); }
-    txt(it.n, x + w / 2, y + 62, it.n.length > 9 ? 12 : 14, '#3b2410');
-    if (eq) txt('Angelegt', x + w / 2, y + 77, 12, '#2e7d32'); else if (owned) txt('Gekauft', x + w / 2, y + 77, 12, '#6b4a2b', 'center', 'normal'); else if (it.gift) txt(it.gift === 25 ? '72 Medaillen' : `Tür ${it.gift}`, x + w / 2, y + 77, 13, it.gift === 25 ? '#a07400' : '#6a4aa8'); else { drawAmber(x + w / 2 - 18, y + 76, 6); txt(String(cost), x + w / 2 - 8, y + 77, 14, can ? '#8a5a00' : '#a09070', 'left'); }
-    buttons.push({ x, y, w, h, cb: () => { shopSel = i; shopSay(owned ? (eq ? 'Das trägst du gerade.' : 'Das steht dir gut!') : it.gift ? (it.gift === 25 ? 'Sammle alle 72 Medaillen – dann gehört das dir!' : `Das findest du hinter Tür ${it.gift} im Kalender!`) : can ? `Das kostet ${cost} Bernstein.` : 'Sammle noch etwas Bernstein!'); } });
+    if (!owned) { circle(x + w - 18, y + 18, 13, 'rgba(40,30,20,.78)'); ico('lock', x + w - 18, y + 18, 16); }
+    if (save.newGifts.includes(key + ':' + i)) { ctx.save(); ctx.translate(x + 24, y + 16); ctx.rotate(-0.3); rr(-18, -9, 36, 18, 5); ctx.fillStyle = '#e53935'; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = '#fff'; ctx.stroke(); txt('NEU', 0, 1, 12, '#fff'); ctx.restore(); }
+    const nm = it.n === 'Auto' ? 'Automatik' : it.n; txt(nm, x + w / 2, y + 77, nm.length > 9 ? 12 : 14, '#3b2410');
+    const pill = (c0, c1, tc) => { rr(x + 12, y + 84, w - 24, 13, 6.5); ctx.fillStyle = vgrad(y + 84, y + 97, c0, c1); ctx.fill(); ctx.lineWidth = 1.2; ctx.strokeStyle = 'rgba(0,0,0,.25)'; ctx.stroke(); return tc; };
+    if (eq) txt('✓ Angelegt', x + w / 2, y + 91, 12, pill('#9be38a', '#5ebb5a', '#17420f')); else if (owned) txt('Gekauft', x + w / 2, y + 91, 12, pill('#f4ecd8', '#e2d6b8', '#6b4a2b'), 'center', 'normal'); else if (it.gift) txt(it.gift === 25 ? '72 Medaillen' : `Tür ${it.gift}`, x + w / 2, y + 91, 12, pill(it.gift === 25 ? '#ffe9a0' : '#d8c8f4', it.gift === 25 ? '#f0c040' : '#b9a0e6', it.gift === 25 ? '#6a4800' : '#3a2470')); else { const tc = pill(can ? '#ffe6a0' : '#e6dcc4', can ? '#f4c24a' : '#d4c8a8', can ? '#6a4800' : '#8a7a58'); drawAmber(x + w / 2 - 17, y + 91, 6); txt(String(cost), x + w / 2 - 7, y + 91, 13, tc, 'left'); }
+    buttons.push({ x, y, w, h, cb: () => { shopSel = i; shopBounce = 1; SFX.click(); shopSay(owned ? (eq ? 'Das trägst du gerade.' : 'Das steht dir gut!') : it.gift ? (it.gift === 25 ? 'Sammle alle 72 Medaillen – dann gehört das dir!' : `Das findest du hinter Tür ${it.gift} im Kalender!`) : can ? `Das kostet ${cost} Bernstein.` : 'Sammle noch etwas Bernstein!'); } });
   });
   if (pages > 1) {
-    button('‹', 440, 358, 56, 34, () => { shopPage = (shopPage + pages - 1) % pages; }, { size: 24, color: '#e0d2b0' });
-    txt(`Seite ${shopPage + 1} von ${pages}`, 690, 375, 16, '#6b4a2b', 'center', 'normal');
-    button('›', 880, 358, 56, 34, () => { shopPage = (shopPage + 1) % pages; }, { size: 24, color: '#e0d2b0' });
+    button('‹', 440, 376, 56, 32, () => { shopPage = (shopPage + pages - 1) % pages; }, { size: 24, color: '#e0d2b0' });
+    otxt(`Seite ${shopPage + 1} von ${pages}`, 690, 392, 16, '#fff3d6', 'rgba(40,20,5,.8)', 4);
+    button('›', 880, 376, 56, 32, () => { shopPage = (shopPage + 1) % pages; }, { size: 24, color: '#e0d2b0' });
   }
   // buy / equip bar
-  const it = list[shopSel], owned = save.owned[key].includes(shopSel), eq = save.equip[key] === shopSel, cost = it.cost || 0, can = !it.gift && save.amber >= cost, BY = 402;
-  if (eq) button('Angelegt', 440, BY, 496, 56, () => {}, { disabled: true, icon: icon('check'), size: 26 });
-  else if (owned) button('Anlegen', 440, BY, 496, 56, () => { save.equip[key] = shopSel; writeSave(); SFX.right(); shopSay('Sieht super aus!'); burst(262, 340, 18, ['#fff', '#ffe08a'], 250, 300, 5, 0.7); }, { color: '#9be38a', size: 26 });
-  else if (it.gift) button(it.gift === 25 ? 'Mit allen 72 Medaillen' : `Aus Tür ${it.gift} im Kalender`, 440, BY, 496, 56, () => { SFX.wrong(); shopSay(it.gift === 25 ? `Du hast ${medalTotal()} von 72 Medaillen.` : `Öffne am ${it.gift}. Dezember die Tür ${it.gift}!`); }, { disabled: true, size: 22 });
-  else if (can) button(`Kaufen  ·  ${cost}`, 440, BY, 496, 56, () => { shopConfirm = { key, sel: shopSel, cost, name: it.n }; SFX.click(); }, { size: 26, icon: icon('amber') });
-  else button('Zu wenig Bernstein', 440, BY, 496, 56, () => { SFX.wrong(); toast('Noch zu wenig Bernstein!', '#ffb4a8'); shopSay('Sammle noch etwas Bernstein!'); }, { disabled: true, size: 24 });
-  button('Zurück', W - 224, H - 66, 200, 50, () => go('map'), { size: 24, icon: icon('back') });
+  const it = list[shopSel], owned = save.owned[key].includes(shopSel), eq = save.equip[key] === shopSel, cost = it.cost || 0, can = !it.gift && save.amber >= cost, BY = 412;
+  if (eq) button('Angelegt', 440, BY, 496, 52, () => {}, { disabled: true, icon: icon('check'), size: 26 });
+  else if (owned) button('Anlegen', 440, BY, 496, 52, () => { save.equip[key] = shopSel; writeSave(); SFX.right(); shopSay('Sieht super aus!'); shopBounce = 1; burst(262, 330, 26, ['#fff', '#ffe08a', '#ffd34d'], 280, 300, 5, 0.9); }, { color: '#9be38a', size: 26 });
+  else if (it.gift) button(it.gift === 25 ? 'Mit allen 72 Medaillen' : `Aus Tür ${it.gift} im Kalender`, 440, BY, 496, 52, () => { SFX.wrong(); shopSay(it.gift === 25 ? `Du hast ${medalTotal()} von 72 Medaillen.` : `Öffne am ${it.gift}. Dezember die Tür ${it.gift}!`); }, { disabled: true, size: 22 });
+  else if (can) button(`Kaufen  ·  ${cost}`, 440, BY, 496, 52, () => { shopConfirm = { key, sel: shopSel, cost, name: it.n }; SFX.click(); }, { size: 26, icon: icon('amber') });
+  else button('Zu wenig Bernstein', 440, BY, 496, 52, () => { SFX.wrong(); toast('Noch zu wenig Bernstein!', '#ffb4a8'); shopSay('Sammle noch etwas Bernstein!'); }, { disabled: true, size: 24 });
+  button('Zurück', W - 224, H - 56, 200, 46, () => go('map'), { size: 24, icon: icon('back') });
   if (!owned && !it.gift) { ctx.font = 'bold 15px sans-serif'; const lbl = 'Vorschau – noch nicht gekauft', pw = 214; rr(262 - pw / 2, 462, pw, 28, 14); ctx.fillStyle = 'rgba(40,24,10,.78)'; ctx.fill(); txt(lbl, 262, 477, 15, '#ffe9b0'); }
   if (shopConfirm) { // are you sure? nothing is bought by accident
     buttons.length = 0; const sc = shopConfirm;
@@ -4484,6 +4590,48 @@ function leatherCover() {
   rr(24, 26, W - 44, H - 40, 14); ctx.fillStyle = '#d9c597'; ctx.fill();
   rr(20, 20, W - 40, H - 40, 14); ctx.fillStyle = vgrad(20, H, '#f8ebc8', '#f3e2bf', '#e8d4a4'); ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#a88a52'; ctx.stroke();
 }
+// ---------- Dino-Buch "Steckbrief": era, diet and a size comparison with a child ----------
+const STECK = [
+  { l: 'Lebte vor', e: '68 Mio. Jahren', d: 'Fleisch', dk: 'meat', m: 12 }, { l: 'Lebte vor', e: '68 Mio. Jahren', d: 'Pflanzen', dk: 'leaf', m: 9 }, { l: 'Lebte vor', e: '150 Mio. Jahren', d: 'Pflanzen', dk: 'leaf', m: 25 },
+  { l: 'Lebte vor', e: '200 Mio. Jahren', d: 'Plankton', dk: 'fish', m: 0.3 }, { l: 'Lebte vor', e: '75 Mio. Jahren', d: 'Quallen', dk: 'fish', m: 4 }, { l: 'Entstanden vor', e: '100 Mio. Jahren', d: '–', dk: 'none', m: 0.5 },
+  { l: 'Lebte vor', e: '75 Mio. Jahren', d: 'Fleisch', dk: 'meat', m: 2 }, { l: 'Lebte vor', e: '85 Mio. Jahren', d: 'Fische', dk: 'fish', m: 6, ml: 'Spannweite' }, { l: 'Lebte vor', e: '150 Mio. Jahren', d: 'Pflanzen', dk: 'leaf', m: 9 },
+  { l: 'Lebte vor', e: '200 Mio. Jahren', d: 'Fische', dk: 'fish', m: 3 }, { l: 'Lebte vor', e: '75 Mio. Jahren', d: 'Fleisch', dk: 'meat', m: 12 }, { l: 'Lebte vor', e: '200 Mio. Jahren', d: 'Fische', dk: 'fish', m: 4 },
+  { l: 'Lebte vor', e: '10 000 Jahren', d: 'Pflanzen', dk: 'leaf', m: 4 }, { l: 'Lebte vor', e: '68 Mio. Jahren', d: 'Pflanzen', dk: 'leaf', m: 7 }, { l: 'Gelegt vor', e: '70 Mio. Jahren', d: '–', dk: 'none', m: 0.3, ml: 'Grösse' },
+  { l: 'Lebte vor', e: '68 Mio. Jahren', d: 'Fleisch', dk: 'meat', m: 10, ml: 'Spannweite' }, { l: 'Lebte vor', e: '150 Mio. Jahren', d: 'Insekten', dk: 'meat', m: 0.5 }, { l: 'Lebte vor', e: '70 Mio. Jahren', d: 'Pflanzen', dk: 'leaf', m: 10 },
+  { l: 'Lebte vor', e: '95 Mio. Jahren', d: 'Fische', dk: 'fish', m: 14 }, { l: 'Lebt', e: 'heute noch', d: 'Alles', dk: 'all', m: 0.5 }, { l: 'Schlug ein vor', e: '66 Mio. Jahren', d: '–', dk: 'none', m: 0, txt: 'Etwa 10 km breit – so hoch wie der Mount Everest!' },
+  { l: 'Gibt es seit', e: '300 Mio. Jahren', d: 'Sonne', dk: 'none', m: 30, ml: 'Höhe' }, { l: 'Lebte vor', e: '110 Mio. Jahren', d: 'Pflanzen', dk: 'leaf', m: 1 }, { l: 'Lebte vor', e: '130 Mio. Jahren', d: 'Fleisch', dk: 'meat', m: 1 },
+];
+function drawKid(x, base, h) { // a child silhouette, h pixels tall, standing at x
+  const u = h / 100; ctx.save(); ctx.translate(x, base); ctx.scale(u, u);
+  ctx.fillStyle = '#2f4a78'; rr(-9, -42, 7, 42, 3); ctx.fill(); rr(2, -42, 7, 42, 3); ctx.fill();
+  ctx.fillStyle = '#d8483a'; rr(-13, -72, 26, 34, 8); ctx.fill(); ctx.fillStyle = '#f0c9a0'; circle(0, -84, 13, '#f0c9a0'); ctx.fillStyle = '#e9c25e'; ctx.beginPath(); ctx.arc(0, -88, 13.5, Math.PI, 0); ctx.fill(); circle(-14, -82, 5, '#e9c25e'); circle(14, -82, 5, '#e9c25e');
+  ctx.strokeStyle = '#d8483a'; ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(-13, -66); ctx.lineTo(-20, -44); ctx.moveTo(13, -66); ctx.lineTo(20, -44); ctx.stroke(); ctx.restore();
+}
+function drawSizeRuler(x, y, w, h, st, th) {
+  rr(x, y, w, h, 14); ctx.fillStyle = 'rgba(255,250,235,.9)'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#b8a070'; ctx.stroke();
+  if (!st.m) { txt('Grösse im Vergleich', x + w / 2, y + 14, 14, '#8a6a3a', 'center', 'normal'); wrapLines(st.txt || '', w - 40, 17).forEach((l, i, a) => txt(l, x + w / 2, y + h / 2 + 6 + (i - (a.length - 1) / 2) * 22, 17, '#3b2410', 'center', 'normal')); return; }
+  const base = y + h - 12, sc = Math.min(36, (w - 70) / st.m), kidH = 1.4 * sc, len = st.m * sc, kx = x + 34;
+  txt('Grösse im Vergleich', x + w / 2, y + 14, 14, '#8a6a3a', 'center', 'normal');
+  ctx.strokeStyle = 'rgba(138,106,58,.35)'; ctx.lineWidth = 2; ctx.setLineDash([5, 5]); ctx.beginPath(); ctx.moveTo(x + 14, base); ctx.lineTo(x + w - 14, base); ctx.stroke(); ctx.setLineDash([]);
+  drawKid(kx, base, Math.max(14, kidH));
+  const bx = kx + 20, by = base - 20; rr(bx, by, Math.max(8, len), 18, 9); ctx.fillStyle = vgrad(by, by + 18, shade(th.sky[0], 1.25), shade(th.sky[0], 0.8)); ctx.fill(); ctx.lineWidth = 2.5; ctx.strokeStyle = '#2b1a0c'; ctx.stroke();
+  const m = st.m >= 10 ? Math.round(st.m) : String(st.m).replace('.', ','), kids = Math.max(1, Math.round(st.m / 1.4));
+  txt(`${st.ml || 'Länge'}: ${m} m`, x + w - 16, y + 31, 18, '#3b2410', 'right'); txt(st.m < 1 ? 'kleiner als ein Kind' : `so lang wie ${kids} ${kids === 1 ? 'Kind' : 'Kinder'}`, x + w - 16, y + 50, 14, '#6b4a2b', 'right', 'normal');
+}
+function drawHourglass(x, y) { ctx.fillStyle = '#e8c070'; ctx.strokeStyle = '#6b4a2b'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x - 8, y - 10); ctx.lineTo(x + 8, y - 10); ctx.lineTo(x + 1.5, y); ctx.lineTo(x + 8, y + 10); ctx.lineTo(x - 8, y + 10); ctx.lineTo(x - 1.5, y); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#c98a3a'; ctx.beginPath(); ctx.moveTo(x - 5, y + 9); ctx.lineTo(x + 5, y + 9); ctx.lineTo(x, y + 3); ctx.fill(); }
+function drawDietIcon(k, x, y) {
+  ctx.save(); ctx.translate(x, y); ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  if (k === 'leaf' || k === 'all') { ctx.save(); if (k === 'all') ctx.translate(-5, 0); ctx.fillStyle = '#5cb85c'; ctx.strokeStyle = '#2e7d32'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-8, 8); ctx.quadraticCurveTo(-10, -8, 8, -9); ctx.quadraticCurveTo(10, 8, -8, 8); ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.moveTo(-8, 8); ctx.lineTo(5, -5); ctx.stroke(); ctx.restore(); }
+  if (k === 'meat' || k === 'all') { ctx.save(); if (k === 'all') ctx.translate(7, 2); ctx.fillStyle = '#c9603a'; ctx.strokeStyle = '#7a3418'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(-2, -2, 8, 6, -0.6, 0, 7); ctx.fill(); ctx.stroke(); ctx.strokeStyle = '#f4ecd8'; ctx.lineWidth = 3.5; ctx.beginPath(); ctx.moveTo(3, 3); ctx.lineTo(9, 9); ctx.stroke(); circle(10, 10, 2.6, '#f4ecd8'); ctx.restore(); }
+  if (k === 'fish') { ctx.fillStyle = '#4f9ad8'; ctx.strokeStyle = '#2a5a8a'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(-1, 0, 9, 6, 0, 0, 7); ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.moveTo(7, 0); ctx.lineTo(13, -6); ctx.lineTo(13, 6); ctx.closePath(); ctx.fill(); ctx.stroke(); circle(-5, -1.5, 1.6, '#fff'); }
+  if (k === 'none') { ctx.strokeStyle = '#a09070'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(-7, 0); ctx.lineTo(7, 0); ctx.stroke(); }
+  ctx.restore();
+}
+function steckChip(x, y, w, label, value, icon) {
+  rr(x, y + 2, w, 42, 12); ctx.fillStyle = 'rgba(0,0,0,.12)'; ctx.fill(); rr(x, y, w, 42, 12); ctx.fillStyle = '#fffaf0'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#b8a070'; ctx.stroke();
+  icon(x + 22, y + 21); txt(label, x + 42, y + 13, 12, '#8a6a3a', 'left', 'normal');
+  let fs = 16; setFont(fs); while (ctx.measureText(value).width > w - 50 && fs > 10) { fs--; setFont(fs); } txt(value, x + 42, y + 30, fs, '#2b1a00', 'left');
+}
 function foil(x, y, w, h, r, t) { // diagonal shimmer on found cards
   ctx.save(); rr(x, y, w, h, r); ctx.clip(); const u = ((t * 0.35) % 1.6) - 0.3, gx = x + u * (w + h);
   const g = ctx.createLinearGradient(gx - 30, y, gx + 30, y + h); g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(0.5, 'rgba(255,255,255,.35)'); g.addColorStop(1, 'rgba(255,255,255,0)'); ctx.fillStyle = g; ctx.fillRect(x, y, w, h); ctx.restore();
@@ -4509,13 +4657,15 @@ function drawBook() {
   }
   if (bookSel < 0) button('Zurück', W / 2 - 100, H - 62, 200, 46, () => go('map'), { size: 24, icon: icon('back') });
   else {
-    const th = WORLDS[LEVELS[bookSel].wi];
+    const th = WORLDS[LEVELS[bookSel].wi], st = STECK[bookSel];
     panel(90, 56, 780, 420);
-    ctx.save(); rr(120, 90, 340, 250, 18); ctx.clip(); ctx.fillStyle = vgrad(90, 340, shade(th.sky[1], 1.2), th.sky[1]); ctx.fillRect(120, 90, 340, 250); ctx.restore(); rr(120, 90, 340, 250, 18); ctx.lineWidth = 4; ctx.strokeStyle = '#fffaf0'; ctx.stroke(); rr(118, 88, 344, 254, 20); ctx.lineWidth = 2; ctx.strokeStyle = '#8a6a3a'; ctx.stroke();
-    drawCardArt(bookSel, 290, 215, 320, false); foil(120, 90, 340, 250, 18, T);
-    txt(FACTS[bookSel].name, 500, 126, FACTS[bookSel].name.length > 11 ? 32 : 38, '#3b2410', 'left'); txt(`Tür ${bookSel + 1} · ${LEVELS[bookSel].title}`, 500, 160, 18, '#8a6a3a', 'left', 'normal');
-    wrapLines(FACTS[bookSel].text, 330, 22).forEach((l, i) => txt(l, 500, 200 + i * 30, 22, '#3b2410', 'left', 'normal'));
-    button('Schliessen', W / 2 - 110, 392, 220, 56, () => { bookSel = -1; }, { icon: icon('check') });
+    ctx.save(); rr(120, 88, 340, 186, 18); ctx.clip(); ctx.fillStyle = vgrad(88, 274, shade(th.sky[1], 1.2), th.sky[1]); ctx.fillRect(120, 88, 340, 186); ctx.restore(); rr(120, 88, 340, 186, 18); ctx.lineWidth = 4; ctx.strokeStyle = '#fffaf0'; ctx.stroke(); rr(118, 86, 344, 190, 20); ctx.lineWidth = 2; ctx.strokeStyle = '#8a6a3a'; ctx.stroke();
+    drawCardArt(bookSel, 290, 181, 262, false); foil(120, 88, 340, 186, 18, T);
+    drawSizeRuler(120, 284, 340, 96, st, th);
+    txt(FACTS[bookSel].name, 500, 118, FACTS[bookSel].name.length > 11 ? 32 : 38, '#3b2410', 'left'); txt(`Tür ${bookSel + 1} · ${LEVELS[bookSel].title}`, 500, 150, 18, '#8a6a3a', 'left', 'normal');
+    wrapLines(FACTS[bookSel].text, 340, 21).forEach((l, i) => txt(l, 500, 184 + i * 27, 21, '#3b2410', 'left', 'normal'));
+    if (st.d === '–') steckChip(500, 314, 350, st.l, st.e, (x, y) => drawHourglass(x, y)); else { steckChip(500, 314, 172, st.l, st.e, (x, y) => drawHourglass(x, y)); steckChip(678, 314, 172, 'Frisst', st.d, (x, y) => drawDietIcon(st.dk, x, y)); } steckChip(500, 362, 350, 'Zuhause in der Welt', th.name, (x, y) => { ctx.save(); rr(x - 13, y - 9, 26, 18, 4); ctx.clip(); drawThemeThumb(LEVELS[bookSel].wi, x - 13, y - 9, 26, 18); ctx.restore(); });
+    button('Schliessen', W / 2 - 110, 420, 220, 46, () => { bookSel = -1; }, { icon: icon('check'), size: 24 });
     buttons.unshift({ x: 0, y: 0, w: W, h: H, cb: () => { bookSel = -1; } });
   }
 }
@@ -4701,6 +4851,7 @@ function frame(now) {
   else if (scene === 'map') drawMap();
   else if (scene === 'book') drawBook();
   else if (scene === 'board') drawBoard();
+  else if (scene === 'tmap') drawTMap();
   else if (scene === 'shop') drawShop();
   else if (scene === 'sheet') drawSheet();
   else if (scene === 'play') drawPlay();

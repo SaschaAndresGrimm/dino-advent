@@ -35,6 +35,8 @@ Run both check and test before every commit. Playwright needs `npx playwright in
 
 - **Collection milestones:** all 72 medals (`medalTotal()`) set `save.master`, grant and equip the shop items with `gift: 25` (Dino-Meister skin, Meister-Krone) and start a map celebration (`mapFW`, dialog). A world's doors get a gold frame when `worldMedalsDone(wi)`. The 4th treasure triggers `chestParty()`; a full chest can be tapped to replay it. `gift: 25` in `SKINS`/`HATS` means "earned with 72 medals", never granted by a door.
 
+- **Shop, Steckbrief, Schatzkarte:** the shop scene lives in `shopScene()`/`shopCounter()` and the 100 px item cards in `drawShop` (status pills: owned, Tür N, price). The Dino-Buch detail view reads `STECK[i]` (era, diet, size in metres; `m: 0` shows a text instead of the ruler) - add an entry whenever a card is added. `drawTMap` shows the three torn map pieces (days 6, 12, 18 via `tmHave`); after a boss follow-up dialog `tmapNew` triggers the reveal animation.
+
 ## Testing pitfalls
 - `tests/levels.spec.js` has a bot (`PLAY`) that must be able to finish every level. New obstacles usually need a rule there. If it fails with `done:false, steps:60000` the bot is stuck: step it in small chunks and print position, nearby pits/platforms/obstacles.
 - Tests run with service workers blocked and a fake clock only where they say so (`calendar.spec.js`).
