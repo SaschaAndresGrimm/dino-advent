@@ -476,3 +476,23 @@ test('settings: separate music and effect volume, calm mode removes shake', asyn
   expect(r).toEqual({ vol: [4, 0], calm: true });
   expect(game.errors).toEqual([]);
 });
+
+test('72 medals unlock the Dino-Meister rewards once; per-world gold frame logic; full chest party', async ({ game }) => {
+  await game.open({ lvM: Array.from({ length: 24 }, (_, i) => (i === 23 ? [1, 1, 0] : [1, 1, 1])), lvDone: Array(24).fill(1), treasures: [1, 1, 1, 0] });
+  const r = await game.eval(() => {
+    const d = window.__dino, S = d.save;
+    const before = { total: d.medalTotal(), master: S.master, world4: d.worldMedalsDone(4), world0: d.worldMedalsDone(0) };
+    d.startLevel(23); const G = d.G; G.startT = 0; G.coach = null; G.L.coach.forEach(c => (c.done = true)); G.eggsGot = [true, true, true]; G.hits = 0; G.amber = 999; d.finishLevel();
+    const after = { total: d.medalTotal(), master: S.master, owned: [S.owned.skin.length, S.owned.hat.length], eq: S.equip };
+    const owned10 = S.owned.skin.includes(S.equip.skin) && S.owned.hat.includes(S.equip.hat);
+    d.startLevel(23); d.finishLevel(); // a second finish must not grant twice
+    const again = [S.owned.skin.length, S.owned.hat.length];
+    return { before, after, owned10, again, chestBefore: d.chestFull() };
+  });
+  expect(r.before).toEqual({ total: 71, master: 0, world4: false, world0: true });
+  expect(r.after.total).toBe(72); expect(r.after.master).toBe(1); expect(r.owned10).toBe(true);
+  expect(r.again).toEqual(r.after.owned); expect(r.chestBefore).toBe(false);
+  const p = await game.eval(() => { const d = window.__dino; d.save.treasures[3] = 1; d.chestParty(); return { full: d.chestFull(), t: d.chestPartyT }; });
+  expect(p.full).toBe(true); expect(p.t).toBeGreaterThan(6);
+  expect(game.errors).toEqual([]);
+});

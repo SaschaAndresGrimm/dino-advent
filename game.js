@@ -38,6 +38,7 @@ if (!save.equip) save.equip = { skin: 0, hat: 0, fire: 0 };
 if (!save.best) save.best = []; while (save.best.length < 8) save.best.push(0);
 if (save.volMusic == null) save.volMusic = 4; if (save.volSfx == null) save.volSfx = 4; if (!save.calm) save.calm = false;
 if (!save.dailyLast) save.dailyLast = 0; if (!save.dailyStreak) save.dailyStreak = 0; if (!save.dailyBoardDay) save.dailyBoardDay = 0; if (!save.installHint) save.installHint = false;
+if (!save.master) save.master = 0; if (!save.masterNew) save.masterNew = 0; if (!save.chestSeen) save.chestSeen = 0;
 if (!save.storySeen) save.storySeen = {}; if (!save.afterNew) save.afterNew = 0; if (!save.oliName) save.oliName = '';
 if (!save.board) save.board = []; while (save.board.length < 9) save.board.push([]); if (!save.nick) save.nick = '';
 function writeSave() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) {} }
@@ -476,6 +477,8 @@ const DAY_AFTER = {
   18: [{ who: 'goetti', text: 'Alle drei Stücke! Zusammengelegt zeigen sie den Weg: über den Vulkan, und dahinter liegt die Höhle des Krallenkönigs.' }, { who: 'chili', text: 'Mümmel! Auf zum Vulkan!' }],
 };
 const TEASERS = { 5: 'Morgen wartet der Krabbenkönig mit dem ersten Kartenstück!', 11: 'Morgen taucht das Seeungeheuer auf …', 17: 'Morgen: die Adlerkönigin! Sie hütet das letzte Kartenstück.', 23: 'Morgen ist der grosse Tag – der Krallenkönig wartet!' };
+const medalTotal = () => save.lvM.flat().reduce((a, b) => a + b, 0);
+const worldMedalsDone = wi => LEVELS.filter(l => l.wi === wi).every(l => save.lvM[l.li].every(Boolean));
 function launchLevel(i) { // first time a day starts, Goetti briefs the player (a short dialog on the map)
   const day = i + 1, lines = DAY_STORY[day];
   if (lines && !save.storySeen[day]) { save.storySeen[day] = 1; writeSave(); startDialog(lines, () => startLevel(i)); } else startLevel(i);
@@ -521,10 +524,11 @@ const SKINS = [
   { n: 'Mint', gift: 17, body: '#7fd6a6', dark: '#4aa070', belly: '#f4ffe8' },
   { n: 'Nacht', gift: 20, body: '#2f3b6e', dark: '#1a2248', belly: '#9aa8e8' },
   { n: 'Regenbogen', gift: 23, rainbow: true, body: '#e84a6f', dark: '#8a2a4a', belly: '#fff0f8' },
+  { n: 'Dino-Meister', gift: 25, rainbow: 'gold', body: '#ffd34d', dark: '#b07a10', belly: '#fff7c8' },
 ];
 const HATS = [{ n: 'Auto', cost: 0 }, { n: 'Mütze', cost: 150, k: 'santa' }, { n: 'Cowboy', cost: 300, k: 'cowboy' }, { n: 'Krone', cost: 700, k: 'crown' },
   { n: 'Strohhut', gift: 2, k: 'straw' }, { n: 'Pirat', gift: 4, k: 'pirate' }, { n: 'Taucherbrille', gift: 6, k: 'goggles' }, { n: 'Kochmütze', gift: 8, k: 'chef' }, { n: 'Zylinder', gift: 10, k: 'tophat' },
-  { n: 'Bergmütze', gift: 13, k: 'beanie' }, { n: 'Zauberhut', gift: 14, k: 'wizard' }, { n: 'Propeller', gift: 16, k: 'propeller' }, { n: 'Rentier', gift: 18, k: 'antlers' }, { n: 'Heiligenschein', gift: 22, k: 'halo' }, { n: 'Goldkrone', gift: 24, k: 'goldcrown' }];
+  { n: 'Bergmütze', gift: 13, k: 'beanie' }, { n: 'Zauberhut', gift: 14, k: 'wizard' }, { n: 'Propeller', gift: 16, k: 'propeller' }, { n: 'Rentier', gift: 18, k: 'antlers' }, { n: 'Heiligenschein', gift: 22, k: 'halo' }, { n: 'Goldkrone', gift: 24, k: 'goldcrown' }, { n: 'Meister-Krone', gift: 25, k: 'mastercrown' }];
 const FIRES = [
   { n: 'Orange', cost: 0, a: '255,190,60', b: '255,80,10', c: '255,40,0', fl: ['#fff3b0', '#ffa628', '#ff4a10'], ball: '#ff8a20', glow: '255,140,30' },
   { n: 'Blau', cost: 200, a: '130,200,255', b: '40,100,255', c: '0,30,200', fl: ['#e6f4ff', '#5fb0ff', '#2a50ff'], ball: '#4a90ff', glow: '80,150,255' },
@@ -601,6 +605,12 @@ function drawHat(hat, x, HY) {
   } else if (hat === 'cowboy') {
     ell(x + 1, HY + 7, 20, 4.8, -0.06, '#7a4a22'); ctx.fillStyle = '#9a6330'; ctx.beginPath(); ctx.moveTo(x - 13, HY + 7); ctx.quadraticCurveTo(x - 14, HY - 13, x + 1, HY - 12); ctx.quadraticCurveTo(x + 16, HY - 13, x + 15, HY + 7); ctx.closePath(); ctx.fill();
     ctx.strokeStyle = '#5a3416'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(x - 2, HY - 11); ctx.quadraticCurveTo(x + 1, HY - 6, x + 4, HY - 11); ctx.stroke(); ctx.fillStyle = '#5a3416'; ctx.fillRect(x - 13, HY + 1, 28, 3);
+  } else if (hat === 'mastercrown') {
+    ctx.save(); ctx.translate(x + 1, HY + 8); ctx.scale(1.35, 1.35); ctx.translate(-(x + 1), -(HY + 8));
+    const mg = ctx.createRadialGradient(x + 1, HY - 4, 2, x + 1, HY - 4, 26); mg.addColorStop(0, `rgba(255,240,150,${0.55 + 0.2 * Math.sin(T * 4)})`); mg.addColorStop(1, 'rgba(255,230,120,0)'); ctx.fillStyle = mg; ctx.beginPath(); ctx.arc(x + 1, HY - 4, 26, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#ffd34d'; ctx.beginPath(); ctx.moveTo(x - 13, HY + 8); ctx.lineTo(x - 15, HY - 9); ctx.lineTo(x - 8, HY - 2); ctx.lineTo(x - 3, HY - 12); ctx.lineTo(x + 1, HY - 3); ctx.lineTo(x + 5, HY - 12); ctx.lineTo(x + 10, HY - 2); ctx.lineTo(x + 17, HY - 9); ctx.lineTo(x + 15, HY + 8); ctx.closePath(); ctx.fill(); ctx.strokeStyle = '#8a5a00'; ctx.lineWidth = 1.5; ctx.stroke();
+    ctx.fillStyle = '#e8a317'; ctx.fillRect(x - 13, HY + 4, 29, 4);
+    circle(x + 1, HY + 1, 2.6, '#40c4ff'); circle(x - 7, HY + 3, 1.8, '#e53935'); circle(x + 9, HY + 3, 1.8, '#69f0ae'); for (const [px, py] of [[x - 15, HY - 9], [x - 3, HY - 12], [x + 5, HY - 12], [x + 17, HY - 9]]) circle(px, py, 2.3, '#fff'); drawStar(x + 1, HY - 17, 3.8, '#fff'); ctx.restore();
   } else if (hat === 'goldcrown') {
     ctx.save(); ctx.translate(x + 1, HY + 8); ctx.scale(1.25, 1.25); ctx.translate(-(x + 1), -(HY + 8));
     ctx.fillStyle = '#ffe066'; ctx.beginPath(); ctx.moveTo(x - 13, HY + 8); ctx.lineTo(x - 14, HY - 8); ctx.lineTo(x - 7, HY - 1); ctx.lineTo(x + 1, HY - 13); ctx.lineTo(x + 9, HY - 1); ctx.lineTo(x + 16, HY - 8); ctx.lineTo(x + 15, HY + 8); ctx.closePath(); ctx.fill(); ctx.strokeStyle = '#a67c10'; ctx.lineWidth = 1.6; ctx.stroke();
@@ -664,7 +674,7 @@ function rexMouth(duck) {
 function drawRex(x, y, s, ph, jaw, o = {}) {
   ctx.save(); ctx.translate(x, y); ctx.scale(o.flip ? -s : s, s);
   if (o.alpha != null) ctx.globalAlpha = o.alpha;
-  const rbH = o.rainbow ? (T * 60) % 360 : 0, b0 = o.rainbow ? hslHex(rbH, 68, 52) : (o.body || '#2f9e5f'), d0 = o.rainbow ? hslHex(rbH, 68, 34) : (o.dark || '#1f7442'), belly0 = o.belly || '#f3e3a8', plate = o.spike || '#eaa43c';
+  const gold = o.rainbow === 'gold', rbH = gold ? 44 + 5 * Math.sin(T * 3) : o.rainbow ? (T * 60) % 360 : 0, b0 = gold ? hslHex(rbH, 95, 56 + 9 * Math.sin(T * 4)) : o.rainbow ? hslHex(rbH, 68, 52) : (o.body || '#2f9e5f'), d0 = gold ? hslHex(rbH, 85, 36) : o.rainbow ? hslHex(rbH, 68, 34) : (o.dark || '#1f7442'), belly0 = o.belly || '#f3e3a8', plate = o.spike || '#eaa43c';
   const vyn = clamp((o.vy || 0) / 900, -1, 1), hurt = o.hurt || 0;
   if (hurt > 0) { jaw = Math.max(jaw, 0.3 * hurt); ctx.rotate(Math.sin(T * 45) * 0.045 * hurt - 0.07 * hurt); } // ouch: wobble, open mouth
   const sq = (o.sq || 0) - 0.012 * Math.sin(T * 2.2); // + squash, - stretch, plus breathing
@@ -2205,8 +2215,14 @@ function go(s) {
   settingsOpen = false;
   if (scene === 'shop' && s !== 'shop' && save.newGifts.length) { save.newGifts = []; writeSave(); }
   scene = s; shopConfirm = null; endlessPick = false; doorOverlay = null; parentMode = false; titlePress = 0; fadeT = 1; if (s === 'shop') { shopTab = 0; shopPage = 0; shopSel = save.equip.skin; shopTalk = { t: 4, text: 'Willkommen! Such dir etwas aus.' }; } parts = []; dialog = null; toasts = [];
+  if (s === 'map' && save.masterNew && save.treasureNew < 0 && !save.afterNew) { save.masterNew = 0; writeSave(); mapFW = 9; SFX.right(); startDialog([
+    { who: 'goetti', text: 'Unglaublich, {oli}! Alle 72 Medaillen! Du bist der grösste Dino-Meister der Welt!' },
+    { who: 'mami', text: 'Wir sind so stolz auf dich, {oli}!' },
+    { who: 'papi', text: 'Und {rex} strahlt wie Gold!' },
+    { who: 'goetti', text: 'Dafür habe ich etwas ganz Besonderes: den Dino-Meister-Anzug und die Meister-Krone. {rex} trägt sie schon – im Laden kannst du sie jederzeit wechseln!' },
+  ]); }
   if (s === 'map' && save.afterNew > 0 && save.treasureNew < 0) { const d = save.afterNew; save.afterNew = 0; writeSave(); startDialog(DAY_AFTER[d] || []); }
-  if (s === 'map' && save.treasureNew >= 0) { const k = save.treasureNew; save.treasureNew = -1; writeSave(); chestPop[k] = 1; startDialog([{ who: k === 3 ? 'kiwi' : 'goetti', text: k === 3 ? 'Kiwi! Kiwi! (Kiwi hüpft vor Freude.)' : TREASURES[k].line }].concat(k === 3 ? [{ who: 'goetti', text: TREASURES[3].line }] : [])); }
+  if (s === 'map' && save.treasureNew >= 0) { const k = save.treasureNew; save.treasureNew = -1; writeSave(); chestPop[k] = 1; startDialog([{ who: k === 3 ? 'kiwi' : 'goetti', text: k === 3 ? 'Kiwi! Kiwi! (Kiwi hüpft vor Freude.)' : TREASURES[k].line }].concat(k === 3 ? [{ who: 'goetti', text: TREASURES[3].line }] : []), () => { if (chestFull() && !save.chestSeen) { save.chestSeen = 1; writeSave(); startDialog([{ who: 'goetti', text: 'Meine Schatzkiste ist wieder voll! Gitarre, Velo, Angel und Kiwi – danke, {oli}!' }, { who: 'kiwi', text: 'Kiwi! Kiwi! (Kiwi macht einen Freudentanz.)' }], () => chestParty()); } }); }
 }
 
 function startLevel(arg, endless) { // endless: arg = theme index. otherwise arg = calendar level index 0..23
@@ -2441,6 +2457,7 @@ function finishLevel() {
   G.newTreasure = tk >= 0 && G.L.treasure.got && !save.treasures[tk];
   if (G.newTreasure) { save.treasures[tk] = 1; save.treasureNew = tk; }
   if (DAY_AFTER[lv.day] && !wasDone) save.afterNew = lv.day;
+  if (!save.master && medalTotal() >= 72) { save.master = 1; save.masterNew = 1; const si = SKINS.findIndex(x => x.gift === 25), hi = HATS.findIndex(x => x.gift === 25); if (!save.owned.skin.includes(si)) save.owned.skin.push(si); if (!save.owned.hat.includes(hi)) save.owned.hat.push(hi); save.equip.skin = si; save.equip.hat = hi; save.newGifts.push('skin:' + si, 'hat:' + hi); }
   save.amber += G.amber; writeSave();
   G.overlay = { type: 'complete', t: 0, popped: [], cpopped: [] }; SFX.right();
 }
@@ -3761,6 +3778,14 @@ function drawStory() {
 }
 
 const chestPop = [0, 0, 0, 0];
+const chestFull = () => save.treasures.every(Boolean);
+let chestPartyT = 0, mapFW = 0;
+function chestParty() { // all four treasures are back: the chest glows, the treasures dance and Goetti's song plays
+  chestPartyT = 7; SFX.right();
+  [[0, 523], [0.18, 659], [0.36, 784], [0.54, 1047], [0.9, 988], [1.08, 784], [1.26, 659], [1.44, 784], [1.8, 1047], [2.0, 1319], [2.2, 1047], [2.4, 784]].forEach(([d, f]) => tone(f, 0.28, 'triangle', 0.09, null, d));
+  [[0, 262], [0.9, 196], [1.8, 262], [2.4, 330]].forEach(([d, f]) => tone(f, 0.7, 'sine', 0.06, null, d));
+  for (const [d, f] of [[2.9, 2100], [3.1, 2650]]) { tone(f, 0.3, 'sine', 0.1, null, d); }
+}
 function playTreasure(i) {
   if (!save.treasures[i]) { SFX.wrong(); toast(i === 3 ? 'Wo ist Kiwi nur? Vielleicht am Vulkan …' : 'Das hat Goetti noch verloren – hinter Tür ' + ([3, 9, 15, 21][i]) + '!', '#ffb4a8'); return; }
   chestPop[i] = 1; toast(TREASURES[i].tap, '#ffd34d');
@@ -3772,7 +3797,11 @@ function playTreasure(i) {
 function drawChest() {
   // Goetti's treasure chest: open lid, gold hoard, the four lost treasures sitting inside
   { const cx0 = 262, cw = 420, cy0 = H - 122, rim = cy0 + 56;
+    if (chestFull()) buttons.push({ x: cx0, y: cy0 - 10, w: cw, h: 130, silent: true, cb: () => chestParty() }); // tap the full chest to celebrate again
     shadow(cx0 + cw / 2, H - 8, cw * 0.55, 0.35);
+    if (chestPartyT > 0) { chestPartyT -= DT; const u = clamp(chestPartyT / 7, 0, 1), gl = ctx.createRadialGradient(cx0 + cw / 2, rim - 10, 10, cx0 + cw / 2, rim - 10, 260); gl.addColorStop(0, `rgba(255,236,150,${0.55 * Math.min(1, u * 4)})`); gl.addColorStop(1, 'rgba(255,236,150,0)'); ctx.fillStyle = gl; ctx.fillRect(cx0 - 120, rim - 250, cw + 240, 330);
+      for (let i = 0; i < 4; i++) chestPop[i] = Math.max(chestPop[i], 0.5 + 0.5 * Math.sin(T * 9 + i * 1.6));
+      if (Math.random() < 0.35) burst(cx0 + 40 + Math.random() * (cw - 80), rim - 30, 4, ['#ffd740', '#fff', '#ff8a9a', '#69f0ae', '#40c4ff'], 260, 380, 5, 1); }
     // open lid, seen from the inside (red velvet, wood rim, gold trim)
     ctx.beginPath(); ctx.moveTo(cx0 + 18, rim); ctx.lineTo(cx0 + 10, cy0 + 22); ctx.quadraticCurveTo(cx0 + cw / 2, cy0 - 18, cx0 + cw - 10, cy0 + 22); ctx.lineTo(cx0 + cw - 18, rim); ctx.closePath();
     ctx.fillStyle = '#7b4a28'; ctx.fill(); ctx.lineWidth = 3.5; ctx.strokeStyle = '#2b1a0c'; ctx.stroke();
@@ -3866,6 +3895,7 @@ function drawDoor(i, today) {
   if (isToday) { ctx.save(); ctx.translate(14, 14); ctx.rotate(-0.35); rr(-24, -9, 48, 18, 5); ctx.fillStyle = '#e53935'; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = '#fff'; ctx.stroke(); txt('HEUTE', 0, 1, 11, '#fff'); ctx.restore(); }
   if (done) { rr(w / 2 - 36, h - 23, 72, 20, 10); ctx.fillStyle = 'rgba(30,18,8,.6)'; ctx.fill(); for (let k = 0; k < 3; k++) drawMedal(w / 2 - 22 + k * 22, h - 13, 7, k, save.lvM[i][k]); }
   if (lv.boss && open) { drawStar(14, h - 14, 9, '#ff6a3a'); }
+  if (open && worldMedalsDone(lv.wi)) { ctx.save(); ctx.shadowColor = '#ffd34d'; ctx.shadowBlur = 8 + 4 * Math.sin(T * 3 + i); ctx.strokeStyle = '#ffd34d'; ctx.lineWidth = 3.5; ctx.beginPath(); ctx.moveTo(0, h); ctx.lineTo(0, 22); ctx.quadraticCurveTo(0, 0, w / 2, 0); ctx.quadraticCurveTo(w, 0, w, 22); ctx.lineTo(w, h); ctx.stroke(); ctx.restore(); }
   ctx.restore();
   buttons.push({ x, y, w, h, cb: () => clickDoor(i) });
 }
@@ -4052,7 +4082,7 @@ function drawMap() { // the advent calendar
   otxt(today === 0 && save.dayOverride == null ? (left > 0 ? `Noch ${left} ${left === 1 ? 'Tag' : 'Tage'} bis zum 1. Dezember!` : 'Gleich geht es los!') : today >= 24 ? 'Alle Türen sind offen – frohe Weihnachten!' : fmt(`Heute: Tür ${today} – {rex} und Chili sind bereit!`), 32, 70, 19, '#fff', 'rgba(0,0,0,.7)', 5, 'left');
   buttons.push({ x: 20, y: 14, w: 330, h: 40, silent: true, cb: () => {} , hold: true });
   drawAmber(W - 210, 36, 14); otxt(String(save.amber), W - 188, 37, 24, '#ffe08a', 'rgba(0,0,0,.7)', 5, 'left');
-  drawMedal(W - 318, 44, 12, 1, true); otxt(`${save.lvM.flat().reduce((a, b) => a + b, 0)}/72`, W - 298, 37, 24, '#ffe08a', 'rgba(0,0,0,.7)', 5, 'left');
+  drawMedal(W - 318, 44, 12, 1, true); otxt(`${medalTotal()}/72`, W - 298, 37, 24, save.master ? '#fff6b0' : '#ffe08a', save.master ? '#8a5a00' : 'rgba(0,0,0,.7)', 5, 'left'); if (save.master) { drawStar(W - 336, 22, 9 + 1.5 * Math.sin(T * 5), '#ffd34d'); drawStar(W - 226 + 0, 20, 5 + Math.sin(T * 6 + 1), '#fff'); }
   drawChest();
   button(save.muted ? 'Ton aus' : 'Ton', W - 130, 16, 112, 42, () => { settingsOpen = true; }, { size: 18, color: '#e0d2b0' });
   button('Dino-Buch', 24, H - 82, 210, 60, () => { bookSel = -1; go('book'); }, { icon: icon('book') });
@@ -4061,6 +4091,8 @@ function drawMap() { // the advent calendar
   if (save.lvDone.some(Boolean) || save.finished) { button('Endlos', W - 274, H - 150, 176, 56, () => { endlessPick = true; }, { color: '#9fd3ff', icon: icon('loop'), size: 24 }); button('', W - 92, H - 150, 68, 56, () => { boardTab = -1; go('board'); }, { color: '#ffe08a', icon: icon('trophy') }); }
   if (save.finished) button('Weihnachts-Ende', W - 274, H - 82, 250, 60, () => startEnding(), { color: '#e57373', textColor: '#fff', icon: icon('star'), size: 21 });
   if (endlessPick) drawEndlessPicker();
+  if (mapFW > 0) { mapFW -= DT; if (Math.random() < 0.09) { const c = ['#ff5252', '#ffd740', '#69f0ae', '#40c4ff', '#ea80fc', '#fff']; burst(100 + Math.random() * 760, 70 + Math.random() * 280, 36, [c[Math.floor(Math.random() * 6)], '#fff'], 300, 160, 5, 1.4); tone(220 + Math.random() * 220, 0.3, 'triangle', 0.04, 80); } }
+  drawParts(0);
   if (doorOverlay) drawDoorOverlay();
   if (parentMode) drawParentPanel();
   if (installHintVisible()) drawInstallHint();
@@ -4124,7 +4156,7 @@ function drawShop() {
     const j = i % PER, x = 440 + (j % 4) * 126, y = 168 + Math.floor(j / 4) * 96, w = 118, h = 88, owned = save.owned[key].includes(i), eq = save.equip[key] === i, cost = it.cost || 0, can = !it.gift && save.amber >= cost, sel = shopSel === i;
     if (sel) { rr(x - 4, y - 4, w + 8, h + 8, 16); ctx.fillStyle = 'rgba(255,211,77,.55)'; ctx.fill(); }
     ctx.save(); rr(x, y + 3, w, h, 14); ctx.fillStyle = 'rgba(0,0,0,.22)'; ctx.fill(); ctx.restore();
-    rr(x, y, w, h, 14); ctx.fillStyle = eq ? '#d4f2bd' : owned ? '#fffaf0' : it.gift ? '#e8e0f4' : can ? '#ffeab8' : '#e2d8c2'; ctx.fill(); ctx.lineWidth = sel ? 4 : 3; ctx.strokeStyle = sel ? '#e8a317' : eq ? '#2e7d32' : '#8a6a3a'; ctx.stroke();
+    rr(x, y, w, h, 14); ctx.fillStyle = eq ? '#d4f2bd' : owned ? '#fffaf0' : it.gift ? (it.gift === 25 ? '#fff0b8' : '#e8e0f4') : can ? '#ffeab8' : '#e2d8c2'; ctx.fill(); ctx.lineWidth = sel ? 4 : 3; ctx.strokeStyle = sel ? '#e8a317' : eq ? '#2e7d32' : '#8a6a3a'; ctx.stroke();
     ctx.save(); rr(x + 5, y + 5, w - 10, 46, 8); ctx.clip(); ctx.fillStyle = vgrad(y, y + 52, '#fffdf4', '#f0e2bf'); ctx.fillRect(x, y, w, 54);
     if (key === 'skin') { oRex(x + w / 2 + 2, y + 44, 0.2, 0.5, 0.05, { body: it.body, dark: it.dark, belly: it.belly, rainbow: it.rainbow }); }
     else if (key === 'hat') drawHatIcon(it.k, x + w / 2, y + 28, 0.95);
@@ -4134,8 +4166,8 @@ function drawShop() {
     if (!owned) ico('lock', x + w - 16, y + 16, 17);
     if (save.newGifts.includes(key + ':' + i)) { ctx.save(); ctx.translate(x + 22, y + 14); ctx.rotate(-0.3); rr(-18, -9, 36, 18, 5); ctx.fillStyle = '#e53935'; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = '#fff'; ctx.stroke(); txt('NEU', 0, 1, 12, '#fff'); ctx.restore(); }
     txt(it.n, x + w / 2, y + 62, it.n.length > 9 ? 12 : 14, '#3b2410');
-    if (eq) txt('Angelegt', x + w / 2, y + 77, 12, '#2e7d32'); else if (owned) txt('Gekauft', x + w / 2, y + 77, 12, '#6b4a2b', 'center', 'normal'); else if (it.gift) txt(`Tür ${it.gift}`, x + w / 2, y + 77, 13, '#6a4aa8'); else { drawAmber(x + w / 2 - 18, y + 76, 6); txt(String(cost), x + w / 2 - 8, y + 77, 14, can ? '#8a5a00' : '#a09070', 'left'); }
-    buttons.push({ x, y, w, h, cb: () => { shopSel = i; shopSay(owned ? (eq ? 'Das trägst du gerade.' : 'Das steht dir gut!') : it.gift ? `Das findest du hinter Tür ${it.gift} im Kalender!` : can ? `Das kostet ${cost} Bernstein.` : 'Sammle noch etwas Bernstein!'); } });
+    if (eq) txt('Angelegt', x + w / 2, y + 77, 12, '#2e7d32'); else if (owned) txt('Gekauft', x + w / 2, y + 77, 12, '#6b4a2b', 'center', 'normal'); else if (it.gift) txt(it.gift === 25 ? '72 Medaillen' : `Tür ${it.gift}`, x + w / 2, y + 77, 13, it.gift === 25 ? '#a07400' : '#6a4aa8'); else { drawAmber(x + w / 2 - 18, y + 76, 6); txt(String(cost), x + w / 2 - 8, y + 77, 14, can ? '#8a5a00' : '#a09070', 'left'); }
+    buttons.push({ x, y, w, h, cb: () => { shopSel = i; shopSay(owned ? (eq ? 'Das trägst du gerade.' : 'Das steht dir gut!') : it.gift ? (it.gift === 25 ? 'Sammle alle 72 Medaillen – dann gehört das dir!' : `Das findest du hinter Tür ${it.gift} im Kalender!`) : can ? `Das kostet ${cost} Bernstein.` : 'Sammle noch etwas Bernstein!'); } });
   });
   if (pages > 1) {
     button('‹', 440, 358, 56, 34, () => { shopPage = (shopPage + pages - 1) % pages; }, { size: 24, color: '#e0d2b0' });
@@ -4146,7 +4178,7 @@ function drawShop() {
   const it = list[shopSel], owned = save.owned[key].includes(shopSel), eq = save.equip[key] === shopSel, cost = it.cost || 0, can = !it.gift && save.amber >= cost, BY = 402;
   if (eq) button('Angelegt', 440, BY, 496, 56, () => {}, { disabled: true, icon: icon('check'), size: 26 });
   else if (owned) button('Anlegen', 440, BY, 496, 56, () => { save.equip[key] = shopSel; writeSave(); SFX.right(); shopSay('Sieht super aus!'); burst(262, 340, 18, ['#fff', '#ffe08a'], 250, 300, 5, 0.7); }, { color: '#9be38a', size: 26 });
-  else if (it.gift) button(`Aus Tür ${it.gift} im Kalender`, 440, BY, 496, 56, () => { SFX.wrong(); shopSay(`Öffne am ${it.gift}. Dezember die Tür ${it.gift}!`); }, { disabled: true, size: 22 });
+  else if (it.gift) button(it.gift === 25 ? 'Mit allen 72 Medaillen' : `Aus Tür ${it.gift} im Kalender`, 440, BY, 496, 56, () => { SFX.wrong(); shopSay(it.gift === 25 ? `Du hast ${medalTotal()} von 72 Medaillen.` : `Öffne am ${it.gift}. Dezember die Tür ${it.gift}!`); }, { disabled: true, size: 22 });
   else if (can) button(`Kaufen  ·  ${cost}`, 440, BY, 496, 56, () => { shopConfirm = { key, sel: shopSel, cost, name: it.n }; SFX.click(); }, { size: 26, icon: icon('amber') });
   else button('Zu wenig Bernstein', 440, BY, 496, 56, () => { SFX.wrong(); toast('Noch zu wenig Bernstein!', '#ffb4a8'); shopSay('Sammle noch etwas Bernstein!'); }, { disabled: true, size: 24 });
   button('Zurück', W - 224, H - 66, 200, 50, () => go('map'), { size: 24, icon: icon('back') });
@@ -4683,5 +4715,5 @@ function frame(now) {
 requestAnimationFrame(frame);
 
 // debug hook for testing in the browser console
-window.__dino = { startDaily, dailyWorld, dayKey, get dialog() { return dialog; }, DAY_STORY, DAY_AFTER, launchLevel, finishLevel, fmt, cleanNick, boardAdd, boardQualifies, boardAll, endRun, get scene() { return scene; }, get doorOverlay() { return doorOverlay; }, get buttons() { return buttons; }, pitFall, get lowfx() { return LOWFX; }, set lowfx(v) { LOWFX = v; }, get G() { return G; }, get E() { return E; }, save, startLevel, startEnding, go, jump, roar, updatePlay, updateEnding, answer, retry, tapEgg, openGate, playTreasure, drawPlay, duckDown, duckUp, shootFire, drawShop, buildSong, dash, LEVELS, adventDay, openDoorGift, giftFor, clickDoor, skillsFor, bookOpen(i) { bookSel = i; }, sheet(p) { sheetPage = p || 'hero'; scene = 'sheet'; } };
+window.__dino = { medalTotal, worldMedalsDone, chestFull, chestParty, get chestPartyT() { return chestPartyT; }, startDaily, dailyWorld, dayKey, get dialog() { return dialog; }, DAY_STORY, DAY_AFTER, launchLevel, finishLevel, fmt, cleanNick, boardAdd, boardQualifies, boardAll, endRun, get scene() { return scene; }, get doorOverlay() { return doorOverlay; }, get buttons() { return buttons; }, pitFall, get lowfx() { return LOWFX; }, set lowfx(v) { LOWFX = v; }, get G() { return G; }, get E() { return E; }, save, startLevel, startEnding, go, jump, roar, updatePlay, updateEnding, answer, retry, tapEgg, openGate, playTreasure, drawPlay, duckDown, duckUp, shootFire, drawShop, buildSong, dash, LEVELS, adventDay, openDoorGift, giftFor, clickDoor, skillsFor, bookOpen(i) { bookSel = i; }, sheet(p) { sheetPage = p || 'hero'; scene = 'sheet'; } };
 })();

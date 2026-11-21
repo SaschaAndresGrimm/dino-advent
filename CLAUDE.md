@@ -33,6 +33,8 @@ Run both check and test before every commit. Playwright needs `npx playwright in
 
 - **Settings and daily run:** `save.volMusic`/`save.volSfx` (0-5, 4 = normal) scale `tone()`/`noise()` through `bus` (`musicTick` sets `bus = 'music'`); `save.calm` disables screen shake and the red hit flash. Tages-Lauf = an endless run seeded by `dayKey()` (`startDaily`), world chosen by `dailyWorld()`, +20 amber and a streak once per day, daily board is `save.board[8]` and resets each day. The iPad install hint shows once on the map (`save.installHint`).
 
+- **Collection milestones:** all 72 medals (`medalTotal()`) set `save.master`, grant and equip the shop items with `gift: 25` (Dino-Meister skin, Meister-Krone) and start a map celebration (`mapFW`, dialog). A world's doors get a gold frame when `worldMedalsDone(wi)`. The 4th treasure triggers `chestParty()`; a full chest can be tapped to replay it. `gift: 25` in `SKINS`/`HATS` means "earned with 72 medals", never granted by a door.
+
 ## Testing pitfalls
 - `tests/levels.spec.js` has a bot (`PLAY`) that must be able to finish every level. New obstacles usually need a rule there. If it fails with `done:false, steps:60000` the bot is stuck: step it in small chunks and print position, nearby pits/platforms/obstacles.
 - Tests run with service workers blocked and a fake clock only where they say so (`calendar.spec.js`).
