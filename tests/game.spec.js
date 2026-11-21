@@ -64,7 +64,10 @@ test('shop: select to preview, buy only with enough amber, then equip and persis
   await page.waitForTimeout(300);
   const card = j => [440 + (j % 4) * 126 + 59, 168 + Math.floor(j / 4) * 96 + 44];  // item card centres (logical px)
   const buy = [440 + 248, 402 + 28];                                                  // the confirm button
-  await page.mouse.click(...card(1)); await page.mouse.click(...buy);               // Blau (120)
+  const yes = [480 + 85, 330 + 23];                                                  // 'Ja, kaufen!' in the confirmation
+  await page.mouse.click(...card(1)); await page.mouse.click(...buy);               // Blau (120): asks first, nothing is bought yet
+  expect(await game.eval(() => window.__dino.save.amber)).toBe(200);
+  await page.mouse.click(...yes);
   let r = await game.eval(() => ({ amber: window.__dino.save.amber, skin: window.__dino.save.equip.skin, owned: window.__dino.save.owned.skin }));
   expect(r).toEqual({ amber: 80, skin: 1, owned: [0, 1] });
   await page.mouse.click(...card(3)); await page.mouse.click(...buy);               // Gold (600): too expensive
