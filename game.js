@@ -23,7 +23,8 @@ window.addEventListener('resize', resize); resize();
 // Save game
 // =====================================================================
 const SAVE_KEY = 'olisDinoRettung.v1';
-let save = { rexName: '', babyName: '', unlocked: 0, eggs: [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], amber: 0, finished: false, muted: false, tutorialDone: false };
+let save = { rexName: '', babyName: '', unlocked: 0, eggs: [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], amber: 0, finished: false, muted: false, tutorialDone: false,
+  medals: [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], treasures: [0,0,0,0], treasureNew: -1 };
 try { const s = JSON.parse(localStorage.getItem(SAVE_KEY)); if (s) save = Object.assign(save, s); } catch (e) {}
 function writeSave() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) {} }
 
@@ -179,22 +180,43 @@ function drawToasts() {
 const WORLDS = [
   { name: 'Dschungel', speed: 270, segs: 24, patterns: ['rock', 'rock', 'pit', 'pit', 'amber', 'raptor', 'plat', 'boulder'],
     startTip: 'Willkommen im Dschungel! Sammle Bernstein und finde die 3 Dino-Eier.',
-    riddle: { q: 'Ich habe drei Hörner und einen grossen Knochenschild am Nacken. Wer bin ich?', a: ['Triceratops', 'T-Rex', 'Stegosaurus'], ok: 0 },
+    riddles: [
+      { q: 'Ein Bauer hat 10 Schafe. Alle bis auf 7 laufen weg. Wie viele Schafe hat er noch?', a: ['7', '3', '10'], ok: 0, why: '„Alle bis auf 7“ heisst: 7 Schafe bleiben da!' },
+      { q: 'Was ist schwerer: ein Kilo Federn oder ein Kilo Steine?', a: ['Beide gleich schwer', 'Die Steine', 'Die Federn'], ok: 0, why: 'Ein Kilo ist ein Kilo – egal ob Federn oder Steine!' },
+      { q: 'Fabios Mami hat zwei Kinder. Eines heisst Fabio. Wie heisst das andere?', a: ['Oli', 'Chili', 'Goetti'], ok: 0, why: 'Na klar – das bist DU!' },
+      { q: 'Ich habe drei Hörner, aber ich bin kein Nashorn. Wer bin ich?', a: ['Triceratops', 'Stegosaurus', 'T-Rex'], ok: 0, why: '„Tri“ heisst drei – Triceratops heisst „Drei-Horn-Gesicht“!' },
+    ],
     sky: ['#0f3b3a', '#8cc49b'], far: '#2f6a50', mid: '#1f4a38', ground: '#4a3020', top: '#3f9b3a', dots: '#3a2416', edge: '#2e1d12', plat: '#6b4a2b', platTop: '#4caf50',
     rock: '#7b6b5a', deco: '#173d2c', volcS: 0.45, volcCol: '#35544a', egg: '#f6e7b0', eggSpot: '#6aa84f' },
   { name: 'Canyon', speed: 295, segs: 30, patterns: ['rock', 'rock2', 'pit', 'pit', 'raptor', 'ptero', 'ptero', 'boulder', 'plat', 'amber'],
     startTip: 'Der heisse Canyon! Hier fliegen Flugsaurier herum.',
-    riddle: { q: 'Ich kann fliegen, bin aber gar kein Dinosaurier. Wer bin ich?', a: ['Pteranodon', 'Velociraptor', 'Stegosaurus'], ok: 0 },
+    riddles: [
+      { q: 'Ein Hahn legt ein Ei genau auf die Spitze vom Dach. Auf welche Seite rollt es?', a: ['Hähne legen keine Eier!', 'Nach links', 'Nach rechts'], ok: 0, why: 'Eier legen nur Hennen. Ein Hahn legt gar keine Eier!' },
+      { q: 'Du rennst um die Wette und überholst den Zweiten. Auf welchem Platz bist du jetzt?', a: ['Zweiter', 'Erster', 'Dritter'], ok: 0, why: 'Du nimmst seinen Platz ein – also bist du jetzt Zweiter!' },
+      { q: 'Was hat ganz viele Zähne, kann aber nicht beissen?', a: ['Ein Kamm', 'Ein Hai', 'Ein T-Rex'], ok: 0, why: 'Ein Kamm hat viele Zähne – aber er beisst nie!' },
+      { q: 'Ich kann fliegen und lebte bei den Dinos – aber ich bin gar kein Dinosaurier. Wer bin ich?', a: ['Pteranodon', 'Velociraptor', 'Stegosaurus'], ok: 0, why: 'Der Pteranodon war ein Flugsaurier – das ist kein Dinosaurier!' },
+    ],
     sky: ['#d9702e', '#f7d08a'], far: '#c0643a', mid: '#9a4a2a', ground: '#b5603a', top: '#d98b4e', dots: '#8e4526', edge: '#6e2f17', plat: '#8b4a2b', platTop: '#e0a060',
     rock: '#8d5a3b', deco: '#7a3a1e', volcS: 0.65, volcCol: '#9c5a3c', mesa: true, egg: '#cfe8ff', eggSpot: '#e07b39' },
   { name: 'Eiszeit', speed: 315, segs: 34, patterns: ['rock', 'rock2', 'pit', 'icicle', 'icicle', 'raptor', 'ptero', 'boulder', 'plat', 'amber'],
     startTip: 'Brrr, die Eiszeit! Hier riecht es schon ein bisschen nach Weihnachten…',
-    riddle: { q: 'Chili findet 7 Karotten und knabbert 3 davon auf. Wie viele Karotten sind noch übrig?', a: ['4', '3', '5'], ok: 0 },
+    riddles: [
+      { q: 'Wie viele Monate im Jahr haben 28 Tage?', a: ['Alle 12', 'Nur einer', 'Zwei'], ok: 0, why: 'Jeder Monat hat mindestens 28 Tage – also alle 12!' },
+      { q: 'Je mehr du davon wegnimmst, desto grösser wird es. Was ist es?', a: ['Ein Loch', 'Ein Schneemann', 'Ein Berg'], ok: 0, why: 'Je mehr Erde du wegschaufelst, desto grösser wird das Loch!' },
+      { q: 'Was wird immer nasser, je mehr es trocknet?', a: ['Ein Handtuch', 'Die Sonne', 'Ein Eiszapfen'], ok: 0, why: 'Das Handtuch trocknet dich ab – und wird dabei selbst nass!' },
+      { q: 'Chili frisst jeden Tag 2 Karotten. Wie viele Karotten sind das in einer ganzen Woche?', a: ['14', '12', '9'], ok: 0, why: 'Eine Woche hat 7 Tage: 7 mal 2 = 14 Karotten!' },
+    ],
     sky: ['#0b1f3f', '#5d86b8'], far: '#c9dcf0', mid: '#8fb0d6', ground: '#5f7591', top: '#f4f8ff', dots: '#4b5f7a', edge: '#3c4f68', plat: '#9fc3e6', platTop: '#ffffff',
     rock: '#7f93ab', deco: '#1d3b4f', volcS: 0.85, volcCol: '#3a4f6e', stars: true, snow: true, egg: '#e8f4ff', eggSpot: '#5aa0e0' },
   { name: 'Vulkan', speed: 335, segs: 36, patterns: ['pit', 'pit', 'geyser', 'geyser', 'raptor', 'ptero', 'boulder', 'rock2', 'plat'],
     startTip: 'Der Vulkan! Irgendwo hier ist das goldene Ei…',
-    riddle: { q: 'Welches Tier von heute ist ein Verwandter der Dinosaurier?', a: ['Huhn', 'Hase', 'Goldfisch'], ok: 0, wrongMsg: { 1: 'Chili: Hey! Ich bin doch kein Dino!' } },
+    riddles: [
+      { q: 'Ein T-Rex wiegt 7 Tonnen. Wie viel wiegt er, wenn er auf einem Bein steht?', a: ['7 Tonnen', '3,5 Tonnen', '14 Tonnen'], ok: 0, why: 'Er wird doch nicht leichter, nur weil er ein Bein hebt!' },
+      { q: 'Welcher Dino hat NICHT zur gleichen Zeit gelebt wie der T-Rex?', a: ['Stegosaurus', 'Triceratops', 'Ankylosaurus'], ok: 0, why: 'Der Stegosaurus lebte viel früher. Zwischen ihm und dem T-Rex liegt mehr Zeit als zwischen dem T-Rex und uns!' },
+      { q: 'Was kommt einmal in jeder Minute vor, zweimal in jedem Moment, aber nie in tausend Jahren?', a: ['Der Buchstabe M', 'Ein Meteorit', 'Ein Vulkanausbruch'], ok: 0, why: '„Minute“ hat ein M, „Moment“ hat zwei M – und in „tausend Jahren“ ist gar kein M!' },
+      { q: 'Welches Tier von heute ist ein Verwandter der Dinosaurier?', a: ['Huhn', 'Hase', 'Goldfisch'], ok: 0, wrongMsg: { 1: 'Chili: Hey! Ich bin doch kein Dino!' }, why: 'Vögel stammen von den Dinosauriern ab – auch das Huhn!' },
+      { q: 'Der Kiwi ist ein Vogel. Was kann er aber NICHT?', a: ['Fliegen', 'Laufen', 'Eier legen'], ok: 0, why: 'Kiwis haben nur winzige Flügel – fliegen können sie nicht!' },
+    ],
     sky: ['#1a0505', '#8a2a10'], far: '#3a0f0a', mid: '#250807', ground: '#2a1a16', top: '#4a2a20', dots: '#ff5a1f', edge: '#170c0a', plat: '#3a2722', platTop: '#ff7a2a',
     rock: '#4a3a36', deco: '#140404', volcS: 1.25, volcCol: '#1c0807', lava: true, egg: '#ffd9c2', eggSpot: '#c0392b' },
 ];
@@ -214,7 +236,14 @@ const FACTS = [
   { name: 'Meteorit', text: 'Vor etwa 66 Millionen Jahren schlug ein riesiger Meteorit auf der Erde ein. Danach starben die meisten Dinosaurier aus.' },
 ];
 
-const WHO = { goetti: 'Goetti', chili: 'Chili', rex: () => save.rexName || 'T-Rex', mami: 'Mami', papi: 'Papi', fabio: 'Fabio' };
+const TREASURES = [
+  { name: 'Goettis Gitarre', line: 'Meine Gitarre! Danke, Oli! Tipp sie in der Schatzkiste an – dann spiele ich dir was vor.', tap: 'Goetti spielt ein Lied!' },
+  { name: 'Goettis Velo', line: 'Mein Velo! Das hat der Vulkan bis in den Canyon geschleudert. Damit machen wir zwei mal eine grosse Tour!', tap: 'Kling, kling!' },
+  { name: 'Goettis Angel', line: 'Meine Angelrute! Weisst du was? Im Winter kann man sogar durch ein Loch im Eis fischen. Das machen wir mal zusammen!', tap: 'Platsch! Ein Fisch!' },
+  { name: 'Kiwi', line: 'Kiwi! Mein kleiner Freund aus Neuseeland ist wieder da! Kiwis können nicht fliegen – darum läuft Kiwi ab jetzt mit dir mit.', tap: 'Kiwi! Kiwi!' },
+];
+const MEDALS = [['Eier-Profi', 'Alle 3 Eier'], ['Ohne Kratzer', 'Kein Treffer'], ['Bernstein-Sammler', '80% Bernstein']];
+const WHO = { goetti: 'Goetti', chili: 'Chili', rex: () => save.rexName || 'T-Rex', mami: 'Mami', papi: 'Papi', fabio: 'Fabio', kiwi: 'Kiwi' };
 
 // =====================================================================
 // Character drawing
@@ -373,6 +402,63 @@ function drawBaby(x, y, s, ph, flip) {
   ctx.restore();
 }
 
+function drawGuitar(x, y, s, rot = 0) {
+  ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.scale(s, s);
+  rr(-4, -64, 8, 52, 3); ctx.fillStyle = '#6b4a2b'; ctx.fill();
+  rr(-7, -78, 14, 16, 4); ctx.fillStyle = '#3b2410'; ctx.fill();
+  for (let i = 0; i < 3; i++) { circle(-9, -74 + i * 5, 1.8, '#ddd'); circle(9, -74 + i * 5, 1.8, '#ddd'); }
+  circle(0, 20, 24, '#d9822b'); circle(0, -6, 17, '#d9822b'); ell(0, 8, 14, 22, 0, '#d9822b');
+  ctx.lineWidth = 2.5; ctx.strokeStyle = '#8a4b14'; ctx.beginPath(); ctx.arc(0, 20, 24, 0.2, Math.PI - 0.2); ctx.stroke();
+  circle(0, 6, 7, '#3b2410'); rr(-9, 26, 18, 4, 2); ctx.fillStyle = '#3b2410'; ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,.8)'; ctx.lineWidth = 0.8; for (let i = -1; i <= 1; i++) { ctx.beginPath(); ctx.moveTo(i * 2, -64); ctx.lineTo(i * 2, 28); ctx.stroke(); }
+  ctx.restore();
+}
+function drawBike(x, y, s) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  for (const wx of [-30, 30]) { ctx.strokeStyle = '#2b2b2b'; ctx.lineWidth = 4.5; ctx.beginPath(); ctx.arc(wx, -19, 18, 0, Math.PI * 2); ctx.stroke(); ctx.strokeStyle = '#999'; ctx.lineWidth = 1; for (let k = 0; k < 4; k++) { const a = k * Math.PI / 4 + T; ctx.beginPath(); ctx.moveTo(wx + Math.cos(a) * 16, -19 + Math.sin(a) * 16); ctx.lineTo(wx - Math.cos(a) * 16, -19 - Math.sin(a) * 16); ctx.stroke(); } }
+  ctx.strokeStyle = '#d63a3a'; ctx.lineWidth = 4.5; ctx.beginPath();
+  ctx.moveTo(-30, -19); ctx.lineTo(-8, -46); ctx.lineTo(0, -19); ctx.lineTo(-30, -19); ctx.moveTo(-8, -46); ctx.lineTo(20, -46); ctx.lineTo(0, -19); ctx.moveTo(20, -46); ctx.lineTo(30, -19); ctx.stroke();
+  ctx.strokeStyle = '#333'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(20, -46); ctx.lineTo(17, -56); ctx.lineTo(27, -58); ctx.stroke();
+  rr(-18, -52, 18, 6, 3); ctx.fillStyle = '#222'; ctx.fill();
+  circle(26, -60, 3, '#ffd740');
+  ctx.restore();
+}
+function drawRod(x, y, s, ph = 0) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s); ctx.lineCap = 'round';
+  ctx.strokeStyle = '#5b3a1e'; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(-30, 18); ctx.lineTo(-6, -12); ctx.stroke();
+  ctx.strokeStyle = '#2b2b2b'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(-6, -12); ctx.lineTo(28, -56); ctx.stroke();
+  circle(-16, 4, 6, '#9aa4ad'); circle(-16, 4, 2.5, '#555');
+  const fx = 36 + Math.sin(ph) * 3, fy = 2;
+  ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(28, -56); ctx.lineTo(fx, fy - 8); ctx.stroke();
+  ell(fx, fy, 10, 5.5, Math.sin(ph) * 0.3, '#ff8f3a'); ctx.fillStyle = '#ff8f3a'; ctx.beginPath(); ctx.moveTo(fx - 8, fy); ctx.lineTo(fx - 15, fy - 6); ctx.lineTo(fx - 15, fy + 6); ctx.fill(); circle(fx + 5, fy - 1, 1.3, '#222');
+  ctx.restore();
+}
+function drawKiwi(x, y, s, ph = 0, flip = false) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(flip ? -s : s, s); ctx.lineCap = 'round';
+  ctx.strokeStyle = '#c9a56b'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(-4, -5); ctx.lineTo(-4 + Math.sin(ph) * 4, 0); ctx.moveTo(4, -5); ctx.lineTo(4 - Math.sin(ph) * 4, 0); ctx.stroke();
+  ell(0, -16, 18, 13, 0, '#8b6a43');
+  ctx.strokeStyle = 'rgba(60,40,20,.5)'; ctx.lineWidth = 1.2; for (let i = 0; i < 5; i++) { ctx.beginPath(); ctx.moveTo(-12 + i * 5, -24); ctx.lineTo(-14 + i * 5, -14); ctx.stroke(); }
+  circle(14, -22, 7.5, '#8b6a43');
+  ctx.strokeStyle = '#e8cf9a'; ctx.lineWidth = 2.6; ctx.beginPath(); ctx.moveTo(20, -21); ctx.quadraticCurveTo(32, -16, 40, -6); ctx.stroke();
+  circle(16, -24, 1.6, '#111');
+  ctx.restore();
+}
+function drawTreasure(k, x, y, s, ph = T * 4) {
+  if (k === 0) drawGuitar(x, y + 4 * s, s * 0.85, -0.35);
+  else if (k === 1) drawBike(x, y + 30 * s, s);
+  else if (k === 2) drawRod(x, y + 10 * s, s, ph);
+  else drawKiwi(x - 8 * s, y + 18 * s, s * 1.4, ph);
+}
+function drawMedal(x, y, r, kind, on) {
+  ctx.save(); if (!on) ctx.globalAlpha = 0.35;
+  ctx.fillStyle = '#d63a3a'; ctx.beginPath(); ctx.moveTo(x - r * 0.9, y - r * 1.9); ctx.lineTo(x - r * 0.2, y - r * 1.9); ctx.lineTo(x + r * 0.3, y - r * 0.6); ctx.lineTo(x - r * 0.4, y - r * 0.6); ctx.fill();
+  ctx.fillStyle = '#2e6fd6'; ctx.beginPath(); ctx.moveTo(x + r * 0.9, y - r * 1.9); ctx.lineTo(x + r * 0.2, y - r * 1.9); ctx.lineTo(x - r * 0.3, y - r * 0.6); ctx.lineTo(x + r * 0.4, y - r * 0.6); ctx.fill();
+  circle(x, y, r, on ? '#e8a317' : '#999'); circle(x, y, r * 0.82, on ? '#ffd34d' : '#ccc');
+  if (kind === 0) drawEgg(x, y, r * 0.5, '#fff7e0', '#6aa84f');
+  else if (kind === 1) drawHeart(x, y + r * 0.05, r / 22, true);
+  else drawAmber(x, y, r * 0.45);
+  ctx.restore();
+}
 function drawGoettiHead(cx, cy, r) {
   circle(cx - r * 0.95, cy + 2, r * 0.22, '#e8b48a'); circle(cx + r * 0.95, cy + 2, r * 0.22, '#e8b48a');
   circle(cx, cy, r, '#f0c49b');
@@ -433,12 +519,13 @@ function drawHeart(x, y, s, full) {
 
 function drawPortrait(who, cx, cy, r) {
   ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2);
-  const bg = { goetti: '#cfe3b0', chili: '#ffe0c2', rex: '#bfe6cf', mami: '#ead7f5', papi: '#d3e6fb', fabio: '#ffe6c4' }[who] || '#eee';
+  const bg = { kiwi: '#e8f5d0', goetti: '#cfe3b0', chili: '#ffe0c2', rex: '#bfe6cf', mami: '#ead7f5', papi: '#d3e6fb', fabio: '#ffe6c4' }[who] || '#eee';
   ctx.fillStyle = bg; ctx.fill(); ctx.clip();
   if (who === 'goetti') { drawGoettiHead(cx, cy + r * 0.25, r * 0.55); }
   else if (who === 'chili') { const s = r / 26; drawChili(cx - 10 * s, cy + 30 * s, s, T * 3); }
   else if (who === 'rex') { const s = r / 42; drawRex(cx - 68 * s, cy + 104 * s, s, 0, 0.3 + 0.2 * Math.sin(T * 8)); }
   else if (who === 'mami' || who === 'papi') { const s = r / 34; drawLongneck(cx - 72 * s, cy + 146 * s, s, who === 'mami' ? '#b07cc6' : '#4f8fd6', T * 2); }
+  else if (who === 'kiwi') { const s = r / 22; drawKiwi(cx - 16 * s, cy + 22 * s, s, T * 6); }
   else if (who === 'fabio') { const s = r / 26; drawTrike(cx - 36 * s, cy + 36 * s, s, '#f39c34', 0); }
   ctx.restore();
   ctx.lineWidth = 4; ctx.strokeStyle = '#6b4a2b'; ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke();
@@ -588,7 +675,7 @@ function buildLevel(wi) {
       { x: 3840, type: 'roar', text: 'Ein Raptor! Drück BRÜLL!' });
     x = 4600;
   } else L.tips.push({ x: 150, text: th.startTip });
-  const n = th.segs, eggAt = [Math.floor(n * 0.25), Math.floor(n * 0.55), Math.floor(n * 0.85)], cpAt = [Math.floor(n * 0.4), Math.floor(n * 0.7)];
+  const n = th.segs, eggAt = [Math.floor(n * 0.25), Math.floor(n * 0.55), Math.floor(n * 0.85)], cpAt = [Math.floor(n * 0.4), Math.floor(n * 0.7)], tAt = Math.floor(n * 0.45);
   for (let i = 0; i < n; i++) {
     if (cpAt.includes(i)) { L.cps.push({ x, on: false }); x += 160; }
     let w;
@@ -600,6 +687,9 @@ function buildLevel(wi) {
     } else if (i === eggAt[1]) {
       L.spots.push({ x: x + 40, k: 1, state: 'idle' });
       L.eggs.push({ k: 1, x: x + 340, y: GROUND - 150, hidden: true }); w = 440;
+    } else if (i === tAt) {
+      L.tips.push({ x: x - 750, text: wi === 3 ? 'Da oben piepst etwas! Doppelsprung – zweimal schnell tippen!' : 'Da oben liegt etwas von Goetti! Doppelsprung – zweimal schnell tippen!' });
+      L.plats.push({ x, y: GROUND - 250, w: 220 }); L.treasure = { k: wi, x: x + 110, y: GROUND - 300, got: false }; w = 220;
     } else if (i === eggAt[2]) {
       L.pits.push({ x, w: 150 }); L.eggs.push({ k: 2, x: x + 75, y: GROUND - 195 }); w = 150;
     } else {
@@ -608,6 +698,7 @@ function buildLevel(wi) {
     x += w + 260 + R() * 200;
   }
   L.eggs.sort((a, b) => a.k - b.k);
+  L.ambTotal = L.amb.length;
   x += 300;
   if (wi === 3) { L.bossX = x + 200; L.gateX = L.bossX + 1300; } else L.gateX = x + 500;
   return L;
@@ -617,7 +708,10 @@ function buildLevel(wi) {
 // Play state
 // =====================================================================
 let scene = 'title', G = null;
-function go(s) { scene = s; parts = []; dialog = null; toasts = []; }
+function go(s) {
+  scene = s; parts = []; dialog = null; toasts = [];
+  if (s === 'map' && save.treasureNew >= 0) { const k = save.treasureNew; save.treasureNew = -1; writeSave(); chestPop[k] = 1; startDialog([{ who: k === 3 ? 'kiwi' : 'goetti', text: k === 3 ? 'Kiwi! Kiwi! (Kiwi hüpft vor Freude.)' : TREASURES[k].line }].concat(k === 3 ? [{ who: 'goetti', text: TREASURES[3].line }] : [])); }
+}
 
 function startLevel(wi) {
   go('play');
@@ -653,7 +747,7 @@ function roar() {
 }
 function hurt(force) {
   const p = G.p; if (!force && p.inv > 0) return;
-  p.hearts--; p.inv = 1.8; SFX.hurt(); G.shake = 0.35; G.hitFlash = 0.45;
+  p.hearts--; G.hits = (G.hits || 0) + 1; p.inv = 1.8; SFX.hurt(); G.shake = 0.35; G.hitFlash = 0.45;
   try { if (navigator.vibrate) navigator.vibrate(180); } catch (e) {}
   if (!force) p.vy = Math.min(p.vy, -450);
   if (p.hearts <= 0) { G.overlay = { type: 'retry' }; }
@@ -680,18 +774,29 @@ function revealEgg(s) {
   const e = G.L.eggs[s.k]; e.hidden = false; e.popping = true; e.ty = e.y; e.x0 = s.x; e.x = s.x; e.y = GROUND - 10; e.vy = -900; e.vx = (G.p.wx + 640 - s.x) / 1.1; SFX.pop();
   burst(s.x, GROUND - 5, 20, ['#8b5a2b', '#a0703a', '#ffe08a'], 260, 900, 7, 0.8);
 }
-function openRiddle() { toasts = []; const order = [0, 1, 2].sort(() => Math.random() - 0.5); G.overlay = { type: 'riddle', order, wrong: [], msg: '', shake: 0 }; }
-function answer(i) {
-  const r = WORLDS[G.wi].riddle, o = G.overlay;
-  if (i === r.ok) { SFX.right(); G.overlay = null; G.gateOpening = true; toast('Richtig! Das Tor geht auf!', '#9cff8a'); burst(G.L.gateX - 10, GROUND - 200, 50, ['#ffd740', '#ff5252', '#69f0ae', '#40c4ff', '#fff'], 500, 700, 8, 1.4); }
-  else { SFX.wrong(); if (!o.wrong.includes(i)) o.wrong.push(i); o.msg = (r.wrongMsg && r.wrongMsg[i]) || 'Fast! Versuch es nochmal.'; o.shake = 0.4; }
+const lastRiddle = {};
+function openRiddle() {
+  toasts = []; const pool = WORLDS[G.wi].riddles; let r;
+  do r = pool[Math.floor(Math.random() * pool.length)]; while (pool.length > 1 && r === lastRiddle[G.wi]);
+  lastRiddle[G.wi] = r;
+  G.overlay = { type: 'riddle', r, order: [0, 1, 2].sort(() => Math.random() - 0.5), wrong: [], msg: '', shake: 0, solved: false };
 }
+function answer(i) {
+  const o = G.overlay, r = o.r;
+  if (i === r.ok) { SFX.right(); o.solved = true; o.msg = ''; burst(G.cam + W / 2, 200, 40, ['#ffd740', '#ff5252', '#69f0ae', '#40c4ff', '#fff'], 450, 600, 7, 1.2); }
+  else { SFX.wrong(); if (!o.wrong.includes(i)) o.wrong.push(i); o.msg = (r.wrongMsg && r.wrongMsg[i]) || 'Achtung, Trickfrage! Lies nochmal genau.'; o.shake = 0.4; }
+}
+function openGate() { G.overlay = null; G.gateOpening = true; toast('Das Tor geht auf!', '#9cff8a'); burst(G.L.gateX - 10, GROUND - 200, 50, ['#ffd740', '#ff5252', '#69f0ae', '#40c4ff', '#fff'], 500, 700, 8, 1.4); }
 function finishLevel() {
   const wi = G.wi; G.newCards = [];
   for (let k = 0; k < 3; k++) if (G.eggsGot[k]) { if (!save.eggs[wi][k]) G.newCards.push(k); save.eggs[wi][k] = 1; }
   if (wi === 0) save.tutorialDone = true;
+  G.earned = [G.eggsGot.every(Boolean), !G.hits, G.amber >= Math.ceil(G.L.ambTotal * 0.8)];
+  G.newMedals = []; G.earned.forEach((e, k) => { if (e && !save.medals[wi][k]) G.newMedals.push(k); if (e) save.medals[wi][k] = 1; });
+  G.newTreasure = G.L.treasure && G.L.treasure.got && !save.treasures[wi];
+  if (G.newTreasure) { save.treasures[wi] = 1; save.treasureNew = wi; }
   save.amber += G.amber; save.unlocked = Math.max(save.unlocked, Math.min(3, wi + 1)); writeSave();
-  if (wi === 3) startEnding(); else { G.overlay = { type: 'complete' }; SFX.right(); }
+  G.overlay = { type: 'complete', t: 0, popped: [] }; SFX.right();
 }
 
 function updatePlay(dt) {
@@ -730,6 +835,11 @@ function updatePlay(dt) {
       e.got = true; G.eggsGot[e.k] = true; SFX.egg(); G.flyEggs.push({ x: e.x - G.cam, y: ey, k: e.k, t: 0 }); burst(e.x, ey, 30, ['#fff3b0', '#ffd740', th.egg, th.eggSpot], 360, 500, 7, 1);
       toast('Dino-Karte gefunden: ' + FACTS[G.wi * 3 + e.k].name + '!', '#ffe08a');
     }
+  }
+  const tr = L.treasure;
+  if (tr && !tr.got && Math.hypot(tr.x - (p.wx + 10), tr.y - (p.y - 50)) < 78) {
+    tr.got = true; SFX.egg(); setTimeout(SFX.right, 250); burst(tr.x, tr.y, 40, ['#ffd740', '#fff', '#69f0ae'], 400, 500, 7, 1.2);
+    toast(TREASURES[tr.k].name + (save.treasures[tr.k] ? '!' : ' gefunden!'), '#ffd740');
   }
   // chili
   const c = G.chili; c.ph += dt * 12;
@@ -892,12 +1002,14 @@ function drawPlay() {
   for (const a of L.amb) if (!a.got) { const x = a.x - cam; if (x > -20 && x < W + 20) drawAmber(x, a.y + Math.sin(T * 4 + a.x) * 3, 10); }
   for (const e of L.eggs) if (!e.hidden && !e.got) { const x = e.x - cam; if (x > -60 && x < W + 60) drawEgg(x, e.y + Math.sin(T * 3 + e.k) * 5, 24, th.egg, th.eggSpot, 0.8 + 0.2 * Math.sin(T * 5), Math.sin(T * 2) * 0.1); }
   for (const o of L.obs) if (!o.dead) drawObstacle(o, cam, th);
+  if (L.treasure && !L.treasure.got) { const tr = L.treasure, x = tr.x - cam, y = tr.y + Math.sin(T * 3) * 6; if (x > -80 && x < W + 80) { const g = ctx.createRadialGradient(x, y, 5, x, y, 70); g.addColorStop(0, 'rgba(255,240,150,.7)'); g.addColorStop(1, 'rgba(255,240,150,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, 70, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = save.treasures[tr.k] ? 0.6 : 1; drawTreasure(tr.k, x, y, 0.9); ctx.globalAlpha = 1; for (let i = 0; i < 4; i++) { const a = T * 2 + i * 1.57; ctx.globalAlpha = 0.5 + 0.5 * Math.sin(T * 6 + i); circle(x + Math.cos(a) * 44, y + Math.sin(a) * 30, 3, '#fff6b0'); } ctx.globalAlpha = 1; } }
   if (G.golden && !G.gotGolden) drawEgg(G.golden.x - cam, G.golden.y + (G.golden.landed ? Math.sin(T * 3) * 5 : 0), 32, '#ffd700', '#e0a800', 1.2, Math.sin(T * 2) * 0.1);
   if (G.boss && G.boss.x - cam < W + 200) { const b = G.boss; const bx = b.x - cam; ctx.save(); if (b.flash > 0 && Math.sin(T * 40) > 0) ctx.globalAlpha = 0.4; drawRaptor(bx, GROUND, 2.3, b.state === 'taunt' ? 0 : b.ph, b.state !== 'flee', { col: '#8b1a1a', dark: '#4a0a0a', crown: true }); ctx.restore(); if (b.state === 'taunt') otxt('!', bx - 70, GROUND - 230, 60, '#ff5252', '#000', 8); for (let i = 0; i < 3; i++) drawHeart(bx - 40 + i * 30, GROUND - 260, 0.9, i < b.hp); }
   // chili
   const c = G.chili; drawChili(c.wx - cam, c.y, 1.25, c.ph, c.dig ? false : (G.bossStarted && !G.golden));
   if (c.dig) otxt('!', c.wx - cam + 20, c.y - 70 - Math.abs(Math.sin(T * 10)) * 6, 36, '#ffd34d', '#3b1d00', 6);
-  // baby follower
+  // baby + kiwi followers
+  if (save.treasures[3]) drawKiwi(p.wx - cam - 215, GROUND - (G.startT > 0 || G.stopped ? 0 : Math.abs(Math.sin(p.ph * 0.7 + 1)) * 12), 1.1, p.ph * 1.3);
   if (save.babyName) drawBaby(p.wx - cam - 150, GROUND - (G.startT > 0 || G.stopped ? 0 : Math.abs(Math.sin(p.ph * 0.6)) * 10), 0.85, p.ph);
   // player
   if (!(p.inv > 0 && Math.sin(T * 30) > 0.3)) drawRex(p.wx - cam, p.y, 0.92, p.ph, p.roarT > 0 ? 1 : 0.05, { rider: true, air: !p.onGround, hat: G.wi >= 2 });
@@ -996,24 +1108,43 @@ function drawOverlay() {
     txt('Chili meint: Nochmal ab dem letzten Fähnchen!', W / 2, 300, 22, '#6b4a2b', 'center', 'normal');
     button('Nochmal!', 290, 340, 200, 62, retry); button('Karte', 510, 340, 160, 62, () => go('map'), { color: '#e0d2b0' });
   } else if (o.type === 'riddle') {
-    const r = th.riddle; o.shake = Math.max(0, o.shake - DT);
+    const r = o.r; o.shake = Math.max(0, o.shake - DT);
     ctx.save(); if (o.shake > 0) ctx.translate(Math.sin(T * 60) * 8 * o.shake, 0);
     panel(110, 40, 740, 460); drawPortrait('goetti', 180, 112, 46);
-    button('🔊 Vorlesen', 660, 56, 170, 42, () => speak(r.q + ' ' + o.order.map(i => r.a[i]).join('? Oder ') + '?'), { size: 18, color: '#e0d2b0' });
+    button('🔊 Vorlesen', 660, 56, 170, 42, () => speak(o.solved ? r.why : r.q + ' ' + o.order.map(i => r.a[i]).join('? Oder ') + '?'), { size: 18, color: '#e0d2b0' });
     txt('Goettis Rätsel-Tor', 250, 86, 22, '#8a6a3a', 'left');
     wrapLines(r.q, 560, 28).forEach((l, i) => txt(l, 250, 122 + i * 34, 28, '#3b2410', 'left'));
-    o.order.forEach((ai, j) => { const bad = o.wrong.includes(ai); button((bad ? '✗ ' : '') + r.a[ai], 230, 230 + j * 80, 500, 64, () => { if (!bad) answer(ai); }, { color: bad ? '#e8b4b4' : '#f4b400', size: 30 }); });
-    if (o.msg) txt(o.msg, W / 2, 478, 22, '#b03a2e');
+    if (!o.solved) {
+      o.order.forEach((ai, j) => { const bad = o.wrong.includes(ai); button((bad ? '✗ ' : '') + r.a[ai], 230, 230 + j * 80, 500, 64, () => { if (!bad) answer(ai); }, { color: bad ? '#e8b4b4' : '#f4b400', size: 30 }); });
+      if (o.msg) txt(o.msg, W / 2, 478, 22, '#b03a2e');
+    } else {
+      rr(230, 228, 500, 64, 26); ctx.fillStyle = '#9be38a'; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,.3)'; ctx.stroke();
+      txt('✓ ' + r.a[r.ok], W / 2, 261, 30, '#17420f');
+      wrapLines(r.why, 600, 24).forEach((l, i) => txt(l, W / 2, 330 + i * 32, 24, '#3b2410', 'center', 'normal'));
+      button('Tor öffnen!', W / 2 - 140, 418, 280, 62, openGate, { size: 28 });
+    }
     ctx.restore();
   } else if (o.type === 'complete') {
-    panel(150, 50, 660, 440);
-    otxt('Welt geschafft!', W / 2, 105, 46, '#ffd34d', '#3b1d00', 10);
-    for (let k = 0; k < 3; k++) { const has = save.eggs[G.wi][k]; const x = W / 2 - 180 + k * 180; drawEgg(x, 190, 36, has ? th.egg : '#ddd', has ? th.eggSpot : '#ccc', has ? 0.6 : 0, Math.sin(T * 3 + k) * 0.08); txt(has ? FACTS[G.wi * 3 + k].name : '???', x, 250, 22, has ? '#3b2410' : '#999'); if (G.newCards.includes(k)) txt('NEU!', x + 34, 160, 18, '#e53935'); }
-    drawAmber(W / 2 - 70, 300, 14); txt(`+${G.amber} Bernstein`, W / 2 + 10, 301, 26, '#6b4a2b');
-    const missing = 3 - save.eggs[G.wi].reduce((a, b) => a + b, 0);
-    txt(missing ? 'Chili schnuppert: Hier sind noch Eier versteckt!' : 'Alle Eier gefunden! Super gemacht!', W / 2, 350, 22, '#6b4a2b', 'center', 'normal');
-    button('Karte', 230, 400, 200, 64, () => go('map'), { color: '#e0d2b0' });
-    button('Nächste Welt', 460, 400, 270, 64, () => startLevel(G.wi + 1));
+    o.t += DT;
+    panel(150, 24, 660, 492);
+    otxt('Welt geschafft!', W / 2, 70, 44, '#ffd34d', '#3b1d00', 10);
+    for (let k = 0; k < 3; k++) { const has = save.eggs[G.wi][k]; const x = W / 2 - 180 + k * 180; drawEgg(x, 132, 28, has ? th.egg : '#ddd', has ? th.eggSpot : '#ccc', has ? 0.6 : 0, Math.sin(T * 3 + k) * 0.08); txt(has ? FACTS[G.wi * 3 + k].name : '???', x, 176, 20, has ? '#3b2410' : '#999'); if (G.newCards.includes(k)) txt('NEU!', x + 30, 108, 16, '#e53935'); }
+    for (let k = 0; k < 3; k++) {
+      const x = W / 2 - 200 + k * 200, on = save.medals[G.wi][k], isNew = G.newMedals.includes(k);
+      const u = isNew ? clamp((o.t - 0.5 - k * 0.45) * 3, 0, 1) : 1;
+      if (isNew && u > 0 && !o.popped.includes(k)) { o.popped.push(k); [784, 988, 1175, 1568].forEach((f, j) => tone(f, 0.25, 'triangle', 0.12, null, j * 0.06)); burst(G.cam + x, 250, 25, ['#ffd34d', '#fff', '#e8a317'], 300, 400, 6, 0.9); }
+      const sc = isNew ? (u < 1 ? u * 1.35 : 1 + 0.05 * Math.sin(T * 6)) : 1;
+      ctx.save(); ctx.translate(x, 252); ctx.scale(sc, sc); drawMedal(0, 0, 26, k, on && u > 0); ctx.restore();
+      txt(MEDALS[k][0], x, 296, 19, on ? '#3b2410' : '#999');
+      txt(G.earned[k] ? 'geschafft!' : k === 2 ? `${G.amber} von ${Math.ceil(G.L.ambTotal * 0.8)}` : MEDALS[k][1], x, 318, 15, G.earned[k] ? '#2e7d32' : '#8a6a3a', 'center', 'normal');
+      if (isNew && u >= 1) txt('NEU!', x + 32, 222, 16, '#e53935');
+    }
+    if (G.newTreasure) { drawTreasure(G.wi, W / 2 - 200, 362, 0.85); txt(TREASURES[G.wi].name + ' gefunden!', W / 2 + 20, 368, 26, '#2e7d32'); }
+    else if (!save.treasures[G.wi]) txt('Goetti vermisst hier noch etwas … Schau mal ganz weit oben!', W / 2, 368, 19, '#6b4a2b', 'center', 'normal');
+    else { const missing = 3 - save.eggs[G.wi].reduce((a, b) => a + b, 0); txt(missing ? 'Chili schnuppert: Hier sind noch Eier versteckt!' : 'Super gemacht!', W / 2, 368, 20, '#6b4a2b', 'center', 'normal'); }
+    button('Karte', 230, 422, 200, 62, () => go('map'), { color: '#e0d2b0' });
+    if (G.wi < 3) button('Nächste Welt', 460, 422, 270, 62, () => startLevel(G.wi + 1));
+    else button('Weiter!', 460, 422, 270, 62, () => startEnding(), { color: '#e57373', textColor: '#fff' });
   }
 }
 
@@ -1105,13 +1236,22 @@ function drawStory() {
   drawChili(380, GROUND, 1.4, T * 3);
 }
 
-const MAPNODES = [{ x: 165, y: 345 }, { x: 385, y: 265 }, { x: 600, y: 350 }, { x: 815, y: 245 }];
+const MAPNODES = [{ x: 165, y: 338 }, { x: 385, y: 258 }, { x: 600, y: 322 }, { x: 815, y: 238 }];
+const chestPop = [0, 0, 0, 0];
 function drawMapIcon(i, x, y) {
   ctx.save(); ctx.beginPath(); ctx.arc(x, y, 46, 0, Math.PI * 2); ctx.clip();
   const th = WORLDS[i]; const g = ctx.createLinearGradient(0, y - 46, 0, y + 46); g.addColorStop(0, th.sky[0]); g.addColorStop(1, th.sky[1]); ctx.fillStyle = g; ctx.fillRect(x - 50, y - 50, 100, 100);
   ctx.fillStyle = th.top; ctx.fillRect(x - 50, y + 22, 100, 30);
   if (i === 0) palm(x, y + 24, 60, '#1f5a35'); else if (i === 1) cactus(x, y + 24, 46, '#5f7a2a'); else if (i === 2) pine(x, y + 26, 70, '#1d4a3f', true); else drawVolcano(x, y + 24, 0.22, '#2a0a08', 1);
   ctx.restore();
+}
+function playTreasure(i) {
+  if (!save.treasures[i]) { SFX.wrong(); toast(i === 3 ? 'Wo ist Kiwi nur? Vielleicht beim Vulkan …' : 'Das hat Goetti noch verloren – in Welt ' + (i + 1) + '!', '#ffb4a8'); return; }
+  chestPop[i] = 1; toast(TREASURES[i].tap, '#ffd34d');
+  if (i === 0) { [[196, 247, 294, 392, 494], [262, 330, 392, 523, 659], [220, 262, 330, 440, 523], [196, 247, 294, 392, 494]].forEach((ch, c) => ch.forEach((f, j) => tone(f, 0.9, 'triangle', 0.07, null, c * 0.45 + j * 0.03))); }
+  else if (i === 1) { for (const d of [0, 0.28]) { tone(2100, 0.35, 'sine', 0.12, null, d); tone(2650, 0.3, 'sine', 0.07, null, d + 0.02); } }
+  else if (i === 2) { noise(0.4, 0.3, 1400); tone(500, 0.15, 'sine', 0.12, 1500, 0.3); }
+  else { tone(1700, 0.2, 'square', 0.05, 2700); tone(1700, 0.2, 'square', 0.05, 2700, 0.28); }
 }
 function drawMap() {
   const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#1d2b53'); g.addColorStop(0.7, '#e07a5f'); g.addColorStop(1, '#f2cc8f');
@@ -1131,6 +1271,7 @@ function drawMap() {
     ctx.restore();
     otxt(`${i + 1}. ${th.name}`, n.x, n.y + 72, 24, open ? '#fff' : '#bbb', 'rgba(0,0,0,.7)', 6);
     for (let k = 0; k < 3; k++) drawEgg(n.x - 26 + k * 26, n.y - 70, 11, save.eggs[i][k] ? th.egg : 'rgba(255,255,255,.25)', save.eggs[i][k] ? th.eggSpot : 'rgba(255,255,255,.15)');
+    for (let k = 0; k < 3; k++) drawMedal(n.x - 30 + k * 30, n.y + 106, 10, k, save.medals[i][k]);
     buttons.push({ x: n.x - 60, y: n.y - 85, w: 120, h: 175, cb: () => { if (open) startLevel(i); else { SFX.wrong(); toast('Diese Welt ist noch gesperrt!', '#ffb4a8'); } } });
   });
   const cur = MAPNODES[Math.min(save.unlocked, 3)];
@@ -1138,6 +1279,18 @@ function drawMap() {
   otxt('Welt-Karte', 30, 42, 40, '#ffd34d', '#3b1d00', 9, 'left');
   otxt(fmt('{rex} und Chili sind bereit!'), 32, 84, 22, '#fff', 'rgba(0,0,0,.7)', 5, 'left');
   drawAmber(W - 210, 40, 14); otxt(String(save.amber), W - 188, 41, 26, '#ffe08a', 'rgba(0,0,0,.7)', 5, 'left');
+  drawMedal(W - 318, 48, 13, 1, true); otxt(`${save.medals.flat().reduce((a, b) => a + b, 0)}/12`, W - 298, 41, 26, '#ffe08a', 'rgba(0,0,0,.7)', 5, 'left');
+  // Goetti's treasure chest
+  rr(256, H - 100, 448, 88, 16); ctx.fillStyle = 'rgba(60,35,15,.88)'; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = '#e8a317'; ctx.stroke();
+  txt('Goettis Schatzkiste', 272, H - 86, 15, '#ffd34d', 'left');
+  for (let i = 0; i < 4; i++) {
+    const x = 316 + i * 110, y = H - 44, has = save.treasures[i];
+    chestPop[i] = Math.max(0, chestPop[i] - DT * 2);
+    circle(x, y, 30, has ? 'rgba(255,240,180,.18)' : 'rgba(0,0,0,.3)');
+    if (has) { ctx.save(); ctx.translate(x, y); const sc = 1 + chestPop[i] * 0.4; ctx.scale(sc, sc); ctx.rotate(Math.sin(T * 20) * chestPop[i] * 0.3); drawTreasure(i, 0, 0, 0.58, T * 6); ctx.restore(); }
+    else txt('?', x, y + 2, 30, 'rgba(255,255,255,.4)');
+    buttons.push({ x: x - 50, y: y - 40, w: 100, h: 80, silent: true, cb: () => playTreasure(i) });
+  }
   button(save.muted ? 'Ton aus' : 'Ton an', W - 130, 18, 112, 46, () => { save.muted = !save.muted; writeSave(); }, { size: 20, color: '#e0d2b0' });
   button('Dino-Buch', 24, H - 82, 210, 60, () => { bookSel = -1; go('book'); });
   if (save.finished) button('Weihnachts-Ende', W - 274, H - 82, 250, 60, () => startEnding(), { color: '#e57373', textColor: '#fff' });
@@ -1188,12 +1341,21 @@ function tapEgg() {
   E.taps++; E.wob = 0.5; SFX.crack(); burst(480, 380, 10, ['#ffd700', '#fff3b0'], 250, 600, 5, 0.6);
   if (E.taps >= 6) { E.phase = 'hatch'; E.hatchT = 0; SFX.right(); burst(480, 380, 70, ['#ffd700', '#fff', '#ff5252', '#69f0ae'], 520, 500, 8, 1.6); }
 }
+function treasureLines() {
+  const n = save.treasures.reduce((a, b) => a + b, 0), L = [];
+  if (save.treasures[3]) L.push({ who: 'kiwi', text: 'Kiwi! Kiwi! (Kiwi will auch mitfeiern.)' });
+  if (n === 4) L.push({ who: 'goetti', text: 'Und dank dir habe ich meine Gitarre, mein Velo, meine Angel – und Kiwi wieder! Das beste Weihnachten überhaupt!' });
+  else if (n > 0) L.push({ who: 'goetti', text: 'Ein paar meiner verlorenen Sachen hast du auch gefunden – danke! Vielleicht entdeckst du ja noch den Rest …' });
+  else L.push({ who: 'goetti', text: 'Meine Gitarre, mein Velo, meine Angel und mein Kiwi sind leider noch irgendwo da draussen … Vielleicht findest du sie ja!' });
+  return L;
+}
 function afterBabyName() {
   startDialog([
     { who: 'mami', text: '{baby}! Was für ein wunderschöner Name!' },
     { who: 'papi', text: 'Willkommen in der Familie, {baby}!' },
     { who: 'fabio', text: 'Darf ich {baby} auch mal streicheln? Bitte, bitte!' },
     { who: 'chili', text: 'Mümmel, mümmel! (Chili freut sich riesig.)' },
+    ...treasureLines(),
     { who: 'goetti', text: '{baby} kommt ab jetzt bei jedem Abenteuer mit. Und jetzt: Lasst uns Weihnachten feiern!' },
   ], () => { E.phase = 'party'; save.finished = true; writeSave(); jingle(); }, true);
 }
@@ -1225,13 +1387,17 @@ function drawEnding() {
   ctx.strokeStyle = '#2e8b57'; ctx.lineWidth = 7; ctx.beginPath(); ctx.arc(165, 385, 12, 0, Math.PI * 2); ctx.stroke(); circle(165, 375, 3, '#d63a3a');
   for (let i = 0; i < 8; i++) circle(30 + i * 25, 302, 4, ['#ff5252', '#ffd740', '#69f0ae', '#40c4ff'][(i + Math.floor(T * 3)) % 4]);
   pine(268, 452, 210, '#1f6b42', true);
+  if (save.treasures[1]) drawBike(95, 452, 0.95);
+  if (save.treasures[2]) drawRod(222, 418, 1, T * 3);
   rr(230, 425, 30, 26, 3); ctx.fillStyle = '#d63a3a'; ctx.fill(); ctx.fillStyle = '#ffd740'; ctx.fillRect(243, 425, 5, 26);
   rr(280, 432, 26, 20, 3); ctx.fillStyle = '#40a4ff'; ctx.fill(); ctx.fillStyle = '#fff'; ctx.fillRect(291, 432, 4, 20);
   // family (right)
   drawLongneck(800, 452, 0.72, '#b07cc6', T * 2, true);
   drawLongneck(905, 452, 0.8, '#4f8fd6', T * 2 + 1, true);
   drawTrike(720, 455 - (E.phase === 'party' ? Math.abs(Math.sin(T * 6)) * 12 : 0), 1, '#f39c34', 0, true);
-  drawGoetti(325, 452, 1.1, E.phase === 'party');
+  drawGoetti(325, 452, 1.1, E.phase === 'party' && !save.treasures[0]);
+  if (save.treasures[0]) drawGuitar(332, 372 + (E.phase === 'party' ? Math.sin(T * 8) * 2 : 0), 0.85, -1.05);
+  if (save.treasures[3]) drawKiwi(572, 454 - (E.phase === 'party' ? Math.abs(Math.sin(T * 9 + 1)) * 16 : 0), 1.25, T * 8, true);
   drawRex(640, 452, 1.0, E.phase === 'party' ? T * 6 : 0, E.phase === 'party' ? 0.3 + 0.3 * Math.sin(T * 5) : 0.1, { rider: true, flip: true, hat: true });
   drawChili(395, 456 - (E.phase === 'party' ? Math.abs(Math.sin(T * 8)) * 18 : 0), 1.4, T * 6, false);
   // nest + egg
@@ -1330,5 +1496,5 @@ function frame(now) {
 requestAnimationFrame(frame);
 
 // debug hook for testing in the browser console
-window.__dino = { get scene() { return scene; }, get G() { return G; }, get E() { return E; }, save, startLevel, startEnding, go, jump, roar, updatePlay, updateEnding, answer, retry, tapEgg };
+window.__dino = { get scene() { return scene; }, get G() { return G; }, get E() { return E; }, save, startLevel, startEnding, go, jump, roar, updatePlay, updateEnding, answer, retry, tapEgg, openGate, playTreasure };
 })();
