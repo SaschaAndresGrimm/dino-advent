@@ -24,7 +24,7 @@ Run both check and test before every commit. Playwright needs `npx playwright in
 - Anything with state that a respawn can break (crumbling platforms, fallen meteors) must be reset in `retry()` and `pitFall()`.
 - Hints must come early: `firstTip` uses `x - 1200`; tutorial coach points are 150 to 300 px before the obstacle. Hints and coach must never mention a skill the player has not learned yet (`SKILL_DAYS`: dash 4, duck 7, swim 10, stomp 13, glide 16, fire 19).
 - Boss fights: Rex stands still (FLITZ lunges him forward and back). Collectibles must come to him (they drift and hearts are magnetic). The boss must walk back to `home` between phases. Enemy waves need wide spacing (200+ px) so a jump fits between them.
-- Do not draw over the HUD area at the top centre (eggs, progress bar). Messages go at the bottom.
+- Do not draw over the HUD area at the top centre (eggs, progress bar, boss bar). Hint boxes go at the bottom (max 3 lines, they must stay below the ground line); boss banners sit at y=128, boss toasts at y=300. Keep Chili at 145 px behind Rex so the two silhouettes do not merge.
 
 ## Testing pitfalls
 - `tests/levels.spec.js` has a bot (`PLAY`) that must be able to finish every level. New obstacles usually need a rule there. If it fails with `done:false, steps:60000` the bot is stuck: step it in small chunks and print position, nearby pits/platforms/obstacles.
