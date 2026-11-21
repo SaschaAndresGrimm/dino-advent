@@ -328,15 +328,15 @@ const WORLDS = [
   { name: 'Weihnacht', art: 2, bonus: true, speed: 345, segs: 36, patterns: ['rock', 'rock2', 'pit', 'icicle', 'icicle', 'raptor', 'ptero', 'swoop', 'boulder', 'plat', 'amber', 'low', 'compy', 'geode', 'pitRock', 'lowRock', 'compyRun', 'hopper', 'hopper2', 'plant', 'meteor', 'meteors', 'bounce', 'bounceUp', 'crumble', 'raptor2'],
     startTip: 'Bonus-Welt: die Weihnachtsnacht! Alles, was du gelernt hast, hilft dir hier. Findest du alle 3 Eier und die Feuer-Chilis?',
     riddles: [
-      { q: 'Der Weihnachtsmann hat 24 Geschenke. Er gibt jedem Kind 3. Wie viele Kinder bekommen etwas?', a: ['8', '6', '12'], ok: 0, why: '24 geteilt durch 3 ist 8 – also 8 Kinder!' },
-      { q: 'Welche Zahl kommt als Nächstes? 2, 4, 8, 16, …', a: ['32', '24', '20'], ok: 0, why: 'Jedes Mal wird verdoppelt: 16 + 16 = 32!' },
+      { q: 'Acht Elfen tragen Geschenke. Sieben Elfen tragen je 7 Geschenke, der kleinste Elf nur 2. Wie viele Geschenke sind es zusammen?', a: ['51', '58', '56'], ok: 0, why: '7 mal 7 sind 49, dazu die 2 vom kleinsten Elf: 51!' },
+      { q: 'Welche Zahl kommt als Nächstes? 1, 3, 7, 15, 31, …', a: ['63', '47', '62'], ok: 0, why: 'Es kommt +2, +4, +8, +16 dazu – und jetzt +32: 31 + 32 = 63!' },
       { q: 'Am Baum hängen 3 rote Kugeln für jede goldene. Es sind 4 goldene. Wie viele Kugeln sind es zusammen?', a: ['16', '12', '7'], ok: 0, why: '4 goldene und 3 mal 4 = 12 rote – zusammen 16 Kugeln!' },
       { q: 'Am Adventskranz brennen 3 Kerzen. Du bläst eine aus. Wie viele Kerzen hast du noch?', a: ['3', '2', '1'], ok: 0, why: 'Eine ist nur ausgeblasen – alle 3 Kerzen sind noch da!' },
       { q: 'Welche Zahl kommt als Nächstes? 25, 24, 22, 19, …', a: ['15', '16', '17'], ok: 0, why: 'Es wird jedes Mal ein bisschen mehr abgezogen: −1, −2, −3 – und jetzt −4. 19 − 4 = 15!' },
       { q: 'Was ist schwerer: 1 kg Schnee oder 1 kg Lebkuchen?', a: ['Beide gleich schwer', 'Der Lebkuchen', 'Der Schnee'], ok: 0, why: '1 Kilogramm ist immer 1 Kilogramm – egal, woraus es besteht!' },
       { q: 'Chili isst jeden Tag doppelt so viele Karotten wie am Tag davor. Am 1. Tag eine. Wie viele am 5. Tag?', a: ['16', '10', '8'], ok: 0, why: '1, 2, 4, 8, 16 – am 5. Tag sind es 16 Karotten!' },
       { q: 'Ein Geschenk kostet 20 Franken. Es ist halb so teuer wie ein Schlitten. Was kosten beide zusammen?', a: ['60 Franken', '40 Franken', '30 Franken'], ok: 0, why: 'Der Schlitten kostet 40 Franken. 20 + 40 = 60 Franken!' },
-      { q: 'Heute ist der 20. Dezember. Wie viele Tage sind es bis zum 24.?', a: ['4', '5', '3'], ok: 0, why: '24 − 20 = 4 Tage!' },
+      { q: 'Eine Adventskerze ist 24 cm lang und brennt jeden Tag 3 cm ab. Nach wie vielen Tagen ist sie nur noch 6 cm lang?', a: ['6 Tage', '8 Tage', '7 Tage'], ok: 0, why: '24 − 6 = 18 cm sind abgebrannt, und 18 geteilt durch 3 sind 6 Tage!' },
       { q: 'Ich habe Städte, aber keine Häuser. Berge, aber keine Bäume. Wasser, aber keine Fische. Was bin ich?', a: ['Eine Landkarte', 'Ein Traum', 'Ein Bild'], ok: 0, why: 'Auf einer Landkarte sind Städte, Berge und Seen nur eingezeichnet!' },
     ],
     sky: ['#050b24', '#1c3a6e'], far: '#9fb8dc', mid: '#6b8ab4', ground: '#4f6585', top: '#f4f8ff', dots: '#3c4f6a', edge: '#2c3c54', plat: '#8fb3d8', platTop: '#ffffff',
@@ -349,46 +349,46 @@ WORLDS.push(
   { name: 'Strand', art: 5, speed: 285, segs: 52, patterns: ['rock', 'rock2', 'pit', 'amber', 'raptor', 'plat', 'boulder', 'compy', 'wall', 'wall', 'tide', 'tide', 'hopper', 'plant', 'meteor', 'bounce', 'bounceUp', 'crumble', 'raptor2'],
     startTip: 'Ein Strand! Neue Fähigkeit: FLITZ! Damit rennst du durch Sandmauern und Wellen.',
     riddles: [
-      { q: 'Am Strand liegen 12 Muscheln. Du sammelst 5 und lässt 2 wieder fallen. Wie viele hast du in der Hand?', a: ['3', '7', '10'], ok: 0, why: '5 gesammelt, 2 verloren: 5 − 2 = 3 Muscheln!' },
-      { q: 'Welche Zahl kommt als Nächstes? 3, 6, 9, 12, …', a: ['15', '14', '18'], ok: 0, why: 'Jedes Mal kommt 3 dazu: 12 + 3 = 15!' },
-      { q: 'Eine Krabbe hat 10 Beine. Wie viele Beine haben 3 Krabben zusammen?', a: ['30', '13', '20'], ok: 0, why: '3 mal 10 = 30 Beine!' },
+      { q: 'Am Strand bauen 3 Kinder je 4 Sandburgen. Jede Burg hat 3 Türme, aber 5 Burgen stürzen ein. Wie viele Türme stehen noch?', a: ['21', '36', '15'], ok: 0, why: '3 mal 4 sind 12 Burgen, 5 stürzen ein – es bleiben 7. Und 7 mal 3 sind 21 Türme!' },
+      { q: 'Welche Zahl kommt als Nächstes? 2, 6, 12, 20, 30, …', a: ['42', '40', '36'], ok: 0, why: 'Es kommt +4, +6, +8, +10 dazu – und jetzt +12: 30 + 12 = 42!' },
+      { q: 'Eine Krabbe hat 10 Beine, ein Seestern 5 Arme. Am Strand liegen 4 Tiere mit zusammen 30 Beinen und Armen. Wie viele davon sind Krabben?', a: ['2', '1', '3'], ok: 0, why: '2 Krabben (20) und 2 Seesterne (10): das sind 4 Tiere und zusammen 30!' },
       { q: 'Was wird nasser, je mehr es dich trocknet?', a: ['Ein Handtuch', 'Ein Schwamm', 'Die Sonne'], ok: 0, why: 'Ein Handtuch wird nasser, je mehr es dich trocknet!' },
       { q: 'Wenn 2 Möwen in 2 Minuten 2 Fische fangen: Wie lange brauchen 4 Möwen für 4 Fische?', a: ['2 Minuten', '4 Minuten', '1 Minute'], ok: 0, why: 'Jede Möwe fängt in 2 Minuten einen Fisch – alle zusammen brauchen wieder 2 Minuten!' },
       { q: 'Welcher Monat hat 28 Tage?', a: ['Alle Monate', 'Nur der Februar', 'Keiner'], ok: 0, why: 'Jeder Monat hat mindestens 28 Tage!' },
       { q: 'Ich habe ein Gesicht und zwei Hände, aber keine Arme und Beine. Was bin ich?', a: ['Eine Uhr', 'Ein Seestern', 'Ein Strandball'], ok: 0, why: 'Eine Uhr hat ein Zifferblatt (Gesicht) und zwei Zeiger (Hände)!' },
       { q: 'Du hast 5 Eis und isst alle bis auf 2. Wie viele hast du gegessen?', a: ['3', '2', '5'], ok: 0, why: 'Alle bis auf 2: 5 − 2 = 3 gegessen!' },
       { q: 'Welche Zahl kommt als Nächstes? 1, 4, 9, 16, …', a: ['25', '20', '24'], ok: 0, why: 'Das sind 1×1, 2×2, 3×3, 4×4 – als Nächstes 5×5 = 25!' },
-      { q: 'Ein Schwimmbrett kostet 12 Franken, ein Ball die Hälfte. Was kosten beide zusammen?', a: ['18 Franken', '24 Franken', '6 Franken'], ok: 0, why: 'Der Ball kostet 6 Franken. 12 + 6 = 18!' },
+      { q: 'Ein Eis kostet 3 Franken. Zu jedem 4. gekauften Eis gibt es 1 Eis gratis dazu. Du hast 12 Franken. Wie viele Eis bekommst du?', a: ['5', '4', '6'], ok: 0, why: '12 Franken sind 4 gekaufte Eis – dazu kommt 1 gratis. Also 5 Eis!' },
     ],
     sky: ['#4fb6e8', '#bfe9ff'], far: '#7fd0e0', mid: '#e8d29a', ground: '#e8c985', top: '#f3dca0', dots: '#c9a95e', edge: '#a8883e', plat: '#b98a54', platTop: '#f3dca0', rock: '#b8a47a', deco: '#2f7d4a', volcS: 0.3, volcCol: '#6a8aa8', egg: '#fff0c8', eggSpot: '#ff7a5a' },
   { name: 'Unterwasser', art: 6, swim: true, speed: 270, segs: 52, patterns: ['coralgate', 'coralgate', 'jellies', 'jellies', 'urchins', 'sword', 'bubbles', 'rockwall'],
     startTip: 'Unter Wasser! Tippe, um nach oben zu schwimmen. DUCKEN taucht schneller ab.',
     riddles: [
-      { q: 'Ein Wal taucht 20 m tief und kommt 8 m wieder hoch. Wie tief ist er jetzt?', a: ['12 m', '28 m', '8 m'], ok: 0, why: '20 − 8 = 12 Meter tief!' },
-      { q: 'Ein Fisch schwimmt 3 Runden im Teich. Jede Runde dauert 4 Minuten. Wie lange insgesamt?', a: ['12 Minuten', '7 Minuten', '10 Minuten'], ok: 0, why: '3 mal 4 = 12 Minuten!' },
-      { q: 'Welche Zahl kommt als Nächstes? 100, 90, 80, 70, …', a: ['60', '50', '65'], ok: 0, why: 'Jedes Mal minus 10: 70 − 10 = 60!' },
-      { q: 'Ein Oktopus hat 8 Arme, ein Seestern 5. Wie viele Arme haben 2 Oktopusse und 1 Seestern?', a: ['21', '16', '13'], ok: 0, why: '8 + 8 + 5 = 21 Arme!' },
+      { q: 'Ein Wal taucht alle 6 Minuten zum Atmen auf, ein Delfin alle 10 Minuten. Jetzt sind beide oben. Nach wie vielen Minuten sind sie wieder gleichzeitig oben?', a: ['30 Minuten', '60 Minuten', '16 Minuten'], ok: 0, why: 'Wal: 6, 12, 18, 24, 30 – Delfin: 10, 20, 30. Nach 30 Minuten treffen sie sich!' },
+      { q: 'Welche Zahl kommt als Nächstes? 1, 2, 6, 24, 120, …', a: ['720', '240', '600'], ok: 0, why: 'Mal 2, mal 3, mal 4, mal 5 – und jetzt mal 6: 120 mal 6 = 720!' },
+      { q: 'Die Krake denkt sich eine Zahl. Sie rechnet mal 3, zieht 5 ab und bekommt 25. Welche Zahl war es?', a: ['10', '8', '12'], ok: 0, why: 'Rückwärts: 25 + 5 = 30, und 30 geteilt durch 3 ist 10!' },
+      { q: 'Welche Zahl passt nicht dazu? 4, 9, 16, 20, 25, 36', a: ['20', '25', '9'], ok: 0, why: 'Alle anderen sind Quadratzahlen (2×2, 3×3, 4×4, 5×5, 6×6) – nur die 20 nicht!' },
       { q: 'Je mehr man davon wegnimmt, desto grösser wird es. Was ist das?', a: ['Ein Loch', 'Ein Haufen', 'Ein Berg'], ok: 0, why: 'Ein Loch wird grösser, wenn man etwas wegnimmt!' },
       { q: 'Wie viele Beine haben 3 Delfine und 2 Krabben (jede Krabbe hat 10 Beine)?', a: ['20', '26', '30'], ok: 0, why: 'Delfine haben keine Beine – nur die Krabben: 2 mal 10 = 20!' },
-      { q: 'Der Wasserstand steigt jeden Tag um 2 cm. Nach 5 Tagen ist er 14 cm hoch. Wie hoch war er am Anfang?', a: ['4 cm', '10 cm', '14 cm'], ok: 0, why: '5 mal 2 = 10 cm dazu. 14 − 10 = 4 cm am Anfang!' },
+      { q: 'Ein Becken fasst 600 Liter. Ein Hahn füllt 20 Liter pro Minute, ein Abfluss lässt 10 Liter pro Minute ab. Beide laufen. Wie lange dauert es, bis das leere Becken voll ist?', a: ['60 Minuten', '30 Minuten', '20 Minuten'], ok: 0, why: 'Pro Minute kommen 20 − 10 = 10 Liter dazu. 600 geteilt durch 10 sind 60 Minuten!' },
       { q: 'In einem Aquarium sind 6 Fische. Alle bis auf 4 sind blau. Wie viele sind blau?', a: ['2', '4', '6'], ok: 0, why: 'Alle bis auf 4 sind blau – also sind 6 − 4 = 2 blau!' },
       { q: 'Welche Zahl kommt als Nächstes? 2, 3, 5, 8, 12, …', a: ['17', '16', '15'], ok: 0, why: 'Es kommt +1, +2, +3, +4 dazu – jetzt +5: 12 + 5 = 17!' },
-      { q: 'Eine Schildkröte läuft 1 Meter pro Minute. Wie lange braucht sie für 1000 Meter?', a: ['1000 Minuten', '100 Minuten', '10 Minuten'], ok: 0, why: '1000 Meter mit 1 Meter pro Minute: 1000 Minuten!' },
+      { q: 'Fünf Fische haben je 2 Augen – aber ein Fisch hat nur ein Auge. Wie viele Augen sind es zusammen?', a: ['9', '10', '8'], ok: 0, why: '4 Fische mit je 2 Augen sind 8, dazu das 1 Auge des fünften: 9 Augen!' },
     ],
     sky: ['#0a4a7a', '#2fb0c8'], far: '#2a7a9a', mid: '#1d6a8a', ground: '#d8c48a', top: '#e8d8a0', dots: '#b8a468', edge: '#8a7a48', plat: '#2f9a8a', platTop: '#7fe0c8', rock: '#5a7a8a', deco: '#1a5a6a', volcS: 0.3, volcCol: '#1d4a6a', egg: '#d8f4ff', eggSpot: '#ff8a6a' },
   { name: 'Berge', art: 7, speed: 300, segs: 52, patterns: ['rock', 'rock2', 'widegap', 'widegap', 'updraft', 'raptor', 'ptero', 'boulder', 'plat', 'amber', 'avalanche', 'compy', 'hopper', 'plant', 'meteor', 'meteors', 'bounce', 'crumble', 'raptor2'],
     startTip: 'Hoch in den Bergen! Neue Fähigkeit: GLEITEN. Halte die Taste in der Luft gedrückt und schwebe über die Schluchten.',
     riddles: [
-      { q: 'Ein Steinbock klettert 40 m hoch und rutscht dann 10 m ab. Wie hoch ist er?', a: ['30 m', '50 m', '40 m'], ok: 0, why: '40 − 10 = 30 Meter hoch!' },
-      { q: 'Welche Zahl kommt als Nächstes? 5, 10, 20, 40, …', a: ['80', '60', '50'], ok: 0, why: 'Jedes Mal wird verdoppelt: 40 + 40 = 80!' },
-      { q: 'Ein Berg ist 3000 m hoch, ein anderer 500 m höher. Wie hoch ist der zweite?', a: ['3500 m', '3050 m', '2500 m'], ok: 0, why: '3000 + 500 = 3500 Meter!' },
+      { q: 'Eine Gämse springt jeden Tag 8 m höher, rutscht aber jede Nacht 3 m ab. Nach wie vielen Tagen erreicht sie die 28 m?', a: ['5 Tage', '4 Tage', '6 Tage'], ok: 0, why: 'Netto sind es 5 m pro Tag. Nach 4 Tagen ist sie bei 20 m, am 5. Tag springt sie auf 28 m!' },
+      { q: 'Welche Zahl kommt als Nächstes? 1, 4, 10, 22, 46, …', a: ['94', '92', '70'], ok: 0, why: 'Jedes Mal mal 2 plus 2: 46 mal 2 sind 92, plus 2 ergibt 94!' },
+      { q: 'Ein Berg ist 3000 m hoch. Pro 100 m Höhe wird es 0,6 Grad kälter. Unten sind es 20 Grad. Wie warm ist es oben?', a: ['2 Grad', '12 Grad', '−18 Grad'], ok: 0, why: '30 mal 0,6 sind 18 Grad kälter: 20 − 18 = 2 Grad!' },
       { q: 'Er hat einen Fuss, aber keine Schuhe, und einen Gipfel, aber keinen Kopf. Was ist es?', a: ['Ein Berg', 'Ein Baum', 'Ein Turm'], ok: 0, why: 'Ein Berg hat einen Fuss (ganz unten) und einen Gipfel!' },
       { q: 'Auf dem Gipfel sind es −6 Grad, unten im Tal +4 Grad. Wie gross ist der Unterschied?', a: ['10 Grad', '2 Grad', '24 Grad'], ok: 0, why: 'Von −6 bis 0 sind es 6 Grad, dann noch 4: zusammen 10 Grad!' },
       { q: 'Ein Wanderweg ist 12 km lang. Du bist die Hälfte gelaufen und dann noch 2 km. Wie viele km sind es noch?', a: ['4 km', '6 km', '2 km'], ok: 0, why: 'Die Hälfte sind 6 km, dazu 2 km = 8 km gelaufen. 12 − 8 = 4 km!' },
-      { q: 'Ein Adler fliegt 15 km in 3 Stunden. Wie weit fliegt er in einer Stunde (gleich schnell)?', a: ['5 km', '45 km', '3 km'], ok: 0, why: '15 geteilt durch 3 = 5 Kilometer pro Stunde!' },
-      { q: 'Die Seilbahn fährt alle 20 Minuten. Um 10:15 Uhr ist sie gefahren. Wann fährt sie wieder?', a: ['10:35 Uhr', '10:20 Uhr', '10:40 Uhr'], ok: 0, why: '10:15 plus 20 Minuten ist 10:35 Uhr!' },
+      { q: 'Ein Adler fliegt gegen den Wind 12 km in 2 Stunden. Mit dem Wind schafft er die 12 km in 1 Stunde. Wie viel schneller ist er mit dem Wind pro Stunde?', a: ['6 km mehr', '12 km mehr', '3 km mehr'], ok: 0, why: 'Gegen den Wind 6 km pro Stunde, mit dem Wind 12 km pro Stunde – also 6 km mehr!' },
+      { q: 'Die Seilbahn fährt um 10:15 Uhr und dann alle 20 Minuten. Wie oft fährt sie bis 12:00 Uhr (die Fahrt um 10:15 mitgezählt)?', a: ['6 Mal', '5 Mal', '7 Mal'], ok: 0, why: '10:15, 10:35, 10:55, 11:15, 11:35 und 11:55 – das sind 6 Fahrten!' },
       { q: 'Welche Zahl kommt als Nächstes? 1, 2, 4, 7, 11, 16, …', a: ['22', '21', '20'], ok: 0, why: 'Es kommt +1, +2, +3, +4, +5 dazu – jetzt +6: 16 + 6 = 22!' },
-      { q: 'Ein Bergsteiger braucht für 100 Höhenmeter 10 Minuten. Wie lange für 300 Höhenmeter?', a: ['30 Minuten', '13 Minuten', '100 Minuten'], ok: 0, why: '300 sind 3 mal 100 – also 3 mal 10 = 30 Minuten!' },
+      { q: 'Ein Rucksack wiegt am Anfang 12 kg. Die Gruppe isst jeden Tag 1,5 kg Proviant. Nach 4 Tagen kommen 2 kg Schokolade dazu. Wie schwer ist der Rucksack dann?', a: ['8 kg', '10 kg', '4 kg'], ok: 0, why: '4 mal 1,5 sind 6 kg gegessen: 12 − 6 = 6, dazu 2 kg ergibt 8 kg!' },
     ],
     sky: ['#3a6fb0', '#c9e0f5'], far: '#9db8d6', mid: '#6f8fb0', ground: '#7a7f88', top: '#9bb07a', dots: '#5a5f68', edge: '#40444c', plat: '#8a8f98', platTop: '#b8d09a', rock: '#7a8088', deco: '#2a5a3a', volcS: 0.5, volcCol: '#6f86a8', egg: '#eaf4ff', eggSpot: '#7a9ad6' },
 );
@@ -2526,11 +2526,12 @@ function updateBoss(dt) {
     } break;
     case 'summon':
       if (!b.summoned) {
-        b.summoned = true; b.t = 0; SFX.roar(); G.shake = 0.4; const base = K.minions, n = b.hp === 3 ? 3 : b.hp === 2 ? 4 : 5;
-        for (let i = 0; i < n; i++) L.obs.push(mkMinion(base[i % base.length], i));
+        b.summoned = true; b.t = 0; SFX.roar(); G.shake = 0.4; const base = K.minions, n = b.hp === 3 ? 3 : b.hp === 2 ? 4 : 5; b.spawnQ = [];
+        for (let i = 0; i < n; i++) { const k = base[i % base.length]; if (k === 'jelly' || k === 'rollrock') L.obs.push(mkMinion(k, i)); else b.spawnQ.push({ k, i, at: 0.8 + b.spawnQ.length * (k === 'raptor' ? 1.7 : 1.35) }); } // the helpers file out from behind the boss, one at a time
         toast('Seine Helfer kommen!', '#ffe08a');
       }
-      if (b.t > 2.2 && (b.t > 10 || !L.obs.some(o => o.minion && !o.dead && !o.scared && !o.flat && o.x > G.cam))) { b.summoned = false; b.state = b.kind === 'kraken' ? 'lanes' : 'charge'; b.laneN = 0; b.laneNext = 0.2; b.t = 0; toast('Jetzt kommt der Boss selbst!', '#ffb4a8'); }
+      while (b.spawnQ && b.spawnQ.length && b.t >= b.spawnQ[0].at) { const q = b.spawnQ.shift(), m = mkMinion(q.k, q.i); m.x = Math.max(b.x, home) + 20; L.obs.push(m); burst(m.x, GROUND - 14, 6, ['#d8c3a5', '#fff'], 120, 90, 5, 0.4); SFX.pop(); }
+      if (b.t > 2.2 && !(b.spawnQ && b.spawnQ.length) && (b.t > 16 || !L.obs.some(o => o.minion && !o.dead && !o.scared && !o.flat && o.x > G.cam))) { b.summoned = false; b.state = b.kind === 'kraken' ? 'lanes' : 'charge'; b.laneN = 0; b.laneNext = 0.2; b.t = 0; toast('Jetzt kommt der Boss selbst!', '#ffb4a8'); }
       break;
     case 'crouch': // leap: a shadow marks the landing spot, then he jumps
       if (b.t > 0.75) { b.state = 'leap'; b.t = 0; b.fromX = b.x; SFX.jump(); }
@@ -3473,18 +3474,41 @@ function drawGiftIcon(g, cx, cy, k) {
   else if (g.key === 'fire') drawFlameIcon(fireOf(g.i), cx, cy, k * 1.6);
   else { drawAmber(cx, cy, 30 * k); otxt('+' + g.n, cx, cy + 50 * k, 28, '#ffe08a', 'rgba(0,0,0,.7)', 5); }
 }
-function drawDoorOverlay() {
-  const o = doorOverlay, lv = LEVELS[o.i]; o.t += DT; const u = clamp(o.t / 0.9, 0, 1);
+function drawDoorOverlay() { // the door shakes, glows at the seam, swings open on two leaves, and the gift pops out in a burst of light and confetti
+  const o = doorOverlay, lv = LEVELS[o.i]; o.t += DT; const t = o.t, u = clamp(t / 1.6, 0, 1);
+  const open = clamp((t - 0.45) / 0.65, 0, 1), eo = open * open * (3 - 2 * open), pop = clamp((t - 0.95) / 0.55, 0, 1), tt = Math.max(0, t - 0.95);
+  const back = x => 1 + 2.70158 * Math.pow(x - 1, 3) + 1.70158 * Math.pow(x - 1, 2);
+  if (!o.a && t > 0.45) { o.a = 1; SFX.click(); }
+  if (!o.b && t > 0.95) { o.b = 1; SFX.amber(); burst(W / 2, 235, 46, ['#ffd740', '#fff6b0', '#ff8a65', '#69f0ae', '#40c4ff'], 520, 420, 7, 1.2); }
   ctx.fillStyle = 'rgba(8,10,24,.6)'; ctx.fillRect(0, 0, W, H);
   woodFrame(250, 50, 460, 440, 26);
   txt(`Tür ${lv.day}`, W / 2, 98, 40, '#3b2410'); txt(lv.title, W / 2, 132, 20, '#8a6a3a', 'center', 'normal');
-  // the door swings open to reveal the gift
-  ctx.save(); rr(380, 150, 200, 170, 14); ctx.clip(); ctx.fillStyle = vgrad(150, 320, '#fff6d0', '#ffd77a'); ctx.fillRect(380, 150, 200, 170);
-  const gl = ctx.createRadialGradient(480, 235, 6, 480, 235, 110); gl.addColorStop(0, `rgba(255,255,220,${u})`); gl.addColorStop(1, 'rgba(255,230,140,0)'); ctx.fillStyle = gl; ctx.fillRect(380, 150, 200, 170);
-  if (u > 0.5) { ctx.save(); ctx.translate(480, 238 + Math.sin(T * 3) * 4); const sc = clamp((u - 0.5) * 3, 0, 1) * 1.0; ctx.scale(sc, sc); drawGiftIcon(o.g, 0, 0, 1.4); ctx.restore(); }
+  const fx = 380, fy = 150, fw = 200, fh = 170, cx = fx + fw / 2, cy = fy + fh / 2 + 2;
+  // behind the door: a dark room that floods with light
+  ctx.save(); rr(fx, fy, fw, fh, 14); ctx.clip(); ctx.fillStyle = '#241810'; ctx.fillRect(fx, fy, fw, fh);
+  ctx.globalAlpha = eo; ctx.fillStyle = vgrad(fy, fy + fh, '#fff6d0', '#ffd77a'); ctx.fillRect(fx, fy, fw, fh); ctx.globalAlpha = 1;
+  ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.translate(cx, cy); ctx.rotate(T * 0.5);
+  for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2; ctx.fillStyle = `rgba(255,240,170,${0.2 * eo})`; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(a - 0.09) * 260, Math.sin(a - 0.09) * 260); ctx.lineTo(Math.cos(a + 0.09) * 260, Math.sin(a + 0.09) * 260); ctx.fill(); }
   ctx.restore();
-  const sw = 1 - u; ctx.save(); rr(380, 150, 200 * Math.max(0.02, sw), 170, 10); ctx.fillStyle = vgrad(150, 320, '#b07a42', '#7a4e24'); ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = '#2b1a0c'; ctx.stroke(); ctx.restore();
-  rr(380, 150, 200, 170, 14); ctx.lineWidth = 5; ctx.strokeStyle = '#6b4a2b'; ctx.stroke();
+  const gl = ctx.createRadialGradient(cx, cy, 6, cx, cy, 110); gl.addColorStop(0, `rgba(255,255,220,${eo})`); gl.addColorStop(1, 'rgba(255,230,140,0)'); ctx.fillStyle = gl; ctx.fillRect(fx, fy, fw, fh);
+  if (pop > 0) { ctx.strokeStyle = `rgba(255,247,192,${0.85 * (1 - pop)})`; ctx.lineWidth = 7; ctx.beginPath(); ctx.arc(cx, cy, 20 + pop * 120, 0, Math.PI * 2); ctx.stroke(); ctx.save(); ctx.translate(cx, cy + 3 + Math.sin(T * 3) * 4 - (1 - pop) * 34); const sc = Math.max(0.01, back(pop)); ctx.scale(sc, sc); drawGiftIcon(o.g, 0, 0, 1.4); ctx.restore(); }
+  ctx.restore();
+  // the seam glows and the door trembles, then both leaves swing open towards the viewer
+  const pre = clamp(t / 0.45, 0, 1), ox = t < 0.45 ? Math.sin(t * 90) * 2.2 * pre : 0;
+  const lw = fw / 2 * (1 - 0.88 * eo), ex = 15 * eo;
+  for (const sd of [-1, 1]) {
+    const hx = sd < 0 ? fx : fx + fw, fr = hx - sd * lw + ox;
+    ctx.save(); ctx.beginPath(); ctx.moveTo(hx + ox, fy); ctx.lineTo(fr, fy - ex); ctx.lineTo(fr, fy + fh + ex); ctx.lineTo(hx + ox, fy + fh); ctx.closePath();
+    const g = ctx.createLinearGradient(hx, 0, fr, 0); g.addColorStop(0, '#b88650'); g.addColorStop(1, eo > 0 ? '#5a381a' : '#8a5a2c'); ctx.fillStyle = g; ctx.fill(); ctx.lineJoin = 'round'; ctx.lineWidth = 3; ctx.strokeStyle = '#2b1a0c'; ctx.stroke();
+    ctx.clip(); ctx.strokeStyle = 'rgba(40,22,8,.35)'; ctx.lineWidth = 1.6; for (let i = 1; i < 4; i++) { const px = hx - sd * lw * i / 4 + ox; ctx.beginPath(); ctx.moveTo(px, fy - 20); ctx.lineTo(px, fy + fh + 20); ctx.stroke(); }
+    ctx.fillStyle = 'rgba(255,255,255,.1)'; ctx.fillRect(Math.min(hx, hx - sd * lw) + ox, fy, lw, 5); ctx.restore();
+    if (lw > 22) { circle(fr + sd * 11, cy, 5, '#ffd34d'); circle(fr + sd * 12, cy - 1.4, 1.8, '#fff3b0'); }
+  }
+  if (t < 0.6) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; const g = ctx.createLinearGradient(cx - 14, 0, cx + 14, 0); g.addColorStop(0, 'rgba(255,230,140,0)'); g.addColorStop(0.5, `rgba(255,236,150,${0.9 * pre})`); g.addColorStop(1, 'rgba(255,230,140,0)'); ctx.fillStyle = g; ctx.fillRect(cx - 14, fy, 28, fh); ctx.restore(); }
+  rr(fx, fy, fw, fh, 14); ctx.lineWidth = 5; ctx.strokeStyle = '#6b4a2b'; ctx.stroke();
+  // sparkles drift out of the opened door, confetti rains down
+  if (eo > 0) for (let i = 0; i < 16; i++) { const a = hash(i * 1.7) * Math.PI * 2, r = 100 + ((T * 36 + i * 23) % 70), al = eo * (0.4 + 0.6 * Math.sin(T * 5 + i)) * (1 - ((T * 36 + i * 23) % 70) / 90); if (al > 0.05) { ctx.globalAlpha = clamp(al, 0, 1); drawStar(cx + Math.cos(a) * r * 1.15, cy + Math.sin(a) * r * 0.8, 3 + hash(i) * 4, '#fff3a0'); } } ctx.globalAlpha = 1;
+  if (tt > 0 && tt < 3) { ctx.save(); ctx.beginPath(); ctx.rect(262, 62, 436, 416); ctx.clip(); const cols = ['#ff5252', '#ffd740', '#69f0ae', '#40c4ff', '#e040fb', '#fff']; for (let i = 0; i < 44; i++) { const vx = (hash(i * 2.3) - 0.5) * 460, vy = -300 - hash(i * 5.1) * 240, x = cx + vx * tt, y = cy + vy * tt + 560 * tt * tt; ctx.globalAlpha = clamp((3 - tt) * 1.2, 0, 1); ctx.save(); ctx.translate(x, y); ctx.rotate(tt * (4 + hash(i) * 8) + i); ctx.fillStyle = cols[i % 6]; ctx.fillRect(-4, -2.2, 8, 4.4); ctx.restore(); } ctx.restore(); ctx.globalAlpha = 1; }
   const label = { hat: 'Neuer Hut', skin: 'Neue Farbe', fire: 'Neue Feuerfarbe', amber: 'Bernstein-Schatz' }[o.g.key];
   if (u >= 1) { txt(label + '!', W / 2, 352, 22, '#2e7d32'); txt(o.g.name, W / 2, 386, 32, '#3b2410'); txt('Du findest es im Laden.', W / 2, 418, 16, '#8a6a3a', 'center', 'normal'); }
   button('Zurück', 270, 432, 150, 44, () => { doorOverlay = null; }, { size: 22 });

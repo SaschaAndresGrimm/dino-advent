@@ -359,7 +359,7 @@ test('crab boss (day 6): no duck shots, crabs not dinos, spaced out, pickups dri
     for (let i = 0; i < 400 && !(G.boss && G.boss.state === 'taunt'); i++) d.updatePlay(1 / 60);
     const b = G.boss; b.phase = 0; b.hp = 3; b.state = 'taunt'; b.t = 5; d.updatePlay(1 / 60);
     const lanes = b.volley ? b.volley.seq.slice() : [];
-    b.phase = 1; b.hp = 3; b.state = 'summon'; b.summoned = false; d.updatePlay(1 / 60);
+    b.phase = 1; b.hp = 3; b.state = 'summon'; b.summoned = false; for (let i = 0; i < 230; i++) d.updatePlay(1 / 60); // the crabs file out from behind the king one by one
     const m = L.obs.filter(o => o.minion), xs = m.map(o => o.x).sort((a, c) => a - c);
     L.hearts.push({ x: p.wx + 240, y: 340, got: false }); for (let i = 0; i < 120; i++) d.updatePlay(1 / 60);
     return { lanes, crabs: m.every(o => o.crab), n: m.length, minGap: Math.min(...xs.slice(1).map((x, i) => x - xs[i])), heartDist: L.hearts[L.hearts.length - 1].x - p.wx };
