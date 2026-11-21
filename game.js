@@ -2075,9 +2075,9 @@ function buildLevel(wi, endless, LV) { // LV = the calendar level spec (or undef
     updraft: x => { firstTip('updraft', x - 1200, 'Aufwind! Er wirbelt dich hoch in die Luft – halte gedrückt, dann gleitest du weit!'); const w = 400; L.pits.push({ x, w }); L.obs.push({ type: 'updraft', x: x + w / 2, w: 210 }); for (let i = 0; i < 6; i++) L.amb.push({ x: x + w / 2 + Math.sin(i * 1.3) * 40, y: GROUND - 90 - i * 38, got: false }); return w; },
     avalanche: x => { firstTip('avalanche', x - 1200, 'Steinlawine! Spring drüber oder brüll sie kaputt!'); for (let i = 0; i < 2; i++) L.obs.push({ type: 'rollrock', x: x + 110 + i * 270, rot: 0 }); return 440; },
     // ---- underwater: swim ----
-    coralgate: x => { const gh = 215, gy = 120 + Math.floor(R() * (GROUND - 120 - gh - 30)); L.obs.push({ type: 'cgate', x: x + 90, gapY: gy, gapH: gh }); for (let i = 0; i < 3; i++) L.amb.push({ x: x + 40 + i * 50, y: gy + gh / 2 + (i - 1) * 12, got: false }); return 190; },
-    jellies: x => { firstTip('jelly', x - 1200, 'Quallen! Schwimm drumherum.'); for (let i = 0; i < 3; i++) L.obs.push({ type: 'jelly', x: x + 90 + i * 140, y0: 200 + (i % 2) * 110 + R() * 25, amp: 38 + R() * 28, ph: R() * 6, y: 220 }); return 440; },
-    urchins: x => { firstTip('urchin', x - 1200, 'Seeigel am Boden! Schwimm drüber.'); for (let i = 0; i < 3; i++) L.obs.push({ type: 'urchin', x: x + 60 + i * 72 }); for (let i = 0; i < 4; i++) L.amb.push({ x: x + 30 + i * 60, y: 200 + Math.sin(i) * 20, got: false }); return 300; },
+    coralgate: x => { const gh = 255, gy = 100 + Math.floor(R() * (GROUND - 100 - gh - 30)); L.obs.push({ type: 'cgate', x: x + 90, gapY: gy, gapH: gh }); for (let i = 0; i < 3; i++) L.amb.push({ x: x + 40 + i * 50, y: gy + gh / 2 + (i - 1) * 12, got: false }); return 190; },
+    jellies: x => { firstTip('jelly', x - 1200, 'Quallen! Schwimm drumherum.'); for (let i = 0; i < 3; i++) L.obs.push({ type: 'jelly', x: x + 90 + i * 230, y0: 175 + (i % 2) * 155 + R() * 15, amp: 24 + R() * 16, ph: R() * 6, y: 220 }); return 700; },
+    urchins: x => { firstTip('urchin', x - 1200, 'Seeigel am Boden! Schwimm drüber.'); for (let i = 0; i < 3; i++) L.obs.push({ type: 'urchin', x: x + 60 + i * 130 }); for (let i = 0; i < 4; i++) L.amb.push({ x: x + 40 + i * 90, y: 200 + Math.sin(i) * 20, got: false }); return 440; },
     sword: x => { firstTip('sword', x - 1200, 'Ein Schwertfisch! Schwimm aus dem Weg – oder brüll ihn weg!'); L.obs.push({ type: 'sword', x: x + 220, y: 230 + R() * 150, spd: 340, ph: 0, alpha: 1 }); return 260; },
     bubbles: x => { for (let i = 0; i < 9; i++) L.amb.push({ x: x + i * 50, y: 270 + Math.sin(i * 0.8) * 95, got: false }); return 440; },
     rockwall: x => { L.obs.push({ type: 'boulder', x: x + 90, w: 110, h: 270 }); for (let i = 0; i < 3; i++) L.amb.push({ x: x + 40 + i * 50, y: 150, got: false }); return 170; },
@@ -2128,7 +2128,7 @@ function buildLevel(wi, endless, LV) { // LV = the calendar level spec (or undef
     } else if (wi === 6) { // new: swim
       L.seen.sword = L.seen.jelly = L.seen.urchin = 1;
       if (!save.learned.swim) L.coach.push({ x: 650, type: 'jump', text: 'Tippe – du schwimmst nach oben!' });
-      L.obs.push({ type: 'cgate', x: 1500, gapY: 170, gapH: 235 }); for (let i = 0; i < 3; i++) L.amb.push({ x: 1440 + i * 50, y: 290, got: false });
+      L.obs.push({ type: 'cgate', x: 1500, gapY: 150, gapH: 275 }); for (let i = 0; i < 3; i++) L.amb.push({ x: 1440 + i * 50, y: 290, got: false });
       L.tips.push({ x: 700, text: 'Schwimm durch die Lücke im Korallentor!' });
       x = 2300;
     } else if (wi === 7) { // new: glide
@@ -2593,7 +2593,7 @@ function updatePlay(dt) {
       case 'wall': hb = { x: o.x - o.w / 2, y: GROUND - o.h, w: o.w, h: o.h }; break;
       case 'tide': if (d < 720) o.moving = true; if (o.moving) o.x -= 210 * dt; hb = { x: o.x - 70, y: GROUND - 118, w: 110, h: 118 }; break;
       case 'rollrock': if (d < 760 || o.minion) { o.x -= 250 * dt; o.rot = (o.rot || 0) - dt * 7; } hb = { x: o.x - 30, y: GROUND - 64, w: 60, h: 64 }; break;
-      case 'urchin': hb = { x: o.x - 20, y: GROUND - 40, w: 40, h: 40 }; break;
+      case 'urchin': hb = { x: o.x - 17, y: GROUND - 38, w: 34, h: 38 }; break;
       case 'jelly': if (o.minion && o.spd) o.x -= o.spd * dt; o.y = o.y0 + Math.sin(T * 2 + o.ph) * o.amp; hb = { x: o.x - 22, y: o.y - 24, w: 44, h: 48 }; break;
       case 'sword':
         if (o.scared) { o.x += o.vx * dt; o.vy += 600 * dt; o.y += o.vy * dt; o.alpha -= dt * 1.2; if (o.alpha <= 0) o.dead = true; break; }
