@@ -426,3 +426,27 @@ test('local Bestenliste: nickname filter, top 10 per world, ranks and persistenc
   expect(await game.eval(() => window.__dino.scene)).toBe('board');
   expect(game.errors).toEqual([]);
 });
+
+test('story: day briefing plays once before a level, a boss unlocks a map dialog, {oli} uses the chosen name', async ({ game, page }) => {
+  await game.open({ storySeen: {}, oliName: 'Mia' });
+  const r = await game.eval(() => {
+    const d = window.__dino; d.go('map');
+    d.launchLevel(0); const first = { scene: d.scene, dlg: d.dialog && d.dialog.lines.length };
+    return first;
+  });
+  expect(r.scene).toBe('map'); expect(r.dlg).toBeGreaterThan(0);
+  // tap through the dialog: the level starts afterwards
+  for (let i = 0; i < 4; i++) { await page.mouse.click(480, 300); await page.waitForTimeout(150); await page.mouse.click(480, 300); await page.waitForTimeout(150); }
+  expect(await game.eval(() => window.__dino.scene)).toBe('play');
+  // seen once: launching again goes straight into the level
+  const again = await game.eval(() => { const d = window.__dino; d.go('map'); d.launchLevel(0); return d.scene; });
+  expect(again).toBe('play');
+  // every day has a briefing; the boss days have a follow-up
+  const cov = await game.eval(() => { const d = window.__dino; let n = 0; for (let day = 1; day <= 24; day++) if (d.DAY_STORY[day] && d.DAY_STORY[day].length) n++; return { n, after: Object.keys(d.DAY_AFTER).join(',') }; });
+  expect(cov).toEqual({ n: 24, after: '6,12,18' });
+  // finishing the crab king for the first time queues the map dialog
+  await game.eval(() => { const d = window.__dino; d.save.lvDone[5] = 0; d.startLevel(5); const G = d.G; G.startT = 0; G.coach = null; G.L.coach.forEach(c => (c.done = true)); d.finishLevel(); d.go('map'); });
+  expect(await game.eval(() => window.__dino.dialog && window.__dino.dialog.lines.length)).toBeGreaterThan(0);
+  expect(await game.eval(() => window.__dino.fmt('{oli}'))).toBe('Mia');
+  expect(game.errors).toEqual([]);
+});

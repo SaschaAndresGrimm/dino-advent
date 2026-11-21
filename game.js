@@ -35,6 +35,7 @@ while (save.riddleSeen.length < 8) save.riddleSeen.push([]);
 if (!save.owned) save.owned = { skin: [0], hat: [0], fire: [0] };
 if (!save.equip) save.equip = { skin: 0, hat: 0, fire: 0 };
 if (!save.best) save.best = []; while (save.best.length < 8) save.best.push(0);
+if (!save.storySeen) save.storySeen = {}; if (!save.afterNew) save.afterNew = 0; if (!save.oliName) save.oliName = '';
 if (!save.board) save.board = []; while (save.board.length < 8) save.board.push([]); if (!save.nick) save.nick = '';
 function writeSave() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) {} }
 
@@ -189,7 +190,7 @@ function setFont(size, weight = 'bold') { ctx.font = `${weight} ${size}px ${FONT
 function txt(s, x, y, size, color, align = 'center', weight = 'bold') { setFont(size, weight); ctx.fillStyle = color; ctx.textAlign = align; ctx.textBaseline = 'middle'; ctx.fillText(s, x, y); }
 function otxt(s, x, y, size, color, stroke = 'rgba(0,0,0,.75)', lw = 6, align = 'center') { setFont(size); ctx.textAlign = align; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round'; ctx.strokeStyle = stroke; ctx.lineWidth = lw; ctx.strokeText(s, x, y); ctx.fillStyle = color; ctx.fillText(s, x, y); }
 function wrapLines(s, maxW, size) { setFont(size); const out = []; let cur = ''; for (const w of s.split(' ')) { const t = cur ? cur + ' ' + w : w; if (ctx.measureText(t).width > maxW && cur) { out.push(cur); cur = w; } else cur = t; } if (cur) out.push(cur); return out; }
-function fmt(s) { return s.replace(/\{rex\}/g, save.rexName || 'Rexi').replace(/\{baby\}/g, save.babyName || 'Baby'); }
+function fmt(s) { return s.replace(/\{oli\}/g, save.oliName || 'Oli').replace(/\{rex\}/g, save.rexName || 'Rexi').replace(/\{baby\}/g, save.babyName || 'Baby'); }
 function overlap(a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; }
 
 // immediate-mode buttons (rebuilt every frame)
@@ -428,11 +429,51 @@ const FACTS_NEW = [
 // one card per level (24 days). Order follows the calendar: jungle, beach, canyon, underwater, ice age, mountains, volcano, Christmas.
 const FACTS = [...FACTS_OLD.slice(0, 3), ...FACTS_NEW.slice(0, 3), ...FACTS_OLD.slice(3, 6), ...FACTS_NEW.slice(3, 6), ...FACTS_OLD.slice(6, 9), ...FACTS_NEW.slice(6, 9), ...FACTS_OLD.slice(9, 12), ...FACTS_OLD.slice(12, 15)];
 const TREASURES = [
-  { name: 'Goettis Gitarre', line: 'Meine Gitarre! Danke, Oli! Tipp sie in der Schatzkiste an – dann spiele ich dir was vor.', tap: 'Goetti spielt ein Lied!' },
+  { name: 'Goettis Gitarre', line: 'Meine Gitarre! Danke, {oli}! Tipp sie in der Schatzkiste an – dann spiele ich dir was vor.', tap: 'Goetti spielt ein Lied!' },
   { name: 'Goettis Velo', line: 'Mein Velo! Das hat der Vulkan bis in den Canyon geschleudert. Damit machen wir zwei mal eine grosse Tour!', tap: 'Kling, kling!' },
   { name: 'Goettis Angel', line: 'Meine Angelrute! Weisst du was? Im Winter kann man sogar durch ein Loch im Eis fischen. Das machen wir mal zusammen!', tap: 'Platsch! Ein Fisch!' },
   { name: 'Kiwi', line: 'Kiwi! Mein kleiner Freund ist wieder da! Kiwis sind das Wahrzeichen von Neuseeland und können nicht fliegen – darum läuft Kiwi ab jetzt mit dir mit.', tap: 'Kiwi! Kiwi!' },
 ];
+// =====================================================================
+// Story: the Krallenkönig stole the dino family's golden egg. Three bosses each hold a piece of his map.
+// DAY_STORY plays once before a level (first time), DAY_AFTER once on the map after a boss, TEASERS on the results screen.
+// =====================================================================
+const DAY_STORY = {
+  1: [{ who: 'goetti', text: 'Tür 1! Hier im Dschungel hat der Vulkan die meisten Eier verloren. Und schau mal: riesige Krallenspuren!' }, { who: 'chili', text: 'Schnupper, schnupper … Das riecht nach dem Krallenkönig! Folgen wir der Spur!' }],
+  2: [{ who: 'goetti', text: 'Die Spuren führen hoch hinauf. Der Räuber ist über die Baumwipfel geklettert – spring hinterher, {oli}!' }],
+  3: [{ who: 'goetti', text: 'Heute lernst du das BRÜLLEN! Damit verjagst du jeden Raptor. Und irgendwo hier liegt meine Gitarre – der Vulkan hat sie weit weggeschleudert.' }],
+  4: [{ who: 'goetti', text: 'Die Spuren enden am Strand! Ab heute kannst du FLITZEN – sogar mitten durch Sandmauern.' }, { who: 'chili', text: 'Mümmel! Hier riecht es nach Meer und nach Krallenkönig.' }],
+  5: [{ who: 'goetti', text: 'Krabbenstrand! Pass auf die Krabben auf – sie benehmen sich, als würden sie etwas bewachen …' }],
+  6: [{ who: 'goetti', text: 'Da vorne sitzt der Krabbenkönig! Und schau: Um seinen Hals hängt ein Stück Pergament!' }, { who: 'fabio', text: '(Funkspruch) Das ist ein Teil von der Schatzkarte des Krallenkönigs! Hol es dir, {oli}!' }],
+  7: [{ who: 'goetti', text: 'Die heisse Schlucht! Der Räuber hat hier gelagert – die Asche ist noch warm. Ab heute kannst du DUCKEN: Halte den Knopf, dann kommst du unter tiefen Ästen durch.' }],
+  8: [{ who: 'goetti', text: 'Duck dich! Die Flugsaurier kreisen hier ständig. Sie kennen den Krallenkönig – und sie mögen keine Fremden.' }],
+  9: [{ who: 'goetti', text: 'Ein Raptor-Rudel! Der Krallenkönig hat sie als Wachen zurückgelassen. Brüll sie weg! Irgendwo hier liegt auch mein Velo …' }],
+  10: [{ who: 'goetti', text: 'Tauchgang! Das Kartenstück zeigt: Der Weg geht unter Wasser weiter. Ab heute kannst du SCHWIMMEN – tippen heisst nach oben, TAUCHEN nach unten.' }],
+  11: [{ who: 'goetti', text: 'Das Korallenlabyrinth! Die Fische flüstern, dass hier ein Seeungeheuer wohnt. Es mag keine Besucher …' }],
+  12: [{ who: 'goetti', text: 'Da ist es: das Seeungeheuer! Und es hält das zweite Kartenstück in seinen Tentakeln!' }, { who: 'papi', text: '(Funkspruch) Wir drücken euch die Daumen, {oli}! Bring unser Ei zurück!' }],
+  13: [{ who: 'goetti', text: 'Die Eiszeit! Alles ist gefroren. Ab heute kannst du STAMPFEN: Spring hoch und drück STAMPF – das knackt sogar Bernstein-Steine.' }],
+  14: [{ who: 'goetti', text: 'Die Krallenspuren sind im Schnee ganz frisch. Wir holen auf!' }],
+  15: [{ who: 'goetti', text: 'Eiskalte Ebene! Und dort im Eis steckt meine Angelrute – siehst du sie?' }],
+  16: [{ who: 'goetti', text: 'Der Gipfelweg! Ab heute kannst du GLEITEN: Halte in der Luft die Taste gedrückt und schwebe über die Schluchten.' }],
+  17: [{ who: 'goetti', text: 'Über den Wolken wohnt die Adlerkönigin. Sie hütet das letzte Kartenstück. Pass auf die Windwellen auf!' }],
+  18: [{ who: 'goetti', text: 'Die Adlerkönigin! Das letzte Kartenstück liegt in ihrem Nest.' }, { who: 'mami', text: '(Funkspruch) Du bist so mutig, {oli}! Wir sind in Gedanken bei dir!' }],
+  19: [{ who: 'goetti', text: 'Der Vulkan! Heiss, heiss, heiss. Sammle die roten Feuer-Chilis, dann kann {rex} FEUER spucken!' }],
+  20: [{ who: 'goetti', text: 'Der Lavafluss! Hüpf von Stein zu Stein – und lass dich nicht in die Lava fallen.' }],
+  21: [{ who: 'goetti', text: 'Seine Krallenspuren glühen noch – der Räuber ist ganz nah! Und hörst du das? Irgendwo ruft ein Kiwi …' }],
+  22: [{ who: 'goetti', text: 'Wir haben den Vulkan hinter uns! Es schneit. Es ist Weihnachtsnacht – und der Krallenkönig ist ganz nah.' }],
+  23: [{ who: 'goetti', text: 'Der Sternenwald. Hörst du das? Ein leises Klopfen … Das Dino-Baby im goldenen Ei ruft nach uns!' }, { who: 'fabio', text: '(Funkspruch) Bitte beeil dich, {oli}! Mein Geschwisterchen friert!' }],
+  24: [{ who: 'goetti', text: 'Das ist seine Höhle! Der Krallenkönig sitzt auf dem goldenen Ei – und er sieht gar nicht fröhlich aus.' }, { who: 'mami', text: 'Wir stehen hinter dir, {oli}!' }, { who: 'papi', text: 'Du schaffst das, {rex}! Und Chili auch!' }, { who: 'goetti', text: 'Das ist der letzte Kampf. Los, {oli}!' }],
+};
+const DAY_AFTER = {
+  6: [{ who: 'goetti', text: 'Geschafft! Der Krabbenkönig hat ein Kartenstück verloren. Darauf ist das Meer gezeichnet – und ein goldenes Ei!' }, { who: 'chili', text: 'Mümmel! Noch zwei Stücke fehlen, dann kennen wir den Weg zum Versteck.' }],
+  12: [{ who: 'goetti', text: 'Das zweite Stück! Jetzt sehen wir hohe Berge – und einen rauchenden Vulkan.' }, { who: 'chili', text: 'Mümmel! Nur noch ein Stück, {oli}!' }],
+  18: [{ who: 'goetti', text: 'Alle drei Stücke! Zusammengelegt zeigen sie den Weg: über den Vulkan, und dahinter liegt die Höhle des Krallenkönigs.' }, { who: 'chili', text: 'Mümmel! Auf zum Vulkan!' }],
+};
+const TEASERS = { 5: 'Morgen wartet der Krabbenkönig mit dem ersten Kartenstück!', 11: 'Morgen taucht das Seeungeheuer auf …', 17: 'Morgen: die Adlerkönigin! Sie hütet das letzte Kartenstück.', 23: 'Morgen ist der grosse Tag – der Krallenkönig wartet!' };
+function launchLevel(i) { // first time a day starts, Goetti briefs the player (a short dialog on the map)
+  const day = i + 1, lines = DAY_STORY[day];
+  if (lines && !save.storySeen[day]) { save.storySeen[day] = 1; writeSave(); startDialog(lines, () => startLevel(i)); } else startLevel(i);
+}
 // =====================================================================
 // Advent calendar: 24 levels, a new one opens every day from 1 December
 // =====================================================================
@@ -444,7 +485,7 @@ function adventDay() { // how many doors are open today (0 before 1 Dec, 24 from
   const n = new Date(); return clamp(Math.floor((new Date(n.getFullYear(), n.getMonth(), n.getDate()) - ADVENT_START) / 86400000) + 1, 0, 24);
 }
 const LEVEL_THEMES = [0, 0, 0, 5, 5, 5, 1, 1, 1, 6, 6, 6, 2, 2, 2, 7, 7, 7, 3, 3, 3, 4, 4, 4];
-const LEVEL_TITLES = ['Erste Schritte', 'Hoch hinaus', 'Brüll-Training', 'Sandburgen-Rennen', 'Krabbenstrand', 'Der Krabbenkönig', 'Heisse Schlucht', 'Duck dich!', 'Raptor-Rudel', 'Tauchgang', 'Korallenlabyrinth', 'Das Seeungeheuer', 'Eiskalte Ebene', 'Stampf-Meister', 'Mammut-Pfad', 'Gipfelweg', 'Wolkensprung', 'Die Adlerkönigin', 'Vulkan-Aufstieg', 'Lavafluss', 'Feuer-Chili', 'Verschneite Nacht', 'Sternenwald', 'Der Krallenkönig'];
+const LEVEL_TITLES = ['Erste Schritte', 'Hoch hinaus', 'Brüll-Training', 'Sandburgen-Rennen', 'Krabbenstrand', 'Der Krabbenkönig', 'Raptor-Rudel', 'Duck dich!', 'Heisse Schlucht', 'Tauchgang', 'Korallenlabyrinth', 'Das Seeungeheuer', 'Mammut-Pfad', 'Stampf-Meister', 'Eiskalte Ebene', 'Gipfelweg', 'Wolkensprung', 'Die Adlerkönigin', 'Vulkan-Aufstieg', 'Lavafluss', 'Feuer-Chili', 'Verschneite Nacht', 'Sternenwald', 'Der Krallenkönig'];
 const BOSS_DAYS = { 6: 'crab', 12: 'kraken', 18: 'queen', 24: 'king' };
 const TREASURE_DAY = { 3: 0, 9: 1, 15: 2, 21: 3 }; // Goetti's guitar, bike, rod and Kiwi
 const LEVELS = LEVEL_THEMES.map((wi, li) => { const sub = li % 3, day = li + 1, boss = BOSS_DAYS[day] || null; return { li, day, wi, sub, title: LEVEL_TITLES[li], boss, treasure: TREASURE_DAY[day] != null ? TREASURE_DAY[day] : -1, segs: Math.round(46 + li * 0.9 - (boss ? 14 : 0)), speedMul: [0.98, 1.04, 1.1][sub], maxTier: [2, 3, 3][sub] }; });
@@ -2152,6 +2193,7 @@ let scene = 'title', G = null, fadeT = 0;
 function go(s) {
   if (scene === 'shop' && s !== 'shop' && save.newGifts.length) { save.newGifts = []; writeSave(); }
   scene = s; shopConfirm = null; endlessPick = false; doorOverlay = null; parentMode = false; titlePress = 0; fadeT = 1; if (s === 'shop') { shopTab = 0; shopPage = 0; shopSel = save.equip.skin; shopTalk = { t: 4, text: 'Willkommen! Such dir etwas aus.' }; } parts = []; dialog = null; toasts = [];
+  if (s === 'map' && save.afterNew > 0 && save.treasureNew < 0) { const d = save.afterNew; save.afterNew = 0; writeSave(); startDialog(DAY_AFTER[d] || []); }
   if (s === 'map' && save.treasureNew >= 0) { const k = save.treasureNew; save.treasureNew = -1; writeSave(); chestPop[k] = 1; startDialog([{ who: k === 3 ? 'kiwi' : 'goetti', text: k === 3 ? 'Kiwi! Kiwi! (Kiwi hüpft vor Freude.)' : TREASURES[k].line }].concat(k === 3 ? [{ who: 'goetti', text: TREASURES[3].line }] : [])); }
 }
 
@@ -2165,18 +2207,18 @@ function startLevel(arg, endless) { // endless: arg = theme index. otherwise arg
     chili: { wx: 95, y: GROUND, ph: 0, dig: null, digT: 0 }, cp: 200, rings: [],
     boss: null, bossStarted: false, golden: null, gotGolden: false, atGate: false, gateT: 0, gateOpening: false, gateOpen: 0, finished: false,
     coach: null, flyEggs: [], slotPop: [0, 0, 0], hitFlash: 0, endless: !!endless, score: 0, heartAt: 500, tier: 1 };
-  if (!endless) { G.chiliSay = { text: 'Los geht\'s, Oli!', t: 2.6 }; G.chiliCd = 4; }
+  if (!endless) { G.chiliSay = { text: fmt('Los geht\'s, {oli}!'), t: 2.6 }; G.chiliCd = 4; }
   if (endless) { G.tip = { text: 'Endlos-Lauf! Es wird immer schneller und gefährlicher. Alle 500 Punkte gibt es ein Herz zurück.', t: 5 }; G.startT = 1.2; }
 }
 
 const pick = a => a[Math.floor(Math.random() * a.length)];
 function chiliSay(text, force) { // short speech bubble from Chili, rate-limited so it never nags
-  if (!G || G.endless) return; if (!force && G.chiliCd > 0) return;
+  text = fmt(text); if (!G || G.endless) return; if (!force && G.chiliCd > 0) return;
   G.chiliSay = { text, t: 2.6 }; G.chiliCd = 6;
 }
 function cheer() { // the first time a new move works: a small celebration
   const p = G.p; SFX.right(); burst(p.wx + 20, p.y - 100, 30, ['#ffd740', '#fff', '#69f0ae', '#40c4ff', '#ff8a9a'], 380, 500, 7, 1);
-  G.rings.push({ x: p.wx + 20, y: p.y - 90, r: 12, a: 1, c: '255,230,120' }); toast(pick(['Super!', 'Toll gemacht!', 'Genau so!', 'Perfekt!']), '#ffe08a'); chiliSay(pick(['Juhu, Oli!', 'Das war klasse!']), true);
+  G.rings.push({ x: p.wx + 20, y: p.y - 90, r: 12, a: 1, c: '255,230,120' }); toast(pick(['Super!', 'Toll gemacht!', 'Genau so!', 'Perfekt!']), '#ffe08a'); chiliSay(pick(['Juhu, {oli}!', 'Das war klasse!']), true);
 }
 function jump() {
   const p = G.p; if (G.startT > 0.3) return;
@@ -2264,7 +2306,7 @@ function hurt(force) {
   p.hearts--; p.hitT = 0.45; G.hits = (G.hits || 0) + 1; p.inv = 1.8; SFX.hurt(); G.shake = p.hearts <= 0 ? 0 : 0.35; G.hitFlash = 0.45;
   try { if (navigator.vibrate) navigator.vibrate(180); } catch (e) {}
   if (!force) p.vy = Math.min(p.vy, -450);
-  chiliSay(pick(['Aua! Nicht aufgeben!', 'Weiter geht\'s, Oli!', 'Du schaffst das!']), true);
+  chiliSay(pick(['Aua! Nicht aufgeben!', 'Weiter geht\'s, {oli}!', 'Du schaffst das!']), true);
   if (p.hearts <= 0) { if (G.endless) endRun(); else G.overlay = { type: 'retry' }; }
 }
 function endRun() {
@@ -2275,7 +2317,7 @@ function endRun() {
   const wi = G.wi, sc = G.score;
   if (boardQualifies(wi, sc)) setTimeout(() => {
     if (!G || !G.overlay || G.overlay.type !== 'endover') return;
-    askName('In der Bestenliste! Wie heisst du?', save.nick || 'Oli', name => { const r = boardAdd(wi, cleanNick(name).name, sc); if (G && G.overlay && G.overlay.type === 'endover') G.overlay.rank = r; SFX.right(); }, v => { const c = cleanNick(v); return c.ok ? '' : c.msg; });
+    askName('In der Bestenliste! Wie heisst du?', save.nick || save.oliName || 'Oli', name => { const r = boardAdd(wi, cleanNick(name).name, sc); if (G && G.overlay && G.overlay.type === 'endover') G.overlay.rank = r; SFX.right(); }, v => { const c = cleanNick(v); return c.ok ? '' : c.msg; });
   }, 1300);
 }
 function resetCrumble(L) { for (const pl of L.plats) if (pl.crumble) { pl.gone = false; pl.t = null; pl.y = pl.y0; pl.fv = 0; } }
@@ -2384,6 +2426,7 @@ function finishLevel() {
   const tk = G.L.treasure ? G.L.treasure.k : -1;
   G.newTreasure = tk >= 0 && G.L.treasure.got && !save.treasures[tk];
   if (G.newTreasure) { save.treasures[tk] = 1; save.treasureNew = tk; }
+  if (DAY_AFTER[lv.day] && !wasDone) save.afterNew = lv.day;
   save.amber += G.amber; writeSave();
   G.overlay = { type: 'complete', t: 0, popped: [], cpopped: [] }; SFX.right();
 }
@@ -2458,7 +2501,7 @@ function updatePlay(dt) {
     G.score = Math.max(G.score, Math.floor((p.wx - 200) / 25) + G.amber * 3); if (G.score >= G.heartAt) { G.heartAt += 500; if (p.hearts < 3) { p.hearts++; SFX.power(); toast('Ein Herz zurück!', '#ff8a9a'); } else toast(G.score + ' Punkte!', '#ffe08a'); } }
   // tips, checkpoints
   for (const t of L.tips) if (!t.shown && p.wx >= t.x) { t.shown = true; G.tip = { text: t.text, t: 6.5 }; }
-  for (const c of L.cps) if (!c.on && p.wx >= c.x) { c.on = true; G.cp = c.x; SFX.flag(); chiliSay(pick(['Fähnchen! Weiter so!', 'Pfoten hoch, Oli!', 'Prima, das war stark!'])); if (p.hearts < 3) { p.hearts++; toast('Fähnchen erreicht – ein Herz zurück!', '#ff8a9a'); } else toast('Fähnchen erreicht!', '#ffe08a'); }
+  for (const c of L.cps) if (!c.on && p.wx >= c.x) { c.on = true; G.cp = c.x; SFX.flag(); chiliSay(pick(['Fähnchen! Weiter so!', 'Pfoten hoch, {oli}!', 'Prima, das war stark!'])); if (p.hearts < 3) { p.hearts++; toast('Fähnchen erreicht – ein Herz zurück!', '#ff8a9a'); } else toast('Fähnchen erreicht!', '#ffe08a'); }
   // amber
   for (const a of L.amb) if (!a.got && Math.abs(a.x - p.wx - 10) < 42 && Math.abs(a.y - (p.y - 50)) < 62) { a.got = true; G.amber++; G.combo = G.t - (G.lastAmb || -9) < 0.6 ? Math.min(G.combo + 1, 8) : 0; G.lastAmb = G.t; if (G.combo > 0) tone(880 * Math.pow(1.0595, G.combo * 2), 0.12, 'triangle', 0.1); else SFX.amber(); burst(a.x, a.y, 6, ['#ffd166', '#ff9f1c'], 150, 200, 4, 0.4); }
   // eggs
@@ -2561,7 +2604,7 @@ function updatePlay(dt) {
   // boss
   if (L.bossX && !G.bossStarted && p.wx >= L.bossX) {
     G.bossStarted = true; G.stopped = true; p.wx = L.bossX; G.cp = L.bossX; G.boss = newBoss(0); G.bossCp = 0;
-    G.tip = { text: 'Der Krallenkönig! Er ist stark – in 4 Phasen musst du ihn besiegen!', t: 5 };
+    G.tip = { text: 'Der Krallenkönig hat das goldene Ei geklaut – hol es zurück! Besiege ihn in vier Runden.', t: 6 };
   }
   if (G.boss) updateBoss(dt);
   if (G.golden && !G.gotGolden) {
@@ -3155,7 +3198,7 @@ function drawFamilyCliff(L, cam) {
   const lbl = (s, x) => { setFont(14); const w = ctx.measureText(s).width + 14; rr(x - w / 2, 242, w, 20, 10); ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.fill(); txt(s, x, 252, 14, '#3b2410'); };
   lbl('Mamasaurus', x0 + 180); lbl('Papasaurus', x0 + 320); lbl('Fabiosaurus', x0 + 450);
   if (cheer) {
-    const lines = [['Los, Oli!', x0 + 240, 96], [fmt('Du schaffst das, {rex}!'), x0 + 390, 84], ['Oli! Oli! Oli!', x0 + 480, 112]];
+    const lines = [[fmt('Los, {oli}!'), x0 + 240, 96], [fmt('Du schaffst das, {rex}!'), x0 + 390, 84], [fmt('{oli}! {oli}! {oli}!'), x0 + 480, 112]];
     lines.forEach(([s, x, y], i) => { if (Math.sin(T * 1.5 + i * 2.1) > -0.2) { setFont(18); const w = ctx.measureText(s).width + 20; rr(x - w / 2, y - 16, w, 32, 14); ctx.fillStyle = '#fff'; ctx.fill(); txt(s, x, y, 18, '#3b2410'); } });
   }
 }
@@ -3535,7 +3578,7 @@ function drawOverlay() {
     }
     if (G.newTreasure) { drawTreasure(G.L.treasure.k, W / 2 - 200, 380, 0.8); txt(TREASURES[G.L.treasure.k].name + ' gefunden!', W / 2 + 20, 384, 26, '#2e7d32'); }
     else { const tk = lv.treasure; const nextOpen = lv.day < 24 && lv.day === adventDay(); const missing = 3 - save.lvE[G.li].filter(Boolean).length;
-      txt(nextOpen ? `Morgen öffnet sich Tür ${lv.day + 1} – bis dann!` : tk >= 0 && !save.treasures[tk] ? 'Goetti vermisst hier noch etwas … Schau mal ganz weit oben!' : missing ? 'Chili schnuppert: Hier sind noch Eier versteckt!' : 'Super gemacht!', W / 2, 384, 19, '#6b4a2b', 'center', 'normal'); }
+      txt(nextOpen && TEASERS[lv.day] ? TEASERS[lv.day] : nextOpen ? `Morgen öffnet sich Tür ${lv.day + 1} – bis dann!` : tk >= 0 && !save.treasures[tk] ? 'Goetti vermisst hier noch etwas … Schau mal ganz weit oben!' : missing ? 'Chili schnuppert: Hier sind noch Eier versteckt!' : 'Super gemacht!', W / 2, 384, 19, '#6b4a2b', 'center', 'normal'); }
     { const hop = Math.abs(Math.sin(T * 7)) * 16, hop2 = Math.abs(Math.sin(T * 7 + 1.2)) * 14; shadow(240, 506, 52 - hop * 0.6, 0.25); shadow(724, 506, 22, 0.25);
       oRex(240, 502 - hop, 0.55, T * 8, 0.85, Object.assign(rexLook(G.wi), { rider: true, vy: -200 }));
       chiliFx.joy = 1; oChili(724, 504 - hop2, 1.0, T * 12, true); chiliFx.joy = 0;
@@ -3619,11 +3662,7 @@ function pressTitle() { tryFullscreen(); if (!save.rexName) startStory(); else g
 
 function startStory() {
   go('story');
-  startDialog([
-    { who: 'goetti', text: 'Hallo Oli! Hier ist Goetti, aus meiner Dino-Forschungsstation in Neuseeland – direkt am grossen Vulkan.' },
-    { who: 'goetti', text: 'Bei uns am anderen Ende der Welt ist alles etwas anders – sogar die Vögel: Unsere Kiwis können nicht fliegen!' },
-    { who: 'goetti', text: 'Heute Nacht hat der Vulkan gebebt – und alle meine Dino-Eier sind davongerollt!' },
-    { who: 'goetti', text: 'Ich brauche den mutigsten Dino-Forscher der Welt. Und das bist DU!' },
+  const rexPart = () => startDialog([
     { who: 'goetti', text: 'Zum Glück hast du einen starken Freund: einen jungen T-Rex! Aber er hat noch keinen Namen…' },
   ], () => askName('Wie soll dein T-Rex heissen?', 'Rexi', name => {
     save.rexName = name; writeSave();
@@ -3631,9 +3670,21 @@ function startStory() {
       { who: 'rex', text: 'ROOOAAARRR! ({rex} gefällt der Name!)' },
       { who: 'goetti', text: '{rex} – super Name! Und Chili kommt auch mit. Mit der Hasennase findet Chili jedes versteckte Ei!' },
       { who: 'chili', text: 'Schnupper, schnupper… Chili ist bereit!' },
-      { who: 'goetti', text: 'Jeden Tag bis Weihnachten öffnet sich eine neue Tür in meinem Adventskalender – hinter jeder wartet ein Abenteuer! Und am Schluss wartet das goldene Ei… Los geht\'s!' },
+      { who: 'goetti', text: 'Jeden Tag bis Weihnachten öffnet sich eine neue Tür in meinem Adventskalender – hinter jeder wartet ein Abenteuer! Und am Schluss warten der Krallenkönig und das goldene Ei. Los geht\'s!' },
     ], () => go('map'), true);
   }), true);
+  const missionPart = () => startDialog([
+    { who: 'goetti', text: '{oli}! Was für ein toller Name. Heute Nacht hat der Vulkan gebebt – und alle meine Dino-Eier sind davongerollt!' },
+    { who: 'goetti', text: 'Und das Schlimmste: Auch das goldene Ei meiner Nachbarn, der Dino-Familie, ist verschwunden!' },
+    { who: 'fabio', text: '(Funkspruch) Hilfe! Der Krallenkönig hat das Ei geklaut! Er ist riesig und hat ganz scharfe Krallen!' },
+    { who: 'goetti', text: 'Ich brauche den mutigsten Dino-Forscher der Welt. Und das bist DU, {oli}!' },
+  ], rexPart, true);
+  if (save.oliName) { if (save.rexName) go('map'); else missionPart(); return; }
+  startDialog([
+    { who: 'goetti', text: 'Hallo! Hier ist Goetti, aus meiner Dino-Forschungsstation in Neuseeland – direkt am grossen Vulkan.' },
+    { who: 'goetti', text: 'Bei uns am anderen Ende der Welt ist alles etwas anders – sogar die Vögel: Unsere Kiwis können nicht fliegen!' },
+    { who: 'goetti', text: 'Aber nun zu dir: Wie heisst du eigentlich?' },
+  ], () => askName('Wie heisst du?', 'Oli', name => { save.oliName = name; writeSave(); missionPart(); }), true);
 }
 function drawNZFlag(x, y, w, h, t, pole = 70) { // flag on a pole, waving a little
   ctx.save(); ctx.translate(x, y);
@@ -3661,7 +3712,7 @@ function treeFern(x, b, h) { // New Zealand tree fern: slim trunk with a crown o
   }
 }
 function drawStory() {
-  const bi = dialog ? dialog.i : 0, ph2 = !!save.rexName, quake = !ph2 && bi === 2, roar = ph2 && bi === 0;
+  const bi = dialog ? dialog.i : 0, phA = !save.oliName, phB = !!save.oliName && !save.rexName, ph2 = !!save.rexName, quake = phB && !!dialog && dialog.lines.length === 4 && bi <= 2, roar = ph2 && bi === 0;
   ctx.save(); if (quake || roar) ctx.translate(Math.sin(T * 47) * (quake ? 3 : 2), Math.cos(T * 39) * 2);
   drawBackground(0, 0); drawGround(0, EMPTY, 0);
   ctx.save(); ctx.translate(690, GROUND); ctx.scale(0.78, 0.78); ctx.translate(-690, -GROUND); // the station, a little smaller so the top dialog never hides its flag
@@ -3675,13 +3726,13 @@ function drawStory() {
   ctx.restore();
   shadow(486, GROUND + 2, 34, 0.3); shadow(246, GROUND + 2, 64, 0.3); shadow(386, GROUND + 2, 26, 0.3);
   treeFern(70, GROUND + 4, 150); treeFern(905, GROUND + 4, 125);
-  const hop = !ph2 && bi === 1 ? Math.abs(Math.sin(T * 6)) * 26 : 0; // the kiwi hops but cannot fly
+  const hop = phA && bi === 1 ? Math.abs(Math.sin(T * 6)) * 26 : 0; // the kiwi hops but cannot fly
   shadow(620, GROUND + 2, 26 - hop * 0.3, 0.3); oKiwi(620, GROUND - hop, 1.5, T * 3, true);
-  if (!ph2 && bi === 1) { ctx.save(); ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = 3; ctx.lineCap = 'round'; for (let k = 0; k < 3; k++) { const a = 0.4 + k * 0.5; ctx.beginPath(); ctx.arc(620, GROUND - 30 - hop, 54 + k * 8, Math.PI + a, Math.PI + a + 0.3); ctx.stroke(); } ctx.restore(); }
+  if (phA && bi === 1) { ctx.save(); ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = 3; ctx.lineCap = 'round'; for (let k = 0; k < 3; k++) { const a = 0.4 + k * 0.5; ctx.beginPath(); ctx.arc(620, GROUND - 30 - hop, 54 + k * 8, Math.PI + a, Math.PI + a + 0.3); ctx.stroke(); } ctx.restore(); }
   oGoetti(480, GROUND, 1.2, true);
-  if (!ph2 && bi === 3) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; const g = ctx.createLinearGradient(0, 40, 0, GROUND); g.addColorStop(0, 'rgba(255,230,140,0)'); g.addColorStop(1, 'rgba(255,230,140,.35)'); ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(220, 40); ctx.lineTo(290, 40); ctx.lineTo(340, GROUND); ctx.lineTo(170, GROUND); ctx.fill(); ctx.restore(); for (let k = 0; k < 5; k++) { const a = T * 2 + k * 1.26, r = 70 + 8 * Math.sin(T * 5 + k); drawStar(255 + Math.cos(a) * r, 310 + Math.sin(a) * r * 0.9, 7 + 3 * Math.sin(T * 6 + k), '#ffe27a'); } }
+  if (phB && dialog && dialog.lines.length === 4 && bi === 3) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; const g = ctx.createLinearGradient(0, 40, 0, GROUND); g.addColorStop(0, 'rgba(255,230,140,0)'); g.addColorStop(1, 'rgba(255,230,140,.35)'); ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(220, 40); ctx.lineTo(290, 40); ctx.lineTo(340, GROUND); ctx.lineTo(170, GROUND); ctx.fill(); ctx.restore(); for (let k = 0; k < 5; k++) { const a = T * 2 + k * 1.26, r = 70 + 8 * Math.sin(T * 5 + k); drawStar(255 + Math.cos(a) * r, 310 + Math.sin(a) * r * 0.9, 7 + 3 * Math.sin(T * 6 + k), '#ffe27a'); } }
   oRex(240, GROUND, 1.15, T * 2, roar ? 0.9 : save.rexName ? 0.2 : 0, Object.assign(rexLook(0), { rider: true }));
-  if (!ph2 && bi === 4) otxt('?', 300, 214 + Math.sin(T * 4) * 8, 58, '#ffd34d', '#3b1d00', 10);
+  if (phB && (!dialog || dialog.lines.length === 1)) otxt('?', 300, 214 + Math.sin(T * 4) * 8, 58, '#ffd34d', '#3b1d00', 10);
   if (roar) for (let k = 0; k < 3; k++) { const u = ((T * 1.6 + k / 3) % 1); ctx.strokeStyle = `rgba(255,240,200,${0.8 * (1 - u)})`; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(330, 372, 30 + u * 110, -0.9, 0.9); ctx.stroke(); }
   if (ph2 && bi === 2) chiliFx.dig = true; oChili(380, GROUND, 1.4, T * 3); chiliFx.dig = false;
   if (quake) { // the volcano shook: eggs roll away across the ground
@@ -3807,7 +3858,7 @@ function clickDoor(i) {
   if (day > today) { SFX.wrong(); toast(today === 0 ? 'Der Kalender startet am 1. Dezember!' : `Diese Tür öffnet sich am ${day}. Dezember!`, '#ffb4a8'); return; }
   const g = save.gifts.includes(day) ? null : openDoorGift(day);
   if (g) { doorOverlay = { i, g, t: 0 }; SFX.right(); burst(W / 2, 250, 50, ['#ffd740', '#ff5252', '#69f0ae', '#40c4ff', '#fff'], 520, 500, 8, 1.4); return; }
-  startLevel(i);
+  launchLevel(i);
 }
 function drawGiftIcon(g, cx, cy, k) {
   if (g.key === 'hat') drawHatIcon(HATS[g.i].k, cx, cy, k * 1.5);
@@ -3856,10 +3907,10 @@ function drawDoorOverlay() { // the door shakes, glows at the seam, swings open 
   if (cosm) {
     button('Zurück', 268, 432, 100, 44, () => { doorOverlay = null; }, { size: 19 });
     button(worn ? 'Angelegt ✓' : 'Anziehen', 376, 432, 140, 44, () => { save.equip[o.g.key] = o.g.i; save.newGifts = save.newGifts.filter(k => k !== o.g.key + ':' + o.g.i); writeSave(); SFX.right(); }, { size: 19, color: worn ? '#d4f2bd' : '#9fd3ff', disabled: u < 1 || worn });
-    button('Los geht\'s!', 524, 432, 170, 44, () => { doorOverlay = null; startLevel(o.i); }, { size: 20, icon: icon('play'), disabled: u < 1 });
+    button('Los geht\'s!', 524, 432, 170, 44, () => { doorOverlay = null; launchLevel(o.i); }, { size: 20, icon: icon('play'), disabled: u < 1 });
   } else {
     button('Zurück', 270, 432, 150, 44, () => { doorOverlay = null; }, { size: 22 });
-    button('Los geht\'s!', 435, 432, 255, 44, () => { doorOverlay = null; startLevel(o.i); }, { size: 24, icon: icon('play'), disabled: u < 1 });
+    button('Los geht\'s!', 435, 432, 255, 44, () => { doorOverlay = null; launchLevel(o.i); }, { size: 24, icon: icon('play'), disabled: u < 1 });
   }
   buttons.unshift({ x: 0, y: 0, w: W, h: H, cb: () => {}, silent: true });
 }
@@ -4395,10 +4446,11 @@ function startEnding() {
   go('ending');
   E = { phase: 'talk', taps: 0, wob: 0, hatchT: 0, fw: 0, asked: false };
   startDialog([
-    { who: 'goetti', text: 'Oli, {rex}, Chili – ihr habt es geschafft! Alle Eier sind wieder sicher in der Station.' },
+    { who: 'goetti', text: '{oli}, {rex}, Chili – ihr habt es geschafft! Alle Eier sind wieder sicher in der Station.' },
+    { who: 'goetti', text: 'Der Krallenkönig ist weit weggeflogen. Ich glaube, er wollte das Ei nur wärmen – in seiner Höhle war es so kalt.' },
     { who: 'goetti', text: 'Und schaut mal, wer zum Feiern gekommen ist: Mamasaurus, Papasaurus und Fabiosaurus!' },
-    { who: 'fabio', text: 'Oli! Oli! Das goldene Ei wackelt!!' },
-    { who: 'goetti', text: 'Tatsächlich! Tippe ganz oft auf das Ei, Oli – hilf dem Baby beim Schlüpfen!' },
+    { who: 'fabio', text: '{oli}! {oli}! Das goldene Ei wackelt!!' },
+    { who: 'goetti', text: 'Tatsächlich! Tippe ganz oft auf das Ei, {oli} – hilf dem Baby beim Schlüpfen!' },
   ], () => { E.phase = 'tap'; }, true);
 }
 function tapEgg() {
@@ -4429,7 +4481,7 @@ function updateEnding(dt) {
     E.hatchT += dt;
     if (E.hatchT > 1.6 && !E.asked) {
       E.asked = true;
-      if (!save.babyName) startDialog([{ who: 'goetti', text: 'Ein Dino-Baby – mit Weihnachtsmütze! Oli, du darfst ihm einen Namen geben.' }], () => askName('Wie soll das Dino-Baby heissen?', 'Krümel', n => { save.babyName = n; writeSave(); afterBabyName(); }), true);
+      if (!save.babyName) startDialog([{ who: 'goetti', text: 'Ein Dino-Baby – mit Weihnachtsmütze! {oli}, du darfst ihm einen Namen geben.' }], () => askName('Wie soll das Dino-Baby heissen?', 'Krümel', n => { save.babyName = n; writeSave(); afterBabyName(); }), true);
       else afterBabyName();
     }
   }
@@ -4492,7 +4544,7 @@ function drawEnding() {
   drawSnow(1);
   if (E.phase === 'party') {
     ctx.save(); ctx.translate(W / 2, 105); ctx.rotate(Math.sin(T * 2) * 0.02);
-    otxt('Frohe Weihnachten, Oli!', 0, 0, 62, '#ffd34d', '#7a1010', 14); ctx.restore();
+    otxt(fmt('Frohe Weihnachten, {oli}!'), 0, 0, 62, '#ffd34d', '#7a1010', 14); ctx.restore();
     otxt('Alles Liebe – dein Goetti', W / 2, 165, 30, '#fff', 'rgba(0,0,0,.7)', 6);
     button('Lied nochmal', 24, 20, 180, 50, () => jingle(), { size: 20, color: '#e0d2b0' });
     button('Zur Karte', W - 204, 20, 180, 50, () => go('map'), { size: 22 });
@@ -4581,5 +4633,5 @@ function frame(now) {
 requestAnimationFrame(frame);
 
 // debug hook for testing in the browser console
-window.__dino = { cleanNick, boardAdd, boardQualifies, boardAll, endRun, get scene() { return scene; }, get doorOverlay() { return doorOverlay; }, get buttons() { return buttons; }, pitFall, get lowfx() { return LOWFX; }, set lowfx(v) { LOWFX = v; }, get G() { return G; }, get E() { return E; }, save, startLevel, startEnding, go, jump, roar, updatePlay, updateEnding, answer, retry, tapEgg, openGate, playTreasure, drawPlay, duckDown, duckUp, shootFire, drawShop, buildSong, dash, LEVELS, adventDay, openDoorGift, giftFor, clickDoor, skillsFor, bookOpen(i) { bookSel = i; }, sheet(p) { sheetPage = p || 'hero'; scene = 'sheet'; } };
+window.__dino = { get dialog() { return dialog; }, DAY_STORY, DAY_AFTER, launchLevel, finishLevel, fmt, cleanNick, boardAdd, boardQualifies, boardAll, endRun, get scene() { return scene; }, get doorOverlay() { return doorOverlay; }, get buttons() { return buttons; }, pitFall, get lowfx() { return LOWFX; }, set lowfx(v) { LOWFX = v; }, get G() { return G; }, get E() { return E; }, save, startLevel, startEnding, go, jump, roar, updatePlay, updateEnding, answer, retry, tapEgg, openGate, playTreasure, drawPlay, duckDown, duckUp, shootFire, drawShop, buildSong, dash, LEVELS, adventDay, openDoorGift, giftFor, clickDoor, skillsFor, bookOpen(i) { bookSel = i; }, sheet(p) { sheetPage = p || 'hero'; scene = 'sheet'; } };
 })();
