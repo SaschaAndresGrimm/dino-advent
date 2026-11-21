@@ -627,6 +627,8 @@ function drawRex(x, y, s, ph, jaw, o = {}) {
   ell(24, -68, 28, 28, 0, body);
   ctx.strokeStyle = 'rgba(255,255,225,.5)'; ctx.lineWidth = 2.4; ctx.lineCap = 'round'; ctx.beginPath(); ctx.ellipse(4, -66, 42, 26, -0.18, Math.PI * 1.12, Math.PI * 1.72); ctx.stroke();
   ell(16, -52, 33, 13, -0.22, belly);
+  ctx.fillStyle = shade(d0, 0.8); ctx.globalAlpha = 0.3; for (const [qx, qy, qr] of [[-16, -78, 4.2], [-2, -84, 3.4], [10, -80, 3], [-26, -66, 3.6], [-8, -70, 2.6], [20, -72, 2.4], [38, -70, 2.8]]) circle(qx, qy, qr, ctx.fillStyle); ctx.globalAlpha = 1;
+  ctx.strokeStyle = 'rgba(255,255,225,.18)'; ctx.lineWidth = 1.2; for (let i = 0; i < 5; i++) { ctx.beginPath(); ctx.arc(46 + i * 4, -100 + i * 5, 4, Math.PI * 0.9, Math.PI * 1.9); ctx.stroke(); }
   ctx.strokeStyle = 'rgba(0,0,0,.14)'; ctx.lineWidth = 1.5; for (let i = 0; i < 4; i++) { ctx.beginPath(); ctx.moveTo(4 + i * 9, -55 + i * 1.5); ctx.lineTo(8 + i * 9, -47 + i * 1.5); ctx.stroke(); }
   // back stripes
   ctx.strokeStyle = 'rgba(15,70,38,.35)'; ctx.lineWidth = 4; ctx.lineCap = 'round'; for (let i = 0; i < 4; i++) { ctx.beginPath(); ctx.moveTo(-26 + i * 15, -88 + i * 1.5); ctx.quadraticCurveTo(-24 + i * 15, -80, -28 + i * 15 + 4, -72); ctx.stroke(); }
@@ -1194,20 +1196,45 @@ function paintMid(wi) {
 const cloudSprites = {};
 function cloudSprite(wi, v) {
   const key = wi + ':' + v; if (cloudSprites[key]) return cloudSprites[key];
-  const gx = GFX[wi], rs = 1.5, w = 220, h = 90, c = document.createElement('canvas'); c.width = w * rs; c.height = h * rs;
+  const gx = GFX[wi], rs = 1.5, w = 220, h = 120, c = document.createElement('canvas'); c.width = w * rs; c.height = h * rs;
   const old = ctx; ctx = c.getContext('2d'); ctx.scale(rs, rs);
   const R = rng(17 + v * 5 + wi * 31), puffs = [];
-  for (let i = 0; i < 8; i++) puffs.push([30 + R() * 160, 50 + (R() - 0.5) * 16, 16 + R() * 20]);
+  for (let i = 0; i < 8; i++) puffs.push([30 + R() * 160, 62 + (R() - 0.5) * 16, 16 + R() * 20]);
   for (const [x, y, r] of puffs) circle(x, y + 8, r, gx.cloud[1]);
   for (const [x, y, r] of puffs) { const g = ctx.createRadialGradient(x - r * 0.3, y - r * 0.5, 2, x, y, r); g.addColorStop(0, gx.cloud[0]); g.addColorStop(1, gx.cloud[1]); circle(x, y, r * 0.92, g); }
+  ctx.globalCompositeOperation = 'source-atop'; { const sg = ctx.createLinearGradient(0, 62, 0, 112); sg.addColorStop(0, 'rgba(0,0,0,0)'); sg.addColorStop(1, shade(gx.cloud[1], 0.72)); ctx.globalAlpha = 0.32; ctx.fillStyle = sg; ctx.fillRect(0, 0, w, h); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; }
   ctx = old; return (cloudSprites[key] = c);
+}
+function silLongneck(x, y, s, col) { // a far-away herd member, pure silhouette
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s); ctx.fillStyle = col; ctx.strokeStyle = col; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.ellipse(0, -50, 46, 24, 0, 0, 7); ctx.fill();
+  const nb = Math.sin(T * 0.6 + x * 0.01) * 4;
+  ctx.lineWidth = 14; ctx.beginPath(); ctx.moveTo(34, -58); ctx.quadraticCurveTo(70, -70, 72 + nb, -118); ctx.stroke();
+  ctx.lineWidth = 9; ctx.beginPath(); ctx.moveTo(72 + nb, -118); ctx.lineTo(86 + nb, -123); ctx.stroke();
+  ctx.lineWidth = 12; ctx.beginPath(); ctx.moveTo(-40, -52); ctx.quadraticCurveTo(-90, -48, -122, -18); ctx.stroke();
+  ctx.lineWidth = 11; for (const lx of [-28, -10, 16, 32]) { ctx.beginPath(); ctx.moveTo(lx, -40); ctx.lineTo(lx + Math.sin(T * 0.8 + lx) * 3, 6); ctx.stroke(); }
+  ctx.restore();
+}
+function drawFarLife(wi, cam) { // distant herd + a flock of pterosaurs: a little life in the backdrop
+  if (wi === 0 || wi === 1 || wi === 5) {
+    const col = wi === 0 ? 'rgba(28,66,58,.5)' : wi === 1 ? 'rgba(130,64,40,.42)' : 'rgba(40,110,120,.32)';
+    for (let i = 0; i < 3; i++) { const span = W + 520, x = mod(i * 470 + 300 - T * 4 - cam * 0.07, span) - 260; silLongneck(x, 352 + i * 4, 0.42 + i * 0.07, col); }
+  }
+  if (wi === 0 || wi === 1 || wi === 3 || wi === 7) {
+    ctx.strokeStyle = wi === 3 ? 'rgba(20,6,4,.6)' : 'rgba(25,35,35,.45)'; ctx.fillStyle = ctx.strokeStyle; ctx.lineCap = 'round'; ctx.lineWidth = 2.6;
+    for (let i = 0; i < 5; i++) {
+      const x = mod(i * 85 + T * 24 + 200 - cam * 0.05, W + 260) - 130, y = 105 + (i % 3) * 22 + Math.abs(i - 2) * 9 + Math.sin(T * 0.9 + i) * 6, f = Math.sin(T * 3.6 + i * 0.9) * 8, sz = 0.8 + (i % 2) * 0.25;
+      ctx.beginPath(); ctx.moveTo(x - 24 * sz, y + f); ctx.quadraticCurveTo(x - 9 * sz, y - 7 - f * 0.4, x, y); ctx.quadraticCurveTo(x + 9 * sz, y - 7 - f * 0.4, x + 24 * sz, y + f); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x + 2, y); ctx.lineTo(x + 12 * sz, y + 3); ctx.lineTo(x + 2, y + 4); ctx.fill();
+    }
+  }
 }
 function drawClouds(wi, cam) {
   if (wi === 6) return;
   ctx.globalAlpha = wi === 3 ? 0.7 : wi === 2 ? 0.45 : 0.85;
   for (let i = 0; i < 5; i++) {
     const span = W + 320, x = mod(hash(i + wi * 9) * span - T * (6 + i * 2) - cam * 0.03 * (1 + i * 0.2), span) - 240, y = 40 + hash(i + 20) * 120, s = 0.6 + hash(i + 40) * 0.6;
-    ctx.drawImage(cloudSprite(wi, i % 3), x, y, 220 * s, 90 * s);
+    ctx.drawImage(cloudSprite(wi, i % 3), x, y, 220 * s, 120 * s);
   }
   ctx.globalAlpha = 1;
 }
@@ -1505,6 +1532,7 @@ function drawBackground(wi, cam) {
   if (wi < 5) drawVolcano(740, 345, th.volcS, th.volcCol, wi === 3 ? 1 : 0); else backdropNew(wi, cam);
   const Ls = getLayers(wi);
   drawLayer(Ls.far, cam * 0.1);
+  drawFarLife(wi, cam);
   if (wi <= 1) godRays(gx);
   drawLayer(Ls.mid, cam * 0.25);
   ctx.fillStyle = vgrad(330, 440, `rgba(${gx.haze},0)`, `rgba(${gx.haze},${wi === 3 ? 0.12 : 0.22})`); ctx.fillRect(0, 330, W, 110);
@@ -1538,19 +1566,40 @@ function drawGround(wi, L, cam) {
       ctx.fillStyle = c; ctx.beginPath(); ctx.moveTo(x, GROUND); ctx.quadraticCurveTo(x + 2, GROUND - hh * 0.6, x + 4 + hash(k + 1) * 4, GROUND - hh); ctx.lineTo(x + 6, GROUND); ctx.fill();
       if (hash(k + 17) < 0.06) { circle(x + 4, GROUND - hh - 2, 3.5, ['#ff5a8a', '#ffd166', '#fff'][k & 1 ? 0 : (k & 2 ? 1 : 2)]); circle(x + 4, GROUND - hh - 2, 1.4, '#ffeb6b'); }
     }
+    for (let k = Math.floor(cam / 173) - 1; k < (cam + W) / 173 + 1; k++) { // mushrooms and ferns along the path
+      const q = hash(k + 31), x = k * 173 - cam + hash(k + 32) * 90;
+      if (q < 0.3) { ctx.fillStyle = '#f1e6c8'; ctx.fillRect(x - 2, GROUND - 9, 4, 9); ctx.fillStyle = q < 0.15 ? '#e5483a' : '#e9a23a'; ctx.beginPath(); ctx.ellipse(x, GROUND - 9, 9, 6.5, 0, Math.PI, 0); ctx.fill(); circle(x - 3, GROUND - 12, 1.5, '#fff'); circle(x + 3, GROUND - 11, 1.2, '#fff'); circle(x + 6, GROUND - 28 + 20, 0.01, '#fff'); }
+      else if (q < 0.6) { ctx.lineCap = 'round'; ctx.lineWidth = 2.2; for (let i = -3; i <= 3; i++) { ctx.strokeStyle = i % 2 ? '#2f8a3a' : '#43a84a'; ctx.beginPath(); ctx.moveTo(x, GROUND + 1); ctx.quadraticCurveTo(x + i * 5, GROUND - 14 - (3 - Math.abs(i)) * 2, x + i * 9, GROUND - 6 + Math.abs(i) * 2.5); ctx.stroke(); } }
+    }
   } else if (wi === 1) {
     ctx.fillStyle = vgrad(GROUND - 4, GROUND + 12, '#f2c088', '#cf8650'); ctx.fillRect(0, GROUND - 4, W, 14);
+    for (let k = Math.floor(cam / 151) - 1; k < (cam + W) / 151 + 1; k++) { // dry tufts, tiny cacti, cracked earth
+      const q = hash(k + 41), x = k * 151 - cam + hash(k + 42) * 80;
+      if (q < 0.35) { ctx.strokeStyle = '#b8863e'; ctx.lineWidth = 1.8; ctx.lineCap = 'round'; for (let i = -2; i <= 2; i++) { ctx.beginPath(); ctx.moveTo(x, GROUND + 1); ctx.quadraticCurveTo(x + i * 3, GROUND - 8, x + i * 6, GROUND - 13 + Math.abs(i) * 2); ctx.stroke(); } }
+      else if (q < 0.6) { rr(x - 3, GROUND - 16, 6, 17, 3); ctx.fillStyle = '#4f7a2a'; ctx.fill(); rr(x + 2, GROUND - 11, 7, 3.4, 1.7); ctx.fill(); rr(x + 6.4, GROUND - 16, 3.4, 7, 1.7); ctx.fill(); circle(x, GROUND - 17, 2.2, '#ff7aa8'); }
+      else if (q < 0.75) { ctx.strokeStyle = 'rgba(110,50,20,.45)'; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.moveTo(x - 12, GROUND + 3); ctx.lineTo(x - 2, GROUND + 7); ctx.lineTo(x + 4, GROUND + 4); ctx.lineTo(x + 14, GROUND + 9); ctx.moveTo(x - 2, GROUND + 7); ctx.lineTo(x - 4, GROUND + 12); ctx.stroke(); }
+    }
     ctx.strokeStyle = 'rgba(160,80,30,.3)'; ctx.lineWidth = 1.5;
     for (let k = Math.floor(cam / 70) - 1; k < (cam + W) / 70 + 1; k++) { const x = k * 70 - cam; ctx.beginPath(); ctx.arc(x + 30, GROUND + 14, 22, Math.PI * 1.2, Math.PI * 1.8); ctx.stroke(); }
     for (let k = Math.floor(cam / 37) - 1; k < (cam + W) / 37 + 1; k++) { const x = k * 37 - cam + hash(k) * 20; ell(x, GROUND - 2, 3 + hash(k + 2) * 3, 2.5, 0, '#a5623a'); }
   } else if (wi === 2) {
     ctx.fillStyle = vgrad(GROUND - 6, GROUND + 16, '#ffffff', '#cfe0f5'); ctx.fillRect(0, GROUND - 6, W, 22);
     for (let k = Math.floor(cam / 60) - 1; k < (cam + W) / 60 + 1; k++) { const x = k * 60 - cam; ell(x, GROUND - 4, 34, 8, 0, '#fff'); ell(x + 6, GROUND + 14, 30, 6, 0, 'rgba(120,150,200,.25)'); }
+    for (let k = Math.floor(cam / 167) - 1; k < (cam + W) / 167 + 1; k++) { // little ice crystals and paw prints
+      const q = hash(k + 51), x = k * 167 - cam + hash(k + 52) * 90;
+      if (q < 0.35) { for (const [dx, h2] of [[-6, 11], [0, 17], [6, 9]]) { ctx.fillStyle = 'rgba(170,215,255,.9)'; ctx.beginPath(); ctx.moveTo(x + dx - 3, GROUND); ctx.lineTo(x + dx, GROUND - h2); ctx.lineTo(x + dx + 3, GROUND); ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,.75)'; ctx.beginPath(); ctx.moveTo(x + dx - 3, GROUND); ctx.lineTo(x + dx, GROUND - h2); ctx.lineTo(x + dx - 0.5, GROUND); ctx.fill(); } }
+      else if (q < 0.6) { ctx.fillStyle = 'rgba(110,140,190,.4)'; for (let i = 0; i < 3; i++) { circle(x + i * 10, GROUND + 6 + (i % 2) * 3, 2.2, ctx.fillStyle); circle(x + i * 10 - 3, GROUND + 3 + (i % 2) * 3, 1.1, ctx.fillStyle); circle(x + i * 10 + 3, GROUND + 3 + (i % 2) * 3, 1.1, ctx.fillStyle); } }
+    }
     for (let k = Math.floor(cam / 29) - 1; k < (cam + W) / 29 + 1; k++) { const tw = Math.sin(T * 3 + k * 1.7); if (tw > 0.75) { const x = k * 29 - cam + hash(k) * 20, y = GROUND - 2 + hash(k + 4) * 12, s = (tw - 0.75) * 16; ctx.fillStyle = '#fff'; ctx.fillRect(x - s / 2, y - 0.6, s, 1.2); ctx.fillRect(x - 0.6, y - s / 2, 1.2, s); } }
   } else {
     ctx.fillStyle = vgrad(GROUND - 4, GROUND + 12, '#4a2c24', '#2a1814'); ctx.fillRect(0, GROUND - 4, W, 14);
     ctx.strokeStyle = `rgba(255,110,30,${0.55 + 0.25 * Math.sin(T * 2.5)})`; ctx.lineWidth = 2; ctx.beginPath();
     for (let x = -10; x <= W + 10; x += 16) { const wx = x + cam; ctx.lineTo(x, GROUND + 9 + Math.sin(wx * 0.09) * 2); } ctx.stroke();
+    for (let k = Math.floor(cam / 131) - 1; k < (cam + W) / 131 + 1; k++) { // embers and tiny flames
+      const q = hash(k + 61), x = k * 131 - cam + hash(k + 62) * 70, fl = 0.6 + 0.4 * Math.sin(T * 7 + k * 2);
+      if (q < 0.4) { ell(x, GROUND - 1, 8, 5, 0, '#2a1612'); ctx.save(); ctx.shadowColor = '#ff6a10'; ctx.shadowBlur = 8; ctx.strokeStyle = `rgba(255,${120 + 60 * fl | 0},30,.9)`; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(x - 5, GROUND - 2); ctx.lineTo(x - 1, GROUND - 5); ctx.lineTo(x + 2, GROUND - 2); ctx.lineTo(x + 6, GROUND - 4); ctx.stroke(); ctx.restore(); }
+      else if (q < 0.6) { ctx.save(); ctx.shadowColor = '#ff8a20'; ctx.shadowBlur = 10; ctx.fillStyle = `rgba(255,${150 + 60 * fl | 0},40,.9)`; ctx.beginPath(); ctx.moveTo(x - 4, GROUND); ctx.quadraticCurveTo(x - 5, GROUND - 8 * fl - 4, x, GROUND - 12 * fl - 6); ctx.quadraticCurveTo(x + 5, GROUND - 8, x + 4, GROUND); ctx.fill(); ctx.fillStyle = '#fff0a0'; ctx.beginPath(); ctx.ellipse(x, GROUND - 3, 1.6, 3.4 * fl, 0, 0, 7); ctx.fill(); ctx.restore(); }
+    }
     for (let k = Math.floor(cam / 50) - 1; k < (cam + W) / 50 + 1; k++) { const x = k * 50 - cam + hash(k) * 20; ctx.fillStyle = '#1a0e0b'; ctx.beginPath(); ctx.moveTo(x - 8, GROUND); ctx.lineTo(x - 2, GROUND - 6 - hash(k + 1) * 6); ctx.lineTo(x + 6, GROUND); ctx.fill(); }
   }
   // pits
@@ -3152,6 +3201,7 @@ function drawDoor(i, today) {
   const fr = open ? th.far : '#6a5a4a'; ctx.beginPath(); ctx.moveTo(0, h); ctx.lineTo(0, 22); ctx.quadraticCurveTo(0, 0, w / 2, 0); ctx.quadraticCurveTo(w, 0, w, 22); ctx.lineTo(w, h); ctx.closePath();
   ctx.fillStyle = vgrad(0, h, shade(fr, 1.2), shade(fr, 0.8)); ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = '#2b1a0c'; ctx.stroke();
   const ix = 7, iy = 8, iw = w - 14, ih = h - 8;
+  ctx.fillStyle = 'rgba(255,255,255,.94)'; ctx.beginPath(); ctx.moveTo(-3, 25); ctx.quadraticCurveTo(-3, -4, w / 2, -4); ctx.quadraticCurveTo(w + 3, -4, w + 3, 25); ctx.quadraticCurveTo(w * 0.9, 13, w * 0.78, 20); ctx.quadraticCurveTo(w * 0.62, 9, w * 0.5, 18); ctx.quadraticCurveTo(w * 0.34, 8, w * 0.22, 17); ctx.quadraticCurveTo(w * 0.08, 10, -3, 25); ctx.fill(); ctx.strokeStyle = 'rgba(150,180,220,.7)'; ctx.lineWidth = 1.5; ctx.stroke();
   if (done || (open && opened)) { // the door stands open: a view of the level's theme
     ctx.save(); ctx.beginPath(); ctx.moveTo(ix, h); ctx.lineTo(ix, iy + 18); ctx.quadraticCurveTo(ix, iy, w / 2, iy); ctx.quadraticCurveTo(ix + iw, iy, ix + iw, iy + 18); ctx.lineTo(ix + iw, h); ctx.closePath(); ctx.clip();
     drawThemeThumb(lv.wi, ix, iy, iw, ih); if (!done) { ctx.fillStyle = 'rgba(10,10,30,.35)'; ctx.fillRect(ix, iy, iw, ih); } ctx.restore();
@@ -3236,6 +3286,12 @@ function drawMap() { // the advent calendar
   woodFrame(14, 84, W - 28, 3 * (DOORS.h + DOORS.gy) + 30, 22, '#3a2f55');
   ctx.save(); rr(25, 95, W - 50, 3 * (DOORS.h + DOORS.gy) + 8, 14); ctx.clip(); ctx.fillStyle = vgrad(95, 400, '#2a2250', '#1d1740'); ctx.fillRect(0, 0, W, H); for (let i = 0; i < 40; i++) { ctx.globalAlpha = 0.25 + 0.3 * Math.abs(Math.sin(T * 0.8 + i)); circle(30 + hash(i + 3) * (W - 60), 100 + hash(i + 11) * 290, 1.2, '#ffe9a8'); } ctx.globalAlpha = 1; ctx.restore();
   for (let i = 0; i < 24; i++) drawDoor(i, today);
+  { const n = 4, seg = (W - 28) / n, cols = ['#ff5a5a', '#ffd34d', '#5ad07a', '#5ab4ff']; // string of fairy lights
+    for (let q = 0; q < n; q++) {
+      const x0 = 14 + q * seg; ctx.strokeStyle = '#141414'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x0, 86); ctx.quadraticCurveTo(x0 + seg / 2, 86 + 28, x0 + seg, 86); ctx.stroke();
+      for (let b = 1; b < 9; b++) { const u = b / 9, bx = x0 + seg * u, by = 86 + 28 * 2 * u * (1 - u) * 0.5 * 2 / 2 + 0, c = cols[(q * 9 + b) % 4], tw = 0.55 + 0.45 * Math.sin(T * 3 + b * 1.3 + q);
+        const yy = 86 + 28 * u * (1 - u) * 2; ctx.globalAlpha = 0.28 * tw; circle(bx, yy + 5, 9, c); ctx.globalAlpha = 1; ctx.fillStyle = '#141414'; ctx.fillRect(bx - 1.5, yy, 3, 3); circle(bx, yy + 6, 3.8, c); circle(bx - 1, yy + 5, 1.2, 'rgba(255,255,255,.8)'); }
+    } }
   // header
   otxt('Adventskalender', 30, 38, 38, '#ffd34d', '#3b1d00', 9, 'left');
   const left = Math.ceil((ADVENT_START - new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate())) / 86400000);
