@@ -45,6 +45,10 @@ const PLAY = `
           else if (o.type === 'compy') { if (dx < 130) wantJump = true; }
           else if (o.type === 'icicle' && o.state === 'stuck') { if (dx < 150) wantJump = true; }
           else if (o.type === 'geyser') { if (dx < 150) wantJump = true; }
+          else if (o.type === 'hopper') { if (dx < 330) wantRoar = true; if (dx < 90) wantJump = true; }
+          else if (o.type === 'plant') { if (dx < 150) wantJump = true; }
+          else if (o.type === 'seed') { if (dx < 190) wantJump = true; }
+          else if (o.type === 'meteor') { if (o.state === 'stuck' && dx < 150) wantJump = true; }
           else if (o.type === 'wall') { if (dx < 330) wantDash = true; }
           else if (o.type === 'tide') { if (dx < 250) wantJump = true; } }
         if (wantDuck && !ducking) { d.duckDown('k'); ducking = true; } else if (!wantDuck && ducking) { d.duckUp('k'); ducking = false; }

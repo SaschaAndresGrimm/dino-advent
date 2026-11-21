@@ -265,7 +265,7 @@ function drawToasts() {
 // Game data
 // =====================================================================
 const WORLDS = [
-  { name: 'Dschungel', speed: 270, segs: 24, patterns: ['rock', 'rock', 'pit', 'pit', 'amber', 'raptor', 'plat', 'boulder'],
+  { name: 'Dschungel', speed: 282, segs: 24, patterns: ['rock', 'rock2', 'pit', 'pit', 'raptor', 'raptor2', 'plat', 'boulder', 'hopper', 'hopper2', 'plant', 'meteor', 'meteors', 'bounce', 'bounceUp', 'crumble', 'ptero', 'compy', 'pitRock'],
     startTip: 'Willkommen im Dschungel! Sammle Bernstein und finde die 3 Dino-Eier.',
     riddles: [
       { q: 'Ein Velo und eine Glocke kosten zusammen 110 Franken. Das Velo kostet 100 Franken mehr. Was kostet die Glocke?', a: ['5 Franken', '10 Franken', '1 Franken'], ok: 0, why: 'Glocke 5 + Velo 105 = 110 – und 105 ist genau 100 mehr als 5!' },
@@ -281,7 +281,7 @@ const WORLDS = [
     ],
     sky: ['#0f3b3a', '#8cc49b'], far: '#2f6a50', mid: '#1f4a38', ground: '#4a3020', top: '#3f9b3a', dots: '#3a2416', edge: '#2e1d12', plat: '#6b4a2b', platTop: '#4caf50',
     rock: '#7b6b5a', deco: '#173d2c', volcS: 0.45, volcCol: '#35544a', egg: '#f6e7b0', eggSpot: '#6aa84f' },
-  { name: 'Canyon', speed: 295, segs: 30, patterns: ['rock', 'rock2', 'pit', 'pit', 'raptor', 'ptero', 'swoop', 'boulder', 'plat', 'amber', 'low', 'low', 'pitRock', 'lowRock', 'wall'],
+  { name: 'Canyon', speed: 295, segs: 30, patterns: ['rock', 'rock2', 'pit', 'pit', 'raptor', 'ptero', 'swoop', 'boulder', 'plat', 'amber', 'low', 'low', 'pitRock', 'lowRock', 'wall', 'hopper', 'hopper2', 'plant', 'meteor', 'meteors', 'bounce', 'bounceUp', 'crumble', 'raptor2'],
     startTip: 'Der heisse Canyon! Neue Fähigkeit: Halte DUCKEN gedrückt – so kommst du unter tiefen Felsen und Flugsauriern durch.',
     riddles: [
       { q: 'Ein Flugsaurier fliegt 3 km nach Norden, dann 3 km nach Osten und dann 3 km nach Süden. Wie weit ist er vom Start weg?', a: ['3 km', '0 km', '9 km'], ok: 0, why: 'Norden und Süden heben sich auf – übrig bleiben die 3 km nach Osten!' },
@@ -297,7 +297,7 @@ const WORLDS = [
     ],
     sky: ['#d9702e', '#f7d08a'], far: '#c0643a', mid: '#9a4a2a', ground: '#b5603a', top: '#d98b4e', dots: '#8e4526', edge: '#6e2f17', plat: '#8b4a2b', platTop: '#e0a060',
     rock: '#8d5a3b', deco: '#7a3a1e', volcS: 0.65, volcCol: '#9c5a3c', mesa: true, egg: '#cfe8ff', eggSpot: '#e07b39' },
-  { name: 'Eiszeit', speed: 315, segs: 34, patterns: ['rock', 'rock2', 'pit', 'icicle', 'icicle', 'raptor', 'ptero', 'boulder', 'plat', 'amber', 'low', 'compy', 'compy', 'geode', 'pitRock', 'lowRock', 'compyRun'],
+  { name: 'Eiszeit', speed: 315, segs: 34, patterns: ['rock', 'rock2', 'pit', 'icicle', 'icicle', 'raptor', 'ptero', 'boulder', 'plat', 'amber', 'low', 'compy', 'compy', 'geode', 'pitRock', 'lowRock', 'compyRun', 'hopper', 'plant', 'meteor', 'bounce', 'bounceUp', 'crumble', 'raptor2'],
     startTip: 'Brrr, die Eiszeit! Neue Fähigkeit: Spring hoch und drück STAMPF – das knackt Bernstein-Steine und plättet Kompsis!',
     riddles: [
       { q: 'Das Thermometer zeigt −3 Grad. Dann wird es 8 Grad wärmer. Wie warm ist es jetzt?', a: ['5 Grad', '11 Grad', '−11 Grad'], ok: 0, why: 'Von −3 sind es 3 Grad bis 0 – und dann noch 5 weiter: 5 Grad!' },
@@ -313,7 +313,7 @@ const WORLDS = [
     ],
     sky: ['#0b1f3f', '#5d86b8'], far: '#c9dcf0', mid: '#8fb0d6', ground: '#5f7591', top: '#f4f8ff', dots: '#4b5f7a', edge: '#3c4f68', plat: '#9fc3e6', platTop: '#ffffff',
     rock: '#7f93ab', deco: '#1d3b4f', volcS: 0.85, volcCol: '#3a4f6e', stars: true, snow: true, egg: '#e8f4ff', eggSpot: '#5aa0e0' },
-  { name: 'Vulkan', speed: 335, segs: 36, patterns: ['pit', 'pit', 'geyser', 'geyser', 'raptor', 'ptero', 'swoop', 'boulder', 'rock2', 'plat', 'low', 'compy', 'compy', 'geode', 'pitRock', 'lowRock', 'compyRun'],
+  { name: 'Vulkan', speed: 335, segs: 36, patterns: ['pit', 'pit', 'geyser', 'geyser', 'raptor', 'ptero', 'swoop', 'boulder', 'rock2', 'plat', 'low', 'compy', 'compy', 'geode', 'pitRock', 'lowRock', 'compyRun', 'hopper', 'plant', 'meteor', 'meteors', 'bounce', 'crumble', 'raptor2'],
     startTip: 'Der Vulkan! Neu: Feuer-Chilis! Damit kann {rex} Feuer spucken. Und irgendwo hier ist das goldene Ei…',
     riddles: [
       { q: 'Ben ist grösser als Ana. Ana ist kleiner als Max, aber grösser als Lou. Wer ist am kleinsten?', a: ['Lou', 'Ana', 'Max'], ok: 0, why: 'Ben und Max sind grösser als Ana, und Ana ist grösser als Lou – also ist Lou am kleinsten!' },
@@ -329,7 +329,7 @@ const WORLDS = [
     ],
     sky: ['#1a0505', '#8a2a10'], far: '#3a0f0a', mid: '#250807', ground: '#2a1a16', top: '#4a2a20', dots: '#ff5a1f', edge: '#170c0a', plat: '#3a2722', platTop: '#ff7a2a',
     rock: '#4a3a36', deco: '#140404', volcS: 1.25, volcCol: '#1c0807', lava: true, egg: '#ffd9c2', eggSpot: '#c0392b' },
-  { name: 'Weihnacht', art: 2, bonus: true, speed: 345, segs: 36, patterns: ['rock', 'rock2', 'pit', 'icicle', 'icicle', 'raptor', 'ptero', 'swoop', 'boulder', 'plat', 'amber', 'low', 'compy', 'geode', 'pitRock', 'lowRock', 'compyRun'],
+  { name: 'Weihnacht', art: 2, bonus: true, speed: 345, segs: 36, patterns: ['rock', 'rock2', 'pit', 'icicle', 'icicle', 'raptor', 'ptero', 'swoop', 'boulder', 'plat', 'amber', 'low', 'compy', 'geode', 'pitRock', 'lowRock', 'compyRun', 'hopper', 'hopper2', 'plant', 'meteor', 'meteors', 'bounce', 'bounceUp', 'crumble', 'raptor2'],
     startTip: 'Bonus-Welt: die Weihnachtsnacht! Alles, was du gelernt hast, hilft dir hier. Findest du alle 3 Eier und die Feuer-Chilis?',
     riddles: [
       { q: 'Der Weihnachtsmann hat 24 Geschenke. Er gibt jedem Kind 3. Wie viele Kinder bekommen etwas?', a: ['8', '6', '12'], ok: 0, why: '24 geteilt durch 3 ist 8 – also 8 Kinder!' },
@@ -350,7 +350,7 @@ const WORLDS = [
 function ART(wi) { return WORLDS[wi].art != null ? WORLDS[wi].art : wi; }
 
 WORLDS.push(
-  { name: 'Strand', art: 5, speed: 285, segs: 52, patterns: ['rock', 'rock2', 'pit', 'amber', 'raptor', 'plat', 'boulder', 'compy', 'wall', 'wall', 'tide', 'tide'],
+  { name: 'Strand', art: 5, speed: 285, segs: 52, patterns: ['rock', 'rock2', 'pit', 'amber', 'raptor', 'plat', 'boulder', 'compy', 'wall', 'wall', 'tide', 'tide', 'hopper', 'plant', 'meteor', 'bounce', 'bounceUp', 'crumble', 'raptor2'],
     startTip: 'Ein Strand! Neue Fähigkeit: FLITZ! Damit rennst du durch Sandmauern und Wellen.',
     riddles: [
       { q: 'Am Strand liegen 12 Muscheln. Du sammelst 5 und lässt 2 wieder fallen. Wie viele hast du in der Hand?', a: ['3', '7', '10'], ok: 0, why: '5 gesammelt, 2 verloren: 5 − 2 = 3 Muscheln!' },
@@ -380,7 +380,7 @@ WORLDS.push(
       { q: 'Eine Schildkröte läuft 1 Meter pro Minute. Wie lange braucht sie für 1000 Meter?', a: ['1000 Minuten', '100 Minuten', '10 Minuten'], ok: 0, why: '1000 Meter mit 1 Meter pro Minute: 1000 Minuten!' },
     ],
     sky: ['#0a4a7a', '#2fb0c8'], far: '#2a7a9a', mid: '#1d6a8a', ground: '#d8c48a', top: '#e8d8a0', dots: '#b8a468', edge: '#8a7a48', plat: '#2f9a8a', platTop: '#7fe0c8', rock: '#5a7a8a', deco: '#1a5a6a', volcS: 0.3, volcCol: '#1d4a6a', egg: '#d8f4ff', eggSpot: '#ff8a6a' },
-  { name: 'Berge', art: 7, speed: 300, segs: 52, patterns: ['rock', 'rock2', 'widegap', 'widegap', 'updraft', 'raptor', 'ptero', 'boulder', 'plat', 'amber', 'avalanche', 'compy'],
+  { name: 'Berge', art: 7, speed: 300, segs: 52, patterns: ['rock', 'rock2', 'widegap', 'widegap', 'updraft', 'raptor', 'ptero', 'boulder', 'plat', 'amber', 'avalanche', 'compy', 'hopper', 'plant', 'meteor', 'meteors', 'bounce', 'crumble', 'raptor2'],
     startTip: 'Hoch in den Bergen! Neue Fähigkeit: GLEITEN. Halte die Taste in der Luft gedrückt und schwebe über die Schluchten.',
     riddles: [
       { q: 'Ein Steinbock klettert 40 m hoch und rutscht dann 10 m ab. Wie hoch ist er?', a: ['30 m', '50 m', '40 m'], ok: 0, why: '40 − 10 = 30 Meter hoch!' },
@@ -448,7 +448,7 @@ const LEVEL_THEMES = [0, 0, 0, 5, 5, 5, 1, 1, 1, 6, 6, 6, 2, 2, 2, 7, 7, 7, 3, 3
 const LEVEL_TITLES = ['Erste Schritte', 'Hoch hinaus', 'Brüll-Training', 'Sandburgen-Rennen', 'Krabbenstrand', 'Der Krabbenkönig', 'Heisse Schlucht', 'Duck dich!', 'Raptor-Rudel', 'Tauchgang', 'Korallenlabyrinth', 'Das Seeungeheuer', 'Eiskalte Ebene', 'Stampf-Meister', 'Mammut-Pfad', 'Gipfelweg', 'Wolkensprung', 'Die Adlerkönigin', 'Vulkan-Aufstieg', 'Lavafluss', 'Feuer-Chili', 'Verschneite Nacht', 'Sternenwald', 'Der Krallenkönig'];
 const BOSS_DAYS = { 6: 'crab', 12: 'kraken', 18: 'queen', 24: 'king' };
 const TREASURE_DAY = { 3: 0, 9: 1, 15: 2, 21: 3 }; // Goetti's guitar, bike, rod and Kiwi
-const LEVELS = LEVEL_THEMES.map((wi, li) => { const sub = li % 3, day = li + 1, boss = BOSS_DAYS[day] || null; return { li, day, wi, sub, title: LEVEL_TITLES[li], boss, treasure: TREASURE_DAY[day] != null ? TREASURE_DAY[day] : -1, segs: Math.round(46 + li * 0.9 - (boss ? 14 : 0)), speedMul: [0.93, 1, 1.06][sub], maxTier: [1, 2, 3][sub] }; });
+const LEVELS = LEVEL_THEMES.map((wi, li) => { const sub = li % 3, day = li + 1, boss = BOSS_DAYS[day] || null; return { li, day, wi, sub, title: LEVEL_TITLES[li], boss, treasure: TREASURE_DAY[day] != null ? TREASURE_DAY[day] : -1, segs: Math.round(46 + li * 0.9 - (boss ? 14 : 0)), speedMul: [0.98, 1.04, 1.1][sub], maxTier: [2, 3, 3][sub] }; });
 // skills arrive with the calendar: dash on day 4, duck on 7, swim on 10, stomp on 13, glide on 16, fire on 19
 const SKILL_DAYS = { dash: 4, duck: 7, swim: 10, stomp: 13, glide: 16, fire: 19 };
 function skillsFor(li, wi) { const d = li == null ? 99 : li + 1; return { duck: d >= SKILL_DAYS.duck, stomp: d >= SKILL_DAYS.stomp, dash: d >= SKILL_DAYS.dash, glide: d >= SKILL_DAYS.glide, fire: d >= SKILL_DAYS.fire, swim: wi === 6 }; }
@@ -1586,7 +1586,20 @@ function drawGround(wi, L, cam) {
 }
 function fossilBone(x, y) { ctx.strokeStyle = 'rgba(255,240,215,.45)'; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x - 7, y); ctx.lineTo(x + 7, y - 3); ctx.stroke(); circle(x - 8, y - 2, 2.5, 'rgba(255,240,215,.45)'); circle(x - 8, y + 2, 2.5, 'rgba(255,240,215,.45)'); circle(x + 8, y - 5, 2.5, 'rgba(255,240,215,.45)'); circle(x + 8, y - 1, 2.5, 'rgba(255,240,215,.45)'); }
 
+function critterCol() { return { 0: '#55b84a', 1: '#e0873a', 2: '#7ac8e8', 3: '#e0503a', 5: '#e8644f', 7: '#8aa0d0' }[ART(G.wi)] || '#55b84a'; }
+function drawCrumble(pl, cam) {
+  const x = pl.x - cam + (pl.t != null && !pl.gone ? Math.sin(T * 70) * 2.5 : 0), y = pl.y, w = pl.w;
+  if (x > W + 20 || x + w < -20 || y > H + 40) return;
+  const c = ART(G.wi) === 2 ? '#9fb4cc' : ART(G.wi) === 3 ? '#4a3a36' : '#a8967a';
+  ctx.save(); if (pl.gone) ctx.globalAlpha = clamp(1 - (pl.y - pl.y0) / 260, 0, 1);
+  if (!pl.gone) ell(x + w / 2, GROUND + 2, w * 0.4, 6, 0, 'rgba(0,0,0,.18)');
+  rr(x, y, w, 34, 10); ctx.fillStyle = vgrad(y, y + 34, shade(c, 1.25), c, shade(c, 0.65)); ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = '#2b1a0c'; ctx.stroke();
+  ctx.strokeStyle = 'rgba(0,0,0,.45)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x + w * 0.3, y + 3); ctx.lineTo(x + w * 0.36, y + 14); ctx.lineTo(x + w * 0.28, y + 24); ctx.moveTo(x + w * 0.7, y + 4); ctx.lineTo(x + w * 0.62, y + 16); ctx.lineTo(x + w * 0.7, y + 30); ctx.stroke();
+  if (pl.t != null && !pl.gone) { ctx.fillStyle = `rgba(255,120,60,${0.25 + 0.2 * Math.sin(T * 40)})`; rr(x, y, w, 34, 10); ctx.fill(); }
+  ctx.restore();
+}
 function drawPlatform(pl, cam, wi) {
+  if (pl.crumble) return drawCrumble(pl, cam);
   const x = pl.x - cam, y = pl.y, w = pl.w;
   if (x > W + 20 || x + w < -20) return;
   ell(x + w / 2, GROUND + 2, w * 0.4, 6, 0, 'rgba(0,0,0,.18)');
@@ -1722,6 +1735,16 @@ function buildLevel(wi, endless, LV) { // LV = the calendar level spec (or undef
     pitRock: x => { const w = 100 + Math.floor(R() * 30) + wi * 10; L.pits.push({ x, w }); L.obs.push({ type: 'rock', x: x + w + 270, w: 56, h: 44 }); amberArc(x - 40, w + 80, 120); return w + 320; },
     lowRock: x => { firstTip('lowRock', x - 1200, 'Erst ducken, dann hüpfen!'); L.obs.push({ type: 'low', x: x + 70, w: 150 }); L.obs.push({ type: 'rock', x: x + 430, w: 56, h: 44 }); amberRow(x - 10, 4, GROUND - 30, 45); return 480; },
     compyRun: x => { firstTip('compy', x - 1200, 'Kompsis! Hüpf von Kopf zu Kopf!'); for (let i = 0; i < 5; i++) L.obs.push({ type: 'compy', x: x + 80 + i * 78, spd: 150 + wi * 15 + (curTier - 1) * 8, ph: i, alpha: 1 }); return 480; },
+    // ---- new for everybody: hoppers, spitting plants, meteors, bounce mushrooms, crumbling steps ----
+    hopper: x => { firstTip('hopper', x - 1200, 'Ein Hüpf-Frosch! Spring drüber, lande auf seinem Kopf – oder brüll ihn weg!'); L.obs.push({ type: 'hopper', x: x + 220, hp: R() * 3 }); return 280; },
+    hopper2: x => { firstTip('hopper', x - 1200, 'Hüpf-Frösche! Spring drüber oder brüll sie weg!'); L.obs.push({ type: 'hopper', x: x + 200, hp: 0 }); L.obs.push({ type: 'hopper', x: x + 470, hp: 1.3 }); return 520; },
+    plant: x => { firstTip('plant', x - 1200, 'Eine Spuck-Pflanze! Spring über die Samen, die sie spuckt!'); L.obs.push({ type: 'plant', x: x + 280, shoot: 0.5, pop: 0 }); amberRow(x + 40, 3, GROUND - 120, 50); return 360; },
+    meteor: x => { firstTip('meteor', x - 1200, 'Achtung, Meteor! Wo es rot blinkt, schlägt gleich einer ein!'); L.obs.push({ type: 'meteor', x: x + 300, state: 'wait', y: -80, vy: 0 }); return 340; },
+    meteors: x => { firstTip('meteor', x - 1200, 'Meteoriten-Regen! Wo es rot blinkt, schlägt gleich einer ein!'); for (let i = 0; i < 3; i++) L.obs.push({ type: 'meteor', x: x + 260 + i * 270, state: 'wait', y: -80, vy: 0 }); return 760; },
+    bounce: x => { firstTip('pad', x - 1200, 'Ein Hüpfpilz! Lauf drauf – er katapultiert dich hoch!'); L.obs.push({ type: 'pad', x: x + 60, sq: 0 }); amberArc(x + 80, 300, 320); return 400; },
+    bounceUp: x => { firstTip('pad', x - 1200, 'Ein Hüpfpilz! Er katapultiert dich ganz hoch hinauf!'); L.obs.push({ type: 'pad', x: x + 60, sq: 0 }); const y = GROUND - 250; L.plats.push({ x: x + 190, y, w: 240 }); amberRow(x + 220, 4, y - 45, 45); amberArc(x + 70, 140, 280); return 440; },
+    crumble: x => { firstTip('crumble', x - 1200, 'Wackelsteine! Sie fallen gleich runter – hüpf schnell weiter!'); const n = 3 + (curTier >= 3 || dayN > 12 ? 1 : 0), w = 120, gap = 80, tw = n * (w + gap); L.pits.push({ x, w: tw + 20 }); for (let i = 0; i < n; i++) { const y = GROUND - 70 - (i % 2) * 28; L.plats.push({ x: x + 30 + i * (w + gap), y, y0: y, w, crumble: true, t: null }); amberRow(x + 50 + i * (w + gap), 2, y - 45, 45); } return tw + 20; },
+    raptor2: x => { L.seen.raptor = 1; L.obs.push({ type: 'raptor', x: x + 60, spd: 140 + wi * 20, ph: 0, alpha: 1 }); L.obs.push({ type: 'raptor', x: x + 420, spd: 200 + wi * 20, ph: 2, alpha: 1 }); return 480; },
     // ---- beach: dash ----
     wall: x => { firstTip('wall', x - 1200, 'Eine hohe Mauer! Drück FLITZ und renn durch!'); L.obs.push({ type: 'wall', x: x + 90, w: 60, h: 250 }); amberRow(x + 150, 4, GROUND - 90, 40); return 170; },
     tide: x => { firstTip('tide', x - 1200, 'Eine Welle! Spring drüber – oder FLITZ hindurch!'); L.obs.push({ type: 'tide', x: x + 420, w: 100, h: 118 }); amberArc(x + 60, 200, 100); return 240; },
@@ -1799,9 +1822,9 @@ function buildLevel(wi, endless, LV) { // LV = the calendar level spec (or undef
   }
   const n = endless ? 300 : (LV ? LV.segs : th.segs), eggAt = endless ? [-1, -1, -1] : [Math.floor(n * 0.25), Math.floor(n * 0.55), Math.floor(n * 0.85)], cpAt = endless ? [] : [Math.floor(n * 0.35), Math.floor(n * 0.65)], tAt = endless ? -1 : (LV ? (LV.treasure >= 0 ? Math.floor(n * 0.45) : -1) : (wi === 4 ? -1 : Math.floor(n * 0.45)));
   let segI = 0;
-  const HARD = ['raptor', 'ptero', 'swoop', 'compy', 'geyser', 'geode', 'pitRock', 'lowRock', 'compyRun', 'sword', 'jellies', 'avalanche'], COMBO = ['pitRock', 'lowRock', 'compyRun'];
+  const HARD = ['raptor2', 'hopper2', 'plant', 'meteors', 'crumble', 'bounceUp', 'raptor', 'ptero', 'swoop', 'compy', 'geyser', 'geode', 'pitRock', 'lowRock', 'compyRun', 'sword', 'jellies', 'avalanche'], COMBO = ['pitRock', 'lowRock', 'compyRun', 'meteors', 'hopper2', 'raptor2', 'bounceUp'];
   const NEEDS = { low: 'duck', lowRock: 'duck', swoop: 'duck', geode: 'stomp', wall: 'dash', widegap: 'glide', updraft: 'glide' };
-  const pickPattern = () => { let pool = th.patterns.filter(k => !NEEDS[k] || SK[NEEDS[k]]); const tier = endless ? curTier : (LV ? Math.min(LV.maxTier, 1 + Math.floor(segI * 3 / n)) : 3); const easy = pool.filter(k => !HARD.includes(k)), mid = pool.filter(k => !COMBO.includes(k)); if (tier === 1 && easy.length) pool = easy; else if (tier === 2 && mid.length) pool = mid; return pool[Math.floor(R() * pool.length)]; };
+  const pickPattern = () => { let pool = th.patterns.filter(k => !NEEDS[k] || SK[NEEDS[k]]); const tier = endless ? curTier : (LV ? Math.min(LV.maxTier, 1 + Math.floor(segI * 3 / n)) : 3); const easy = pool.filter(k => !HARD.includes(k)), mid = pool.filter(k => !COMBO.includes(k)); if (tier === 1 && easy.length) pool = easy.filter(k => k !== 'amber').length ? easy.filter(k => k !== 'amber') : easy; else if (tier === 2 && mid.length) pool = mid; return pool[Math.floor(R() * pool.length)]; };
   for (let i = 0; i < n; i++) {
     segI = i;
     if (endless && i > 0 && i % 26 === 0) { curTier++; L.tierX.push(x); }
@@ -1836,7 +1859,7 @@ function buildLevel(wi, endless, LV) { // LV = the calendar level spec (or undef
       w = P[pickPattern()](x);
       if (endless && curTier >= 4 && R() < 0.4) { x += w + 170; w = P[pickPattern()](x); } // doubled-up dangers
     }
-    x += w + (260 + R() * 200) * (endless ? Math.max(0.6, 1 - 0.07 * (curTier - 1)) : 1);
+    x += w + (260 + R() * 200) * (endless ? Math.max(0.6, 1 - 0.07 * (curTier - 1)) : (LV ? 0.82 + 0.1 * Math.min(1, (dayN - 1) / 12) : 1));
   }
   L.eggs.sort((a, b) => a.k - b.k);
   L.ambTotal = L.amb.length;
@@ -1889,7 +1912,7 @@ function dash() {
 }
 function dashBreak(o) { // the dash smashes obstacles and sends enemies flying
   const th = WORLDS[G.wi];
-  if (o.type === 'raptor' || o.type === 'ptero' || o.type === 'compy' || o.type === 'sword') { if (!o.scared) { o.scared = true; o.vx = 520; o.vy = -380; SFX.smash(); } return; }
+  if (o.type === 'raptor' || o.type === 'ptero' || o.type === 'compy' || o.type === 'sword' || o.type === 'hopper') { if (!o.scared) { o.scared = true; o.vx = 520; o.vy = -380; SFX.smash(); } return; }
   o.dead = true; SFX.smash(); burst(o.x, GROUND - (o.h || 60) / 2, 26, o.type === 'wall' && G.wi === 5 ? ['#f0dca0', '#d8b878', '#fff'] : [th.rock, '#5a4a3a', '#a89888'], 460, 1200, 9, 0.9);
   for (let i = 0; i < (o.type === 'wall' ? 5 : 2); i++) G.L.amb.push({ x: o.x + 40 + i * 36, y: GROUND - 60 - i * 18, got: false });
 }
@@ -1941,7 +1964,8 @@ function roar() {
       o.dead = true; SFX.smash(); const th = WORLDS[G.wi];
       burst(o.x, GROUND - (o.h || 40) / 2, 22, o.type === 'icicle' ? ['#e0f4ff', '#9fd3ff', '#fff'] : [th.rock, '#5a4a3a', '#a89888'], 420, 1300, 10, 0.9);
       for (let i = 0; i < 3; i++) G.L.amb.push({ x: o.x + 40 + i * 40, y: GROUND - 60 - i * 20, got: false });
-    } else if (o.type === 'raptor' || o.type === 'ptero' || o.type === 'sword') { o.scared = true; o.vx = 380; o.vy = -320; }
+    } else if (o.type === 'raptor' || o.type === 'ptero' || o.type === 'sword' || o.type === 'hopper') { o.scared = true; o.vx = 380; o.vy = -320; }
+    else if (o.type === 'plant') { o.dead = true; SFX.smash(); burst(o.x, GROUND - 30, 20, ['#5fbf4a', '#2f7a2c', '#fff'], 360, 700, 8, 0.8); }
     else if (o.type === 'compy' && d < 300 && !G.compyHint) { G.compyHint = true; toast('Kompsis sind zu frech – spring drauf!', '#ffe08a'); }
   }
 }
@@ -1958,20 +1982,21 @@ function endRun() {
   if (isNew) { save.best[G.wi] = G.score; } save.amber += G.amber; writeSave();
   G.overlay = { type: 'endover', isNew, prev, t: 0 }; SFX.wrong(); if (isNew) setTimeout(SFX.right, 350);
 }
+function resetCrumble(L) { for (const pl of L.plats) if (pl.crumble) { pl.gone = false; pl.t = null; pl.y = pl.y0; pl.fv = 0; } }
 function pitFall() {
   const p = G.p, L = G.L;
   const pit = L.pits.find(q => p.wx > q.x - 60 && p.wx < q.x + q.w + 60);
   let nx = pit ? pit.x - 480 : p.wx - 480, guard = 0;
   while (!supported(L, nx) && guard++ < 30) nx -= 40;
   p.wx = nx; p.y = GROUND; p.vy = 0; G.chili.wx = nx - 105; G.startT = 1.4;
-  hurt(true); p.inv = 3;
+  resetCrumble(L); hurt(true); p.inv = 3;
 }
 function retry() {
   const p = G.p, L = G.L;
   G.overlay = null; p.hearts = 3; p.inv = 2; p.wx = G.cp; p.y = GROUND; p.vy = 0; p.roarCd = 0; p.stomp = false; p.spin = 1; G.duckHeld = null; G.fireballs = []; G.flames = [];
-  G.chili.wx = p.wx - 105; G.chili.dig = null;
+  G.chili.wx = p.wx - 105; G.chili.dig = null; resetCrumble(L);
   for (const s of L.spots) if (s.state === 'dig') s.state = 'idle';
-  for (const o of L.obs) if ((o.type === 'raptor' || o.type === 'ptero' || o.type === 'compy') && o.x > G.cp - 300 && o.x < G.cp + 700) o.dead = true;
+  for (const o of L.obs) if ((o.type === 'raptor' || o.type === 'ptero' || o.type === 'compy' || o.type === 'hopper' || o.type === 'seed') && o.x > G.cp - 300 && o.x < G.cp + 700) o.dead = true;
   if (G.bossStarted && !G.golden && !G.bossDone) { p.wx = L.bossX; G.chili.wx = p.wx - 90; G.boss = newBoss(G.bossCp || 0); G.stopped = true; for (const o of L.obs) if (o.minion) o.dead = true; if (G.boss.phase > 0) startBossPhase(G.boss); }
   G.startT = 0.9;
 }
@@ -2077,10 +2102,11 @@ function updatePlay(dt) {
   p.gliding = !!(G.sk.glide && !L.swim && G.holdJump != null && !p.onGround && !p.stomp && p.vy > 40);
   p.wx += spd * dt; p.ph += dt * (spd > 0 ? 13 : 2);
   // physics
+  for (const pl of L.plats) if (pl.crumble) { if (pl.t != null && !pl.gone) { pl.t -= dt; if (pl.t <= 0) { pl.gone = true; pl.fv = 0; burst(pl.x + pl.w / 2, pl.y, 14, ['#b8a58a', '#7a6a58', '#fff'], 220, 300, 7, 0.7); } } if (pl.gone) { pl.fv += 2200 * dt; pl.y += pl.fv * dt; } }
   const prevY = p.y, wasGround = p.onGround, vy0 = p.vy; p.vy += (L.swim ? 520 : p.dashT > 0 ? GRAV * 0.25 : GRAV) * dt; if (L.swim) { if (G.duckHeld != null) p.vy += 1700 * dt; p.vy = clamp(p.vy, -430, 400); if (Math.random() < 0.05) burst(p.wx + 40, p.y - 80, 1, ['#dff'], 40, -120, 6, 0.8); } if (p.gliding) p.vy = Math.min(p.vy, 140); if (p.stomp) { if (p.spin < 1) { p.spin = Math.min(1, p.spin + dt / 0.36); p.vy = Math.min(p.vy, 120); if (p.spin >= 1) { p.vy = 1500; SFX.duck(); } } else p.vy = Math.max(p.vy, 1500); } p.y += p.vy * dt; p.onGround = false;
   if (L.swim && p.y < 175) { p.y = 175; p.vy = Math.max(0, p.vy); }
   if (p.vy >= 0) {
-    for (const pl of L.plats) if (p.wx + 25 > pl.x && p.wx - 25 < pl.x + pl.w && prevY <= pl.y + 1 && p.y >= pl.y) { p.y = pl.y; p.vy = 0; p.onGround = true; break; }
+    for (const pl of L.plats) if (!pl.gone && p.wx + 25 > pl.x && p.wx - 25 < pl.x + pl.w && prevY <= pl.y + 1 && p.y >= pl.y) { p.y = pl.y; p.vy = 0; p.onGround = true; if (pl.crumble && pl.t == null) { pl.t = 0.5; SFX.crack(); } break; }
     if (!p.onGround && supported(L, p.wx) && prevY <= GROUND + 4 && p.y >= GROUND) { p.y = GROUND; p.vy = 0; p.onGround = true; }
   }
   if (p.onGround && !wasGround && vy0 > 250) { p.land = 0.16; if (vy0 > 400 && !p.stomp) burst(p.wx, p.y, 9, ['#d8c3a5', '#b39b7a', '#fff'], 150, 260, 5, 0.45); }
@@ -2106,10 +2132,10 @@ function updatePlay(dt) {
       const dx = o.x - f.x; let hit = false;
       if (o.type === 'low') hit = Math.abs(dx) < o.w / 2 + 20;
       else if (o.type === 'ptero') hit = Math.abs(dx) < 40 && Math.abs(o.y - f.y) < 60;
-      else if (o.type !== 'geyser' && !(o.type === 'icicle' && o.state === 'hang')) hit = Math.abs(dx) < 40;
+      else if (o.type !== 'geyser' && o.type !== 'pad' && !(o.type === 'icicle' && o.state === 'hang')) hit = Math.abs(dx) < 40;
       if (!hit) continue;
       f.life = 0; burst(f.x, f.y, 18, ['#ffb030', '#ff5a1f', '#fff3a0', '#555'], 300, 400, 8, 0.7);
-      if (o.type === 'raptor' || o.type === 'ptero' || o.type === 'compy') { o.scared = true; o.vx = 420; o.vy = -360; }
+      if (o.type === 'raptor' || o.type === 'ptero' || o.type === 'compy' || o.type === 'hopper') { o.scared = true; o.vx = 420; o.vy = -360; }
       else if (o.type === 'geode') breakGeode(o);
       else { o.dead = true; SFX.smash(); for (let i = 0; i < 2; i++) L.amb.push({ x: o.x + 40 + i * 40, y: GROUND - 60 - i * 20, got: false }); if (o.type === 'low') burst(o.x, GROUND - 160, 30, ART(G.wi) === 2 ? ['#e0f4ff', '#fff'] : ['#ff9a3c', '#ffd166', '#555'], 400, 600, 9, 1); }
     }
@@ -2178,6 +2204,27 @@ function updatePlay(dt) {
         }
         if (o.type === 'ptero') { o.y = o.baseY + Math.sin(T * 4 + o.x * 0.01) * 8; hb = { x: o.x - 28, y: o.y - 14, w: 56, h: 26 }; }
         else hb = { x: o.x - 26, y: GROUND - 62, w: 52, h: 60 };
+        break;
+      case 'hopper':
+        if (o.flat) { o.flat -= dt; if (o.flat <= 0) { o.flat = 0; o.scared = true; o.vx = 300; o.vy = -300; } break; }
+        if (o.scared) { o.x += o.vx * dt; o.vy += 900 * dt; o.yOff = (o.yOff || 0) + o.vy * dt; o.alpha = (o.alpha == null ? 1 : o.alpha) - dt * 1.3; if (o.alpha <= 0) o.dead = true; break; }
+        if (d < 800) { o.x -= 95 * dt; o.hp += dt; }
+        o.hy = 120 * Math.abs(Math.sin(o.hp * 3.3));
+        hb = { x: o.x - 22, y: GROUND - 46 - o.hy, w: 44, h: 44 };
+        if (p.inv <= 0 && overlap(pb, hb) && p.vy > 0 && p.y <= hb.y + 28) { o.flat = 0.9; SFX.boing(); burst(o.x, GROUND - o.hy - 20, 10, ['#9be26a', '#fff'], 220, 600, 6, 0.5); L.amb.push({ x: o.x + 60, y: GROUND - 110, got: false }); p.vy = -720; p.jumps = 1; p.stomp = false; p.spin = 1; hb = null; }
+        break;
+      case 'plant':
+        if (d < 680 && d > -50) { o.shoot -= dt; if (o.shoot <= 0) { o.shoot = 1.55; o.pop = 0.3; L.obs.push({ type: 'seed', x: o.x - 28, y: GROUND - 30, rot: 0 }); SFX.boing(); } }
+        o.pop = Math.max(0, (o.pop || 0) - dt); hb = { x: o.x - 20, y: GROUND - 54, w: 40, h: 54 }; break;
+      case 'seed': o.x -= 330 * dt; o.rot = (o.rot || 0) - dt * 14; hb = { x: o.x - 12, y: o.y - 12, w: 24, h: 24 }; if (o.x < p.wx - 500) o.dead = true; break;
+      case 'meteor':
+        if (o.state === 'wait' && d < 440) { o.state = 'fall'; o.vy = 200; SFX.crack(); }
+        if (o.state === 'fall') { o.vy += 2600 * dt; o.y += o.vy * dt; hb = { x: o.x - 26, y: o.y - 26, w: 52, h: 52 }; if (o.y >= GROUND - 26) { o.y = GROUND - 26; o.state = 'stuck'; SFX.smash(); G.shake = Math.max(G.shake, 0.4); burst(o.x, GROUND - 10, 26, ['#ffb030', '#ff5a1f', '#fff3a0', '#555'], 380, 600, 8, 0.8); } }
+        else if (o.state === 'stuck') hb = { x: o.x - 26, y: GROUND - 46, w: 52, h: 46 };
+        break;
+      case 'pad':
+        o.sq = Math.max(0, (o.sq || 0) - dt);
+        if (Math.abs(p.wx + 10 - o.x) < 46 && p.vy >= 0 && p.y >= GROUND - 22 && o.sq <= 0) { o.sq = 0.35; p.vy = -1250; p.y = GROUND - 4; p.onGround = false; p.jumps = 1; p.coyote = 0; SFX.boing(); burst(o.x, GROUND - 20, 16, ['#ff6a6a', '#fff', '#ffd34d'], 260, 500, 7, 0.6); }
         break;
       case 'wall': hb = { x: o.x - o.w / 2, y: GROUND - o.h, w: o.w, h: o.h }; break;
       case 'tide': if (d < 720) o.moving = true; if (o.moving) o.x -= 210 * dt; hb = { x: o.x - 70, y: GROUND - 118, w: 110, h: 118 }; break;
@@ -2388,6 +2435,49 @@ function drawObstacle(o, cam, th) {
       break;
     }
     case 'low': drawLow(o, x); break;
+    case 'hopper': {
+      const hy = o.hy || 0, yo = o.yOff || 0, c = critterCol(), flat = o.flat > 0, by = GROUND - hy + yo;
+      ctx.save(); if (o.alpha != null) ctx.globalAlpha = clamp(o.alpha, 0, 1);
+      shadow(x, GROUND + 2, 26 - hy * 0.08, 0.3);
+      if (flat) { ell(x, GROUND - 8, 34, 9, 0, c); ell(x, GROUND - 10, 20, 5, 0, shade(c, 1.4)); circle(x - 14, GROUND - 14, 5, '#fff'); circle(x + 14, GROUND - 14, 5, '#fff'); ctx.restore(); break; }
+      const st = 1 + (hy < 12 ? 0.12 : 0) - hy * 0.0012;
+      ctx.translate(x, by); ctx.scale(1 / st, st);
+      ctx.strokeStyle = shade(c, 0.6); ctx.lineWidth = 7; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(-14, -12); ctx.lineTo(-30, hy > 12 ? 0 : -6); ctx.lineTo(-18, 0); ctx.moveTo(14, -12); ctx.lineTo(28, hy > 12 ? 0 : -6); ctx.lineTo(18, 0); ctx.stroke();
+      ell(0, -26, 26, 22, 0, c); ell(0, -16, 16, 12, 0, shade(c, 1.5)); ctx.beginPath(); ctx.ellipse(0, -26, 26, 22, 0, 0, 7); ctx.lineWidth = 3; ctx.strokeStyle = '#1b2a14'; ctx.stroke();
+      circle(-12, -44, 9, '#fff'); circle(12, -44, 9, '#fff'); ctx.lineWidth = 2.5; ctx.strokeStyle = '#1b2a14'; ctx.beginPath(); ctx.arc(-12, -44, 9, 0, 7); ctx.moveTo(21, -44); ctx.arc(12, -44, 9, 0, 7); ctx.stroke();
+      circle(-10, -43, 4.5, '#1b2a14'); circle(14, -43, 4.5, '#1b2a14');
+      ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, -22, 11, 0.15 * Math.PI, 0.85 * Math.PI); ctx.stroke();
+      ctx.restore(); break;
+    }
+    case 'plant': {
+      const pop = o.pop || 0, k = 1 + pop * 0.6;
+      shadow(x, GROUND + 2, 34, 0.3);
+      ctx.strokeStyle = '#2f7a2c'; ctx.lineWidth = 9; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x + 10, GROUND); ctx.quadraticCurveTo(x + 22, GROUND - 24, x + 4, GROUND - 40); ctx.stroke();
+      ctx.fillStyle = '#4caf50'; ctx.beginPath(); ctx.ellipse(x + 24, GROUND - 8, 18, 7, -0.5, 0, 7); ctx.fill(); ctx.beginPath(); ctx.ellipse(x - 12, GROUND - 7, 16, 6, 0.5, 0, 7); ctx.fill();
+      ctx.save(); ctx.translate(x - 6, GROUND - 52); ctx.scale(k, 1 / k);
+      circle(0, 0, 25, '#c0392b'); ctx.beginPath(); ctx.arc(0, 0, 25, 0, 7); ctx.lineWidth = 3; ctx.strokeStyle = '#4a1510'; ctx.stroke();
+      ctx.fillStyle = '#2b0a08'; ctx.beginPath(); ctx.ellipse(-12, 2, 14, 11 + pop * 14, 0, 0, 7); ctx.fill();
+      ctx.fillStyle = '#fff'; for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.moveTo(-22 + i * 7, -6); ctx.lineTo(-18 + i * 7, 2); ctx.lineTo(-15 + i * 7, -6); ctx.fill(); }
+      circle(6, -12, 6, '#fff'); circle(7, -12, 3, '#222'); circle(10, 4, 3.2, '#ff8a80'); circle(14, -4, 3.2, '#ff8a80');
+      ctx.restore(); break;
+    }
+    case 'seed': {
+      ctx.save(); ctx.translate(x, o.y); ctx.rotate(o.rot || 0); circle(0, 0, 13, '#5a3a1a'); ctx.beginPath(); ctx.arc(0, 0, 13, 0, 7); ctx.lineWidth = 2.5; ctx.strokeStyle = '#1b0f06'; ctx.stroke(); ell(-4, -5, 5, 3, 0.5, 'rgba(255,255,255,.4)'); ctx.strokeStyle = '#2f7a2c'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(8, -8); ctx.lineTo(16, -14); ctx.stroke(); ctx.restore();
+      ctx.fillStyle = 'rgba(95,191,74,.35)'; ctx.beginPath(); ctx.ellipse(x + 26, o.y, 18, 4, 0, 0, 7); ctx.fill(); break;
+    }
+    case 'meteor': {
+      if (o.state === 'wait') { const a = 0.35 + 0.35 * Math.sin(T * 12); ctx.strokeStyle = `rgba(255,70,50,${a + 0.2})`; ctx.lineWidth = 4; ctx.beginPath(); ctx.ellipse(x, GROUND + 4, 36, 9, 0, 0, 7); ctx.stroke(); ctx.fillStyle = `rgba(255,70,50,${a * 0.5})`; ctx.fill(); otxt('!', x, GROUND - 30 + Math.sin(T * 10) * 4, 30, '#ff5a3a', '#fff', 5); break; }
+      if (o.state === 'fall') { const yy = o.y; const tr = ctx.createLinearGradient(x, yy - 160, x, yy); tr.addColorStop(0, 'rgba(255,120,30,0)'); tr.addColorStop(1, 'rgba(255,170,50,.9)'); ctx.fillStyle = tr; ctx.beginPath(); ctx.moveTo(x - 24, yy); ctx.lineTo(x + 24, yy); ctx.lineTo(x + 6, yy - 170); ctx.lineTo(x - 6, yy - 170); ctx.fill(); circle(x, yy, 30, '#ff8a20'); circle(x, yy, 20, '#ffd34d'); circle(x - 5, yy - 3, 11, '#fff3b0'); break; }
+      shadow(x, GROUND + 2, 38, 0.35); ell(x, GROUND - 22, 30, 24, 0, '#3a2f2c'); ctx.beginPath(); ctx.ellipse(x, GROUND - 22, 30, 24, 0, 0, 7); ctx.lineWidth = 3; ctx.strokeStyle = '#1a1210'; ctx.stroke();
+      ctx.strokeStyle = `rgba(255,110,30,${0.55 + 0.35 * Math.sin(T * 5 + o.x)})`; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(x - 14, GROUND - 34); ctx.lineTo(x - 2, GROUND - 20); ctx.lineTo(x - 10, GROUND - 8); ctx.moveTo(x + 4, GROUND - 38); ctx.lineTo(x + 14, GROUND - 22); ctx.stroke(); break;
+    }
+    case 'pad': {
+      const sq = (o.sq || 0) / 0.35, k = 1 - Math.sin(clamp(sq, 0, 1) * Math.PI) * 0.35;
+      shadow(x, GROUND + 2, 40, 0.3); rr(x - 11, GROUND - 38 * k, 22, 38 * k, 8); ctx.fillStyle = '#f3e7cf'; ctx.fill(); ctx.lineWidth = 2.5; ctx.strokeStyle = '#6b4a2b'; ctx.stroke();
+      const cy = GROUND - 38 * k, cw = 46 + sq * 10; ctx.beginPath(); ctx.moveTo(x - cw, cy); ctx.bezierCurveTo(x - cw, cy - 62 * k, x + cw, cy - 62 * k, x + cw, cy); ctx.quadraticCurveTo(x, cy + 10, x - cw, cy); ctx.closePath(); ctx.fillStyle = vgrad(cy - 50, cy + 6, '#ff6a5a', '#c62828'); ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = '#4a1510'; ctx.stroke();
+      ctx.fillStyle = '#fff'; for (const [dx, dy, r] of [[-24, -14, 7], [2, -34, 8], [26, -16, 6], [-4, -14, 5]]) { ctx.beginPath(); ctx.arc(x + dx, cy + dy * k, r, 0, 7); ctx.fill(); }
+      if (Math.sin(T * 5) > 0.2) otxt('↑', x, GROUND - 100, 24, '#ffd34d', '#000', 4); break;
+    }
     case 'wall': { // a tall wall that only the dash can break
       shadow(x, GROUND + 2, o.w * 0.8, 0.35); const sand = G.wi === 5, c = sand ? '#e8cf8a' : th.rock;
       ctx.fillStyle = vgrad(GROUND - o.h, GROUND, shade(c, 1.25), c, shade(c, 0.7)); ctx.beginPath(); ctx.rect(x - o.w / 2, GROUND - o.h, o.w, o.h); ctx.fill(); rim();

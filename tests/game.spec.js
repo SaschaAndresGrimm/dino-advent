@@ -323,3 +323,31 @@ test('skill hints appear well before the obstacle', async ({ game }) => {
   expect(r.coach).not.toBeNull();
   expect(r.gap).toBeGreaterThanOrEqual(450);
 });
+
+test('new enemies and hazards: crumbling steps, bounce mushroom, meteor, hopper and spitting plant', async ({ game }) => {
+  await game.open({});
+  const r = await game.eval(() => {
+    const d = window.__dino; d.startLevel(1); const G = d.G, L = G.L, p = G.p; G.startT = 0; p.inv = 99;
+    L.obs.length = 0; L.pits.length = 0; L.plats.length = 0; p.wx = 5000;
+    // crumbling step: land on it, it falls after a short delay
+    L.pits.push({ x: 4900, w: 400 }); const st = { x: 4960, y: 370, y0: 370, w: 200, crumble: true, t: null }; L.plats.push(st); p.y = 360; p.vy = 100; G.stopped = true;
+    for (let i = 0; i < 5; i++) d.updatePlay(1 / 60); const landed = p.onGround || st.t != null; let fell = false; for (let i = 0; i < 60; i++) { d.updatePlay(1 / 60); if (st.gone) fell = true; }
+    // bounce mushroom launches Rex
+    G.stopped = false; L.pits.length = 0; L.plats.length = 0; p.wx = 6000; p.y = 440; p.vy = 0; p.onGround = true; L.obs.push({ type: 'pad', x: 6040, sq: 0 }); let top = 440; for (let i = 0; i < 40; i++) { d.updatePlay(1 / 60); top = Math.min(top, p.y); }
+    // meteor falls when close and then stays as a rock
+    L.obs.length = 0; p.wx = 7000; p.y = 440; p.vy = 0; const m = { type: 'meteor', x: 7300, state: 'wait', y: -80, vy: 0 }; L.obs.push(m); d.updatePlay(1 / 60); const falling = m.state === 'fall'; for (let i = 0; i < 90; i++) d.updatePlay(1 / 60);
+    // spitting plant makes seeds; hopper hops
+    L.obs.length = 0; p.wx = 9000; const pl = { type: 'plant', x: 9400, shoot: 0.05, pop: 0 }, hp = { type: 'hopper', x: 9300, hp: 0 }; L.obs.push(pl, hp); let maxHy = 0; for (let i = 0; i < 40; i++) { d.updatePlay(1 / 60); maxHy = Math.max(maxHy, hp.hy || 0); }
+    return { landed, fell, top, falling, metState: m.state, seeds: L.obs.filter(o => o.type === 'seed').length, maxHy };
+  });
+  expect(r.landed).toBe(true); expect(r.fell).toBe(true);
+  expect(r.top).toBeLessThan(150);
+  expect(r.falling).toBe(true); expect(r.metState).toBe('stuck');
+  expect(r.seeds).toBeGreaterThan(0); expect(r.maxHy).toBeGreaterThan(40);
+});
+
+test('the first calendar levels are varied: at least 6 kinds of obstacles on day 1-3', async ({ game }) => {
+  await game.open({});
+  const kinds = await game.eval(() => { const d = window.__dino, k = new Set(); for (let li = 0; li < 3; li++) { d.startLevel(li); for (const o of d.G.L.obs) k.add(o.type); if (d.G.L.plats.some(p => p.crumble)) k.add('crumble'); } return [...k]; });
+  expect(kinds.length).toBeGreaterThanOrEqual(6);
+});

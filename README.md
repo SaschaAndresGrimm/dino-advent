@@ -19,6 +19,7 @@
 | 19–21 | Volcano | fire chili | |
 | 22–24 | Christmas night | everything | Krallenkönig (24) |
 
+- **Enemies and hazards** (all themes except underwater): **Hüpf-Frosch** (hops; jump, stomp or roar), **Spuck-Pflanze** (spits seeds), **Meteoriten** (red marker, then they crash down and stay as rocks), **Hüpfpilz** (bounce mushroom: launches you high), **Wackelsteine** (crumbling steps over a pit) and raptor pairs. They are patterns in `buildLevel`; the first levels start at tier 2 so day 1 to 3 are already varied.
 
 A Christmas runner game for Oli: a T-Rex he names himself, Chili the rabbit, Goetti's dino station, 4 worlds plus a bonus Christmas-night world, a boss, an endless run, an amber shop and a Christmas ending. The game text is in German. There's no build step and no external assets: plain HTML, Canvas and synthesised sound.
 
