@@ -11,8 +11,9 @@ let ctx = canvas.getContext('2d');
 let DPR = 1, SC = 1, OX = 0, OY = 0, T = 0, DT = 0;
 
 function resize() {
-  DPR = Math.min(window.devicePixelRatio || 1, 2);
   const w = window.innerWidth, h = window.innerHeight;
+  // cap DPR at 2 and keep the backing store under ~3.2M pixels so large tablets stay smooth
+  DPR = Math.max(1, Math.min(window.devicePixelRatio || 1, 2, Math.sqrt(3.2e6 / Math.max(1, w * h))));
   canvas.width = Math.round(w * DPR); canvas.height = Math.round(h * DPR);
   canvas.style.width = w + 'px'; canvas.style.height = h + 'px';
   SC = Math.min(w / W, h / H); OX = (w - W * SC) / 2; OY = (h - H * SC) / 2;
@@ -1980,12 +1981,17 @@ function vignette(wi) {
 }
 
 // ---------- cartoon outlines via offscreen silhouette ----------
-let LOWFX = false; const perf = { avg: 1 / 60, bad: 0 };
+let LOWFX = false; const perf = { avg: 1 / 60, bad: 0, good: 0, drops: 0 };
 function perfWatch() {
-  if (LOWFX || DT <= 0 || DT > 0.25) return;
+  if (DT <= 0 || DT > 0.25) return;
   perf.avg += (DT - perf.avg) * 0.05;
-  perf.bad = perf.avg > 1 / 36 ? perf.bad + DT : 0;
-  if (perf.bad > 4) { LOWFX = true; }
+  if (!LOWFX) {
+    perf.bad = perf.avg > 1 / 36 ? perf.bad + DT : 0;
+    if (perf.bad > 4) { LOWFX = true; perf.bad = 0; perf.good = 0; perf.drops++; toast('Spar-Modus: weniger Glanz, mehr Tempo', '#9fe3ff'); }
+  } else if (perf.drops < 3) { // recover after a long smooth stretch (a one-off hiccup should not cost the effects for good)
+    perf.good = perf.avg < 1 / 50 ? perf.good + DT : 0;
+    if (perf.good > 12) { LOWFX = false; perf.good = 0; perf.bad = 0; }
+  }
 }
 const outlinePool = {};
 function outlined(key, x, y, bx, by, bw, bh, fn, alpha = 1, lw = 2.6) {
