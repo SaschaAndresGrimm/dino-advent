@@ -24,7 +24,8 @@ Then open http://localhost:8765. Controls:
 
 ## Easy tweaks (all in `game.js`)
 - **Story and dialog text:** search for `startStory`, `startEnding` and `afterBabyName`
-- **Riddles and start tips:** `WORLDS[i].riddle` and `startTip`
+- **Riddles and start tips:** `WORLDS[i].riddles` (10 per world; each is asked once before any repeats, tracked in the save) and `startTip`
+- **New skills per world:** world 1 teaches jump, double jump and roar; world 2 adds DUCKEN; world 3 adds STAMPF (Kompsis, amber stones); world 4 adds the Feuer-Chili
 - **Dino fact cards:** `FACTS`
 - **Difficulty:** `speed` and `segs` (level length) in `WORLDS`, and the pit widths in the `pit` pattern
 - **Looks:** Oli's colours are in `drawOli` (red jacket, brown hair), Chili's in `drawChili`, Goetti's in `drawGoetti` / `drawGoettiHead`

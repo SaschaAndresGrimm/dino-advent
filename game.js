@@ -23,7 +23,7 @@ window.addEventListener('resize', resize); resize();
 // Save game
 // =====================================================================
 const SAVE_KEY = 'olisDinoRettung.v1';
-let save = { rexName: '', babyName: '', unlocked: 0, eggs: [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], amber: 0, finished: false, muted: false, tutorialDone: false, movesDone: false,
+let save = { rexName: '', babyName: '', unlocked: 0, eggs: [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], amber: 0, finished: false, muted: false, tutorialDone: false, learned: { duck: 0, stomp: 0, fire: 0 }, riddleSeen: [[], [], [], []],
   medals: [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], treasures: [0,0,0,0], treasureNew: -1 };
 try { const s = JSON.parse(localStorage.getItem(SAVE_KEY)); if (s) save = Object.assign(save, s); } catch (e) {}
 function writeSave() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) {} }
@@ -183,44 +183,67 @@ function drawToasts() {
 // Game data
 // =====================================================================
 const WORLDS = [
-  { name: 'Dschungel', speed: 270, segs: 24, patterns: ['rock', 'rock', 'pit', 'pit', 'amber', 'raptor', 'plat', 'boulder', 'low', 'compy', 'geode'],
+  { name: 'Dschungel', speed: 270, segs: 24, patterns: ['rock', 'rock', 'pit', 'pit', 'amber', 'raptor', 'plat', 'boulder'],
     startTip: 'Willkommen im Dschungel! Sammle Bernstein und finde die 3 Dino-Eier.',
     riddles: [
       { q: 'Ein Bauer hat 10 Schafe. Alle bis auf 7 laufen weg. Wie viele Schafe hat er noch?', a: ['7', '3', '10'], ok: 0, why: '„Alle bis auf 7“ heisst: 7 Schafe bleiben da!' },
       { q: 'Was ist schwerer: ein Kilo Federn oder ein Kilo Steine?', a: ['Beide gleich schwer', 'Die Steine', 'Die Federn'], ok: 0, why: 'Ein Kilo ist ein Kilo – egal ob Federn oder Steine!' },
       { q: 'Fabios Mami hat zwei Kinder. Eines heisst Fabio. Wie heisst das andere?', a: ['Oli', 'Chili', 'Goetti'], ok: 0, why: 'Na klar – das bist DU!' },
       { q: 'Ich habe drei Hörner, aber ich bin kein Nashorn. Wer bin ich?', a: ['Triceratops', 'Stegosaurus', 'T-Rex'], ok: 0, why: '„Tri“ heisst drei – Triceratops heisst „Drei-Horn-Gesicht“!' },
+      { q: 'Was gehört dir, wird aber von anderen viel öfter benutzt als von dir?', a: ['Dein Name', 'Dein Velo', 'Deine Zahnbürste'], ok: 0, why: 'Alle rufen dich beim Namen – du selbst sagst ihn fast nie!' },
+      { q: 'Was hat Beine, kann aber nicht laufen?', a: ['Ein Tisch', 'Ein Raptor', 'Ein Hase'], ok: 0, why: 'Ein Tisch hat vier Beine – und bleibt trotzdem immer stehen!' },
+      { q: 'Wie viele Beine haben 2 Hasen und 1 T-Rex zusammen?', a: ['10', '12', '8'], ok: 0, why: 'Jeder Hase hat 4 Beine, der T-Rex läuft auf 2: 4 + 4 + 2 = 10!' },
+      { q: 'Welcher Dino hatte einen langen Hals und frass Blätter ganz oben in den Bäumen?', a: ['Brachiosaurus', 'T-Rex', 'Velociraptor'], ok: 0, why: 'Der Brachiosaurus war ein Pflanzenfresser mit einem Riesenhals!' },
+      { q: 'Ein Dino-Ei braucht 3 Tage zum Schlüpfen. Wie lange brauchen 3 Eier, die zusammen im Nest liegen?', a: ['3 Tage', '9 Tage', '6 Tage'], ok: 0, why: 'Alle drei Eier brüten gleichzeitig – also schlüpfen sie alle nach 3 Tagen!' },
+      { q: 'Ein Raptor hat 3 Krallen an jeder Hand. Wie viele Krallen hat er an beiden Händen?', a: ['6', '3', '10'], ok: 0, why: '3 Krallen links plus 3 Krallen rechts = 6!' },
     ],
     sky: ['#0f3b3a', '#8cc49b'], far: '#2f6a50', mid: '#1f4a38', ground: '#4a3020', top: '#3f9b3a', dots: '#3a2416', edge: '#2e1d12', plat: '#6b4a2b', platTop: '#4caf50',
     rock: '#7b6b5a', deco: '#173d2c', volcS: 0.45, volcCol: '#35544a', egg: '#f6e7b0', eggSpot: '#6aa84f' },
-  { name: 'Canyon', speed: 295, segs: 30, patterns: ['rock', 'rock2', 'pit', 'pit', 'raptor', 'ptero', 'swoop', 'boulder', 'plat', 'amber', 'low', 'compy', 'geode'],
-    startTip: 'Der heisse Canyon! Hier fliegen Flugsaurier herum.',
+  { name: 'Canyon', speed: 295, segs: 30, patterns: ['rock', 'rock2', 'pit', 'pit', 'raptor', 'ptero', 'swoop', 'boulder', 'plat', 'amber', 'low', 'low'],
+    startTip: 'Der heisse Canyon! Neue Fähigkeit: Halte DUCKEN gedrückt – so kommst du unter tiefen Felsen und Flugsauriern durch.',
     riddles: [
       { q: 'Ein Hahn legt ein Ei genau auf die Spitze vom Dach. Auf welche Seite rollt es?', a: ['Hähne legen keine Eier!', 'Nach links', 'Nach rechts'], ok: 0, why: 'Eier legen nur Hennen. Ein Hahn legt gar keine Eier!' },
       { q: 'Du rennst um die Wette und überholst den Zweiten. Auf welchem Platz bist du jetzt?', a: ['Zweiter', 'Erster', 'Dritter'], ok: 0, why: 'Du nimmst seinen Platz ein – also bist du jetzt Zweiter!' },
       { q: 'Was hat ganz viele Zähne, kann aber nicht beissen?', a: ['Ein Kamm', 'Ein Hai', 'Ein T-Rex'], ok: 0, why: 'Ein Kamm hat viele Zähne – aber er beisst nie!' },
       { q: 'Ich kann fliegen und lebte bei den Dinos – aber ich bin gar kein Dinosaurier. Wer bin ich?', a: ['Pteranodon', 'Velociraptor', 'Stegosaurus'], ok: 0, why: 'Der Pteranodon war ein Flugsaurier – das ist kein Dinosaurier!' },
+      { q: 'Wie viele Eier kannst du auf einen leeren Magen essen?', a: ['Eins', 'Drei', 'Zehn'], ok: 0, why: 'Nach dem ersten Ei ist dein Magen nicht mehr leer!' },
+      { q: 'Was reist um die ganze Welt und bleibt trotzdem immer in der Ecke?', a: ['Eine Briefmarke', 'Ein Flugsaurier', 'Ein Rucksack'], ok: 0, why: 'Die Briefmarke klebt in der Ecke vom Brief – und reist mit ihm überallhin!' },
+      { q: 'Ein Flugsaurier fliegt 3 Stunden zum Meer und 3 Stunden zurück. Wie lange fliegt er insgesamt?', a: ['6 Stunden', '3 Stunden', '9 Stunden'], ok: 0, why: '3 Stunden hin plus 3 Stunden zurück = 6 Stunden!' },
+      { q: 'Welcher Dino hatte grosse Platten auf dem Rücken?', a: ['Stegosaurus', 'Triceratops', 'Brachiosaurus'], ok: 0, why: 'Der Stegosaurus hatte Knochenplatten auf dem Rücken und Stacheln am Schwanz!' },
+      { q: 'Mamis Mami ist deine …?', a: ['Grossmutter', 'Tante', 'Schwester'], ok: 0, why: 'Die Mami von deiner Mami ist deine Grossmutter!' },
+      { q: 'Was ist voller Löcher und hält trotzdem Wasser?', a: ['Ein Schwamm', 'Ein Sieb', 'Ein Netz'], ok: 0, why: 'Ein Schwamm hat viele Löcher – und saugt sich trotzdem voll Wasser!' },
     ],
     sky: ['#d9702e', '#f7d08a'], far: '#c0643a', mid: '#9a4a2a', ground: '#b5603a', top: '#d98b4e', dots: '#8e4526', edge: '#6e2f17', plat: '#8b4a2b', platTop: '#e0a060',
     rock: '#8d5a3b', deco: '#7a3a1e', volcS: 0.65, volcCol: '#9c5a3c', mesa: true, egg: '#cfe8ff', eggSpot: '#e07b39' },
-  { name: 'Eiszeit', speed: 315, segs: 34, patterns: ['rock', 'rock2', 'pit', 'icicle', 'icicle', 'raptor', 'ptero', 'boulder', 'plat', 'amber', 'low', 'low', 'compy', 'geode'],
-    startTip: 'Brrr, die Eiszeit! Hier riecht es schon ein bisschen nach Weihnachten…',
+  { name: 'Eiszeit', speed: 315, segs: 34, patterns: ['rock', 'rock2', 'pit', 'icicle', 'icicle', 'raptor', 'ptero', 'boulder', 'plat', 'amber', 'low', 'compy', 'compy', 'geode'],
+    startTip: 'Brrr, die Eiszeit! Neue Fähigkeit: Spring hoch und drück STAMPF – das knackt Bernstein-Steine und plättet Kompsis!',
     riddles: [
       { q: 'Wie viele Monate im Jahr haben 28 Tage?', a: ['Alle 12', 'Nur einer', 'Zwei'], ok: 0, why: 'Jeder Monat hat mindestens 28 Tage – also alle 12!' },
       { q: 'Je mehr du davon wegnimmst, desto grösser wird es. Was ist es?', a: ['Ein Loch', 'Ein Schneemann', 'Ein Berg'], ok: 0, why: 'Je mehr Erde du wegschaufelst, desto grösser wird das Loch!' },
       { q: 'Was wird immer nasser, je mehr es trocknet?', a: ['Ein Handtuch', 'Die Sonne', 'Ein Eiszapfen'], ok: 0, why: 'Das Handtuch trocknet dich ab – und wird dabei selbst nass!' },
       { q: 'Chili frisst jeden Tag 2 Karotten. Wie viele Karotten sind das in einer ganzen Woche?', a: ['14', '12', '9'], ok: 0, why: 'Eine Woche hat 7 Tage: 7 mal 2 = 14 Karotten!' },
+      { q: 'Was hat einen Hals, aber keinen Kopf?', a: ['Eine Flasche', 'Ein Brachiosaurus', 'Ein Schneemann'], ok: 0, why: 'Eine Flasche hat einen Flaschenhals – aber keinen Kopf!' },
+      { q: 'Ein Schneemann besteht aus 3 Kugeln. Wie viele Kugeln brauchst du für 4 Schneemänner?', a: ['12', '7', '9'], ok: 0, why: '4 Schneemänner mal 3 Kugeln = 12 Kugeln!' },
+      { q: 'Welcher Monat hat den kürzesten Namen?', a: ['Mai', 'Februar', 'Juni'], ok: 0, why: '„Mai“ hat nur 3 Buchstaben! Der Februar hat zwar die wenigsten Tage – aber den längeren Namen.' },
+      { q: 'Welches Tier lebte in der Eiszeit und hatte ein dickes, zotteliges Fell?', a: ['Mammut', 'Krokodil', 'Kamel'], ok: 0, why: 'Das Wollhaarmammut hielt sich mit dickem Fell warm!' },
+      { q: 'Was wird kleiner, wenn es warm wird?', a: ['Ein Eiszapfen', 'Ein Kuchen im Ofen', 'Ein Pullover'], ok: 0, why: 'Wenn es warm wird, schmilzt der Eiszapfen und wird immer kleiner!' },
+      { q: 'Was kannst du fangen, aber nicht werfen?', a: ['Einen Schnupfen', 'Einen Schneeball', 'Einen Ball'], ok: 0, why: 'Einen Schnupfen fängst du dir ein – werfen kannst du ihn nicht!' },
     ],
     sky: ['#0b1f3f', '#5d86b8'], far: '#c9dcf0', mid: '#8fb0d6', ground: '#5f7591', top: '#f4f8ff', dots: '#4b5f7a', edge: '#3c4f68', plat: '#9fc3e6', platTop: '#ffffff',
     rock: '#7f93ab', deco: '#1d3b4f', volcS: 0.85, volcCol: '#3a4f6e', stars: true, snow: true, egg: '#e8f4ff', eggSpot: '#5aa0e0' },
   { name: 'Vulkan', speed: 335, segs: 36, patterns: ['pit', 'pit', 'geyser', 'geyser', 'raptor', 'ptero', 'swoop', 'boulder', 'rock2', 'plat', 'low', 'compy', 'compy', 'geode'],
-    startTip: 'Der Vulkan! Irgendwo hier ist das goldene Ei…',
+    startTip: 'Der Vulkan! Neu: Feuer-Chilis! Damit kann {rex} Feuer spucken. Und irgendwo hier ist das goldene Ei…',
     riddles: [
       { q: 'Ein T-Rex wiegt 7 Tonnen. Wie viel wiegt er, wenn er auf einem Bein steht?', a: ['7 Tonnen', '3,5 Tonnen', '14 Tonnen'], ok: 0, why: 'Er wird doch nicht leichter, nur weil er ein Bein hebt!' },
       { q: 'Welcher Dino hat NICHT zur gleichen Zeit gelebt wie der T-Rex?', a: ['Stegosaurus', 'Triceratops', 'Ankylosaurus'], ok: 0, why: 'Der Stegosaurus lebte viel früher. Zwischen ihm und dem T-Rex liegt mehr Zeit als zwischen dem T-Rex und uns!' },
       { q: 'Was kommt einmal in jeder Minute vor, zweimal in jedem Moment, aber nie in tausend Jahren?', a: ['Der Buchstabe M', 'Ein Meteorit', 'Ein Vulkanausbruch'], ok: 0, why: '„Minute“ hat ein M, „Moment“ hat zwei M – und in „tausend Jahren“ ist gar kein M!' },
       { q: 'Welches Tier von heute ist ein Verwandter der Dinosaurier?', a: ['Huhn', 'Hase', 'Goldfisch'], ok: 0, wrongMsg: { 1: 'Chili: Hey! Ich bin doch kein Dino!' }, why: 'Vögel stammen von den Dinosauriern ab – auch das Huhn!' },
       { q: 'Der Kiwi ist ein Vogel. Was kann er aber NICHT?', a: ['Fliegen', 'Laufen', 'Eier legen'], ok: 0, why: 'Kiwis haben nur winzige Flügel – fliegen können sie nicht!' },
+      { q: 'Welche Zahl kommt als Nächstes: 2, 4, 6, 8, …?', a: ['10', '9', '12'], ok: 0, why: 'Es kommt immer 2 dazu: 8 + 2 = 10!' },
+      { q: 'Wenn du mich weitererzählst, bin ich weg. Was bin ich?', a: ['Ein Geheimnis', 'Ein Kuchen', 'Ein Ball'], ok: 0, why: 'Ein Geheimnis, das du weitererzählst, ist kein Geheimnis mehr!' },
+      { q: 'Was ist das grösste Tier, das je gelebt hat?', a: ['Blauwal', 'Brachiosaurus', 'T-Rex'], ok: 0, why: 'Der Blauwal ist sogar noch grösser als die grössten Dinosaurier!' },
+      { q: 'Konnten echte Dinosaurier Feuer spucken?', a: ['Nein', 'Ja', 'Nur am Sonntag'], ok: 0, why: 'Nein! Feuer spucken kann nur dein T-Rex hier im Spiel – mit einer Feuer-Chili.' },
+      { q: 'Was läuft und läuft, hat aber keine Beine?', a: ['Die Zeit', 'Ein Raptor', 'Ein Velo'], ok: 0, why: 'Die Zeit läuft immer weiter – ganz ohne Beine!' },
     ],
     sky: ['#1a0505', '#8a2a10'], far: '#3a0f0a', mid: '#250807', ground: '#2a1a16', top: '#4a2a20', dots: '#ff5a1f', edge: '#170c0a', plat: '#3a2722', platTop: '#ff7a2a',
     rock: '#4a3a36', deco: '#140404', volcS: 1.25, volcCol: '#1c0807', lava: true, egg: '#ffd9c2', eggSpot: '#c0392b' },
@@ -1189,23 +1212,34 @@ function buildLevel(wi) {
       { x: 2200, type: 'jump', text: 'Nochmal tippen – ganz nach oben!' },
       { x: 3000, type: 'roar', text: 'Drück BRÜLL!' },
       { x: 3840, type: 'roar', text: 'Ein Raptor! Drück BRÜLL!' });
-    L.tips.push({ x: 4700, text: 'Ein tiefer Ast! Halte DUCKEN gedrückt!' });
-    L.obs.push({ type: 'low', x: 5400, w: 150 }); amberRow(5320, 4, GROUND - 30, 45);
-    L.tips.push({ x: 5800, text: 'Springen und dann DUCKEN drücken = STAMPFER! Damit knackst du Bernstein-Steine.' });
-    L.obs.push({ type: 'geode', x: 6540 });
-    L.tips.push({ x: 6900, text: 'Kompsis! Spring ihnen auf den Kopf!' });
-    for (let i = 0; i < 3; i++) L.obs.push({ type: 'compy', x: 7700 + i * 75, spd: 150, ph: i, alpha: 1 });
-    L.peppers.push({ x: 8500, y: GROUND - 60, got: false });
-    if (!save.movesDone) L.coach.push(
-      { x: 5160, type: 'duck', text: 'DUCKEN gedrückt halten!' },
-      { x: 6280, type: 'jump', text: 'Spring hoch!' },
-      { x: 6400, type: 'stomp', text: 'Jetzt STAMPF drücken!' });
-    x = 8900;
-  } else L.tips.push({ x: 150, text: th.startTip });
+    x = 4600;
+  } else {
+    L.tips.push({ x: 150, text: fmt(th.startTip) });
+    if (wi === 1) { // new: duck
+      L.seen.low = L.seen.swoop = 1;
+      L.obs.push({ type: 'low', x: 1500, w: 150 }); amberRow(1420, 4, GROUND - 30, 45);
+      L.tips.push({ x: 2000, text: 'Ein Flugsaurier fliegt ganz tief! Ducken – oder brüllen!' });
+      const by = GROUND - 88; L.obs.push({ type: 'ptero', x: 2900, y: by, baseY: by, spd: 200, ph: 0, alpha: 1, low: true });
+      if (!save.learned.duck) L.coach.push({ x: 1260, type: 'duck', text: 'DUCKEN gedrückt halten!' });
+      x = 3300;
+    } else if (wi === 2) { // new: stomp
+      L.seen.geode = L.seen.compy = 1;
+      L.obs.push({ type: 'geode', x: 1500 });
+      L.tips.push({ x: 1900, text: 'Kompsis! Brüllen hilft nicht – spring ihnen auf den Kopf!' });
+      for (let i = 0; i < 3; i++) L.obs.push({ type: 'compy', x: 2700 + i * 75, spd: 150, ph: i, alpha: 1 });
+      if (!save.learned.stomp) L.coach.push({ x: 1240, type: 'jump', text: 'Spring hoch!' }, { x: 1360, type: 'stomp', text: 'Jetzt STAMPF drücken!' });
+      x = 3300;
+    } else if (wi === 3) { // new: fire chili
+      L.peppers.push({ x: 900, y: GROUND - 60, got: false });
+      L.obs.push({ type: 'boulder', x: 1700, w: 110, h: 160 });
+      if (!save.learned.fire) L.coach.push({ x: 1420, type: 'roar', text: 'Drück FEUER!' });
+      x = 2200;
+    }
+  }
   const n = th.segs, eggAt = [Math.floor(n * 0.25), Math.floor(n * 0.55), Math.floor(n * 0.85)], cpAt = [Math.floor(n * 0.4), Math.floor(n * 0.7)], tAt = Math.floor(n * 0.45);
   for (let i = 0; i < n; i++) {
     if (cpAt.includes(i)) { L.cps.push({ x, on: false }); x += 160; }
-    if (i === Math.floor(n * 0.33) || i === Math.floor(n * 0.78)) { L.peppers.push({ x: x - 120, y: GROUND - 60, got: false }); }
+    if (wi === 3 && (i === Math.floor(n * 0.33) || i === Math.floor(n * 0.78))) { L.peppers.push({ x: x - 120, y: GROUND - 60, got: false }); }
     let w;
     if (i === eggAt[0]) {
       if (wi === 0) L.tips.push({ x: x - 700, text: 'Da oben glänzt ein Ei! Spring auf die Plattformen!' });
@@ -1247,7 +1281,7 @@ function startLevel(wi) {
   G = { L, wi, cam: 0, t: 0, startT: 1.6, stopped: false, overlay: null, shake: 0, tip: null, eggsGot: [false, false, false], amber: 0,
     p: { wx: 200, y: GROUND, vy: 0, onGround: true, jumps: 0, coyote: 0, inv: 0, roarT: 0, roarCd: 0, hearts: 3, ph: 0, duck: false, stomp: false, spin: 1, fireT: 0, fireCd: 0, breathT: 0 },
     duckHeld: null, fireballs: [], flames: [],
-    chili: { wx: 315, y: GROUND, ph: 0, dig: null, digT: 0 }, cp: 200, rings: [],
+    chili: { wx: 95, y: GROUND, ph: 0, dig: null, digT: 0 }, cp: 200, rings: [],
     boss: null, bossStarted: false, golden: null, gotGolden: false, atGate: false, gateT: 0, gateOpening: false, gateOpen: 0, finished: false,
     coach: null, flyEggs: [], slotPop: [0, 0, 0], hitFlash: 0 };
 }
@@ -1259,11 +1293,11 @@ function jump() {
   else if (p.jumps < 2) { p.vy = -760; p.jumps = 2; SFX.jump2(); G.rings.push({ x: p.wx, y: p.y, r: 10, a: 0.8, c: '255,255,255' }); }
 }
 function duckDown(id) {
-  if (!G || scene !== 'play' || G.overlay) return;
+  if (!G || scene !== 'play' || G.overlay || G.wi < 1) return;
   const p = G.p; G.duckHeld = id;
   if (G.coach) { if (G.coach.type !== 'duck' && G.coach.type !== 'stomp') return; G.coach = null; }
   if (G.startT > 0.3) return;
-  if (!p.onGround && !p.stomp) { p.stomp = true; p.spin = 0; p.vy = Math.min(p.vy, -380); tone(300, 0.3, 'triangle', 0.08, 900); }
+  if (!p.onGround && !p.stomp && G.wi >= 2) { p.stomp = true; p.spin = 0; p.vy = Math.min(p.vy, -380); tone(300, 0.3, 'triangle', 0.08, 900); }
   else if (p.onGround) SFX.duck();
 }
 function duckUp(id) { if (G && (id == null || G.duckHeld === id)) G.duckHeld = null; }
@@ -1329,13 +1363,13 @@ function pitFall() {
   const pit = L.pits.find(q => p.wx > q.x - 60 && p.wx < q.x + q.w + 60);
   let nx = pit ? pit.x - 170 : p.wx - 200, guard = 0;
   while (!supported(L, nx) && guard++ < 30) nx -= 40;
-  p.wx = nx; p.y = GROUND - 150; p.vy = 0; G.chili.wx = nx + 115;
+  p.wx = nx; p.y = GROUND - 150; p.vy = 0; G.chili.wx = nx - 105;
   hurt(true);
 }
 function retry() {
   const p = G.p, L = G.L;
   G.overlay = null; p.hearts = 3; p.inv = 2; p.wx = G.cp; p.y = GROUND; p.vy = 0; p.roarCd = 0; p.stomp = false; p.spin = 1; G.duckHeld = null; G.fireballs = []; G.flames = [];
-  G.chili.wx = p.wx + 115; G.chili.dig = null;
+  G.chili.wx = p.wx - 105; G.chili.dig = null;
   for (const s of L.spots) if (s.state === 'dig') s.state = 'idle';
   for (const o of L.obs) if ((o.type === 'raptor' || o.type === 'ptero' || o.type === 'compy') && o.x > G.cp - 300 && o.x < G.cp + 700) o.dead = true;
   if (G.bossStarted && !G.golden) { p.wx = L.bossX; G.chili.wx = p.wx - 90; G.boss = newBoss(); G.stopped = true; }
@@ -1348,9 +1382,16 @@ function revealEgg(s) {
 }
 const lastRiddle = {};
 function openRiddle() {
-  toasts = []; const pool = WORLDS[G.wi].riddles; let r;
-  do r = pool[Math.floor(Math.random() * pool.length)]; while (pool.length > 1 && r === lastRiddle[G.wi]);
-  lastRiddle[G.wi] = r;
+  toasts = []; const pool = WORLDS[G.wi].riddles;
+  if (!Array.isArray(save.riddleSeen)) save.riddleSeen = [[], [], [], []];
+  let seen = (save.riddleSeen[G.wi] || []).filter(i => i < pool.length);
+  const prev = seen[seen.length - 1];
+  if (seen.length >= pool.length) seen = [];
+  let free = pool.map((_, i) => i).filter(i => !seen.includes(i));
+  if (free.length > 1) free = free.filter(i => i !== prev);
+  const k = free[Math.floor(Math.random() * free.length)];
+  seen.push(k); save.riddleSeen[G.wi] = seen; writeSave();
+  const r = pool[k]; lastRiddle[G.wi] = r;
   G.overlay = { type: 'riddle', r, order: [0, 1, 2].sort(() => Math.random() - 0.5), wrong: [], msg: '', shake: 0, solved: false };
 }
 function answer(i) {
@@ -1362,7 +1403,8 @@ function openGate() { G.overlay = null; G.gateOpening = true; toast('Das Tor geh
 function finishLevel() {
   const wi = G.wi; G.newCards = [];
   for (let k = 0; k < 3; k++) if (G.eggsGot[k]) { if (!save.eggs[wi][k]) G.newCards.push(k); save.eggs[wi][k] = 1; }
-  if (wi === 0) { save.tutorialDone = true; save.movesDone = true; }
+  if (wi === 0) save.tutorialDone = true;
+  if (wi >= 1) save.learned.duck = 1; if (wi >= 2) save.learned.stomp = 1; if (wi >= 3) save.learned.fire = 1;
   G.earned = [G.eggsGot.every(Boolean), !G.hits, G.amber >= Math.ceil(G.L.ambTotal * 0.8)];
   G.newMedals = []; G.earned.forEach((e, k) => { if (e && !save.medals[wi][k]) G.newMedals.push(k); if (e) save.medals[wi][k] = 1; });
   G.newTreasure = G.L.treasure && G.L.treasure.got && !save.treasures[wi];
@@ -1420,7 +1462,7 @@ function updatePlay(dt) {
   G.flames = G.flames.filter(f => f.life > 0);
   if (p.y > H + 120) pitFall();
   p.inv -= dt; p.roarT -= dt; p.roarCd -= dt;
-  G.cam = p.wx - 230;
+  G.cam = p.wx - 270;
   // tips, checkpoints
   for (const t of L.tips) if (!t.shown && p.wx >= t.x) { t.shown = true; G.tip = { text: t.text, t: 4.5 }; }
   for (const c of L.cps) if (!c.on && p.wx >= c.x) { c.on = true; G.cp = c.x; SFX.flag(); toast('Fähnchen erreicht!', '#ffe08a'); }
@@ -1444,7 +1486,7 @@ function updatePlay(dt) {
   // chili
   const c = G.chili; c.ph += dt * 12;
   for (const s of L.spots) if (s.state === 'idle' && c.wx >= s.x - 10) { s.state = 'dig'; c.dig = s; c.digT = 0.7; SFX.dig(); toast('Chili hat etwas erschnüffelt!', '#ffe08a'); }
-  let target = G.bossStarted && !G.golden ? p.wx - 95 : p.wx + 115;
+  let target = p.wx - 105;
   if (c.dig) { target = c.dig.x; c.digT -= dt; if (Math.random() < 0.6) burst(c.dig.x + 10, GROUND - 4, 1, ['#8b5a2b', '#6b4226'], 160, 900, 5, 0.5); if (c.digT <= 0) { revealEgg(c.dig); c.dig.state = 'done'; c.dig = null; } }
   const mv = (L.speed + 260) * dt; c.wx += clamp(target - c.wx, -mv, mv);
   c.y = c.dig ? GROUND : GROUND - Math.abs(Math.sin(c.ph * 0.8)) * 14;
@@ -1656,8 +1698,8 @@ function drawPlay() {
   const c = G.chili; shadow(c.wx - cam + 6, GROUND + 2, 22 * clamp(1 - (GROUND - c.y) / 200, 0.4, 1), 0.25); oChili(c.wx - cam, c.y, 1.25, c.ph, c.dig ? false : (G.bossStarted && !G.golden));
   if (c.dig) otxt('!', c.wx - cam + 20, c.y - 70 - Math.abs(Math.sin(T * 10)) * 6, 36, '#ffd34d', '#3b1d00', 6);
   // baby + kiwi followers
-  if (save.treasures[3]) oKiwi(p.wx - cam - 215, GROUND - (G.startT > 0 || G.stopped ? 0 : Math.abs(Math.sin(p.ph * 0.7 + 1)) * 12), 1.1, p.ph * 1.3);
-  if (save.babyName) oBaby(p.wx - cam - 150, GROUND - (G.startT > 0 || G.stopped ? 0 : Math.abs(Math.sin(p.ph * 0.6)) * 10), 0.85, p.ph);
+  if (save.treasures[3]) oKiwi(p.wx - cam - 225, GROUND - (G.startT > 0 || G.stopped ? 0 : Math.abs(Math.sin(p.ph * 0.7 + 1)) * 12), 1.1, p.ph * 1.3);
+  if (save.babyName) oBaby(p.wx - cam - 168, GROUND - (G.startT > 0 || G.stopped ? 0 : Math.abs(Math.sin(p.ph * 0.6)) * 10), 0.85, p.ph);
   // player
   { let sy = GROUND; for (const pl of L.plats) if (p.wx + 20 > pl.x && p.wx - 20 < pl.x + pl.w && pl.y >= p.y - 2) sy = Math.min(sy, pl.y); if (sy < GROUND || supported(L, p.wx)) shadow(p.wx - cam + 4, sy + 2, 52 * clamp(1 - (sy - p.y) / 260, 0.35, 1), 0.3); }
   if (p.fireT > 0) { const g = ctx.createRadialGradient(p.wx - cam + 10, p.y - 60, 10, p.wx - cam + 10, p.y - 60, 120); g.addColorStop(0, `rgba(255,140,30,${0.3 + 0.12 * Math.sin(T * 10)})`); g.addColorStop(1, 'rgba(255,90,20,0)'); ctx.fillStyle = g; ctx.fillRect(p.wx - cam - 110, p.y - 180, 240, 240); }
@@ -1721,7 +1763,7 @@ function drawPlay() {
   if (G.hitFlash > 0) { G.hitFlash -= DT; const g = ctx.createRadialGradient(W / 2, H / 2, H * 0.35, W / 2, H / 2, H * 0.95); g.addColorStop(0, 'rgba(255,0,0,0)'); g.addColorStop(1, `rgba(255,0,0,${Math.max(0, G.hitFlash)})`); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H); }
   if (G.coach && !G.overlay) drawCoach();
   // start banner
-  if (G.startT > 0) { ctx.globalAlpha = clamp(G.startT * 2, 0, 1); otxt(`Welt ${G.wi + 1}: ${th.name}`, W / 2, 230, 58, '#ffd34d', '#3b1d00', 12); if (G.startT < 0.7) otxt('Los!', W / 2, 300, 46, '#fff', '#000', 10); ctx.globalAlpha = 1; }
+  if (G.startT > 0) { ctx.globalAlpha = clamp(G.startT * 2, 0, 1); otxt(`Welt ${G.wi + 1}: ${th.name}`, W / 2, 230, 58, '#ffd34d', '#3b1d00', 12); { const ns = ['', 'Neue Fähigkeit: DUCKEN', 'Neue Fähigkeit: STAMPFER', 'Neu: FEUER-CHILI'][G.wi]; if (ns && G.startT >= 0.7) otxt(ns, W / 2, 296, 34, '#9fd3ff', '#0b2448', 8); } if (G.startT < 0.7) otxt('Los!', W / 2, 300, 46, '#fff', '#000', 10); ctx.globalAlpha = 1; }
   if (G.overlay) drawOverlay();
 }
 function drawHUD() {
@@ -1747,11 +1789,11 @@ function drawHUD() {
   circle(W - 44, 40, 26, 'rgba(0,0,0,.4)'); ctx.fillStyle = '#fff'; ctx.fillRect(W - 53, 28, 7, 24); ctx.fillRect(W - 42, 28, 7, 24);
   buttons.push({ x: W - 74, y: 10, w: 60, h: 60, cb: () => { G.overlay = { type: 'pause' }; } });
   // duck / stomp button
-  { const dx = 92, dy = H - 92, held = G.duckHeld != null, air = !p.onGround;
+  if (G.wi >= 1) { const dx = 76, dy = H - 78, held = G.duckHeld != null, air = !p.onGround && G.wi >= 2;
     const threat = G.L.obs.some(o => !o.dead && !o.scared && ((o.type === 'low') || (o.type === 'ptero' && o.low)) && o.x - p.wx > 0 && o.x - p.wx < 330) || (air && G.L.obs.some(o => !o.dead && !o.flat && (o.type === 'geode' || o.type === 'compy') && Math.abs(o.x - p.wx - 60) < 120));
     if (threat && !held) { ctx.globalAlpha = 0.5 + 0.3 * Math.sin(T * 14); circle(dx, dy, 74 + 6 * Math.sin(T * 14), '#9fd3ff'); ctx.globalAlpha = 1; }
-    circle(dx, dy, held ? 54 : 58, held ? 'rgba(30,80,170,.95)' : 'rgba(46,111,214,.85)');
-    ctx.lineWidth = 4; ctx.strokeStyle = '#fff'; ctx.beginPath(); ctx.arc(dx, dy, held ? 54 : 58, 0, Math.PI * 2); ctx.stroke();
+    circle(dx, dy, held ? 50 : 54, held ? 'rgba(30,80,170,.9)' : 'rgba(46,111,214,.6)');
+    ctx.lineWidth = 4; ctx.strokeStyle = '#fff'; ctx.beginPath(); ctx.arc(dx, dy, held ? 50 : 54, 0, Math.PI * 2); ctx.stroke();
     ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.moveTo(dx - 14, dy - 30); ctx.lineTo(dx + 14, dy - 30); ctx.lineTo(dx, dy - 14); ctx.fill();
     otxt(air ? 'STAMPF!' : 'DUCKEN', dx, dy + 10, air ? 21 : 20, '#fff', 'rgba(0,0,0,.6)', 5); }
   // roar / fire button
@@ -1781,7 +1823,7 @@ function drawCoach() {
     ctx.strokeStyle = `rgba(255,255,255,${1 - u})`; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(W / 2, 300, 18 + u * 55, 0, Math.PI * 2); ctx.stroke();
     setFont(70, 'normal'); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#fff'; ctx.fillText('👆', W / 2 + 8, 340 - Math.abs(Math.sin(T * 6)) * 16);
   } else if (c.type === 'duck' || c.type === 'stomp') {
-    const dx = 92, dy = H - 92;
+    const dx = 76, dy = H - 78;
     ctx.strokeStyle = `rgba(160,210,255,${1 - u})`; ctx.lineWidth = 8; ctx.beginPath(); ctx.arc(dx, dy, 62 + u * 45, 0, Math.PI * 2); ctx.stroke();
     circle(dx, dy, 58, 'rgba(46,111,214,1)'); ctx.lineWidth = 4; ctx.strokeStyle = '#fff'; ctx.beginPath(); ctx.arc(dx, dy, 58, 0, Math.PI * 2); ctx.stroke();
     ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.moveTo(dx - 14, dy - 30); ctx.lineTo(dx + 14, dy - 30); ctx.lineTo(dx, dy - 14); ctx.fill();
@@ -1792,8 +1834,8 @@ function drawCoach() {
   } else {
     const rx = W - 92, ry = H - 92;
     ctx.strokeStyle = `rgba(255,220,80,${1 - u})`; ctx.lineWidth = 8; ctx.beginPath(); ctx.arc(rx, ry, 70 + u * 45, 0, Math.PI * 2); ctx.stroke();
-    circle(rx, ry, 66, 'rgba(214,58,40,1)'); ctx.lineWidth = 4; ctx.strokeStyle = '#fff'; ctx.beginPath(); ctx.arc(rx, ry, 66, 0, Math.PI * 2); ctx.stroke();
-    otxt('BRÜLL!', rx, ry, 26, '#fff', 'rgba(0,0,0,.6)', 5);
+    const fire = G.p.fireT > 0; circle(rx, ry, 66, fire ? 'rgba(255,110,20,1)' : 'rgba(214,58,40,1)'); ctx.lineWidth = 4; ctx.strokeStyle = '#fff'; ctx.beginPath(); ctx.arc(rx, ry, 66, 0, Math.PI * 2); ctx.stroke();
+    otxt(fire ? 'FEUER!' : 'BRÜLL!', rx, ry, 26, '#fff', 'rgba(0,0,0,.6)', 5);
     const bx = rx - 160 - Math.abs(Math.sin(T * 6)) * 18;
     ctx.fillStyle = '#ffd34d'; ctx.beginPath(); ctx.moveTo(bx + 62, ry); ctx.lineTo(bx + 30, ry - 26); ctx.lineTo(bx + 30, ry - 11); ctx.lineTo(bx - 24, ry - 11); ctx.lineTo(bx - 24, ry + 11); ctx.lineTo(bx + 30, ry + 11); ctx.lineTo(bx + 30, ry + 26); ctx.closePath(); ctx.fill();
     ctx.strokeStyle = '#3b1d00'; ctx.lineWidth = 3; ctx.stroke();
@@ -2164,7 +2206,7 @@ canvas.addEventListener('pointerdown', e => {
   if (nameOpen()) return;
   const { x, y } = toLogical(e);
   if (dialog) { advanceDialog(); return; }
-  if (scene === 'play' && G && !G.overlay && Math.hypot(x - 92, y - (H - 92)) < 84) { duckDown(e.pointerId); return; }
+  if (scene === 'play' && G && !G.overlay && G.wi >= 1 && Math.hypot(x - 76, y - (H - 78)) < 84) { duckDown(e.pointerId); return; }
   if (hitButtons(x, y)) return;
   if (scene === 'title') pressTitle();
   else if (scene === 'play' && !G.overlay) jump();
