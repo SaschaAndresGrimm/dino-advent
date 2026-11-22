@@ -337,23 +337,6 @@ test('music follows the screen: pause ducks it, retry fades it out and brings it
   expect(game.errors).toEqual([]);
 });
 
-test('read-aloud: dialogue lines are spoken with the speaker\'s pitch, Chili only chirps, the setting turns it off', async ({ game, page }) => {
-  await page.addInitScript(() => {
-    window.__spoken = [];
-    Object.defineProperty(window, 'speechSynthesis', { configurable: true, value: { speak(u) { window.__spoken.push([u.text, u.pitch, u.lang]); }, cancel() {}, getVoices() { return []; } } });
-    window.SpeechSynthesisUtterance = class { constructor(t) { this.text = t; } };
-  });
-  await game.open({ oliName: 'Oli', fabioName: 'Fabio' });
-  await game.eval(() => { const d = window.__dino; d.startDialog([{ who: 'goetti', text: 'Hallo {oli}! (winkt)' }, { who: 'fabio', text: 'Juhu!' }, { who: 'chili', text: 'Mümmel!' }], null); });
-  const spoken = await page.evaluate(() => window.__spoken);
-  expect(spoken[0][0]).toBe('Hallo Oli!');
-  expect(spoken[0][1]).toBeLessThan(1);                      // Goetti: deep voice
-  expect(spoken[0][2]).toBe('de-DE');
-  await game.eval(() => { const d = window.__dino; d.save.voice = false; d.startDialog([{ who: 'goetti', text: 'Still.' }], null); });
-  expect((await page.evaluate(() => window.__spoken)).length).toBe(spoken.length);
-  expect(game.errors).toEqual([]);
-});
-
 test('losing: the screen stops shaking once the retry overlay is up', async ({ game, page }) => {
   await game.open();
   await game.start(6);

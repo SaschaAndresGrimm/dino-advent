@@ -42,7 +42,7 @@ if (save.equip.fabioJacket == null) save.equip.fabioJacket = 1;
 if (save.equip.fabioHat == null) save.equip.fabioHat = save.equip.hat;
 if (save.equip.chili == null) save.equip.chili = 0;
 if (!save.best) save.best = []; while (save.best.length < 8) save.best.push(0);
-if (save.voice == null) save.voice = true; if (save.volMusic == null) save.volMusic = 4; if (save.volSfx == null) save.volSfx = 4; if (!save.calm) save.calm = false;
+if (save.volMusic == null) save.volMusic = 4; if (save.volSfx == null) save.volSfx = 4; if (!save.calm) save.calm = false;
 if (!save.dailyLast) save.dailyLast = 0; if (!save.dailyStreak) save.dailyStreak = 0; if (!save.dailyBoardDay) save.dailyBoardDay = 0; if (!save.installHint) save.installHint = false;
 if (!save.master) save.master = 0; if (!save.masterNew) save.masterNew = 0; if (!save.chestSeen) save.chestSeen = 0;
 if (!save.storySeen) save.storySeen = {}; if (!save.afterNew) save.afterNew = 0; if (!save.oliName) save.oliName = '';
@@ -257,8 +257,7 @@ function musicKey(portrait) { // which song should be playing right now (null = 
   }
   return scene === 'ending' ? 'ending' : scene === 'splash' ? null : 'map';
 }
-function musicOpts() { const o = musicOpts0(); if (speech.on) o.vol = Math.min(o.vol, 0.4); return o; } // the song ducks while someone speaks
-function musicOpts0() { // vol: fade target (pause and results duck the song, death and run end fade it out); lift: key change before the gate; danger: heartbeat at one heart
+function musicOpts() { // vol: fade target (pause and results duck the song, death and run end fade it out); lift: key change before the gate; danger: heartbeat at one heart
   const o = { vol: 1, lift: 0, danger: false };
   if (scene === 'ending') { if (E && E.phase === 'party') o.vol = 0.55; return o; } // the jingle plays on top
   if (scene !== 'play' || !G) return o;
@@ -384,23 +383,6 @@ function ambTick(wi, vol) {
   const lvl = AMB[wi].vol * save.volSfx / 4 * vol;
   if (Math.abs(lvl - amb.lvl) > 1e-4) { const g = amb.node.g.gain; g.cancelScheduledValues(0); g.setValueAtTime(Math.max(amb.lvl, 0), now); g.linearRampToValueAtTime(lvl, now + 0.8); amb.node.lg.gain.value = lvl * 0.6; amb.lvl = lvl; }
   if (AMB[wi].ev && now >= amb.next) { amb.next = now + 3 + Math.random() * 6; if (lvl > 0.0005) ambEvent(AMB[wi].ev); }
-}
-// Read-aloud for the story dialogue (browser speech synthesis, German); the song ducks while someone speaks
-const speech = { on: false };
-const VOICE_PITCH = { goetti: 0.85, fabio: 1.55, mami: 1.3, papi: 0.7 };
-function stopSpeech() { speech.on = false; try { if (window.speechSynthesis) window.speechSynthesis.cancel(); } catch (e) {} }
-function speakLine(l) {
-  stopSpeech();
-  if (!save.voice || save.muted || save.volSfx <= 0 || !l) return;
-  if (l.who === 'chili' || l.who === 'kiwi') { SFX.chirp(); return; }
-  if (l.who === 'rex' || !window.speechSynthesis || !window.SpeechSynthesisUtterance) return;
-  const text = fmt(l.text).replace(/\([^)]*\)/g, '').replace(/\s[–—]\s/g, ', ').replace(/\s+/g, ' ').trim(); if (!text) return;
-  try {
-    const u = new SpeechSynthesisUtterance(text), vs = window.speechSynthesis.getVoices ? window.speechSynthesis.getVoices() : [], v = vs.find(x => /^de[-_]CH/i.test(x.lang)) || vs.find(x => /^de/i.test(x.lang));
-    u.lang = v ? v.lang : 'de-DE'; if (v) u.voice = v; u.rate = 0.92; u.pitch = VOICE_PITCH[l.who] || 1; u.volume = clamp(save.volSfx / 4, 0, 1);
-    u.onstart = () => { speech.on = true; }; u.onend = u.onerror = () => { speech.on = false; };
-    window.speechSynthesis.speak(u);
-  } catch (e) {}
 }
 // =====================================================================
 // Helpers
@@ -4155,12 +4137,12 @@ function drawOverlay() {
 // Dialog & name entry
 // =====================================================================
 let dialog = null;
-function startDialog(lines, done, top) { dialog = { lines, i: 0, t: 0, done, top }; speakLine(lines[0]); }
+function startDialog(lines, done, top) { dialog = { lines, i: 0, t: 0, done, top }; }
 function advanceDialog() {
   const l = dialog.lines[dialog.i];
   if (dialog.t * 40 < fmt(l.text).length) { dialog.t = 999; return; }
   SFX.click(); dialog.i++; dialog.t = 0;
-  if (dialog.i >= dialog.lines.length) { const d = dialog.done; dialog = null; stopSpeech(); if (d) d(); } else speakLine(dialog.lines[dialog.i]);
+  if (dialog.i >= dialog.lines.length) { const d = dialog.done; dialog = null; if (d) d(); }
 }
 function drawDialog() {
   if (!dialog) return;
@@ -4645,14 +4627,13 @@ function segBar(label, y, get, set) { // five tappable segments, 0 = silent
   for (let k = 0; k <= 5; k++) { const x = 440 + k * 46, on = get() >= k && k > 0, cur = get() === k; rr(x, y, 40, 44, 10); ctx.fillStyle = k === 0 ? (get() === 0 ? '#e57373' : '#e0d2b0') : on ? '#ffd34d' : '#e6dcc4'; ctx.fill(); ctx.lineWidth = cur ? 4 : 2.5; ctx.strokeStyle = cur ? '#8a5a00' : '#8a6a3a'; ctx.stroke(); if (k === 0) txt('0', x + 20, y + 23, 20, '#6b4a2b'); else { rr(x + 11, y + 22 - k * 2.2, 18, k * 4.4 + 6, 4); ctx.fillStyle = on ? '#8a5a00' : '#b8a888'; ctx.fill(); } buttons.push({ x, y, w: 40, h: 44, cb: () => { set(k); writeSave(); if (k) { if (label === 'Effekte') SFX.right(); } } }); }
 }
 function drawSettings() {
-  panel(230, 90, 500, 360); txt('Einstellungen', W / 2, 132, 34, '#3b2410');
-  segBar('Musik', 158, () => save.volMusic, v => { save.volMusic = v; });
-  segBar('Effekte', 214, () => save.volSfx, v => { save.volSfx = v; });
-  button(save.voice ? 'Vorlesen: an' : 'Vorlesen: aus', 270, 270, 420, 44, () => { save.voice = !save.voice; if (!save.voice) stopSpeech(); writeSave(); }, { size: 20, color: save.voice ? '#d4f2bd' : '#e0d2b0' });
-  button(save.calm ? 'Ruhiger Modus: an' : 'Ruhiger Modus: aus', 270, 322, 420, 44, () => { save.calm = !save.calm; writeSave(); }, { size: 20, color: save.calm ? '#d4f2bd' : '#e0d2b0' });
-  txt('Ruhig = kein Wackeln und kein rotes Aufblitzen.', W / 2, 380, 14, '#8a6a3a', 'center', 'normal');
-  button(save.muted ? 'Ton ganz aus ✓' : 'Ton ganz ausschalten', 270, 396, 250, 44, () => { save.muted = !save.muted; if (save.muted) stopSpeech(); writeSave(); }, { size: 18, color: save.muted ? '#e57373' : '#e0d2b0', textColor: save.muted ? '#fff' : undefined });
-  button('Fertig', 540, 396, 150, 44, () => { settingsOpen = false; }, { size: 22 });
+  panel(230, 90, 500, 360); txt('Einstellungen', W / 2, 135, 36, '#3b2410');
+  segBar('Musik', 170, () => save.volMusic, v => { save.volMusic = v; });
+  segBar('Effekte', 232, () => save.volSfx, v => { save.volSfx = v; });
+  button(save.calm ? 'Ruhiger Modus: an' : 'Ruhiger Modus: aus', 270, 300, 420, 50, () => { save.calm = !save.calm; writeSave(); }, { size: 20, color: save.calm ? '#d4f2bd' : '#e0d2b0' });
+  txt('Ruhig = kein Wackeln und kein rotes Aufblitzen.', W / 2, 372, 15, '#8a6a3a', 'center', 'normal');
+  button(save.muted ? 'Ton ganz aus ✓' : 'Ton ganz ausschalten', 270, 392, 250, 44, () => { save.muted = !save.muted; writeSave(); }, { size: 18, color: save.muted ? '#e57373' : '#e0d2b0', textColor: save.muted ? '#fff' : undefined });
+  button('Fertig', 540, 392, 150, 44, () => { settingsOpen = false; }, { size: 22 });
   buttons.unshift({ x: 0, y: 0, w: W, h: H, cb: () => {}, silent: true });
 }
 let parentClearT = -99;
@@ -5683,5 +5664,5 @@ function frame(now) {
 requestAnimationFrame(frame);
 
 // debug hook for testing in the browser console
-window.__dino = { get mus() { return mus; }, startDialog, get speech() { return speech; }, useAudio(ctx) { AC = ctx; noiseBuf = null; buildAudioGraph(); mus.key = null; mus.trans = null; mus.saved = {}; mus.g = 1; mus.vt = 1; amb.wi = null; amb.node = null; amb.lvl = -1; }, musicTick, SFX, ambTick, ambEvent, AMB, SONGS, startSplash, get splash() { return splash; }, bossDmg, medalTotal, worldMedalsDone, chestFull, chestParty, get chestPartyT() { return chestPartyT; }, startDaily, dailyWorld, dayKey, get dialog() { return dialog; }, DAY_STORY, DAY_AFTER, launchLevel, finishLevel, fmt, cleanNick, boardAdd, boardQualifies, boardAll, endRun, get scene() { return scene; }, get doorOverlay() { return doorOverlay; }, get buttons() { return buttons; }, pitFall, get lowfx() { return LOWFX; }, set lowfx(v) { LOWFX = v; }, get G() { return G; }, get E() { return E; }, save, startLevel, startEnding, go, jump, roar, updatePlay, updateEnding, answer, retry, tapEgg, openGate, playTreasure, drawPlay, duckDown, duckUp, shootFire, drawShop, buildSong, dash, LEVELS, adventDay, openDoorGift, giftFor, clickDoor, skillsFor, bookOpen(i) { bookSel = i; }, sheet(p) { sheetPage = p || 'hero'; scene = 'sheet'; } };
+window.__dino = { get mus() { return mus; }, useAudio(ctx) { AC = ctx; noiseBuf = null; buildAudioGraph(); mus.key = null; mus.trans = null; mus.saved = {}; mus.g = 1; mus.vt = 1; amb.wi = null; amb.node = null; amb.lvl = -1; }, musicTick, SFX, ambTick, ambEvent, AMB, SONGS, startSplash, get splash() { return splash; }, bossDmg, medalTotal, worldMedalsDone, chestFull, chestParty, get chestPartyT() { return chestPartyT; }, startDaily, dailyWorld, dayKey, get dialog() { return dialog; }, DAY_STORY, DAY_AFTER, launchLevel, finishLevel, fmt, cleanNick, boardAdd, boardQualifies, boardAll, endRun, get scene() { return scene; }, get doorOverlay() { return doorOverlay; }, get buttons() { return buttons; }, pitFall, get lowfx() { return LOWFX; }, set lowfx(v) { LOWFX = v; }, get G() { return G; }, get E() { return E; }, save, startLevel, startEnding, go, jump, roar, updatePlay, updateEnding, answer, retry, tapEgg, openGate, playTreasure, drawPlay, duckDown, duckUp, shootFire, drawShop, buildSong, dash, LEVELS, adventDay, openDoorGift, giftFor, clickDoor, skillsFor, bookOpen(i) { bookSel = i; }, sheet(p) { sheetPage = p || 'hero'; scene = 'sheet'; } };
 })();
