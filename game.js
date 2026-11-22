@@ -57,8 +57,8 @@ function buildAudioGraph() {
   let master = AC.destination;
   try { // a gentle compressor/limiter on everything, so the roar, the music and the effects never add up to distortion
     const c = AC.createDynamicsCompressor(); c.threshold.value = -14; c.knee.value = 12; c.ratio.value = 6; c.attack.value = 0.003; c.release.value = 0.2; c.connect(AC.destination); master = c;
-    // soft clipper after the compressor: about +4 dB of loudness for normal levels, and nothing can ever exceed full scale
-    const sh = AC.createWaveShaper(), n = 2048, curve = new Float32Array(n); for (let i = 0; i < n; i++) curve[i] = Math.tanh((i / (n - 1) * 2 - 1) * 1.5) / Math.tanh(1.5);
+    // soft clipper after the compressor: about +4 dB of loudness for normal levels, and the ceiling (0.95) keeps the oversampling filter from overshooting full scale
+    const sh = AC.createWaveShaper(), n = 2048, curve = new Float32Array(n); for (let i = 0; i < n; i++) curve[i] = 0.95 * Math.tanh((i / (n - 1) * 2 - 1) * 1.5) / Math.tanh(1.5);
     sh.curve = curve; sh.oversample = '2x'; c.disconnect(); c.connect(sh); sh.connect(AC.destination);
   } catch (e) {}
   musicIn = AC.createGain(); duckIn = AC.createGain(); fxIn = AC.createGain(); ambIn = AC.createGain();

@@ -6,7 +6,7 @@ async function auditInPage(cfg) {
   d.save.muted = false; d.save.volMusic = 4; d.save.volSfx = 4;
   const stats = buf => {
     let peak = 0, sum = 0, clip = 0, n = 0;
-    for (let c = 0; c < buf.numberOfChannels; c++) { const x = buf.getChannelData(c); for (let i = 0; i < x.length; i++) { const a = Math.abs(x[i]); if (a > peak) peak = a; if (a >= 0.999) clip++; sum += x[i] * x[i]; n++; } }
+    for (let c = 0; c < buf.numberOfChannels; c++) { const x = buf.getChannelData(c); for (let i = 0; i < x.length; i++) { const a = Math.abs(x[i]); if (a > peak) peak = a; if (a >= 0.945) clip++; /* 0.95 = the soft clipper ceiling */ sum += x[i] * x[i]; n++; } }
     return { peak: +(20 * Math.log10(peak + 1e-9)).toFixed(1), rms: +(10 * Math.log10(sum / n + 1e-12)).toFixed(1), clip: +(clip / n).toFixed(5) };
   };
   const render = async (secs, drive) => {
