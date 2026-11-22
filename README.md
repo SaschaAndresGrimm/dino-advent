@@ -1,8 +1,8 @@
 # Oli & Fabios Dino-Advent
 
-![Title screen: Oli and Fabio riding the T-Rex Rexi, with Chili the rabbit](docs/screenshots/title.png)
+![Title screen: Oli and Fabio riding their T-Rex, with Chili the rabbit](docs/screenshots/title.png)
 
-**A Christmas advent-calendar game for two brothers.** Oli steers a T-Rex, Fabio sits in front and roars, and Chili the rabbit hops along. Together they save dinosaurs, one door a day from **1 to 24 December**.
+**A Christmas advent-calendar game for two brothers.** Oli steers a T-Rex that the kids name themselves at the start, Fabio sits in front and roars, and Chili the rabbit hops along. Together they save dinosaurs, one door a day from **1 to 24 December**.
 
 ## ▶ Play now
 
@@ -16,7 +16,7 @@ Open the link in any modern browser (tablet, phone or computer). There is nothin
 
 - **24 doors, one per day.** Door N opens on December N. Before 1 December the calendar shows a countdown. Missed days stay playable, so nobody falls behind.
 - **Each door is a short level** (about 2 minutes): run, jump and roar through the jungle, beach, canyon, deep sea, ice age, mountains, a volcano and finally a Christmas night.
-- **Every door hides a gift:** a hat, a new colour for Rexi or a fire colour, plus a new card for the Dino-Buch.
+- **Every door hides a gift:** a hat, a new colour for your T-Rex or a fire colour, plus a new card for the Dino-Buch.
 - **New skills as you go:** double jump, dash (day 4), duck (7), swim (10), ground pound (13), glide (16) and fire breath (19).
 - **Four boss fights** on days 6, 12, 18 and 24. The last door holds the Krallenkönig, the golden egg and the Christmas ending.
 - Goetti's shop, a collectible Dino-Buch, riddles, an endless run and a daily run keep it fun after the story is done.
