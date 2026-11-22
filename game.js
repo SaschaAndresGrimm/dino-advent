@@ -1103,34 +1103,47 @@ function drawMedal(x, y, r, kind, on) {
   else drawAmber(x, y, r * 0.45);
   ctx.restore();
 }
-function drawGoettiHead(cx, cy, r) {
-  const skin = '#f0c49b', skinD = '#e0aa80', hairC = '#3a2b23', hairL = '#5d4a3e', grey = '#a29c94', TAU = Math.PI * 2;
-  // ears and the back of the messy hair
-  circle(cx - r * 0.97, cy + r * 0.12, r * 0.2, skinD); circle(cx + r * 0.97, cy + r * 0.12, r * 0.2, skinD);
-  ell(cx, cy - r * 0.3, r * 1.03, r * 0.85, 0, hairC);
-  // face (slightly broad jaw)
-  ctx.fillStyle = vgrad(cy - r, cy + r * 1.05, '#f6d2ab', skin, '#e4b38a'); ctx.beginPath(); ctx.ellipse(cx, cy + r * 0.06, r * 0.95, r * 1.0, 0, 0, TAU); ctx.fill();
-  // stubble beard around the jaw and chin
-  ctx.fillStyle = 'rgba(58,43,35,.3)'; ctx.beginPath(); ctx.moveTo(cx - r * 0.93, cy + r * 0.12); ctx.quadraticCurveTo(cx - r * 0.95, cy + r * 0.8, cx - r * 0.35, cy + r * 1.02); ctx.quadraticCurveTo(cx, cy + r * 1.08, cx + r * 0.35, cy + r * 1.02); ctx.quadraticCurveTo(cx + r * 0.95, cy + r * 0.8, cx + r * 0.93, cy + r * 0.12); ctx.quadraticCurveTo(cx + r * 0.78, cy + r * 0.36, cx + r * 0.5, cy + r * 0.36); ctx.lineTo(cx - r * 0.5, cy + r * 0.36); ctx.quadraticCurveTo(cx - r * 0.78, cy + r * 0.36, cx - r * 0.93, cy + r * 0.12); ctx.closePath(); ctx.fill();
-  ctx.fillStyle = 'rgba(150,140,130,.5)'; for (let i = 0; i < 9; i++) circle(cx - r * 0.6 + hash(i + 31) * r * 1.2, cy + r * 0.62 + hash(i + 41) * r * 0.36, r * 0.025, '#b8b0a6');
-  // big open grin with teeth and a cheeky tongue
-  ctx.fillStyle = '#6e2530'; ctx.beginPath(); ctx.moveTo(cx - r * 0.46, cy + r * 0.5); ctx.quadraticCurveTo(cx, cy + r * 0.62, cx + r * 0.46, cy + r * 0.5); ctx.quadraticCurveTo(cx + r * 0.4, cy + r * 0.98, cx, cy + r * 0.98); ctx.quadraticCurveTo(cx - r * 0.4, cy + r * 0.98, cx - r * 0.46, cy + r * 0.5); ctx.closePath(); ctx.fill();
-  ctx.save(); ctx.clip(); ctx.fillStyle = '#fff'; ctx.fillRect(cx - r * 0.5, cy + r * 0.46, r * 1, r * 0.2); ctx.fillStyle = '#e8627e'; ctx.beginPath(); ctx.ellipse(cx + r * 0.08, cy + r * 0.95, r * 0.24, r * 0.17, 0, 0, TAU); ctx.fill(); ctx.strokeStyle = 'rgba(140,40,60,.5)'; ctx.lineWidth = Math.max(1, r * 0.03); ctx.beginPath(); ctx.moveTo(cx + r * 0.08, cy + r * 0.82); ctx.lineTo(cx + r * 0.08, cy + r * 0.95); ctx.stroke(); ctx.restore();
-  // moustache
-  ctx.fillStyle = hairC; ctx.beginPath(); ctx.moveTo(cx - r * 0.55, cy + r * 0.34); ctx.quadraticCurveTo(cx - r * 0.28, cy + r * 0.2, cx, cy + r * 0.34); ctx.quadraticCurveTo(cx + r * 0.28, cy + r * 0.2, cx + r * 0.55, cy + r * 0.34); ctx.quadraticCurveTo(cx + r * 0.3, cy + r * 0.5, cx, cy + r * 0.44); ctx.quadraticCurveTo(cx - r * 0.3, cy + r * 0.5, cx - r * 0.55, cy + r * 0.34); ctx.closePath(); ctx.fill();
-  // nose, smile lines
-  ell(cx, cy + r * 0.17, r * 0.15, r * 0.12, 0, skinD); ctx.strokeStyle = 'rgba(150,90,60,.4)'; ctx.lineWidth = Math.max(1, r * 0.04); ctx.beginPath(); ctx.arc(cx - r * 0.62, cy + r * 0.3, r * 0.22, -0.6, 0.9); ctx.stroke(); ctx.beginPath(); ctx.arc(cx + r * 0.62, cy + r * 0.3, r * 0.22, Math.PI - 0.9, Math.PI + 0.6); ctx.stroke();
-  // brown eyes with a playful sparkle, strong brows
+function drawGoettiHead(cx, cy, r, glasses) { // young, lean face, light stubble, dark cap worn backwards, sunglasses pushed up on top
+  const skin = '#f2c6a0', skinD = '#e2ab82', hairC = '#2e231d', cap = '#26324a', capD = '#141b2c', capL = '#3d4f74', TAU = Math.PI * 2;
+  const facePath = () => { ctx.beginPath(); ctx.moveTo(cx - r * 0.88, cy - r * 0.1); ctx.bezierCurveTo(cx - r * 0.92, cy + r * 0.55, cx - r * 0.46, cy + r * 1.02, cx, cy + r * 1.04); ctx.bezierCurveTo(cx + r * 0.46, cy + r * 1.02, cx + r * 0.92, cy + r * 0.55, cx + r * 0.88, cy - r * 0.1); ctx.bezierCurveTo(cx + r * 0.88, cy - r * 0.85, cx - r * 0.88, cy - r * 0.85, cx - r * 0.88, cy - r * 0.1); ctx.closePath(); };
+  // ears and short hair at the sides
+  circle(cx - r * 0.93, cy + r * 0.14, r * 0.19, skinD); circle(cx + r * 0.93, cy + r * 0.14, r * 0.19, skinD);
+  ell(cx - r * 0.86, cy - r * 0.02, r * 0.1, r * 0.26, 0.1, hairC); ell(cx + r * 0.86, cy - r * 0.02, r * 0.1, r * 0.26, -0.1, hairC);
+  // face
+  facePath(); ctx.fillStyle = vgrad(cy - r, cy + r * 1.05, '#f7d3ae', skin, '#e6b48c'); ctx.fill();
+  // light stubble: a soft shadow along jaw and chin, a faint one above the lip, a few specks
+  ctx.save(); facePath(); ctx.clip(); ctx.fillStyle = vgrad(cy + r * 0.25, cy + r * 1.05, 'rgba(70,52,42,0)', 'rgba(70,52,42,.22)'); ctx.fillRect(cx - r, cy + r * 0.25, r * 2, r * 0.85);
+  ctx.fillStyle = 'rgba(70,52,42,.13)'; ctx.beginPath(); ctx.ellipse(cx, cy + r * 0.38, r * 0.4, r * 0.09, 0, 0, TAU); ctx.fill();
+  ctx.restore();
+  // nose
+  ell(cx, cy + r * 0.16, r * 0.13, r * 0.11, 0, skinD); ell(cx - r * 0.04, cy + r * 0.12, r * 0.05, r * 0.035, 0, 'rgba(255,255,255,.35)');
+  // big open grin with teeth and a hint of tongue
+  ctx.fillStyle = '#6e2530'; ctx.beginPath(); ctx.moveTo(cx - r * 0.46, cy + r * 0.46); ctx.quadraticCurveTo(cx, cy + r * 0.58, cx + r * 0.46, cy + r * 0.46); ctx.quadraticCurveTo(cx + r * 0.4, cy + r * 0.88, cx, cy + r * 0.9); ctx.quadraticCurveTo(cx - r * 0.4, cy + r * 0.88, cx - r * 0.46, cy + r * 0.46); ctx.closePath(); ctx.fill();
+  ctx.save(); ctx.clip(); ctx.fillStyle = '#fff'; ctx.fillRect(cx - r * 0.5, cy + r * 0.42, r, r * 0.2); ctx.fillStyle = '#e8627e'; ctx.beginPath(); ctx.ellipse(cx + r * 0.05, cy + r * 0.88, r * 0.22, r * 0.15, 0, 0, TAU); ctx.fill(); ctx.strokeStyle = 'rgba(0,0,0,.18)'; ctx.lineWidth = Math.max(1, r * 0.03); ctx.beginPath(); ctx.moveTo(cx - r * 0.5, cy + r * 0.62); ctx.lineTo(cx + r * 0.5, cy + r * 0.62); ctx.stroke(); ctx.restore();
+  ctx.strokeStyle = 'rgba(120,50,50,.55)'; ctx.lineWidth = Math.max(1, r * 0.04); ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(cx - r * 0.46, cy + r * 0.46); ctx.quadraticCurveTo(cx, cy + r * 0.58, cx + r * 0.46, cy + r * 0.46); ctx.stroke();
+  // wide-open brown eyes, thick straight raised brows, a little blush
   for (const sx of [-1, 1]) {
-    const ex = cx + sx * r * 0.38, ey = cy - r * 0.1;
-    ell(ex, ey, r * 0.2, r * 0.15, 0, '#fff'); circle(ex + sx * r * 0.02, ey, r * 0.115, '#6a4428'); circle(ex + sx * r * 0.02, ey, r * 0.06, '#140c08'); circle(ex + r * 0.05, ey - r * 0.05, r * 0.05, '#fff'); circle(ex - r * 0.03, ey + r * 0.04, r * 0.025, '#fff');
-    ctx.strokeStyle = hairC; ctx.lineWidth = r * 0.075; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(cx + sx * r * 0.6, cy - r * 0.2); ctx.quadraticCurveTo(cx + sx * r * 0.4, cy - r * 0.34, cx + sx * r * 0.16, cy - r * 0.31); ctx.stroke(); ell(cx + sx * r * 0.62, cy + r * 0.38, r * 0.17, r * 0.1, 0, 'rgba(235,110,100,.28)');
+    const ex = cx + sx * r * 0.38, ey = cy - r * 0.08;
+    ell(ex, ey, r * 0.2, r * 0.19, 0, '#fff'); ctx.strokeStyle = 'rgba(80,50,40,.35)'; ctx.lineWidth = Math.max(1, r * 0.03); ctx.beginPath(); ctx.ellipse(ex, ey, r * 0.2, r * 0.19, 0, 0, TAU); ctx.stroke();
+    circle(ex - sx * r * 0.01, ey, r * 0.125, '#6a4428'); circle(ex - sx * r * 0.01, ey, r * 0.065, '#140c08'); circle(ex + r * 0.04, ey - r * 0.06, r * 0.05, '#fff'); circle(ex - r * 0.04, ey + r * 0.05, r * 0.025, '#fff');
+    ctx.strokeStyle = hairC; ctx.lineWidth = r * 0.1; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(cx + sx * r * 0.62, cy - r * 0.27); ctx.quadraticCurveTo(cx + sx * r * 0.4, cy - r * 0.45, cx + sx * r * 0.14, cy - r * 0.37); ctx.stroke();
+    ell(cx + sx * r * 0.6, cy + r * 0.34, r * 0.16, r * 0.09, 0, 'rgba(235,110,100,.25)');
   }
-  // messy spiky hair, a few grey strands at the temples
-  ctx.fillStyle = hairC; ctx.beginPath(); ctx.arc(cx, cy + r * 0.05, r * 1.0, Math.PI * 1.04, Math.PI * 1.96); ctx.quadraticCurveTo(cx + r * 0.7, cy - r * 0.55, cx + r * 0.35, cy - r * 0.62); ctx.quadraticCurveTo(cx, cy - r * 0.4, cx - r * 0.4, cy - r * 0.62); ctx.quadraticCurveTo(cx - r * 0.75, cy - r * 0.55, cx - r * 0.97, cy - r * 0.02); ctx.closePath(); ctx.fill();
-  for (let k = 0; k < 9; k++) { const u = k / 8, a = Math.PI * (1.1 + u * 0.8), bx = cx + Math.cos(a) * r * 0.98, by = cy + r * 0.05 + Math.sin(a) * r * 0.98, tl = r * (0.2 + 0.18 * hash(k + 2)), ta = a + (u - 0.5) * 0.5 + 0.12; ctx.beginPath(); ctx.moveTo(bx - Math.cos(a + 1.57) * r * 0.16, by - Math.sin(a + 1.57) * r * 0.16); ctx.lineTo(bx + Math.cos(ta) * tl, by + Math.sin(ta) * tl); ctx.lineTo(bx + Math.cos(a + 1.57) * r * 0.16, by + Math.sin(a + 1.57) * r * 0.16); ctx.closePath(); ctx.fill(); }
-  ctx.strokeStyle = hairL; ctx.lineWidth = r * 0.05; ctx.lineCap = 'round'; for (let k = 0; k < 4; k++) { const a = Math.PI * (1.25 + k * 0.17); ctx.beginPath(); ctx.moveTo(cx + Math.cos(a) * r * 0.86, cy + r * 0.05 + Math.sin(a) * r * 0.86); ctx.lineTo(cx + Math.cos(a + 0.1) * r * 1.22, cy + r * 0.05 + Math.sin(a + 0.1) * r * 1.22); ctx.stroke(); }
-  ctx.strokeStyle = grey; ctx.lineWidth = r * 0.045; for (const [aa, sx] of [[1.08, -1], [1.14, -1], [1.92, 1], [1.86, 1]]) { const a = Math.PI * aa; ctx.beginPath(); ctx.moveTo(cx + Math.cos(a) * r * 0.9, cy + r * 0.05 + Math.sin(a) * r * 0.9); ctx.lineTo(cx + Math.cos(a) * r * 1.12, cy + r * 0.05 + Math.sin(a) * r * 1.12 - r * 0.05); ctx.stroke(); }
+  // the cap, worn backwards and pushed back: mesh panel, seams, button, and the adjustment strap across the forehead
+  const dome = () => { ctx.beginPath(); ctx.moveTo(cx - r * 0.96, cy - r * 0.1); ctx.bezierCurveTo(cx - r * 1.04, cy - r * 1.14, cx + r * 1.04, cy - r * 1.14, cx + r * 0.96, cy - r * 0.1); ctx.quadraticCurveTo(cx, cy - r * 0.98, cx - r * 0.96, cy - r * 0.1); ctx.closePath(); };
+  dome(); ctx.fillStyle = vgrad(cy - r, cy - r * 0.3, capL, cap, capD); ctx.fill();
+  ctx.save(); dome(); ctx.clip(); ctx.fillStyle = 'rgba(255,255,255,.1)'; for (let gy = -0.95; gy < -0.3; gy += 0.14) for (let gx = -1; gx < 1; gx += 0.14) circle(cx + (gx + ((gy * 100 | 0) % 2 ? 0.07 : 0)) * r, cy + gy * r, r * 0.022, ctx.fillStyle);
+  ctx.strokeStyle = 'rgba(0,0,0,.28)'; ctx.lineWidth = Math.max(1, r * 0.03); for (const k of [-0.5, 0, 0.5]) { ctx.beginPath(); ctx.moveTo(cx, cy - r * 0.97); ctx.quadraticCurveTo(cx + k * r * 1.1, cy - r * 0.8, cx + k * r * 1.5, cy - r * 0.3); ctx.stroke(); } ctx.restore();
+  dome(); ctx.strokeStyle = capD; ctx.lineWidth = Math.max(1.4, r * 0.06); ctx.lineJoin = 'round'; ctx.stroke();
+  circle(cx, cy - r * 0.97, r * 0.07, capL); ctx.strokeStyle = capD; ctx.lineWidth = Math.max(1, r * 0.03); ctx.beginPath(); ctx.arc(cx, cy - r * 0.97, r * 0.07, 0, TAU); ctx.stroke();
+  const strap = () => { ctx.beginPath(); ctx.moveTo(cx - r * 0.95, cy - r * 0.1); ctx.quadraticCurveTo(cx, cy - r * 0.98, cx + r * 0.95, cy - r * 0.1); };
+  strap(); ctx.strokeStyle = '#0c0f16'; ctx.lineWidth = r * 0.22; ctx.lineCap = 'butt'; ctx.stroke(); strap(); ctx.strokeStyle = '#3c424e'; ctx.lineWidth = r * 0.15; ctx.stroke(); // plastic adjustment strap
+  for (let k = -3; k <= 3; k++) { const u = 0.5 + k * 0.085, y = (1 - u) * (1 - u) * (-0.1) + 2 * u * (1 - u) * (-0.98) + u * u * (-0.1), x = (1 - u) * (1 - u) * (-0.95) + u * u * 0.95; circle(cx + x * r, cy + y * r, r * 0.026, '#12151c'); } // strap holes
+  if (glasses) { // sunglasses resting on top of the cap
+    ctx.save(); ctx.translate(cx + r * 0.02, cy - r * 0.98); ctx.rotate(-0.08); ctx.lineJoin = 'round';
+    for (const sx of [-1, 1]) { ctx.save(); ctx.translate(sx * r * 0.32, 0); rr(-r * 0.27, -r * 0.16, r * 0.54, r * 0.32, r * 0.1); ctx.fillStyle = vgrad(-r * 0.16, r * 0.16, '#3a4256', '#0e121c'); ctx.fill(); ctx.strokeStyle = '#0a0d14'; ctx.lineWidth = r * 0.07; ctx.stroke(); ell(-r * 0.09, -r * 0.06, r * 0.1, r * 0.04, -0.4, 'rgba(255,255,255,.55)'); ctx.restore(); }
+    ctx.strokeStyle = '#0a0d14'; ctx.lineWidth = r * 0.07; ctx.beginPath(); ctx.moveTo(-r * 0.06, -r * 0.04); ctx.quadraticCurveTo(0, -r * 0.1, r * 0.06, -r * 0.04); ctx.stroke(); ctx.restore();
+  }
 }
 function drawGoetti(x, y, s, wave) {
   ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
@@ -1144,7 +1157,7 @@ function drawGoetti(x, y, s, wave) {
   ctx.beginPath(); ctx.moveTo(18, -95); ctx.lineTo(18 + Math.cos(-1.1 + a) * 36, -95 + Math.sin(-1.1 + a) * 36); ctx.stroke();
   circle(18 + Math.cos(-1.1 + a) * 40, -95 + Math.sin(-1.1 + a) * 40, 6, '#f0c49b');
   circle(-26, -54, 6, '#f0c49b');
-  drawGoettiHead(0, -127, 26);
+  drawGoettiHead(0, -127, 26, true);
   ctx.restore();
 }
 
@@ -5039,7 +5052,7 @@ function drawSheet() {
   } else if (sheetPage === 'faces') {
     row(300, 'OLI hats: none / santa / cowboy / crown');
     [null, 'santa', 'cowboy', 'crown'].forEach((h, i) => { ctx.save(); ctx.translate(90 + i * 150, 250); ctx.scale(3.6, 3.6); drawOli(0, 0, 0.5, h, {}); ctx.restore(); });
-    drawGoettiHead(790, 160, 90);
+    drawGoettiHead(790, 160, 90, true);
     row(520, 'PROFESSOR GOETTI portraits + full body');
     drawPortrait('goetti', 100, 440, 60); oGoetti(300, 530, 1.0, true); drawPortrait('goetti', 500, 450, 40);
   } else if (sheetPage === 'react') {
