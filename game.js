@@ -3564,7 +3564,7 @@ function drawPlay() {
   vignette(ART(G.wi));
   ctx.restore(); TOD = 0; chiliFx.dive = false;
   // boss prompt
-  if (G.boss && ((G.boss.state === 'charge' && G.boss.x - p.wx < 390) || G.boss.state === 'tired') && Math.sin(T * 20) > -0.5) otxt('JETZT BRÜLLEN!', W / 2, 262, 48, '#ff5252', '#000', 10);
+  if (G.boss && ((G.boss.state === 'charge' && G.boss.x - p.wx < 390) || G.boss.state === 'tired') && Math.sin(T * 20) > -0.5) { otxt('JETZT BRÜLLEN!', W / 2, 262, 48, '#ff5252', '#000', 10); otxt(fmt('{fabio}, das ist dein Job!'), W / 2, 306, 26, '#ffe08a', '#000', 7); }
   // incoming-danger badges at the right edge
   for (const o of L.obs) {
     if (o.dead || o.scared || (o.type !== 'raptor' && o.type !== 'ptero')) continue;
@@ -4842,7 +4842,7 @@ const CARD_ART = [
   [drawTheriz, 120, 106, 8],
   [drawSpino, 178, 100, -2],
   [drawChicken, 80, 66, 8],
-  [drawMeteor, 120, 100, -34],
+  [drawMeteor, 100, 80, -30],
   [(x, y, s) => { pine(x - 26 * s, y, 90 * s, '#2f6a50', true); pine(x + 28 * s, y, 66 * s, '#3b7d5c', false); }, 100, 90, 0],
   [(x, y, s) => { drawBaby(x, y, s * 1.5, 0.3, false); ctx.strokeStyle = '#d63a3a'; ctx.lineWidth = 5 * s; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x + 6 * s, y - 64 * s); ctx.quadraticCurveTo(x + 14 * s, y - 56 * s, x + 24 * s, y - 62 * s); ctx.stroke(); }, 80, 90, 0],
   [drawFeathered, 110, 80, 0],
