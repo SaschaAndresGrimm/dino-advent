@@ -541,3 +541,22 @@ test('Schatzkarte, Steckbrief and shop redesign render without errors; boss foll
   await game.eval(() => window.__dino.go('shop')); await page.waitForTimeout(400);
   expect(game.errors).toEqual([]);
 });
+
+test('boss damage looks: bossDmg grows with every hit and phase, and is full once the boss flees', async ({ game }) => {
+  await game.open();
+  const r = await game.eval(() => {
+    const d = window.__dino, out = {};
+    for (const [li, n] of [[5, 2], [11, 3], [17, 3], [23, 4]]) {
+      d.startLevel(li); const G = d.G; G.startT = 0; G.coach = null; G.p.inv = 99; G.p.wx = G.L.bossX - 5;
+      for (let i = 0; i < 600 && !(G.boss && G.boss.state === 'taunt'); i++) d.updatePlay(1 / 60);
+      const b = G.boss, seq = [];
+      for (let ph = 0; ph < n; ph++) for (const hp of [3, 2, 1]) { b.phase = ph; b.hp = hp; seq.push(d.bossDmg(b)); }
+      b.state = 'flee'; seq.push(d.bossDmg(b)); out[li] = seq;
+    }
+    return out;
+  });
+  for (const seq of Object.values(r)) {
+    expect(seq[0]).toBe(0); expect(seq[seq.length - 1]).toBe(1);
+    for (let i = 1; i < seq.length; i++) expect(seq[i]).toBeGreaterThan(seq[i - 1]);
+  }
+});

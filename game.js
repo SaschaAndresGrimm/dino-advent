@@ -859,6 +859,7 @@ function drawRaptor(x, y, s, ph, flip, o = {}) {
     ctx.fillStyle = '#ffd700'; ctx.beginPath(); ctx.moveTo(33, -100); ctx.lineTo(32, -116); ctx.lineTo(40, -108); ctx.lineTo(46, -120); ctx.lineTo(52, -108); ctx.lineTo(60, -116); ctx.lineTo(59, -99); ctx.closePath(); ctx.fill(); ctx.strokeStyle = '#a07800'; ctx.lineWidth = 1.6; ctx.stroke();
     circle(46, -105, 2.6, '#e53935'); circle(38, -104, 1.8, '#40c4ff'); circle(54, -104, 1.8, '#69f0ae');
   }
+  if (boss && o.dmg) drawWounds('king', o.dmg, o.wid, o.ko);
   ctx.restore(); ctx.globalAlpha = 1;
 }
 
@@ -2930,6 +2931,104 @@ function drawSmallCrab(x, y, o) {
   for (const sd of [-1, 1]) { ctx.strokeStyle = '#6a1408'; ctx.lineWidth = 1.8; ctx.beginPath(); ctx.moveTo(sd * 36, -40 - Math.sin(t * 0.5 + sd) * 6); ctx.lineTo(sd * 28, -44 - Math.sin(t * 0.5 + sd) * 6); ctx.stroke(); circle(sd * 9 + 1, -49, 1.4, '#fff'); }
   ctx.restore();
 }
+// ---------- battle damage: plasters, bandages, patches, bruises and cracks pile up as a boss loses hearts ----------
+function bossDmg(b) { // 0..1 across all phases; every single hit crosses at least one wound threshold
+  if (b.state === 'flee' || b.state === 'duel') return 1;
+  return clamp((b.phase + (3 - clamp(b.hp, 0, 3)) / 3) / bossKind(b).phases.length, 0, 1);
+}
+function woundPlaster(x, y, rot, sc = 1) {
+  ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.scale(sc, sc);
+  rr(-17, -7, 34, 14, 7); ctx.fillStyle = '#f3cfa4'; ctx.fill(); ctx.strokeStyle = '#8a5a34'; ctx.lineWidth = 1.8; ctx.stroke();
+  ctx.fillStyle = 'rgba(138,90,52,.5)'; for (const dx of [-13, -10, 10, 13]) for (const dy of [-2.6, 2.6]) { ctx.beginPath(); ctx.arc(dx, dy, 0.9, 0, 7); ctx.fill(); }
+  rr(-6.5, -6, 13, 12, 2); ctx.fillStyle = '#fff0d8'; ctx.fill(); ctx.strokeStyle = 'rgba(138,90,52,.55)'; ctx.lineWidth = 1; ctx.stroke();
+  ctx.restore();
+}
+function woundBand(x1, y1, x2, y2, w) { // a wrapped bandage with diagonal weave and a loose flapping end
+  const a = Math.atan2(y2 - y1, x2 - x1), L = Math.hypot(x2 - x1, y2 - y1);
+  ctx.save(); ctx.translate(x1, y1); ctx.rotate(a); ctx.lineJoin = 'round';
+  ctx.fillStyle = '#f6efe0'; ctx.strokeStyle = '#6f604e'; ctx.lineWidth = 2;
+  const fl = Math.sin(T * 4 + x1) * 2.5; ctx.beginPath(); ctx.moveTo(L - 4, w / 2 - 1); ctx.quadraticCurveTo(L + 4, w / 2 + 8, L - 2 + fl, w / 2 + 14); ctx.lineTo(L - 11 + fl, w / 2 + 11); ctx.quadraticCurveTo(L - 12, w / 2 + 5, L - 14, w / 2 - 1); ctx.closePath(); ctx.fill(); ctx.stroke();
+  rr(-3, -w / 2, L + 6, w, w * 0.32); ctx.fill(); ctx.stroke();
+  ctx.save(); rr(-3, -w / 2, L + 6, w, w * 0.32); ctx.clip();
+  ctx.fillStyle = 'rgba(111,96,78,.16)'; ctx.fillRect(-3, w * 0.12, L + 6, w); ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.fillRect(-3, -w / 2 + 1.5, L + 6, w * 0.16);
+  ctx.strokeStyle = 'rgba(111,96,78,.4)'; ctx.lineWidth = 1.3; for (let k = 2; k < L + 4; k += 6) { ctx.beginPath(); ctx.moveTo(k - 3, -w / 2); ctx.lineTo(k + 3, w / 2); ctx.stroke(); }
+  ctx.restore(); ctx.restore();
+}
+function woundPatch(x, y, rot, s, c1, c2) { // a stitched-on cloth patch
+  ctx.save(); ctx.translate(x, y); ctx.rotate(rot);
+  rr(-s, -s, s * 2, s * 2, s * 0.25); ctx.fillStyle = c1; ctx.fill(); ctx.strokeStyle = 'rgba(0,0,0,.55)'; ctx.lineWidth = 1.8; ctx.stroke();
+  ctx.setLineDash([3, 2.6]); rr(-s + 3.2, -s + 3.2, s * 2 - 6.4, s * 2 - 6.4, s * 0.15); ctx.strokeStyle = c2; ctx.lineWidth = 1.5; ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle = 'rgba(255,255,255,.25)'; ctx.beginPath(); ctx.arc(-s * 0.35, -s * 0.35, s * 0.22, 0, 7); ctx.fill();
+  ctx.restore();
+}
+function woundEye(x, y, r) { // a blue-purple shiner ringing the eye
+  ctx.save(); const g = ctx.createRadialGradient(x, y, r * 0.78, x, y, r * 1.75);
+  g.addColorStop(0, 'rgba(60,70,230,.0)'); g.addColorStop(0.22, 'rgba(60,70,230,.8)'); g.addColorStop(0.6, 'rgba(110,50,190,.6)'); g.addColorStop(1, 'rgba(140,60,160,0)');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r * 1.75, 0, 7); ctx.fill();
+  ctx.strokeStyle = 'rgba(40,30,120,.5)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x, y, r * 1.02, 0.2, Math.PI - 0.2); ctx.stroke();
+  ctx.restore();
+}
+function woundShut(x, y, r) { // an eye swollen shut
+  ctx.save(); ctx.beginPath(); ctx.ellipse(x, y, r + 3, r + 2, 0, 0, 7); ctx.fillStyle = vgrad(y - r, y + r, '#9a60d0', '#6a30a0'); ctx.fill();
+  ctx.strokeStyle = '#2a0a48'; ctx.lineWidth = 3; ctx.stroke();
+  const g = ctx.createRadialGradient(x, y + 3, 2, x, y + 3, r + 4); g.addColorStop(0, 'rgba(60,70,230,.75)'); g.addColorStop(1, 'rgba(60,70,230,0)'); ctx.fillStyle = g; ctx.fill();
+  ctx.strokeStyle = '#1a0630'; ctx.lineWidth = 3.4; ctx.beginPath(); ctx.moveTo(x - r + 2, y + 2); ctx.quadraticCurveTo(x, y + 9, x + r - 2, y + 2); ctx.stroke();
+  for (const k of [-1, 0, 1]) { ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(x + k * 7, y + 5); ctx.lineTo(x + k * 9, y + 11); ctx.stroke(); }
+  ctx.restore();
+}
+function woundCrack(x, y, d) { // jagged crack, d = flat list of offsets
+  ctx.save(); ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  const path = ox => { ctx.beginPath(); ctx.moveTo(x + ox, y); let px = x, py = y; for (let i = 0; i < d.length; i += 2) { px += d[i]; py += d[i + 1]; ctx.lineTo(px + ox, py); } };
+  path(1.6); ctx.strokeStyle = 'rgba(255,255,255,.4)'; ctx.lineWidth = 2; ctx.stroke();
+  path(0); ctx.strokeStyle = 'rgba(30,8,4,.9)'; ctx.lineWidth = 3; ctx.stroke();
+  ctx.restore();
+}
+function woundBump(x, y, r) { // a cartoon lump with impact lines
+  ctx.save(); const g = ctx.createRadialGradient(x - r * 0.3, y - r * 0.3, 1, x, y, r); g.addColorStop(0, '#ffc2a8'); g.addColorStop(0.6, '#f0806a'); g.addColorStop(1, '#c04a3a');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill(); ctx.strokeStyle = '#7a2418'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x, y, r, 0.3, Math.PI * 1.1); ctx.stroke();
+  ell(x - r * 0.35, y - r * 0.4, r * 0.3, r * 0.18, -0.6, 'rgba(255,255,255,.7)');
+  ctx.strokeStyle = '#ffe27a'; ctx.lineWidth = 2.2; ctx.lineCap = 'round'; for (const a of [-2.5, -1.9, -1.3]) { ctx.beginPath(); ctx.moveTo(x + Math.cos(a) * (r + 3), y + Math.sin(a) * (r + 3)); ctx.lineTo(x + Math.cos(a) * (r + 9), y + Math.sin(a) * (r + 9)); ctx.stroke(); }
+  ctx.restore();
+}
+function woundSweat(x, y) { // drops that slide down
+  ctx.save(); for (let i = 0; i < 2; i++) { const u = (T * 0.8 + i * 0.5) % 1, px = x + i * 14 - 4, py = y + u * 30; ctx.globalAlpha = Math.min(1, (1 - u) * 2); ctx.fillStyle = '#c8efff'; ctx.strokeStyle = '#3f86b8'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(px, py - 10); ctx.quadraticCurveTo(px + 7, py, px, py + 5); ctx.quadraticCurveTo(px - 7, py, px, py - 10); ctx.fill(); ctx.stroke(); } ctx.restore();
+}
+function woundTuft(x, y) { // ruffled, bent feathers
+  ctx.save(); ctx.lineCap = 'round'; for (const [a, l] of [[-2.2, 26], [-1.75, 31], [-2.65, 22]]) {
+    const ex = x + Math.cos(a) * l, ey = y + Math.sin(a) * l; ctx.strokeStyle = '#2a3a70'; ctx.lineWidth = 2.4; ctx.beginPath(); ctx.moveTo(x, y); ctx.quadraticCurveTo(x + Math.cos(a) * l * 0.5, y + Math.sin(a) * l * 0.5 - 6, ex, ey); ctx.stroke();
+    ctx.save(); ctx.translate(ex, ey); ctx.rotate(a + 0.7); ell(0, 0, 10, 3.6, 0, '#e8eefc'); ctx.strokeStyle = '#2a3a70'; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.ellipse(0, 0, 10, 3.6, 0, 0, 7); ctx.stroke(); ctx.restore();
+  } ctx.restore();
+}
+const WOUND_FN = { plaster: woundPlaster, cross: (x, y, r, s = 1) => { woundPlaster(x, y, r, s); woundPlaster(x, y, r + 1.5, s); }, band: woundBand, patch: woundPatch, eye: woundEye, shut: woundShut, crack: woundCrack, bump: woundBump, sweat: woundSweat, tuft: woundTuft };
+// [threshold, kind, ...args]: drawn in the boss's own coordinates, in the order they were earned
+const WOUNDS = {
+  crab: [[0.12, 'cross', -42, -68, -0.5], [0.3, 'band', -31, -108, -14, -113, 10], [0.45, 'eye', 27, -132, 11], [0.5, 'sweat', -52, -118], [0.6, 'crack', 6, -102, [8, 11, -5, 10, 9, 12, -3, 13]], [0.75, 'band', 80, -110, 102, -106, 11], [0.9, 'patch', -52, -50, 0.25, 9, '#7fb7e8', '#fff'], [0.95, 'cross', 44, -46, 0.4]],
+  kraken: [[0.12, 'cross', -30, -140, -0.5], [0.45, 'eye', 25, -106, 17], [0.5, 'sweat', -56, -150], [0.6, 'patch', 40, -62, 0.25, 11, '#ffd66a', '#a06a00'], [0.75, 'shut', -25, -106, 17], [0.9, 'cross', -44, -90, 0.7]],
+  queen: [[0.12, 'cross', 40, -98, 0.6], [0.3, 'band', 22, -104, 42, -92, 10], [0.45, 'eye', 55, -124, 9], [0.5, 'sweat', 18, -136], [0.6, 'patch', -14, -88, 0.25, 8, '#ff9a6a', '#fff'], [0.75, 'cross', 78, -110, -0.5], [0.9, 'tuft', 26, -128]],
+  king: [[0.12, 'cross', 66, -86, 0.3, 0.5], [0.3, 'band', 4, -70, 14, -38, 9], [0.45, 'eye', 52, -86, 7], [0.5, 'sweat', 30, -100], [0.6, 'crack', -18, -62, [5, 8, -4, 7, 5, 8]], [0.75, 'patch', -24, -50, 0.25, 7, '#7fb7e8', '#fff'], [0.9, 'bump', 38, -94, 6]],
+};
+const woundSeen = {};
+const WOUND_EYES = { crab: [[-24, -132, 11], [24, -132, 11]], kraken: [[-25, -106, 15], [25, -106, 15]], queen: [[54, -124, 8]], king: [[52, -86, 7]] };
+function woundSwirl(x, y, r) { // knocked-out spiral eye
+  ctx.save(); ctx.translate(x, y); ctx.rotate(T * 5); circle(0, 0, r + 1.5, '#fff'); ctx.strokeStyle = '#2a1a4a'; ctx.lineWidth = Math.max(1.6, r * 0.18); ctx.lineCap = 'round'; ctx.beginPath();
+  for (let a = 0; a < 12.5; a += 0.3) { const rr2 = a / 12.5 * r; ctx.lineTo(Math.cos(a) * rr2, Math.sin(a) * rr2); } ctx.stroke(); ctx.restore();
+}
+function woundPuff(x, y, u) { // ring and stars when a wound lands
+  ctx.save(); ctx.globalAlpha = 1 - u; ctx.strokeStyle = '#fff3a0'; ctx.lineWidth = 3 * (1 - u) + 1; ctx.beginPath(); ctx.arc(x, y, 6 + 34 * u, 0, 7); ctx.stroke();
+  for (let i = 0; i < 4; i++) { const a = i * 1.57 + 0.5; drawStar(x + Math.cos(a) * (10 + 30 * u), y + Math.sin(a) * (10 + 30 * u), 7 * (1 - u * 0.5), '#ffd34d'); } ctx.restore();
+}
+function drawWounds(kind, d, wid = '', ko = false) { // a new wound pops in with a little overshoot
+  const list = WOUNDS[kind];
+  for (let i = 0; i < list.length; i++) {
+    const w = list[i], key = kind + wid + i;
+    if (d < w[0]) { delete woundSeen[key]; continue; }
+    if (woundSeen[key] == null) woundSeen[key] = T;
+    const u = clamp((T - woundSeen[key]) / 0.32, 0, 1), k = u >= 1 ? 1 : 1 + 2.70158 * Math.pow(u - 1, 3) + 1.70158 * Math.pow(u - 1, 2);
+    ctx.save(); ctx.translate(w[2], w[3]); ctx.scale(k * 1.2, k * 1.2); ctx.translate(-w[2], -w[3]); WOUND_FN[w[1]](...w.slice(2)); ctx.restore();
+    if (u < 1) woundPuff(w[2], w[3], u);
+  }
+  if (ko) for (const [ex, ey, er] of WOUND_EYES[kind]) woundSwirl(ex, ey, er);
+}
 function drawCrabKing(x, y, s, ph, flip, o = {}) {
   ctx.save(); ctx.translate(x, y); ctx.scale(flip ? -s : s, s); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
   const col = vgrad(-120, 0, '#ff8a6a', '#e0402a', '#9a2418'), dark = '#6a1408', snap = Math.sin(ph * 0.6) * 0.5 + 0.5;
@@ -2947,6 +3046,7 @@ function drawCrabKing(x, y, s, ph, flip, o = {}) {
   ctx.fillStyle = '#fff'; for (let i = 0; i < 5; i++) { ctx.beginPath(); ctx.moveTo(-14 + i * 7, -50); ctx.lineTo(-10.5 + i * 7, -43); ctx.lineTo(-7 + i * 7, -50); ctx.fill(); }
   ctx.fillStyle = 'rgba(255,255,255,.55)'; for (let i = 0; i < 3; i++) circle(-4 + i * 8 + Math.sin(T * 3 + i) * 2, -34 - ((T * 0.8 + i / 3) % 1) * 22, 2.6 - i * 0.4, ctx.fillStyle);
   ctx.fillStyle = '#ffd700'; ctx.beginPath(); ctx.moveTo(-18, -98); ctx.lineTo(-20, -116); ctx.lineTo(-10, -108); ctx.lineTo(0, -122); ctx.lineTo(10, -108); ctx.lineTo(20, -116); ctx.lineTo(18, -98); ctx.closePath(); ctx.fill(); ctx.strokeStyle = '#a07800'; ctx.lineWidth = 2; ctx.stroke(); circle(0, -106, 3, '#e53935');
+  drawWounds('crab', o.dmg || 0, o.wid, o.ko);
   ctx.restore();
 }
 function drawKraken(x, y, s, ph, flip, o = {}) {
@@ -2961,6 +3061,7 @@ function drawKraken(x, y, s, ph, flip, o = {}) {
     ctx.strokeStyle = 'rgba(255,255,255,.18)'; ctx.lineWidth = 3.4; ctx.beginPath(); ctx.moveTo(base - 3, -50); ctx.bezierCurveTo(c1x - 3, -20, c2x - 3, -6, ex - 3, 0); ctx.stroke();
     for (let k = 1; k <= 5; k++) { const [px, py] = pt(k / 5.6); circle(px + 1, py + 3, 3.6 - k * 0.3, '#f0cdf8'); circle(px + 1, py + 3, 1.6 - k * 0.1, '#c27ad8'); }
     ctx.strokeStyle = '#b46ae0'; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(ex + dir * 5, 0, 6, dir < 0 ? 0.3 : Math.PI - 0.3, dir < 0 ? Math.PI * 1.4 : -Math.PI * 0.4, dir > 0); ctx.stroke();
+    for (const [ai, thr, t0] of [[1, 0.3, 0.3], [6, 0.65, 0.35], [6, 0.8, 0.62]]) if (i === ai && (o.dmg || 0) >= thr) { const [px, py] = pt(t0), [qx, qy] = pt(t0 + 0.04), an = Math.atan2(qy - py, qx - px) + Math.PI / 2, c = Math.cos(an) * 15, sn = Math.sin(an) * 15; woundBand(px - c, py - sn, px + c, py + sn, 10); }
   }
   ctx.fillStyle = 'rgba(42,10,72,.55)'; ctx.beginPath(); ctx.moveTo(-70, -54); ctx.quadraticCurveTo(0, -22, 70, -54); ctx.lineTo(60, -62); ctx.quadraticCurveTo(0, -40, -60, -62); ctx.closePath(); ctx.fill(); // webbing between the arms
   // mantle with fins, mottling, bumps and barnacles
@@ -2986,6 +3087,7 @@ function drawKraken(x, y, s, ph, flip, o = {}) {
   // a hooked beak between the arms, and a siphon on the side
   ctx.fillStyle = vgrad(-80, -56, '#7a5a3a', '#2a1a10'); ctx.strokeStyle = '#140a04'; ctx.lineWidth = 2.4; ctx.beginPath(); ctx.moveTo(-13, -76); ctx.quadraticCurveTo(0, -84, 13, -76); ctx.quadraticCurveTo(8, -62, 0, -54); ctx.quadraticCurveTo(-8, -62, -13, -76); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.moveTo(-8, -68); ctx.quadraticCurveTo(0, -62, 8, -68); ctx.stroke(); ell(-4, -76, 4, 2, -0.3, 'rgba(255,255,255,.3)');
   ctx.save(); ctx.translate(54, -70); ctx.rotate(0.6); rr(-5, -13, 11, 22, 5); ctx.fillStyle = '#9a52c8'; ctx.fill(); ctx.strokeStyle = dark; ctx.lineWidth = 2.4; ctx.stroke(); circle(0, -10, 3.4, '#2a0a48'); ctx.restore();
+  drawWounds('kraken', o.dmg || 0, o.wid, o.ko);
   ctx.restore();
 }
 function drawQueen(x, y, s, ph, flip, o = {}) {
@@ -3003,6 +3105,7 @@ function drawQueen(x, y, s, ph, flip, o = {}) {
   circle(54, -124, 8, '#fff'); circle(56, -124, 5, '#ffd23a'); circle(57, -124, 2.6, '#111'); ctx.strokeStyle = '#2a3a70'; ctx.lineWidth = 4.5; ctx.beginPath(); ctx.moveTo(44, -138); ctx.lineTo(64, -131); ctx.stroke();
   ctx.fillStyle = '#ffd700'; ctx.beginPath(); ctx.moveTo(32, -134); ctx.lineTo(30, -152); ctx.lineTo(40, -144); ctx.lineTo(48, -158); ctx.lineTo(56, -144); ctx.lineTo(64, -152); ctx.lineTo(62, -134); ctx.closePath(); ctx.fill(); ctx.strokeStyle = '#a07800'; ctx.lineWidth = 2; ctx.stroke(); circle(47, -140, 3, '#e53935');
   wing(-0.5 + fl * 0.8, '#3a62c0', '#2f54a8', false);
+  drawWounds('queen', o.dmg || 0, o.wid, o.ko);
   ctx.restore();
 }
 
@@ -3489,7 +3592,7 @@ function drawPlay() {
     ctx.translate(sx, 0); ctx.rotate(rot); ctx.scale(1, sy);
     const BC = [['#8b1a1a', '#4a0a0a'], ['#7a3a1a', '#3d1a08'], ['#5a2a7a', '#2a0f40'], ['#b01c10', '#5a0a04']][b.phase] || ['#8b1a1a', '#4a0a0a'];
     const anim = st === 'taunt' || st === 'tired' ? (b.kind === 'king' ? 0 : b.ph * 0.5) : b.ph, face = st !== 'flee';
-    if (b.kind === 'crab') drawCrabKing(0, 0, 1.5, anim, face); else if (b.kind === 'kraken') drawKraken(0, 0, 1.45, anim, face); else if (b.kind === 'queen') drawQueen(0, 0, 1.7, anim, face); else oRaptor(0, 0, 2.3, anim, face, { col: BC[0], dark: BC[1], crown: true });
+    const dmg = bossDmg(b), ko = st === 'flee'; if (b.kind === 'crab') drawCrabKing(0, 0, 1.5, anim, face, { dmg, ko }); else if (b.kind === 'kraken') drawKraken(0, 0, 1.45, anim, face, { dmg, ko }); else if (b.kind === 'queen') drawQueen(0, 0, 1.7, anim, face, { dmg, ko }); else oRaptor(0, 0, 2.3, anim, face, { col: BC[0], dark: BC[1], crown: true, dmg, ko });
     ctx.restore();
     if (st === 'taunt' && b.phase === 0 && b.kind === 'king') otxt('!', bx - 70, GROUND - 230, 60, '#ff5252', '#000', 8);
     if (st === 'tired' || st === 'stagger') for (let i = 0; i < 3; i++) { const a = T * 4 + i * 2.1; drawStar(bx - 70 + Math.cos(a) * 52, by - 250 + Math.sin(a) * 14, 9, '#ffd740'); }
@@ -4931,6 +5034,9 @@ function drawSheet() {
     ctx.save(); ctx.translate(190, 475); ctx.scale(2.2, 2.2); drawOli(0, 0, t, 'santa', {}); ctx.restore();
     fx({}); oChili(330, 480, 1.9, t, false); fx({ vy: -500 }); oChili(480, 455, 1.9, t, false); fx({ dig: true }); oChili(630, 480, 1.9, t, false); fx({});
     oBaby(790, 480, 1.4, t, false);
+  } else if (sheetPage === 'wounds') {
+    [0, 0.4, 0.7, 1].forEach((d, c) => { const x = 120 + c * 240; txt('dmg ' + d + (d === 1 ? ' + K.O.' : ''), x, 22, 14, '#3b2410', 'center');
+      drawCrabKing(x, 150, 0.8, T * 6, false, { dmg: d, ko: d === 1, wid: 'c' + c }); drawKraken(x, 290, 0.58, T * 6, false, { dmg: d, ko: d === 1, wid: 'k' + c }); drawQueen(x - 10, 395, 0.75, T * 6, false, { dmg: d, ko: d === 1, wid: 'q' + c }); oRaptor(x - 10, 520, 1.5, t, false, { col: ['#8b1a1a', '#7a3a1a', '#5a2a7a', '#b01c10'][c], dark: '#4a0a0a', crown: true, dmg: d, ko: d === 1, wid: 'r' + c }); });
   } else if (sheetPage === 'boss') {
     row(270, 'CRAB KING / KRAKEN / QUEEN / small crab');
     drawCrabKing(170, 262, 0.95, T * 6, false); drawKraken(480, 262, 0.8, T * 6, false); drawQueen(790, 262, 1.0, T * 6, false); drawSmallCrab(920, 262, { ph: T });
@@ -5220,5 +5326,5 @@ function frame(now) {
 requestAnimationFrame(frame);
 
 // debug hook for testing in the browser console
-window.__dino = { medalTotal, worldMedalsDone, chestFull, chestParty, get chestPartyT() { return chestPartyT; }, startDaily, dailyWorld, dayKey, get dialog() { return dialog; }, DAY_STORY, DAY_AFTER, launchLevel, finishLevel, fmt, cleanNick, boardAdd, boardQualifies, boardAll, endRun, get scene() { return scene; }, get doorOverlay() { return doorOverlay; }, get buttons() { return buttons; }, pitFall, get lowfx() { return LOWFX; }, set lowfx(v) { LOWFX = v; }, get G() { return G; }, get E() { return E; }, save, startLevel, startEnding, go, jump, roar, updatePlay, updateEnding, answer, retry, tapEgg, openGate, playTreasure, drawPlay, duckDown, duckUp, shootFire, drawShop, buildSong, dash, LEVELS, adventDay, openDoorGift, giftFor, clickDoor, skillsFor, bookOpen(i) { bookSel = i; }, sheet(p) { sheetPage = p || 'hero'; scene = 'sheet'; } };
+window.__dino = { bossDmg, medalTotal, worldMedalsDone, chestFull, chestParty, get chestPartyT() { return chestPartyT; }, startDaily, dailyWorld, dayKey, get dialog() { return dialog; }, DAY_STORY, DAY_AFTER, launchLevel, finishLevel, fmt, cleanNick, boardAdd, boardQualifies, boardAll, endRun, get scene() { return scene; }, get doorOverlay() { return doorOverlay; }, get buttons() { return buttons; }, pitFall, get lowfx() { return LOWFX; }, set lowfx(v) { LOWFX = v; }, get G() { return G; }, get E() { return E; }, save, startLevel, startEnding, go, jump, roar, updatePlay, updateEnding, answer, retry, tapEgg, openGate, playTreasure, drawPlay, duckDown, duckUp, shootFire, drawShop, buildSong, dash, LEVELS, adventDay, openDoorGift, giftFor, clickDoor, skillsFor, bookOpen(i) { bookSel = i; }, sheet(p) { sheetPage = p || 'hero'; scene = 'sheet'; } };
 })();
