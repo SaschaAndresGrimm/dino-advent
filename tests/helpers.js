@@ -37,13 +37,15 @@ const FAKE_AUDIO = () => {
   const P = () => ({ setValueAtTime() {}, exponentialRampToValueAtTime() {}, linearRampToValueAtTime() {}, cancelScheduledValues() {} });
   window.AudioContext = class {
     constructor() { this.currentTime = 0; this.sampleRate = 8000; this.destination = {}; this.state = 'running'; setInterval(() => { this.currentTime += 0.05; }, 50); }
-    createOscillator() { window.__tones++; return { type: '', frequency: P(), connect() {}, start() {}, stop() {} }; }
+    createOscillator() { window.__tones++; return { type: '', frequency: P(), detune: { value: 0 }, connect() {}, start() {}, stop() {} }; }
     createGain() { return { gain: P(), connect() {} }; }
+    createDynamicsCompressor() { const v = () => ({ value: 0 }); return { threshold: v(), knee: v(), ratio: v(), attack: v(), release: v(), connect() {}, disconnect() {} }; }
     createBuffer(c, n) { window.__noises++; return { getChannelData() { return new Float32Array(n); } }; }
+    createWaveShaper() { return { curve: null, oversample: '', connect() {} }; }
     createConvolver() { return { buffer: null, connect() {} }; }
     createStereoPanner() { return { pan: { value: 0 }, connect() {} }; }
-    createBufferSource() { return { connect() {}, start() {}, buffer: null }; }
-    createBiquadFilter() { return { type: '', frequency: { value: 0 }, connect() {} }; }
+    createBufferSource() { return { connect() {}, start() {}, stop() {}, buffer: null, loop: false }; }
+    createBiquadFilter() { return { type: '', frequency: Object.assign(P(), { value: 0 }), Q: { value: 0 }, connect() {} }; }
     resume() { return Promise.resolve(); }
   };
   window.webkitAudioContext = window.AudioContext;
