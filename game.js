@@ -3646,7 +3646,7 @@ function drawPlay() {
   if (G.shield && !G.overlay) { const sx = p.wx - cam + 4, sy = p.y - 84, pu = 1 + 0.03 * Math.sin(T * 5); ctx.save(); ctx.translate(sx, sy); ctx.scale(pu, pu); const sg = ctx.createRadialGradient(0, 0, 36, 0, 0, 116); sg.addColorStop(0, 'rgba(150,220,255,.04)'); sg.addColorStop(1, 'rgba(150,220,255,.34)'); ctx.fillStyle = sg; ctx.beginPath(); ctx.ellipse(0, 0, 124, 102, 0, 0, Math.PI * 2); ctx.fill(); ctx.strokeStyle = 'rgba(210,240,255,.85)'; ctx.lineWidth = 3; ctx.stroke(); ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.beginPath(); ctx.ellipse(-64, -52, 18, 8, -0.7, 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
   if (spinA) ctx.restore();
   if (G._tilt) { ctx.restore(); G._tilt = false; }
-  if (G.entering) { ctx.restore(); drawGate(L, cam, true); } // the frame closes over the heroes as they walk in
+  if (G.entering) ctx.restore(); // the heroes stay in front of the pillars as they walk into the light (Chili used to vanish behind the left pillar)
   for (const o of L.obs) if (!o.dead && o.type === 'low') drawObstacle(o, cam, th);
   ctx.save(); ctx.globalCompositeOperation = 'lighter';
   if (p.breathT > 0) { // flame jet from the mouth
@@ -3918,8 +3918,8 @@ function drawOverlay() {
       const kk = lv.boss, bo = { dmg: 1, ko: true, wid: 'res' }; shadow(668, 508, kk === 'king' ? 62 : 48, 0.25);
       if (kk === 'crab') drawCrabKing(668, 506, 0.45, T * 2, true, bo); else if (kk === 'kraken') drawKraken(668, 506, 0.3, T * 2, true, bo); else if (kk === 'queen') drawQueen(668, 506, 0.45, T * 2, true, bo); else oRaptor(668, 506, 0.6, T * 2, true, { col: '#b01c10', dark: '#4a0a0a', crown: true, dmg: 1, ko: true, wid: 'res' });
     }
-    if (lv.day === 24) button('Weiter!', W / 2 - 150, 422, 300, 62, () => startEnding(), { color: '#e57373', textColor: '#fff' });
-    else button('Zur Karte', W / 2 - 150, 422, 300, 62, () => go('map'));
+    if (lv.day === 24) button('Weiter!', W / 2 - 120, 422, 240, 62, () => startEnding(), { color: '#e57373', textColor: '#fff' });
+    else button('Zur Karte', W / 2 - 120, 422, 240, 62, () => go('map'));
   }
 }
 
