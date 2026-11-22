@@ -40,6 +40,8 @@ const FAKE_AUDIO = () => {
     createOscillator() { window.__tones++; return { type: '', frequency: P(), connect() {}, start() {}, stop() {} }; }
     createGain() { return { gain: P(), connect() {} }; }
     createBuffer(c, n) { window.__noises++; return { getChannelData() { return new Float32Array(n); } }; }
+    createConvolver() { return { buffer: null, connect() {} }; }
+    createStereoPanner() { return { pan: { value: 0 }, connect() {} }; }
     createBufferSource() { return { connect() {}, start() {}, buffer: null }; }
     createBiquadFilter() { return { type: '', frequency: { value: 0 }, connect() {} }; }
     resume() { return Promise.resolve(); }

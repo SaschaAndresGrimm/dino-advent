@@ -11,6 +11,7 @@ Everything is in `game.js` (one IIFE, about 3,800 lines, no modules, no build). 
 | Save game | `save` object, `SAVE_KEY`, migrations, `writeSave()` |
 | Sound | `SFX` (synthesised with Web Audio), `tone()`, `noise()` |
 | Background music | Song engine: `SONGS`, `buildSong(key)`, `musicTick(key, level)`, `musicKey()` picks the song. Boss fights play `boss_<kind>` (epic layer, level 3 in the last round); world → boss runs a one-bar drum-roll transition through the `musicIn` gain node, boss → world plays a fanfare and fades the world song back in |
+| Audio graph | `musicIn` (songs) and `fxIn` (SFX, fanfares) feed a shared generated reverb; `panAt(wx, fn)` pans a sound to its screen position; `musicOpts()` gives the song a fade target (pause/results duck, death fades out), a key lift before the gate and a one-heart heartbeat; `keyRun` plays pickups in the song's key |
 | Helpers | `clamp`, `rr` (rounded rect), `circle`, `ell`, `hash`, `rng`, UI kit (`woodFrame`, `panel`, `button`, `ico`) |
 | Game data | `WORLDS` (per-theme data: speed, obstacle patterns, riddles, colours), `FACTS` (dino cards), `SKINS`/`HATS`/`FIRES` |
 | Advent calendar | `ADVENT_START`, `adventDay()`, `LEVEL_THEMES`, `LEVEL_TITLES`, `BOSS_DAYS`, `LEVELS`, `SKILL_DAYS`, `skillsFor`, gifts |

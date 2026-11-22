@@ -299,7 +299,7 @@ test('Christmas level (world 5) plays with sound on and is not black', async ({ 
 
 test('every world and the map have a long song with valid notes, and tension layers add notes', async ({ game, page }) => {
   await game.open();
-  const r = await game.eval(() => { const out = {}; for (const k of ['map', '0', '1', '2', '3', '4', 'boss_crab', 'boss_kraken', 'boss_queen', 'boss_king']) { const bars = window.__dino.buildSong(k); const notes = bars.flatMap(b => [...b.bass, ...b.lead, ...b.arp]).filter(n => n != null); out[k] = { bars: bars.length, ok: notes.every(Number.isFinite), n: notes.length, distinct: new Set(bars.map(b => b.lead.join())).size }; } return out; });
+  const r = await game.eval(() => { const out = {}; for (const k of ['map', '0', '1', '2', '3', '4', 'boss_crab', 'boss_kraken', 'boss_queen', 'boss_king', 'ending']) { const bars = window.__dino.buildSong(k); const notes = bars.flatMap(b => [...b.bass, ...b.lead, ...b.arp]).filter(n => n != null); out[k] = { bars: bars.length, ok: notes.every(Number.isFinite), n: notes.length, distinct: new Set(bars.map(b => b.lead.join())).size }; } return out; });
   for (const k of Object.keys(r)) { expect(r[k].ok).toBe(true); expect(r[k].bars).toBeGreaterThanOrEqual(24); expect(r[k].distinct).toBeGreaterThan(8); }
   expect(r['0'].bars).toBe(48);
 });
@@ -316,6 +316,24 @@ test('boss fights have their own theme: drum-roll transition in, fanfare and the
   await game.eval(() => { const G = window.__dino.G; G.boss.state = 'flee'; G.boss.t = 0; });
   await page.waitForFunction(() => window.__dino.mus.key === '5');
   expect(await game.eval(() => window.__dino.mus.saved.boss_crab)).toBeUndefined();
+  expect(game.errors).toEqual([]);
+});
+
+test('music follows the screen: pause ducks it, retry fades it out and brings it back, the finale has its own song', async ({ game, page }) => {
+  await page.addInitScript(FAKE_AUDIO);
+  await game.open({ finished: true });
+  await page.mouse.click(10, 10);
+  await game.start(5);
+  await page.waitForFunction(() => window.__dino.mus.key === '5');
+  await game.eval(() => { window.__dino.G.overlay = { type: 'pause' }; });
+  await page.waitForFunction(() => window.__dino.mus.vt === 0.25);
+  expect(await game.eval(() => window.__dino.mus.key)).toBe('5');
+  await game.eval(() => { window.__dino.G.overlay = { type: 'retry' }; });
+  await page.waitForFunction(() => window.__dino.mus.key === null, null, { timeout: 5000 });
+  await game.eval(() => { window.__dino.G.overlay = null; });
+  await page.waitForFunction(() => window.__dino.mus.key === '5' && window.__dino.mus.vt === 1);
+  await game.eval(() => window.__dino.startEnding());
+  await page.waitForFunction(() => window.__dino.mus.key === 'ending');
   expect(game.errors).toEqual([]);
 });
 
