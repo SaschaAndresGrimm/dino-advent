@@ -52,21 +52,22 @@ function writeSave() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)
 // =====================================================================
 // Sound (synthesised, no files needed)
 // =====================================================================
-let AC = null;
+let AC = null, musicIn = null; // musicIn: every music note passes through this gain node, so the song can be faded as a whole
 function audio() {
-  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); musicIn = AC.createGain(); musicIn.connect(AC.destination); } catch (e) {} }
   if (AC && AC.state === 'suspended') AC.resume();
   return AC;
 }
-let bus = 'sfx'; // musicTick switches this to 'music' so the two volumes are separate
-const busGain = () => (bus === 'music' ? save.volMusic : save.volSfx) / 4;
+let bus = 'sfx'; // musicTick switches this to 'music' so the two volumes are separate; 'fanfare' = music volume but not faded with the song
+const busGain = () => (bus === 'sfx' ? save.volSfx : save.volMusic) / 4;
+const busOut = () => (bus === 'music' && musicIn ? musicIn : AC.destination);
 function tone(freq, dur, type = 'sine', vol = 0.2, slideTo = null, delay = 0) {
   if (save.muted || !AC) return; vol *= busGain(); if (vol <= 0.0005) return;
   const t = AC.currentTime + delay, o = AC.createOscillator(), g = AC.createGain();
   o.type = type; o.frequency.setValueAtTime(freq, t);
   if (slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, t + dur);
   g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
-  o.connect(g); g.connect(AC.destination); o.start(t); o.stop(t + dur + 0.05);
+  o.connect(g); g.connect(busOut()); o.start(t); o.stop(t + dur + 0.05);
 }
 let noiseBuf = null;
 function noise(dur, vol = 0.3, freq = 800, delay = 0) {
@@ -76,7 +77,7 @@ function noise(dur, vol = 0.3, freq = 800, delay = 0) {
   const src = AC.createBufferSource(); src.buffer = noiseBuf;
   const f = AC.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = freq;
   const g = AC.createGain(); g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
-  src.connect(f); f.connect(g); g.connect(AC.destination); src.start(t, Math.random() * 1.5, dur + 0.02);
+  src.connect(f); f.connect(g); g.connect(busOut()); src.start(t, Math.random() * 1.5, dur + 0.02);
 }
 const SFX = {
   jump() { tone(330, 0.16, 'square', 0.07, 660); },
@@ -128,15 +129,20 @@ const SONGS = {
   6: { bpm: 98, root: 246.9, wave: 'sine', sc: 'maj', bass: 'calm', dens: 0.46, secs: [[0, 0, 9, 9, 5, 5, 7, 7], [5, 5, 0, 0, 9, 9, 7, 7], [7, 7, 5, 5, 0, 0, 0, 0]], order: [0, 1, 0, 2, 1, 0] },
   7: { bpm: 112, root: 220, wave: 'triangle', sc: 'min', bass: 'pulse', dens: 0.55, secs: [[0, 0, 5, 5, 3, 3, 7, 7], [8, 8, 7, 7, 5, 5, 3, 3], [0, 3, 5, 7, 0, 3, 5, 0]], order: [0, 1, 0, 2, 1, 0] },
   4: { bpm: 124, root: 261.6, wave: 'triangle', sc: 'maj', bass: 'pulse', dens: 0.6, bells: true, secs: [[0,0,5,5, 7,7,0,0], [9,9,5,5, 7,7,0,0], [5,5,7,7, 0,0,0,0]], order: [0, 1, 0, 2, 1, 0] },
+  // Boss themes: same root as the world they live in, minor key, faster, always full drums (epic layer in musicTick). The hook quotes the boss's own motif.
+  boss_crab: { seed: 61, bpm: 152, root: 293.7, wave: 'square', sc: 'min', bass: 'drive', epic: true, dens: 0.7, hook: { bass: [0,N_,0,0, 0,N_,0,0, 0,N_,0,0, 3,N_,5,7], lead: [12,N_,N_,12, 15,N_,12,N_, 17,N_,N_,15, 12,N_,10,N_] }, secs: [[0,0,8,8, 0,0,10,7], [8,8,10,10, 7,7,0,0], [5,5,3,3, 8,10,7,7]], order: [0, 1, 0, 2, 1, 0] },
+  boss_kraken: { seed: 62, bpm: 132, root: 246.9, wave: 'sawtooth', sc: 'min', bass: 'gallop', epic: true, dens: 0.7, hook: { bass: [0,N_,N_,0, 0,N_,0,N_, 0,N_,N_,0, 1,N_,0,N_], lead: [19,N_,N_,17, N_,15,N_,N_, 12,N_,N_,15, N_,12,10,N_] }, secs: [[0,0,1,1, 0,0,8,7], [8,8,7,7, 5,5,3,1], [3,3,5,5, 1,1,0,0]], order: [0, 1, 0, 2, 1, 0] },
+  boss_queen: { seed: 63, bpm: 144, root: 220, wave: 'sawtooth', sc: 'min', bass: 'pulse', epic: true, dens: 0.7, hook: { bass: [0,N_,0,N_, 0,N_,7,N_, 8,N_,8,N_, 7,N_,10,N_], lead: [19,N_,22,N_, 24,N_,22,19, 17,N_,19,N_, 22,N_,N_,N_] }, secs: [[0,0,10,10, 0,0,8,7], [8,8,7,7, 10,10,0,0], [3,3,5,5, 8,8,7,7]], order: [0, 1, 0, 2, 1, 0] },
+  boss_king: { seed: 64, bpm: 156, root: 261.6, wave: 'square', sc: 'min', bass: 'gallop', epic: true, dens: 0.75, hook: { bass: [0,0,12,0, 0,0,12,0, 8,8,20,8, 7,7,19,7], lead: [12,N_,12,15, N_,N_,19,N_, 20,N_,19,N_, 15,N_,12,N_] }, secs: [[0,0,8,8, 0,0,7,7], [8,8,10,10, 7,7,0,0], [5,5,3,3, 8,10,7,7]], order: [0, 1, 0, 2, 1, 0, 2, 0] },
 };
 const SCALES = { maj: [0, 2, 4, 7, 9], min: [0, 3, 5, 7, 10] };
-const BASS_STYLES = { pulse: [0,N_,0,N_, 7,N_,0,N_, 0,N_,0,N_, 7,N_,12,N_], calm: [0,N_,N_,N_, N_,N_,7,N_, 0,N_,N_,N_, N_,N_,7,N_], drive: [0,0,12,0, 0,0,10,0, 0,0,12,0, 7,7,10,12] };
+const BASS_STYLES = { pulse: [0,N_,0,N_, 7,N_,0,N_, 0,N_,0,N_, 7,N_,12,N_], calm: [0,N_,N_,N_, N_,N_,7,N_, 0,N_,N_,N_, N_,N_,7,N_], drive: [0,0,12,0, 0,0,10,0, 0,0,12,0, 7,7,10,12], gallop: [0,N_,0,0, 0,N_,0,0, 0,N_,0,0, 7,N_,12,N_] };
 // singable one-bar rhythms: [start step, length in steps]
 const RHYTHMS = [[[0,4],[4,4],[8,2],[10,2],[12,4]], [[0,6],[6,2],[8,4],[12,4]], [[0,2],[2,2],[4,4],[8,4],[12,2],[14,2]], [[0,4],[4,2],[6,2],[8,8]], [[0,8],[8,4],[12,4]], [[0,3],[3,3],[6,2],[8,4],[12,4]]];
 const songCache = {};
 function buildSong(key) { // -> array of bars {bass, lead, leadDur, arp, c}
   if (songCache[key]) return songCache[key];
-  const m = SONGS[key], sc = SCALES[m.sc], bars = [], wk = Number.isNaN(parseInt(key)) ? 99 : parseInt(key);
+  const m = SONGS[key], sc = SCALES[m.sc], bars = [], wk = m.seed != null ? m.seed : Number.isNaN(parseInt(key)) ? 99 : parseInt(key);
   const pitch = idx => sc[((idx % 5) + 5) % 5] + 12 * Math.floor(idx / 5);
   const phrase = (R, rh, startIdx, dir) => { let idx = startIdx; return rh.map(([st, d], k) => { if (k > 0) { const up = k < rh.length / 2 ? dir : -dir; idx += R() < 0.75 ? up : (R() < 0.5 ? 0 : 2 * up); idx = clamp(idx, 0, 6); } return { st, d, idx }; }); };
   const secs = {};
@@ -164,29 +170,77 @@ function buildSong(key) { // -> array of bars {bass, lead, leadDur, arp, c}
   });
   return songCache[key] = bars;
 }
-const mus = { key: null, bar: 0, step: 0, next: 0, saved: {} };
-function musicLevel() { // how tense the music is: 0 calm, 1 busy, 2 full drums
+const mus = { key: null, bar: 0, step: 0, next: 0, saved: {}, trans: null };
+const isBossKey = k => typeof k === 'string' && k.startsWith('boss_');
+function musicLevel() { // how tense the music is: 0 calm, 1 busy, 2 full drums, 3 (boss final round and duel) everything
   if (!G || scene !== 'play') return 0;
-  if (G.boss && G.boss.state !== 'flee') return 2;
+  if (G.boss && G.boss.state !== 'flee') return G.boss.state === 'duel' || G.boss.phase >= bossKind(G.boss).phases.length - 1 ? 3 : 2;
   if (G.endless) return G.tier >= 4 ? 2 : G.tier >= 2 ? 1 : 0;
   const pr = clamp((G.p.wx - 200) / Math.max(1, G.L.gateX - 200), 0, 1);
   return pr < 0.34 ? 0 : pr < 0.72 ? 1 : 2;
 }
+function musicKey(portrait) { // which song should be playing right now (null = silence)
+  if (save.muted || portrait) return null;
+  if (scene === 'play') {
+    if (G.overlay && G.overlay.type !== 'riddle') return null;
+    if (G.boss && G.boss.state !== 'flee' && !G.bossDone && SONGS['boss_' + G.boss.kind]) return 'boss_' + G.boss.kind; // boss fight: the boss's own theme
+    return String(G.wi);
+  }
+  return scene === 'ending' || scene === 'splash' ? null : 'map';
+}
+function bossFanfare(root) { // short victory fanfare when the boss theme ends
+  bus = 'fanfare';
+  [[0, 0], [4, 0.14], [7, 0.28], [12, 0.42], [16, 0.62]].forEach(([n, t], i) => { const len = i < 4 ? 0.2 : 1.0; tone(root * 2 * Math.pow(2, n / 12), len, 'square', 0.045, null, t); tone(root * Math.pow(2, n / 12), len, 'triangle', 0.08, null, t); });
+  noise(1.1, 0.14, 6500, 0.62); bus = 'music';
+}
+function epicLayer(m, bar, i, d, st, level) { // brass stabs, toms, crashes, 16th hats: what makes a boss theme feel big
+  const f = n => m.root * Math.pow(2, n / 12);
+  if (i === 0 || i === 8 || (level >= 3 && (i === 6 || i === 10))) for (const iv of [0, 7, 12]) tone(f(bar.c + iv), st * (i % 8 === 0 ? 3.2 : 1.6), 'sawtooth', 0.014, null, d);
+  if (i === 6 || i === 14) tone(120, 0.18, 'sine', 0.11, 55, d);                                   // toms
+  if (level >= 3 && (i === 3 || i === 10)) tone(150, 0.12, 'sine', 0.1, 45, d);                    // double kick
+  if (i % 2 === 1) noise(0.02, level >= 3 ? 0.03 : 0.018, 8000, d);                                // 16th hats
+  if (level >= 3 && i % 2 === 1 && bar.arp[i - 1] != null) tone(m.root * 2 * Math.pow(2, (bar.arp[i - 1] + 7) / 12), st * 0.6, 'triangle', 0.008, null, d);
+  if (i === 0 && mus.bar % 8 === 0) { noise(0.9, 0.12, 7000, d); tone(70, 0.6, 'sine', 0.3, 32, d); } // crash + boom at every verse
+}
 function musicTick(key, level = 0) {
-  if (!AC || !key || !SONGS[key]) { if (mus.key != null) mus.saved[mus.key] = { bar: mus.bar, step: mus.step }; mus.key = null; return; }
-  if (mus.key !== key) { if (mus.key != null) mus.saved[mus.key] = { bar: mus.bar, step: mus.step }; mus.key = key; const sv = mus.saved[key]; mus.bar = sv ? sv.bar : 0; mus.step = sv ? sv.step : 0; mus.next = AC.currentTime + 0.1; }
-  if (mus.next < AC.currentTime - 0.05) mus.next = AC.currentTime + 0.05; // after a background pause
-  const m = SONGS[key], bars = buildSong(key), st = 60 / m.bpm / 4; bus = 'music';
+  if (!AC || !key || !SONGS[key]) { if (mus.key != null) mus.saved[mus.key] = { bar: mus.bar, step: mus.step }; mus.key = null; if (mus.trans) { mus.trans = null; if (musicIn) musicIn.gain.setValueAtTime(1, AC.currentTime); } return; }
+  const now = AC.currentTime;
+  if (mus.trans && mus.trans.to !== key) { mus.trans = null; musicIn.gain.cancelScheduledValues(0); musicIn.gain.setValueAtTime(1, now); } // the world changed its mind
+  if (!mus.trans && mus.key !== key) {
+    const from = mus.key; if (from != null) mus.saved[from] = { bar: mus.bar, step: mus.step };
+    if (isBossKey(from) && !isBossKey(key)) delete mus.saved[from]; // a finished (or abandoned) fight starts from the top next time
+    if (isBossKey(key) && from != null && !isBossKey(from)) { // world theme -> boss theme: finish the bar with a drum roll and a riser, then the boss theme hits on the downbeat
+      const st0 = 60 / SONGS[from].bpm / 4; let left = 16 - mus.step; if (left < 6) left += 16;
+      mus.trans = { to: key, left }; if (mus.next < now) mus.next = now + 0.05;
+      const tEnd = mus.next + left * st0; musicIn.gain.cancelScheduledValues(0); musicIn.gain.setValueAtTime(1, now); musicIn.gain.linearRampToValueAtTime(0.35, tEnd - 0.05);
+      bus = 'fanfare'; tone(SONGS[from].root, left * st0, 'sawtooth', 0.05, SONGS[from].root * 8, mus.next - now); bus = 'sfx';
+    } else {
+      mus.key = key; const sv = mus.saved[key]; mus.bar = sv ? sv.bar : 0; mus.step = sv ? sv.step : 0; mus.next = now + 0.1;
+      musicIn.gain.cancelScheduledValues(0); musicIn.gain.setValueAtTime(1, now);
+      if (isBossKey(from) && !isBossKey(key)) { // boss beaten: fanfare, then the world theme fades back in where it left off
+        mus.next = now + 1.5; musicIn.gain.setValueAtTime(0, now); musicIn.gain.setValueAtTime(0, now + 1.4); musicIn.gain.linearRampToValueAtTime(1, now + 3.2);
+        bus = 'music'; bossFanfare(SONGS[from].root); bus = 'sfx';
+      }
+    }
+  }
+  if (mus.next < now - 0.05) mus.next = now + 0.05; // after a background pause
+  bus = 'music';
   while (mus.next < AC.currentTime + 0.45) { // scheduling ahead keeps the music steady even when a frame is slow
+    const m = SONGS[mus.key], bars = buildSong(mus.key), st = 60 / m.bpm / 4;
     const bar = bars[mus.bar % bars.length], i = mus.step, d = mus.next - AC.currentTime, b = bar.bass[i], l = bar.lead[i], ld = bar.leadDur && bar.leadDur[i];
     if (b != null) tone(m.root / 2 * Math.pow(2, b / 12), st * 2.2, 'triangle', 0.055, null, d);
-    if (l != null) { const nd = ld ? st * (ld - 0.25) : st * 0.9; tone(m.root * Math.pow(2, l / 12), nd, m.wave, m.wave === 'square' ? 0.02 : 0.034, null, d); if (level >= 2) tone(m.root * 2 * Math.pow(2, l / 12), Math.min(nd, st * 3), 'triangle', 0.012, null, d); }
+    if (l != null) { const nd = ld ? st * (ld - 0.25) : st * 0.9; tone(m.root * Math.pow(2, l / 12), nd, m.wave, m.wave === 'square' || m.wave === 'sawtooth' ? 0.02 : 0.034, null, d); if (level >= 2) tone(m.root * 2 * Math.pow(2, l / 12), Math.min(nd, st * 3), 'triangle', 0.012, null, d); }
     if (level >= 1 && bar.arp[i] != null) tone(m.root * 2 * Math.pow(2, bar.arp[i] / 12), st * 0.8, 'triangle', 0.011, null, d);
     if (level >= 1 && i % 4 === 2) noise(0.03, 0.035, 7000, d);                      // hats
     if (level >= 2 && (i === 0 || i === 8)) tone(150, 0.12, 'sine', 0.12, 45, d);    // kick
     if (level >= 2 && (i === 4 || i === 12)) noise(0.09, 0.09, 2600, d);              // snare
     if (m.bells && i % 4 === 0) { noise(0.05, 0.05, 9000, d); tone(3100, 0.08, 'triangle', 0.012, null, d); } // sleigh bells
+    if (m.epic) epicLayer(m, bar, i, d, st, level);
+    if (mus.trans && mus.trans.left <= 8) { bus = 'fanfare'; noise(0.07, 0.04 + 0.1 * (1 - mus.trans.left / 8), 3200, d); bus = 'music'; } // snare roll that speeds the build-up
     mus.next += st; mus.step++; if (mus.step >= 16) { mus.step = 0; mus.bar = (mus.bar + 1) % bars.length; }
+    if (mus.trans && --mus.trans.left <= 0) { // the bar is over: the boss theme starts here, fully loud
+      mus.saved[mus.key] = { bar: mus.bar, step: mus.step }; mus.key = mus.trans.to; mus.bar = 0; mus.step = 0; mus.trans = null; musicIn.gain.setValueAtTime(1, mus.next);
+    }
   }
   bus = 'sfx';
 }
@@ -2554,6 +2608,7 @@ function pitFall() {
   resetCrumble(L); hurt(true); p.inv = 3;
 }
 function retry() {
+  for (const k in mus.saved) if (isBossKey(k)) delete mus.saved[k]; // every boss attempt starts the theme from the top
   const p = G.p, L = G.L;
   const fk = G.bossStarted ? 'b' + (G.bossCp || 0) : String(G.cp); G.fails = G.fails || {}; G.fails[fk] = (G.fails[fk] || 0) + 1;
   if (G.fails[fk] >= 3 && !G.endless && !G.shield) { G.shield = true; G.fails[fk] = 0; setTimeout(() => { if (G && scene === 'play') toast('Chili schenkt dir einen Schutzschild!', '#9fd3ff'); }, 700); }
@@ -5443,7 +5498,7 @@ function frame(now) {
   }
   ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = '#000'; ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.setTransform(DPR * SC, 0, 0, DPR * SC, DPR * OX, DPR * OY);
-  musicTick(save.muted || portrait ? null : scene === 'play' ? (G.overlay && G.overlay.type !== 'riddle' ? null : String(G.wi)) : scene === 'ending' || scene === 'splash' ? null : 'map', scene === 'play' ? musicLevel() : 0);
+  musicTick(musicKey(portrait), scene === 'play' ? musicLevel() : 0);
   ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, H); ctx.clip();
   buttons = [];
   if (scene === 'splash') drawSplash();
@@ -5468,5 +5523,5 @@ function frame(now) {
 requestAnimationFrame(frame);
 
 // debug hook for testing in the browser console
-window.__dino = { startSplash, get splash() { return splash; }, bossDmg, medalTotal, worldMedalsDone, chestFull, chestParty, get chestPartyT() { return chestPartyT; }, startDaily, dailyWorld, dayKey, get dialog() { return dialog; }, DAY_STORY, DAY_AFTER, launchLevel, finishLevel, fmt, cleanNick, boardAdd, boardQualifies, boardAll, endRun, get scene() { return scene; }, get doorOverlay() { return doorOverlay; }, get buttons() { return buttons; }, pitFall, get lowfx() { return LOWFX; }, set lowfx(v) { LOWFX = v; }, get G() { return G; }, get E() { return E; }, save, startLevel, startEnding, go, jump, roar, updatePlay, updateEnding, answer, retry, tapEgg, openGate, playTreasure, drawPlay, duckDown, duckUp, shootFire, drawShop, buildSong, dash, LEVELS, adventDay, openDoorGift, giftFor, clickDoor, skillsFor, bookOpen(i) { bookSel = i; }, sheet(p) { sheetPage = p || 'hero'; scene = 'sheet'; } };
+window.__dino = { get mus() { return mus; }, startSplash, get splash() { return splash; }, bossDmg, medalTotal, worldMedalsDone, chestFull, chestParty, get chestPartyT() { return chestPartyT; }, startDaily, dailyWorld, dayKey, get dialog() { return dialog; }, DAY_STORY, DAY_AFTER, launchLevel, finishLevel, fmt, cleanNick, boardAdd, boardQualifies, boardAll, endRun, get scene() { return scene; }, get doorOverlay() { return doorOverlay; }, get buttons() { return buttons; }, pitFall, get lowfx() { return LOWFX; }, set lowfx(v) { LOWFX = v; }, get G() { return G; }, get E() { return E; }, save, startLevel, startEnding, go, jump, roar, updatePlay, updateEnding, answer, retry, tapEgg, openGate, playTreasure, drawPlay, duckDown, duckUp, shootFire, drawShop, buildSong, dash, LEVELS, adventDay, openDoorGift, giftFor, clickDoor, skillsFor, bookOpen(i) { bookSel = i; }, sheet(p) { sheetPage = p || 'hero'; scene = 'sheet'; } };
 })();

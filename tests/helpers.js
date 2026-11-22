@@ -34,7 +34,7 @@ const test = base.extend({
 // A fake Web Audio API so tests can run the music engine and count the notes it schedules.
 const FAKE_AUDIO = () => {
   window.__tones = 0; window.__noises = 0;
-  const P = () => ({ setValueAtTime() {}, exponentialRampToValueAtTime() {}, linearRampToValueAtTime() {} });
+  const P = () => ({ setValueAtTime() {}, exponentialRampToValueAtTime() {}, linearRampToValueAtTime() {}, cancelScheduledValues() {} });
   window.AudioContext = class {
     constructor() { this.currentTime = 0; this.sampleRate = 8000; this.destination = {}; this.state = 'running'; setInterval(() => { this.currentTime += 0.05; }, 50); }
     createOscillator() { window.__tones++; return { type: '', frequency: P(), connect() {}, start() {}, stop() {} }; }
