@@ -690,33 +690,33 @@ WORLDS.push(
 );
 
 const FACTS_OLD = [
-  { name: 'T-Rex', text: 'Der Tyrannosaurus rex hatte rund 60 Zähne. Die grössten waren mit Wurzel so lang wie eine Banane!' },
-  { name: 'Triceratops', text: 'Der Triceratops hatte drei Hörner und einen riesigen Knochenschild am Nacken. Er frass nur Pflanzen.' },
-  { name: 'Brachiosaurus', text: 'Der Brachiosaurus war so hoch wie ein vierstöckiges Haus. Mit seinem langen Hals frass er Blätter ganz oben in den Bäumen.' },
-  { name: 'Velociraptor', text: 'Der Velociraptor war nur etwa so gross wie ein Truthahn – und er hatte Federn!' },
-  { name: 'Pteranodon', text: 'Der Pteranodon war gar kein Dinosaurier, sondern ein Flugsaurier. Seine Flügel waren breiter als ein Auto lang ist!' },
-  { name: 'Stegosaurus', text: 'Der Stegosaurus hatte grosse Platten auf dem Rücken und Stacheln am Schwanz. Sein Gehirn war nur so gross wie eine Walnuss!' },
-  { name: 'Wollhaarmammut', text: 'Das Wollhaarmammut lebte in der Eiszeit – viele Millionen Jahre nach den Dinosauriern. Sein dickes Fell hielt es warm.' },
-  { name: 'Ankylosaurus', text: 'Der Ankylosaurus war gepanzert wie ein Ritter und hatte eine schwere Knochenkeule am Schwanz.' },
-  { name: 'Dino-Eier', text: 'Alle Dinosaurier schlüpften aus Eiern. Die grössten Dino-Eier waren fast so gross wie ein Fussball!' },
-  { name: 'Spinosaurus', text: 'Der Spinosaurus hatte ein riesiges Segel auf dem Rücken. Er konnte schwimmen und frass am liebsten Fische.' },
-  { name: 'Huhn', text: 'Vögel stammen von Dinosauriern ab. Ein Huhn ist also ein entfernter Verwandter vom T-Rex!' },
-  { name: 'Meteorit', text: 'Vor etwa 66 Millionen Jahren schlug ein riesiger Meteorit auf der Erde ein. Danach starben die meisten Dinosaurier aus.' },
-  { name: 'Nadelbäume', text: 'Schon zur Dinozeit gab es Nadelbäume – dein Weihnachtsbaum hat also uralte Verwandte, die Dinos gesehen haben!' },
-  { name: 'Polar-Dinos', text: 'Sogar in der Nähe vom Südpol lebten Dinosaurier. Dort wurde es im Winter wochenlang dunkel und kalt!' },
-  { name: 'Federkleid', text: 'Viele Dinosaurier hatten Federn. Vielleicht hielten sie damit warm – wie eine kuschelige Winterjacke!' },
+  { name: 'T-Rex', text: 'Der T-Rex biss etwa zehnmal so fest zu wie ein Löwe – stark genug, um Knochen zu zermalmen. Seine winzigen Arme waren trotzdem sehr muskulös.' },
+  { name: 'Triceratops', text: 'Im Maul hatte der Triceratops mehrere Hundert Zähne in dichten Reihen, die ständig nachwuchsen – perfekt für zähe Pflanzen. Sein Schädel war über 2 Meter lang!' },
+  { name: 'Brachiosaurus', text: 'Der Brachiosaurus war bis zu 13 m hoch und rund 50 Tonnen schwer. Wie bei einer Giraffe waren seine Vorderbeine länger als die hinteren. Sein Herz musste das Blut bis in den Kopf hochpumpen!' },
+  { name: 'Velociraptor', text: 'Der echte Velociraptor war nur so gross wie ein Truthahn. Dass er Federn trug, weiss man von Knubbeln am Unterarmknochen, wo Federkiele festsassen. Die Film-Raptoren waren viel zu gross!' },
+  { name: 'Pteranodon', text: 'Der Pteranodon hatte keine Zähne, dafür einen langen Schnabel und einen Knochenkamm auf dem Kopf. Er war kein Dino, sondern ein Flugsaurier – seine Flügel spannten bis zu 6 Meter.' },
+  { name: 'Stegosaurus', text: 'Der Stegosaurus lebte etwa 80 Mio. Jahre vor dem T-Rex – der T-Rex lebte also zeitlich näher an uns als am Stegosaurus! Sein Gehirn war nur so gross wie eine Walnuss.' },
+  { name: 'Wollhaarmammut', text: 'Die letzten Mammuts lebten auf der Wrangelinsel noch vor rund 4000 Jahren – da standen die Pyramiden von Gizeh schon! Ihre Stosszähne wurden bis zu 4 Meter lang.' },
+  { name: 'Ankylosaurus', text: 'Der Ankylosaurus war ein wandelnder Panzer: Knochenplatten schützten Rücken, Kopf und sogar die Augenlider. Mit der Schwanzkeule konnte er einem Angreifer die Knochen brechen.' },
+  { name: 'Dino-Eier', text: 'Selbst die riesigsten Dinos legten nur Eier von der Grösse eines Fussballs – dickere Schalen hätten das Küken ersticken lassen. Das längste bekannte Dino-Ei misst über 40 cm.' },
+  { name: 'Spinosaurus', text: 'Der Spinosaurus war länger als der T-Rex. Mit krokodilartiger Schnauze, hoch sitzenden Nasenlöchern und einem paddelförmigen Schwanz jagte er wohl im Wasser nach Fischen.' },
+  { name: 'Huhn', text: 'Forscher fanden im Knochen eines T-Rex noch Eiweiss-Reste – und sie ähnelten denen eines Huhns am meisten! Alle Vögel sind lebende Dinosaurier.' },
+  { name: 'Meteorit', text: 'Der Meteorit schlug bei Chicxulub in Mexiko ein und riss einen Krater von rund 180 km. Staub verdunkelte den Himmel, Pflanzen starben. Nur kleine Tiere überlebten – auch die ersten Vögel.' },
+  { name: 'Nadelbäume', text: 'Nadelbäume gibt es seit rund 300 Mio. Jahren. Die Wollemie galt als ausgestorben, bis man 1994 in Australien lebende Bäume fand – ein Baum direkt aus der Dino-Zeit!' },
+  { name: 'Polar-Dinos', text: 'Vor 110 Mio. Jahren lag Südaustralien nahe am Südpol. Der kleine Leaellynasaura hatte grosse Augen für die Polarnacht – und seinen Namen von der Tochter der Finder.' },
+  { name: 'Federkleid', text: '1996 fand man in China den ersten Dino mit Federn – an seinem Schwanz sind sogar noch rotbraune Streifen zu erkennen! Auch der 9 m lange Yutyrannus, ein T-Rex-Verwandter, trug Federn.' },
 ];
 
 const FACTS_NEW = [
-  { name: 'Ammonit', text: 'Ammoniten waren Verwandte der Tintenfische mit einem Haus in Spiralform. Ihre Muscheln findet man heute noch versteinert!' },
-  { name: 'Archelon', text: 'Der Archelon war die grösste Meeresschildkröte aller Zeiten – so lang wie ein kleines Auto!' },
-  { name: 'Fussspuren', text: 'Dinosaurier haben Fussspuren hinterlassen. Im Stein kann man sie heute noch finden – sogar in der Schweiz!' },
-  { name: 'Ichthyosaurus', text: 'Der Ichthyosaurus sah aus wie ein Delfin, war aber ein Meeresreptil. Er konnte richtig schnell schwimmen!' },
-  { name: 'Mosasaurus', text: 'Der Mosasaurus war ein riesiges Meeresreptil – bis zu 12 Meter lang. Er war mit Echsen und Schlangen verwandt.' },
-  { name: 'Plesiosaurus', text: 'Der Plesiosaurus hatte einen langen Hals und vier Flossen. Er paddelte wie eine Schildkröte durchs Meer.' },
-  { name: 'Quetzalcoatlus', text: 'Der Quetzalcoatlus war einer der grössten Flugsaurier – seine Flügel waren so breit wie ein kleines Flugzeug!' },
-  { name: 'Archaeopteryx', text: 'Der Archaeopteryx war ein Urvogel mit Federn und Zähnen. Er war etwa so gross wie eine Elster.' },
-  { name: 'Therizinosaurus', text: 'Der Therizinosaurus hatte die längsten Krallen aller Tiere – so lang wie ein Unterarm! Er frass aber nur Pflanzen.' },
+  { name: 'Ammonit', text: 'Ammoniten schwammen in Urzeit-Meeren und starben zusammen mit den Dinos aus. Weil sich ihre Gehäuse so schnell veränderten, verraten sie Forschern genau, wie alt ein Gestein ist.' },
+  { name: 'Archelon', text: 'Der Archelon wog über 2 Tonnen. Statt eines harten Panzers hatte er einen Rücken aus Lederhaut mit Knochenstreben – und Flossen, die zusammen etwa 4 Meter spannten.' },
+  { name: 'Fussspuren', text: 'Bei Courtedoux im Jura fand man tausende Fussabdrücke von Langhals-Dinos. Aus dem Abstand der Spuren berechnen Forscher sogar, wie schnell ein Dino lief.' },
+  { name: 'Ichthyosaurus', text: 'Der Ichthyosaurus sah aus wie ein Delfin, war aber ein Reptil. Er atmete Luft und gebar lebende Junge im Wasser – meist mit dem Schwanz voran, damit sie nicht ertranken.' },
+  { name: 'Mosasaurus', text: 'Der Mosasaurus war ein Riesen-Verwandter der Warane und Schlangen und hatte sogar eine zweite Zahnreihe im Gaumen. Seinen ersten Schädel fand man bei Maastricht – daher der Name.' },
+  { name: 'Plesiosaurus', text: 'Das erste fast vollständige Plesiosaurus-Skelett fand 1823 die Fossiliensammlerin Mary Anning. Sein Hals hatte über 30 Wirbel – Menschen und Giraffen haben nur 7!' },
+  { name: 'Quetzalcoatlus', text: 'Der Quetzalcoatlus war am Boden so hoch wie eine Giraffe – und konnte trotzdem fliegen! Am Boden lief er auf allen vieren und stocherte wie ein Storch nach Beute.' },
+  { name: 'Archaeopteryx', text: '1861 fand man in Bayern ein Skelett mit Federn, Zähnen und Krallen an den Flügeln – ein Beweis, dass Vögel von Dinos abstammen. Wie gut er flog, ist bis heute umstritten.' },
+  { name: 'Therizinosaurus', text: 'Man fand zuerst nur seine Riesenkrallen (bis 50 cm) und hielt sie für Teile einer Riesenschildkröte! Dabei war er ein gefiederter Pflanzenfresser.' },
 ];
 // one card per level (24 days). Order follows the calendar: jungle, beach, canyon, underwater, ice age, mountains, volcano, Christmas.
 const FACTS = [...FACTS_OLD.slice(0, 3), ...FACTS_NEW.slice(0, 3), ...FACTS_OLD.slice(3, 6), ...FACTS_NEW.slice(3, 6), ...FACTS_OLD.slice(6, 9), ...FACTS_NEW.slice(6, 9), ...FACTS_OLD.slice(9, 12), ...FACTS_OLD.slice(12, 15)];
@@ -5484,7 +5484,7 @@ function drawSheet() {
     ['goetti', 'chili', 'rex', 'mami', 'papi', 'fabio', 'kiwi'].forEach((w, i) => drawPortrait(w, 70 + i * 130, 485, 38));
   }
 }
-let bookSel = -1;
+let bookSel = -1; const bookAnim = { sel: -1, t: 0 };
 function bookUnread() { const seen = save.bookSeen || []; return save.lvDone.reduce((n, d, i) => n + (d && !seen[i] ? 1 : 0), 0); } // found cards not yet opened in the Dino-Buch
 function leatherCover() {
   ctx.fillStyle = vgrad(0, H, '#6a4528', '#4f3119', '#33200f'); ctx.fillRect(0, 0, W, H);
@@ -5496,15 +5496,31 @@ function leatherCover() {
   rr(20, 20, W - 40, H - 40, 14); ctx.fillStyle = vgrad(20, H, '#f8ebc8', '#f3e2bf', '#e8d4a4'); ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#a88a52'; ctx.stroke();
 }
 // ---------- Dino-Buch "Steckbrief": era, diet and a size comparison with a child ----------
-const STECK = [
-  { l: 'Lebte vor', e: '68 Mio. Jahren', d: 'Fleisch', dk: 'meat', m: 12 }, { l: 'Lebte vor', e: '68 Mio. Jahren', d: 'Pflanzen', dk: 'leaf', m: 9 }, { l: 'Lebte vor', e: '150 Mio. Jahren', d: 'Pflanzen', dk: 'leaf', m: 25 },
-  { l: 'Lebte vor', e: '200 Mio. Jahren', d: 'Plankton', dk: 'fish', m: 0.3 }, { l: 'Lebte vor', e: '75 Mio. Jahren', d: 'Quallen', dk: 'fish', m: 4 }, { l: 'Entstanden vor', e: '100 Mio. Jahren', d: '–', dk: 'none', m: 0.5 },
-  { l: 'Lebte vor', e: '75 Mio. Jahren', d: 'Fleisch', dk: 'meat', m: 2 }, { l: 'Lebte vor', e: '85 Mio. Jahren', d: 'Fische', dk: 'fish', m: 6, ml: 'Spannweite' }, { l: 'Lebte vor', e: '150 Mio. Jahren', d: 'Pflanzen', dk: 'leaf', m: 9 },
-  { l: 'Lebte vor', e: '200 Mio. Jahren', d: 'Fische', dk: 'fish', m: 3 }, { l: 'Lebte vor', e: '75 Mio. Jahren', d: 'Fleisch', dk: 'meat', m: 12 }, { l: 'Lebte vor', e: '200 Mio. Jahren', d: 'Fische', dk: 'fish', m: 4 },
-  { l: 'Lebte vor', e: '10 000 Jahren', d: 'Pflanzen', dk: 'leaf', m: 4 }, { l: 'Lebte vor', e: '68 Mio. Jahren', d: 'Pflanzen', dk: 'leaf', m: 7 }, { l: 'Gelegt vor', e: '70 Mio. Jahren', d: '–', dk: 'none', m: 0.3, ml: 'Grösse' },
-  { l: 'Lebte vor', e: '68 Mio. Jahren', d: 'Fleisch', dk: 'meat', m: 10, ml: 'Spannweite' }, { l: 'Lebte vor', e: '150 Mio. Jahren', d: 'Insekten', dk: 'meat', m: 0.5 }, { l: 'Lebte vor', e: '70 Mio. Jahren', d: 'Pflanzen', dk: 'leaf', m: 10 },
-  { l: 'Lebte vor', e: '95 Mio. Jahren', d: 'Fische', dk: 'fish', m: 14 }, { l: 'Lebt', e: 'heute noch', d: 'Alles', dk: 'all', m: 0.5 }, { l: 'Schlug ein vor', e: '66 Mio. Jahren', d: '–', dk: 'none', m: 0, txt: 'Etwa 10 km breit – so hoch wie der Mount Everest!' },
-  { l: 'Gibt es seit', e: '300 Mio. Jahren', d: 'Sonne', dk: 'none', m: 30, ml: 'Höhe' }, { l: 'Lebte vor', e: '110 Mio. Jahren', d: 'Pflanzen', dk: 'leaf', m: 1 }, { l: 'Lebte vor', e: '130 Mio. Jahren', d: 'Fleisch', dk: 'meat', m: 1 },
+const STECK = [ // order = FACTS. nm/nl: the "Name bedeutet" chip (nl overrides its label); m: metres for the ruler (0 = custom comparison)
+  { l: 'Lebte vor', e: '68 Mio. Jahren', d: 'Fleisch', dk: 'meat', m: 12, nm: '«König der Tyrannen-Echsen»' },
+  { l: 'Lebte vor', e: '68 Mio. Jahren', d: 'Pflanzen', dk: 'leaf', m: 9, nm: '«Dreihorn-Gesicht»' },
+  { l: 'Lebte vor', e: '150 Mio. Jahren', d: 'Pflanzen', dk: 'leaf', m: 25, nm: '«Arm-Echse» (lange Vorderbeine)' },
+  { l: 'Lebte vor', e: '400–66 Mio. Jahren', d: 'Plankton', dk: 'fish', m: 0.3, ml: 'Meist', nm: '«Ammons Horn» (Gott Amun)' },
+  { l: 'Lebte vor', e: '75 Mio. Jahren', d: 'Quallen', dk: 'fish', m: 4.6, nm: '«Herrscher-Schildkröte»' },
+  { l: 'Spuren von vor', e: '150 Mio. Jahren', d: '–', dk: 'none', m: 0.5, ml: 'Abdruck', nl: 'Fachwort', nm: 'Spurenfossil' },
+  { l: 'Lebte vor', e: '75 Mio. Jahren', d: 'Fleisch', dk: 'meat', m: 2, nm: '«Schneller Räuber»' },
+  { l: 'Lebte vor', e: '85 Mio. Jahren', d: 'Fische', dk: 'fish', m: 6, ml: 'Spannweite', nm: '«Flügel ohne Zähne»' },
+  { l: 'Lebte vor', e: '150 Mio. Jahren', d: 'Pflanzen', dk: 'leaf', m: 9, nm: '«Dach-Echse»' },
+  { l: 'Lebte vor', e: '200 Mio. Jahren', d: 'Fische', dk: 'fish', m: 3, nm: '«Fisch-Echse»' },
+  { l: 'Lebte vor', e: '75 Mio. Jahren', d: 'Fleisch', dk: 'meat', m: 12, nm: '«Maas-Echse» (Fundort Maastricht)' },
+  { l: 'Lebte vor', e: '200 Mio. Jahren', d: 'Fische', dk: 'fish', m: 4, nm: '«Fast-Echse»' },
+  { l: 'Starb aus vor', e: '4000 Jahren', d: 'Pflanzen', dk: 'leaf', m: 4, nl: 'Fachname', nm: 'Mammuthus primigenius' },
+  { l: 'Lebte vor', e: '68 Mio. Jahren', d: 'Pflanzen', dk: 'leaf', m: 7, nm: '«Verwachsene Echse»' },
+  { l: 'Gelegt vor', e: '70 Mio. Jahren', d: '–', dk: 'none', m: 0.3, ml: 'Grösse', nl: 'Fachwort', nm: 'Oologie = Eier-Forschung' },
+  { l: 'Lebte vor', e: '68 Mio. Jahren', d: 'Fleisch', dk: 'meat', m: 10, ml: 'Spannweite', nm: '«Gefiederte Schlange» (Aztekengott)' },
+  { l: 'Lebte vor', e: '150 Mio. Jahren', d: 'Insekten', dk: 'meat', m: 0.5, nm: '«Alte Feder»' },
+  { l: 'Lebte vor', e: '70 Mio. Jahren', d: 'Pflanzen', dk: 'leaf', m: 10, nm: '«Sichel-Echse»' },
+  { l: 'Lebte vor', e: '95 Mio. Jahren', d: 'Fische', dk: 'fish', m: 14, nm: '«Dornen-Echse»' },
+  { l: 'Lebt', e: 'heute noch', d: 'Alles', dk: 'all', m: 0.5, nl: 'Fachname', nm: 'Gallus gallus' },
+  { l: 'Schlug ein vor', e: '66 Mio. Jahren', d: '–', dk: 'none', m: 0, cmp: 'everest', txt: 'Etwa 10 km breit – breiter, als der Mount Everest hoch ist!', nl: 'Einschlag bei', nm: 'Chicxulub in Mexiko' },
+  { l: 'Gibt es seit', e: '300 Mio. Jahren', d: 'Sonne', dk: 'none', m: 30, ml: 'Höhe', nl: 'Fachwort', nm: 'Koniferen = Zapfenträger' },
+  { l: 'Lebte vor', e: '110 Mio. Jahren', d: 'Pflanzen', dk: 'leaf', m: 1, nl: 'Bekanntester Polar-Dino', nm: 'Leaellynasaura' },
+  { l: 'Lebte vor', e: '125 Mio. Jahren', d: 'Fleisch', dk: 'meat', m: 1, nl: 'Erster Feder-Dino', nm: 'Sinosauropteryx (China)' },
 ];
 function drawKid(x, base, h) { // a child silhouette, h pixels tall, standing at x
   const u = h / 100; ctx.save(); ctx.translate(x, base); ctx.scale(u, u);
@@ -5514,14 +5530,29 @@ function drawKid(x, base, h) { // a child silhouette, h pixels tall, standing at
 }
 function drawSizeRuler(x, y, w, h, st, th) {
   rr(x, y, w, h, 14); ctx.fillStyle = 'rgba(255,250,235,.9)'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#b8a070'; ctx.stroke();
-  if (!st.m) { txt('Grösse im Vergleich', x + w / 2, y + 14, 14, '#8a6a3a', 'center', 'normal'); wrapLines(st.txt || '', w - 40, 17).forEach((l, i, a) => txt(l, x + w / 2, y + h / 2 + 6 + (i - (a.length - 1) / 2) * 22, 17, '#3b2410', 'center', 'normal')); return; }
-  const base = y + h - 12, sc = Math.min(36, (w - 70) / st.m), kidH = 1.4 * sc, len = st.m * sc, kx = x + 34;
-  txt('Grösse im Vergleich', x + w / 2, y + 14, 14, '#8a6a3a', 'center', 'normal');
-  ctx.strokeStyle = 'rgba(138,106,58,.35)'; ctx.lineWidth = 2; ctx.setLineDash([5, 5]); ctx.beginPath(); ctx.moveTo(x + 14, base); ctx.lineTo(x + w - 14, base); ctx.stroke(); ctx.setLineDash([]);
-  drawKid(kx, base, Math.max(14, kidH));
-  const bx = kx + 20, by = base - 20; rr(bx, by, Math.max(8, len), 18, 9); ctx.fillStyle = vgrad(by, by + 18, shade(th.sky[0], 1.25), shade(th.sky[0], 0.8)); ctx.fill(); ctx.lineWidth = 2.5; ctx.strokeStyle = '#2b1a0c'; ctx.stroke();
+  txt('Grösse im Vergleich', x + 16, y + 17, 13, '#8a6a3a', 'left', 'normal');
+  const base = y + h - 16;
+  if (st.cmp !== 'everest') { ctx.strokeStyle = 'rgba(138,106,58,.35)'; ctx.lineWidth = 2; ctx.setLineDash([5, 5]); ctx.beginPath(); ctx.moveTo(x + 14, base + 2); ctx.lineTo(x + w - 14, base + 2); ctx.stroke(); ctx.setLineDash([]); }
+  if (st.cmp === 'everest') { // meteorite vs. mountain, 6 px per km
+    const k = 6, bs = y + h - 32, mx = x + w * 0.3, cx = x + w * 0.7;
+    wrapLines(st.txt, w - 32, 14).forEach((l, i) => txt(l, x + w / 2, y + 40 + i * 18, 14, '#3b2410', 'center', 'normal'));
+    ctx.fillStyle = '#8f98a6'; ctx.beginPath(); ctx.moveTo(mx - 40, bs); ctx.lineTo(mx, bs - 8.8 * k); ctx.lineTo(mx + 40, bs); ctx.closePath(); ctx.fill(); ctx.strokeStyle = '#4a525e'; ctx.lineWidth = 2; ctx.lineJoin = 'round'; ctx.stroke();
+    const ty = bs - 8.8 * k; ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.moveTo(mx - 9, ty + 14); ctx.lineTo(mx, ty); ctx.lineTo(mx + 9, ty + 14); ctx.lineTo(mx + 3, ty + 11); ctx.lineTo(mx - 2, ty + 15); ctx.closePath(); ctx.fill();
+    circle(cx, bs - 5 * k, 5 * k, '#6b5a4a'); circle(cx - 8, bs - 5 * k - 8, 6, 'rgba(255,255,255,.14)'); ctx.strokeStyle = '#2b1a0c'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(cx, bs - 5 * k, 5 * k, 0, 7); ctx.stroke();
+    txt('Mount Everest: 8,8 km', mx, y + h - 14, 12, '#3b2410', 'center'); txt('Meteorit: 10 km', cx, y + h - 14, 12, '#3b2410', 'center');
+    return;
+  }
   const m = st.m >= 10 ? Math.round(st.m) : String(st.m).replace('.', ','), kids = Math.max(1, Math.round(st.m / 1.4));
-  txt(`${st.ml || 'Länge'}: ${m} m`, x + w - 16, y + 31, 18, '#3b2410', 'right'); txt(st.m < 1 ? 'kleiner als ein Kind' : `so lang wie ${kids} ${kids === 1 ? 'Kind' : 'Kinder'}`, x + w - 16, y + 50, 14, '#6b4a2b', 'right', 'normal');
+  const chain = kids >= 2 && st.m >= 2, sc = Math.min(48, (w - (chain ? 44 : 76)) / st.m), kidH = 1.4 * sc, len = st.m * sc, kx = x + 30;
+  txt(`${st.ml || 'Länge'}: ${m} m`, x + 16, y + 41, 22, '#3b2410', 'left');
+  txt(st.m < 1 ? 'kleiner als ein Kind' : `so lang wie ${kids} ${kids === 1 ? 'Kind' : 'Kinder'}`, x + w - 16, y + 17, 14, '#6b4a2b', 'right', 'normal');
+  if (!chain) drawKid(kx, base, Math.max(14, kidH));
+  const bx = chain ? x + 22 : kx + 22, bh = Math.max(10, Math.min(30, sc * 0.9)), by = base - bh, bl = Math.max(8, len);
+  rr(bx, by, bl, bh, bh / 2); ctx.fillStyle = vgrad(by, base, shade(th.sky[0], 1.3), shade(th.sky[0], 0.8)); ctx.fill(); ctx.lineWidth = 2.5; ctx.strokeStyle = '#2b1a0c'; ctx.stroke();
+  if (st.m >= 2) { const step = st.m > 14 ? 5 : 1; ctx.save(); rr(bx, by, bl, bh, bh / 2); ctx.clip(); ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 1.5; for (let u = step; u < st.m; u += step) { ctx.beginPath(); ctx.moveTo(bx + u * sc, by + bh * 0.55); ctx.lineTo(bx + u * sc, base); ctx.stroke(); } ctx.restore(); }
+  if (chain) { const sp = bl / kids, hk = Math.max(16, Math.min(34, sp * 1.7)); for (let k = 0; k < kids; k++) drawKid(bx + sp * (k + 0.5), by - 3, hk); } // a chain of children, as long as the animal
+  else if (st.m >= 2) { ctx.strokeStyle = '#8a6a3a'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(bx, by - 11); ctx.lineTo(bx, by - 5); ctx.moveTo(bx, by - 8); ctx.lineTo(bx + bl, by - 8); ctx.moveTo(bx + bl, by - 11); ctx.lineTo(bx + bl, by - 5); ctx.stroke(); }
+  if (st.m >= 2) txt(st.m > 14 ? '1 Strich = 5 m' : '1 Strich = 1 m', x + w - 16, y + 41, 12, '#8a6a3a', 'right', 'normal');
 }
 function drawHourglass(x, y) { ctx.fillStyle = '#e8c070'; ctx.strokeStyle = '#6b4a2b'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x - 8, y - 10); ctx.lineTo(x + 8, y - 10); ctx.lineTo(x + 1.5, y); ctx.lineTo(x + 8, y + 10); ctx.lineTo(x - 8, y + 10); ctx.lineTo(x - 1.5, y); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#c98a3a'; ctx.beginPath(); ctx.moveTo(x - 5, y + 9); ctx.lineTo(x + 5, y + 9); ctx.lineTo(x, y + 3); ctx.fill(); }
 function drawDietIcon(k, x, y) {
@@ -5532,6 +5563,8 @@ function drawDietIcon(k, x, y) {
   if (k === 'none') { ctx.strokeStyle = '#a09070'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(-7, 0); ctx.lineTo(7, 0); ctx.stroke(); }
   ctx.restore();
 }
+function drawNameIcon(x, y) { circle(x, y, 11, '#f0d58a'); ctx.lineWidth = 2; ctx.strokeStyle = '#8a6a3a'; ctx.beginPath(); ctx.arc(x, y, 11, 0, 7); ctx.stroke(); txt('Aa', x, y + 1, 12, '#5a3a14', 'center'); }
+function fitTxt(s, x, y, maxW, size, min, color, align = 'center') { let fs = size; setFont(fs); while (ctx.measureText(s).width > maxW && fs > min) { fs--; setFont(fs); } txt(s, x, y, fs, color, align); }
 function steckChip(x, y, w, label, value, icon) {
   rr(x, y + 2, w, 42, 12); ctx.fillStyle = 'rgba(0,0,0,.12)'; ctx.fill(); rr(x, y, w, 42, 12); ctx.fillStyle = '#fffaf0'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#b8a070'; ctx.stroke();
   icon(x + 22, y + 21); txt(label, x + 42, y + 13, 12, '#8a6a3a', 'left', 'normal');
@@ -5543,35 +5576,56 @@ function foil(x, y, w, h, r, t) { // diagonal shimmer on found cards
 }
 function drawBook() {
   leatherCover();
-  otxt('Oli & Fabios Dino-Buch', W / 2, 46, 34, '#ffd34d', '#3b1d00', 9);
   const found = save.lvDone.filter(Boolean).length;
-  txt(`${found} von ${FACTS.length} Karten gefunden – jeden Tag eine neue!`, W / 2, 80, 17, '#6b4a2b', 'center', 'normal');
+  if (bookSel < 0) {
+    otxt('Oli & Fabios Dino-Buch', W / 2, 40, 34, '#ffd34d', '#3b1d00', 9);
+    const bw = 380, bx = (W - bw) / 2, by = 62, fr = found / FACTS.length; // progress pill
+    rr(bx, by, bw, 20, 10); ctx.fillStyle = 'rgba(80,50,20,.22)'; ctx.fill();
+    if (fr > 0) { ctx.save(); rr(bx, by, bw, 20, 10); ctx.clip(); ctx.fillStyle = vgrad(by, by + 20, '#ffe27a', '#f0b400'); ctx.fillRect(bx, by, Math.max(20, bw * fr), 20); ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.fillRect(bx, by + 2, Math.max(20, bw * fr), 5); ctx.restore(); }
+    rr(bx, by, bw, 20, 10); ctx.lineWidth = 2; ctx.strokeStyle = '#8a6a3a'; ctx.stroke();
+    txt(found >= FACTS.length ? 'Alle Karten gefunden – echte Dino-Forscher!' : `${found} von ${FACTS.length} Karten – jeden Tag eine neue!`, W / 2, by + 11, 13, '#3b1d00');
+  }
   if (!save.bookSeen) save.bookSeen = [];
   for (let i = 0; i < FACTS.length; i++) {
     const lv = LEVELS[i], th = WORLDS[lv.wi], has = !!save.lvDone[i];
-    const x = 28 + (i % 6) * 152, y = 94 + Math.floor(i / 6) * 96, w = 142, h = 90, isNew = has && !save.bookSeen[i];
+    const x = 28 + (i % 6) * 152, y = 94 + Math.floor(i / 6) * 91, w = 142, h = 86, isNew = has && !save.bookSeen[i];
     ctx.save(); ctx.translate(x + w / 2, y + h / 2); ctx.rotate((hash(i * 3 + 1) - 0.5) * 0.07); ctx.translate(-w / 2, -h / 2);
     rr(2, 4, w, h, 11); ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.fill();
     rr(0, 0, w, h, 11); ctx.fillStyle = has ? '#fffaf0' : '#e6d8b8'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = has ? '#8a6a3a' : '#b8a888'; ctx.stroke();
     rr(5, 5, w - 10, h - 10, 7); ctx.fillStyle = has ? vgrad(5, h - 5, shade(th.sky[1], 1.15), th.sky[1]) : '#d8c8a8'; ctx.fill();
-    if (has) { drawCardArt(i, w / 2, 36, 120, false); ctx.save(); rr(5, 5, w - 10, h - 10, 7); ctx.clip(); ctx.fillStyle = 'rgba(255,250,240,.88)'; ctx.fillRect(5, h - 27, w - 10, 22); ctx.restore(); txt(FACTS[i].name, w / 2, h - 16, FACTS[i].name.length > 12 ? 12 : FACTS[i].name.length > 9 ? 14 : 16, '#2b1a00'); foil(5, 5, w - 10, h - 10, 7, T + i); }
-    else { ctx.save(); rr(5, 5, w - 10, h - 10, 7); ctx.clip(); ctx.globalAlpha = 0.45; ctx.fillStyle = vgrad(5, h - 5, th.sky[0], th.sky[1]); ctx.fillRect(5, 5, w - 10, h - 10); ctx.globalAlpha = 1; ctx.restore(); drawCardArt(i, w / 2, 36, 120, true); txt(`Tür ${i + 1}`, w / 2, h - 16, 14, '#a8987a', 'center', 'normal'); txt('?', w - 18, 20, 22, 'rgba(120,90,50,.5)'); }
+    if (has) { drawCardArt(i, w / 2, 34, 118, false); ctx.save(); rr(5, 5, w - 10, h - 10, 7); ctx.clip(); ctx.fillStyle = 'rgba(255,250,240,.9)'; ctx.fillRect(5, h - 26, w - 10, 21); ctx.restore(); fitTxt(FACTS[i].name, w / 2, h - 15, w - 22, 16, 11, '#2b1a00'); foil(5, 5, w - 10, h - 10, 7, T + i); }
+    else { ctx.save(); rr(5, 5, w - 10, h - 10, 7); ctx.clip(); ctx.globalAlpha = 0.45; ctx.fillStyle = vgrad(5, h - 5, th.sky[0], th.sky[1]); ctx.fillRect(5, 5, w - 10, h - 10); ctx.globalAlpha = 1; ctx.restore(); drawCardArt(i, w / 2, 34, 118, true); txt(`Tür ${i + 1}`, w / 2, h - 15, 14, '#a8987a', 'center', 'normal'); txt('?', w - 18, 20, 22, 'rgba(120,90,50,.5)'); }
     if (isNew) { ctx.save(); ctx.translate(w - 24, 18); ctx.rotate(0.35); rr(-20, -9, 40, 18, 5); ctx.fillStyle = '#e53935'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#fff'; ctx.stroke(); txt('NEU', 0, 1, 13, '#fff'); ctx.restore(); }
     ctx.restore();
     if (bookSel < 0) buttons.push({ x, y, w, h, cb: () => { if (has) { bookSel = i; save.bookSeen[i] = true; writeSave(); } else toast(`Diese Karte findest du in Tür ${i + 1}.`, '#fff'); } });
   }
-  if (bookSel < 0) button('Zurück', W / 2 - 100, H - 62, 200, 46, () => go('map'), { size: 24, icon: icon('back') });
+  if (bookSel < 0) button('Zurück', W / 2 - 100, H - 72, 200, 46, () => go('map'), { size: 24, icon: icon('back') });
   else {
-    const th = WORLDS[LEVELS[bookSel].wi], st = STECK[bookSel];
-    panel(90, 56, 780, 420);
-    ctx.save(); rr(120, 88, 340, 186, 18); ctx.clip(); ctx.fillStyle = vgrad(88, 274, shade(th.sky[1], 1.2), th.sky[1]); ctx.fillRect(120, 88, 340, 186); ctx.restore(); rr(120, 88, 340, 186, 18); ctx.lineWidth = 4; ctx.strokeStyle = '#fffaf0'; ctx.stroke(); rr(118, 86, 344, 190, 20); ctx.lineWidth = 2; ctx.strokeStyle = '#8a6a3a'; ctx.stroke();
-    drawCardArt(bookSel, 290, 181, 262, false); foil(120, 88, 340, 186, 18, T);
-    drawSizeRuler(120, 284, 340, 96, st, th);
-    txt(FACTS[bookSel].name, 500, 118, FACTS[bookSel].name.length > 11 ? 32 : 38, '#3b2410', 'left'); txt(`Tür ${bookSel + 1} · ${LEVELS[bookSel].title}`, 500, 150, 18, '#8a6a3a', 'left', 'normal');
-    wrapLines(FACTS[bookSel].text, 340, 21).forEach((l, i) => txt(l, 500, 184 + i * 27, 21, '#3b2410', 'left', 'normal'));
-    if (st.d === '–') steckChip(500, 314, 350, st.l, st.e, (x, y) => drawHourglass(x, y)); else { steckChip(500, 314, 172, st.l, st.e, (x, y) => drawHourglass(x, y)); steckChip(678, 314, 172, 'Frisst', st.d, (x, y) => drawDietIcon(st.dk, x, y)); } steckChip(500, 362, 350, 'Zuhause in der Welt', th.name, (x, y) => { ctx.save(); rr(x - 13, y - 9, 26, 18, 4); ctx.clip(); drawThemeThumb(LEVELS[bookSel].wi, x - 13, y - 9, 26, 18); ctx.restore(); });
-    button('Schliessen', W / 2 - 110, 420, 220, 46, () => { bookSel = -1; }, { icon: icon('check'), size: 24 });
+    if (bookAnim.sel !== bookSel) { bookAnim.sel = bookSel; bookAnim.t = T; }
+    const th = WORLDS[LEVELS[bookSel].wi], st = STECK[bookSel], f = FACTS[bookSel], pu = clamp((T - bookAnim.t) * 7, 0, 1), pop = 0.94 + 0.06 * (1 - Math.pow(1 - pu, 3));
+    ctx.save(); ctx.translate(W / 2, H / 2); ctx.scale(pop, pop); ctx.translate(-W / 2, -H / 2); ctx.globalAlpha = 0.4 + 0.6 * pu;
+    panel(80, 34, 800, 474);
+    ctx.save(); rr(112, 66, 350, 196, 18); ctx.clip(); ctx.fillStyle = vgrad(66, 262, shade(th.sky[1], 1.2), th.sky[1]); ctx.fillRect(112, 66, 350, 196); ctx.restore(); rr(112, 66, 350, 196, 18); ctx.lineWidth = 4; ctx.strokeStyle = '#fffaf0'; ctx.stroke(); rr(110, 64, 354, 200, 20); ctx.lineWidth = 2; ctx.strokeStyle = '#8a6a3a'; ctx.stroke();
+    drawCardArt(bookSel, 287, 160, 296, false); foil(112, 66, 350, 196, 18, T);
+    { const wl = th.name; setFont(13); const pw = ctx.measureText(wl).width + 50; rr(122, 228, pw, 26, 13); ctx.fillStyle = 'rgba(255,250,235,.92)'; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = '#b8a070'; ctx.stroke(); ctx.save(); rr(126, 232, 28, 18, 4); ctx.clip(); drawThemeThumb(LEVELS[bookSel].wi, 126, 232, 28, 18); ctx.restore(); txt(wl, 162, 242, 13, '#3b2410', 'left'); }
+    drawSizeRuler(112, 272, 350, 156, st, th);
+    fitTxt(f.name, 496, 98, 352, 38, 26, '#3b2410', 'left'); txt(`Tür ${bookSel + 1} · ${LEVELS[bookSel].title}`, 496, 132, 17, '#8a6a3a', 'left', 'normal');
+    let fs = 21, lines; for (; fs > 15; fs--) { lines = wrapLines(f.text, 352, fs); if (166 + (lines.length - 1) * fs * 1.28 <= 316) break; }
+    lines.forEach((l, i) => txt(l, 496, 166 + i * fs * 1.28, fs, '#3b2410', 'left', 'normal'));
+    if (st.d === '–') steckChip(496, 336, 352, st.l, st.e, (x, y) => drawHourglass(x, y)); else { steckChip(496, 336, 172, st.l, st.e, (x, y) => drawHourglass(x, y)); steckChip(676, 336, 172, 'Frisst', st.d, (x, y) => drawDietIcon(st.dk, x, y)); }
+    steckChip(496, 386, 352, st.nl || 'Name bedeutet', st.nm, drawNameIcon);
+    ctx.strokeStyle = 'rgba(138,106,58,.35)'; ctx.lineWidth = 2; ctx.setLineDash([2, 6]); ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(496, 322); ctx.lineTo(848, 322); ctx.stroke(); ctx.setLineDash([]);
+    button('Schliessen', W / 2 - 110, 444, 220, 46, () => { bookSel = -1; }, { icon: icon('check'), size: 24 });
+    ctx.restore();
     buttons.unshift({ x: 0, y: 0, w: W, h: H, cb: () => { bookSel = -1; } });
+    for (const dir of [-1, 1]) { // previous / next found card
+      let j = bookSel; do { j = (j + dir + FACTS.length) % FACTS.length; } while (!save.lvDone[j] && j !== bookSel);
+      if (j === bookSel) continue;
+      const ax = dir < 0 ? 44 : W - 44, ay = 270, hov = 1 + 0.06 * Math.sin(T * 4 + dir);
+      ctx.save(); ctx.translate(ax, ay); ctx.scale(hov, hov); circle(0, 4, 27, 'rgba(0,0,0,.3)'); circle(0, 0, 27, '#f4b400'); ctx.lineWidth = 3; ctx.strokeStyle = '#7a4a00'; ctx.beginPath(); ctx.arc(0, 0, 27, 0, 7); ctx.stroke();
+      ctx.strokeStyle = '#3b1d00'; ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.beginPath(); ctx.moveTo(-dir * 6, -12); ctx.lineTo(dir * 7, 0); ctx.lineTo(-dir * 6, 12); ctx.stroke(); ctx.restore();
+      buttons.push({ x: ax - 34, y: ay - 34, w: 68, h: 68, cb: () => { bookSel = j; save.bookSeen[j] = true; writeSave(); } });
+    }
   }
 }
 
