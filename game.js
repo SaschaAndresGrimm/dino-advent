@@ -759,9 +759,9 @@ const SKINS = [
   { n: 'Regenbogen', gift: 23, rainbow: true, body: '#e84a6f', dark: '#8a2a4a', belly: '#fff0f8' },
   { n: 'Dino-Meister', gift: 25, rainbow: 'gold', body: '#ffd34d', dark: '#b07a10', belly: '#fff7c8' },
 ];
-const HATS = [{ n: 'Auto', cost: 0 }, { n: 'Mütze', cost: 150, k: 'santa' }, { n: 'Cowboy', cost: 300, k: 'cowboy' }, { n: 'Krone', cost: 700, k: 'crown' },
+const HATS = [{ n: 'Auto', cost: 0 }, { n: 'Mütze', cost: 150, k: 'santa' }, { n: 'Cowboy', cost: 300, k: 'cowboy' }, { n: 'Astronaut', cost: 700, k: 'astro' },
   { n: 'Strohhut', gift: 2, k: 'straw' }, { n: 'Pirat', gift: 4, k: 'pirate' }, { n: 'Taucherbrille', gift: 6, k: 'goggles' }, { n: 'Kochmütze', gift: 8, k: 'chef' }, { n: 'Zylinder', gift: 10, k: 'tophat' },
-  { n: 'Bergmütze', gift: 13, k: 'beanie' }, { n: 'Zauberhut', gift: 14, k: 'wizard' }, { n: 'Propeller', gift: 16, k: 'propeller' }, { n: 'Rentier', gift: 18, k: 'antlers' }, { n: 'Heiligenschein', gift: 22, k: 'halo' }, { n: 'Goldkrone', gift: 24, k: 'goldcrown' }, { n: 'Meister-Krone', gift: 25, k: 'mastercrown' }];
+  { n: 'Bergmütze', gift: 13, k: 'beanie' }, { n: 'Zauberhut', gift: 14, k: 'wizard' }, { n: 'Propeller', gift: 16, k: 'propeller' }, { n: 'Rentier', gift: 18, k: 'antlers' }, { n: 'Heiligenschein', gift: 22, k: 'halo' }, { n: 'Wikinger', gift: 24, k: 'viking' }, { n: 'Meister-Krone', gift: 25, k: 'mastercrown' }];
 const FIRES = [
   { n: 'Orange', cost: 0, a: '255,190,60', b: '255,80,10', c: '255,40,0', fl: ['#fff3b0', '#ffa628', '#ff4a10'], ball: '#ff8a20', glow: '255,140,30' },
   { n: 'Blau', cost: 200, a: '130,200,255', b: '40,100,255', c: '0,30,200', fl: ['#e6f4ff', '#5fb0ff', '#2a50ff'], ball: '#4a90ff', glow: '80,150,255' },
@@ -832,11 +832,11 @@ function drawOli(x, y, ph, hat, o = {}) {
   // head: blond curls (back), face, ear, fringe curls, face details
   const cx = x + 2, cy = y - 40, hairD = fb ? '#d9a838' : '#c9972c', hair = fb ? '#f3d070' : '#e9c25e', hairL = fb ? '#fff0b8' : '#f8e19a';
   const curl = (px, py, r) => { circle(px, py + 1.2, r, hairD); circle(px, py, r, hair); ctx.strokeStyle = hairL; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(px - r * 0.1, py - r * 0.1, r * 0.55, Math.PI * 1.05, Math.PI * 1.7); ctx.stroke(); };
-  const capped = ['santa', 'cowboy', 'straw', 'pirate', 'chef', 'tophat', 'beanie', 'wizard', 'propeller'].includes(hat) || hat === true; // these hats cover the top of the head
+  const capped = ['santa', 'cowboy', 'straw', 'pirate', 'chef', 'tophat', 'beanie', 'wizard', 'propeller', 'viking', 'astro'].includes(hat) || hat === true; // these hats cover the top of the head
   [[-12, -1, 5.4], [-13, -9, 5.6], [-10, -17, 5.6], [-3, -22, 5.8], [6, -21, 5.6], [12, -14, 5.2], [-9, 6, 4.2]].forEach(([dx, dy, r]) => { if (capped && dy < -9) return; curl(cx + dx, cy + dy, r); });
   circle(cx, cy, fb ? 12.6 : 11, '#f6d3b0'); if (fb) { ell(cx + 3, cy + 7, 7, 3, 0, 'rgba(255,255,255,.14)'); }
   circle(cx - 6, cy + 1, 3, '#eaba92'); circle(cx - 6, cy + 1, 1.4, '#d9a073');
-  if (!capped) [[-4, -12, 4.6], [3, -14, 4.8], [10, -10, 4.2], [-10, -8, 4]].forEach(([dx, dy, r]) => curl(cx + dx, cy + dy, r));
+  if (!capped || hat === 'astro') [[-4, -12, 4.6], [3, -14, 4.8], [10, -10, 4.2], [-10, -8, 4]].forEach(([dx, dy, r]) => curl(cx + dx, cy + dy, r));
   if (fb) { circle(cx + 5.6, cy + 1.2, 3.7, '#fff'); circle(cx + 6.3, cy + 1.4, 2.8, '#3b8fe0'); circle(cx + 6.6, cy + 1.4, 1.5, '#14283f'); circle(cx + 7.4, cy + 0.4, 1.1, '#fff'); circle(cx + 5.4, cy + 2.6, 0.6, '#fff'); } else { circle(cx + 5.5, cy + 0.5, 2.7, '#fff'); circle(cx + 6.1, cy + 0.6, 1.9, '#3b7fc4'); circle(cx + 6.3, cy + 0.6, 1, '#14283f'); circle(cx + 6.9, cy - 0.2, 0.7, '#fff'); }
   ctx.strokeStyle = '#b8862a'; ctx.lineWidth = 1.3; ctx.beginPath(); ctx.moveTo(cx + 3, cy - 4.2); ctx.quadraticCurveTo(cx + 6, cy - 5.4, cx + 9, cy - 4); ctx.stroke();
   circle(cx + 10.6, cy + 3, 1.5, '#eeb893');
@@ -845,7 +845,7 @@ function drawOli(x, y, ph, hat, o = {}) {
   ctx.strokeStyle = '#b5483a'; ctx.lineWidth = 1.3; ctx.beginPath(); ctx.arc(cx + 5.5, cy + 6.4, fb ? 3.2 : 2.5, 0.3, Math.PI * 0.75); ctx.stroke();
   // hats sit on the hairline (brim just above the eyebrows) and cover the top curls
   const HY = y - 57;
-  if (capped) { ell(x + 3, HY + 11, 13, 2.6, 0, 'rgba(60,30,10,.16)'); circle(x - 9, y - 41, 4.4, hairD); curl(x - 12, y - 41, 4.6); curl(x - 11, y - 34, 4); }
+  if (capped && hat !== 'astro') { ell(x + 3, HY + 11, 13, 2.6, 0, 'rgba(60,30,10,.16)'); circle(x - 9, y - 41, 4.4, hairD); curl(x - 12, y - 41, 4.6); curl(x - 11, y - 34, 4); }
   drawHat(hat, x, HY);
   if (o.dive) { // diving mask with a strap round the head, and a snorkel
     ctx.strokeStyle = '#1f5f9a'; ctx.lineWidth = 2.6; ctx.beginPath(); ctx.moveTo(cx + 11, cy - 1.6); ctx.quadraticCurveTo(cx - 2, cy - 9, cx - 12, cy - 2); ctx.stroke();
@@ -857,10 +857,17 @@ function drawOli(x, y, ph, hat, o = {}) {
 
 function drawHat(hat, x, HY) {
   ctx.lineJoin = 'round';
-  if (hat === 'crown') {
-    ctx.fillStyle = '#ffd34d'; ctx.beginPath(); ctx.moveTo(x - 12, HY + 8); ctx.lineTo(x - 13, HY - 7); ctx.lineTo(x - 6, HY - 1); ctx.lineTo(x + 1, HY - 11); ctx.lineTo(x + 8, HY - 1); ctx.lineTo(x + 15, HY - 7); ctx.lineTo(x + 14, HY + 8); ctx.closePath(); ctx.fill();
-    ctx.strokeStyle = '#a67c10'; ctx.lineWidth = 1.5; ctx.stroke(); ctx.fillStyle = '#e8b420'; ctx.fillRect(x - 12, HY + 4, 26, 4);
-    circle(x + 1, HY + 2, 2, '#e53935'); circle(x - 6, HY + 3, 1.5, '#40c4ff'); circle(x + 8, HY + 3, 1.5, '#69f0ae');
+  if (hat === 'astro') { // astronaut helmet: full bubble round the head (face shows through the visor), flag patch, blinking antenna
+    const hx = x + 2, hy = HY + 16; // helmet centre = head centre
+    ctx.strokeStyle = '#8a8a96'; ctx.lineWidth = 1.8; ctx.beginPath(); ctx.moveTo(hx - 9, hy - 19); ctx.lineTo(hx - 12, hy - 28); ctx.stroke(); circle(hx - 12, hy - 29, 2.4, Math.sin(T * 6) > 0 ? '#ff4a3a' : '#a02820');
+    ell(hx - 20, hy + 2, 3, 6, 0, '#3a6fd0'); // ear cap
+    const sg = ctx.createRadialGradient(hx - 7, hy - 10, 3, hx, hy, 23); sg.addColorStop(0, '#fff'); sg.addColorStop(1, '#c3cbdd');
+    ctx.fillStyle = sg; ctx.beginPath(); ctx.arc(hx, hy, 21, 0, Math.PI * 2); ctx.moveTo(hx + 16, hy + 1); ctx.ellipse(hx + 2.5, hy + 1, 13.5, 12.5, 0, 0, Math.PI * 2); ctx.fill('evenodd'); // shell with the visor cut out
+    ctx.strokeStyle = '#8d96aa'; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.arc(hx, hy, 21, 0, Math.PI * 2); ctx.stroke();
+    ctx.fillStyle = '#e53935'; ctx.fillRect(hx - 18, hy - 11, 8, 2.4); ctx.fillStyle = '#fff'; ctx.fillRect(hx - 18, hy - 8.6, 8, 2.4); ctx.fillStyle = '#3a6fd0'; ctx.fillRect(hx - 18, hy - 6.2, 8, 2.4); // flag patch
+    rr(hx - 15, hy + 17, 32, 6.5, 3); ctx.fillStyle = '#3a6fd0'; ctx.fill(); ctx.strokeStyle = '#1a3a80'; ctx.lineWidth = 1.2; ctx.stroke(); // neck ring
+    const vg = ctx.createLinearGradient(hx - 8, hy - 12, hx + 14, hy + 14); vg.addColorStop(0, 'rgba(170,215,255,.2)'); vg.addColorStop(1, 'rgba(40,90,170,.16)'); ctx.beginPath(); ctx.ellipse(hx + 2.5, hy + 1, 13.5, 12.5, 0, 0, Math.PI * 2); ctx.fillStyle = vg; ctx.fill(); ctx.strokeStyle = '#ffc400'; ctx.lineWidth = 2.2; ctx.stroke(); // glass + gold rim
+    ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = 1.8; ctx.beginPath(); ctx.arc(hx + 2.5, hy + 1, 9.6, Math.PI * 1.08, Math.PI * 1.45); ctx.stroke();
   } else if (hat === 'cowboy') {
     ell(x + 1, HY + 7, 20, 4.8, -0.06, '#7a4a22'); ctx.fillStyle = '#9a6330'; ctx.beginPath(); ctx.moveTo(x - 13, HY + 7); ctx.quadraticCurveTo(x - 14, HY - 13, x + 1, HY - 12); ctx.quadraticCurveTo(x + 16, HY - 13, x + 15, HY + 7); ctx.closePath(); ctx.fill();
     ctx.strokeStyle = '#5a3416'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(x - 2, HY - 11); ctx.quadraticCurveTo(x + 1, HY - 6, x + 4, HY - 11); ctx.stroke(); ctx.fillStyle = '#5a3416'; ctx.fillRect(x - 13, HY + 1, 28, 3);
@@ -870,10 +877,11 @@ function drawHat(hat, x, HY) {
     ctx.fillStyle = '#ffd34d'; ctx.beginPath(); ctx.moveTo(x - 13, HY + 8); ctx.lineTo(x - 15, HY - 9); ctx.lineTo(x - 8, HY - 2); ctx.lineTo(x - 3, HY - 12); ctx.lineTo(x + 1, HY - 3); ctx.lineTo(x + 5, HY - 12); ctx.lineTo(x + 10, HY - 2); ctx.lineTo(x + 17, HY - 9); ctx.lineTo(x + 15, HY + 8); ctx.closePath(); ctx.fill(); ctx.strokeStyle = '#8a5a00'; ctx.lineWidth = 1.5; ctx.stroke();
     ctx.fillStyle = '#e8a317'; ctx.fillRect(x - 13, HY + 4, 29, 4);
     circle(x + 1, HY + 1, 2.6, '#40c4ff'); circle(x - 7, HY + 3, 1.8, '#e53935'); circle(x + 9, HY + 3, 1.8, '#69f0ae'); for (const [px, py] of [[x - 15, HY - 9], [x - 3, HY - 12], [x + 5, HY - 12], [x + 17, HY - 9]]) circle(px, py, 2.3, '#fff'); drawStar(x + 1, HY - 17, 3.8, '#fff'); ctx.restore();
-  } else if (hat === 'goldcrown') {
-    ctx.save(); ctx.translate(x + 1, HY + 8); ctx.scale(1.25, 1.25); ctx.translate(-(x + 1), -(HY + 8));
-    ctx.fillStyle = '#ffe066'; ctx.beginPath(); ctx.moveTo(x - 13, HY + 8); ctx.lineTo(x - 14, HY - 8); ctx.lineTo(x - 7, HY - 1); ctx.lineTo(x + 1, HY - 13); ctx.lineTo(x + 9, HY - 1); ctx.lineTo(x + 16, HY - 8); ctx.lineTo(x + 15, HY + 8); ctx.closePath(); ctx.fill(); ctx.strokeStyle = '#a67c10'; ctx.lineWidth = 1.6; ctx.stroke();
-    circle(x + 1, HY + 2, 2.4, '#e53935'); circle(x - 7, HY + 3, 1.8, '#40c4ff'); circle(x + 9, HY + 3, 1.8, '#69f0ae'); drawStar(x + 1, HY - 15, 3.4, '#fff'); ctx.restore();
+  } else if (hat === 'viking') { // viking helmet: steel dome, riveted band, two curved horns
+    for (const sx of [-1, 1]) { ctx.fillStyle = '#efe0b0'; ctx.beginPath(); ctx.moveTo(x + 1 + sx * 8, HY - 4); ctx.lineTo(x + 1 + sx * 14, HY + 5); ctx.quadraticCurveTo(x + 1 + sx * 24, HY + 1, x + 1 + sx * 19, HY - 21); ctx.quadraticCurveTo(x + 1 + sx * 15, HY - 8, x + 1 + sx * 8, HY - 4); ctx.closePath(); ctx.fill(); ctx.strokeStyle = '#a89868'; ctx.lineWidth = 1.3; ctx.stroke(); }
+    ctx.fillStyle = '#aab3c4'; ctx.beginPath(); ctx.moveTo(x - 15, HY + 9); ctx.bezierCurveTo(x - 17, HY - 8, x - 6, HY - 14, x + 2, HY - 13); ctx.bezierCurveTo(x + 14, HY - 13, x + 18, HY - 3, x + 17, HY + 9); ctx.closePath(); ctx.fill(); ctx.strokeStyle = '#5a6478'; ctx.lineWidth = 1.5; ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,255,255,.65)'; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(x - 8, HY - 4); ctx.quadraticCurveTo(x - 6, HY - 10, x + 1, HY - 10); ctx.stroke();
+    rr(x - 16, HY + 3, 34, 7, 3); ctx.fillStyle = '#7a8296'; ctx.fill(); ctx.strokeStyle = '#4a5266'; ctx.lineWidth = 1.2; ctx.stroke(); for (const dx of [-11, -4, 3, 10, 16]) circle(x + dx, HY + 6.5, 1.1, '#e8c860');
   } else if (hat === 'straw') {
     ell(x + 1, HY + 8, 23, 5.2, -0.05, '#e0b85c'); ctx.fillStyle = '#f2d98c'; ctx.beginPath(); ctx.moveTo(x - 12, HY + 7); ctx.quadraticCurveTo(x - 13, HY - 10, x + 1, HY - 9); ctx.quadraticCurveTo(x + 15, HY - 10, x + 14, HY + 7); ctx.closePath(); ctx.fill();
     ctx.save(); ctx.clip(); ctx.fillStyle = '#d63a3a'; ctx.fillRect(x - 14, HY + 1, 30, 4); ctx.strokeStyle = 'rgba(150,110,40,.55)'; ctx.lineWidth = 1; for (let i = -9; i < 12; i += 4) { ctx.beginPath(); ctx.moveTo(x + i, HY - 9); ctx.lineTo(x + i, HY + 1); ctx.stroke(); } ctx.restore(); // weave and band stay inside the crown
@@ -4915,10 +4923,10 @@ function awning(h) { // striped market awning with a scalloped edge
   for (let i = 0; i < n; i++) { ctx.fillStyle = i % 2 ? '#fff7e8' : '#d63a3a'; ctx.beginPath(); ctx.moveTo(i * sw, 0); ctx.lineTo((i + 1) * sw, 0); ctx.lineTo((i + 1) * sw, h); ctx.arc(i * sw + sw / 2, h, sw / 2, 0, Math.PI); ctx.closePath(); ctx.fill(); }
   ctx.fillStyle = 'rgba(0,0,0,.18)'; ctx.fillRect(0, h - 10, W, 10); ctx.strokeStyle = '#7a1f1f'; ctx.lineWidth = 2; for (let i = 0; i < n; i++) { ctx.beginPath(); ctx.arc(i * sw + sw / 2, h, sw / 2, 0, Math.PI); ctx.stroke(); }
 }
-const HAT_BOX = { santa: [-27, 21, -20, 11], cowboy: [-19, 20, -12, 11], crown: [-14, 15, -12, 8], straw: [-22, 23, -10, 13], pirate: [-22, 23, -11, 9], goggles: [-15, 17, -2, 11], chef: [-14, 15, -23, 8], tophat: [-16, 17, -20, 12], beanie: [-18, 19, -22, 12], wizard: [-20, 21, -33, 12], propeller: [-16, 17, -13, 8], antlers: [-21, 22, -20, 5], halo: [-17, 18, -21, -7], goldcrown: [-19, 20, -25, 8], mastercrown: [-22, 23, -30, 9] }; // drawn extent of each hat around its brim line [x0, x1, y0, y1]
+const HAT_BOX = { santa: [-27, 21, -20, 11], cowboy: [-19, 20, -12, 11], astro: [-19, 23, -30, 40], straw: [-22, 23, -10, 13], pirate: [-22, 23, -11, 9], goggles: [-15, 17, -2, 11], chef: [-14, 15, -23, 8], tophat: [-16, 17, -20, 12], beanie: [-18, 19, -22, 12], wizard: [-20, 21, -33, 12], propeller: [-16, 17, -13, 8], antlers: [-21, 22, -20, 5], halo: [-17, 18, -21, -7], viking: [-21, 23, -22, 10], mastercrown: [-22, 23, -30, 9] }; // drawn extent of each hat around its brim line [x0, x1, y0, y1]
 function drawHatIcon(kind, cx, cy, k, lim) { // lim: room above the brim; tall hats shrink to fit while the brim stays where it is
   const sc = kind && lim ? Math.min(k, lim / (-(HAT_BOX[kind] || [0, 0, -20])[2] + 8)) : k;
-  ctx.save(); ctx.translate(cx, cy + 6 + 8 * (k - sc)); ctx.scale(sc, sc); if (kind) drawHat(kind, 0, 0); else ico('star', 0, -8, 34); ctx.restore();
+  ctx.save(); ctx.translate(cx, cy + 6 + 8 * (k - sc)); ctx.scale(sc, sc); if (kind === 'astro') ctx.translate(0, -9); /* the helmet wraps the head, so centre it on the card's head */ if (kind) drawHat(kind, 0, 0); else ico('star', 0, -8, 34); ctx.restore();
 }
 function drawFlameIcon(it, cx, cy, k) {
   ctx.save(); ctx.translate(cx, cy); ctx.scale(k, k);
@@ -4977,7 +4985,7 @@ function shopScene() {
   ctx.strokeStyle = '#2a2018'; ctx.lineWidth = 1.6; ctx.beginPath(); for (let i = 0; i <= 17; i++) { const x = 20 + i * 56, y = 68 + Math.sin(i * 1.1) * 3; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); } ctx.stroke();
   // shelf with hats on stands, jars and a toy dino (left of the sign)
   rr(10, 150, 286, 9, 3); ctx.fillStyle = '#8a5a2e'; ctx.fill(); ctx.fillStyle = '#5a3a1c'; ctx.fillRect(22, 159, 6, 12); ctx.fillRect(278, 159, 6, 12);
-  [['santa', 44], ['cowboy', 104], ['crown', 164], ['wizard', 224]].forEach(([k, x]) => { ctx.fillStyle = '#6b4a2b'; ctx.fillRect(x - 2, 136, 4, 14); circle(x, 134, 7, '#e8c9a0'); ctx.save(); ctx.translate(x, 150); drawHatIcon(k, 0, -34, 1.25); ctx.restore(); });
+  [['santa', 44], ['cowboy', 104], ['astro', 164], ['wizard', 224]].forEach(([k, x]) => { ctx.fillStyle = '#6b4a2b'; ctx.fillRect(x - 2, 136, 4, 14); circle(x, 134, 7, '#e8c9a0'); ctx.save(); ctx.translate(x, 150); drawHatIcon(k, 0, -34, 1.25); ctx.restore(); });
   rr(254, 120, 26, 30, 6); ctx.fillStyle = 'rgba(255,255,255,.5)'; ctx.fill(); ctx.strokeStyle = '#6b4a2b'; ctx.lineWidth = 2; ctx.stroke(); drawAmber(267, 138, 7); ctx.fillStyle = '#6b4a2b'; ctx.fillRect(257, 116, 20, 6);
   // small shelf: lantern, egg, jar (beside the cards)
   rr(298, 258, 138, 9, 3); ctx.fillStyle = '#8a5a2e'; ctx.fill(); ctx.fillStyle = '#6b4a2b'; ctx.fillRect(310, 267, 6, 12); ctx.fillRect(418, 267, 6, 12);
@@ -5356,8 +5364,8 @@ function drawSheet() {
     oRex(420, 510, 0.9, 0, 0.05, Object.assign(rexLook(0), { rider: true, duck: true }));
     oRex(700, 510, 0.9, t, 0.3, Object.assign(rexLook(0), { fire: true }));
   } else if (sheetPage === 'faces') {
-    row(300, 'OLI hats: none / santa / cowboy / crown');
-    [null, 'santa', 'cowboy', 'crown'].forEach((h, i) => { ctx.save(); ctx.translate(90 + i * 150, 250); ctx.scale(3.6, 3.6); drawOli(0, 0, 0.5, h, {}); ctx.restore(); });
+    row(300, 'OLI hats: none / santa / cowboy / astro');
+    [null, 'santa', 'cowboy', 'astro'].forEach((h, i) => { ctx.save(); ctx.translate(90 + i * 150, 250); ctx.scale(3.6, 3.6); drawOli(0, 0, 0.5, h, {}); ctx.restore(); });
     drawGoettiHead(790, 160, 90, true);
     row(520, 'PROFESSOR GOETTI portraits + full body');
     drawPortrait('goetti', 100, 440, 60); oGoetti(300, 530, 1.0, true); drawPortrait('goetti', 500, 450, 40);
