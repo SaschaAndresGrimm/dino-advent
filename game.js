@@ -5235,7 +5235,7 @@ function drawEnding() {
   drawAurora();
   { const mg = ctx.createRadialGradient(860, 80, 20, 860, 80, 130); mg.addColorStop(0, 'rgba(240,240,220,.35)'); mg.addColorStop(1, 'rgba(240,240,220,0)'); ctx.fillStyle = mg; ctx.fillRect(730, 0, 230, 210); }
   circle(860, 80, 34, '#f4f1de'); circle(850, 72, 6, 'rgba(0,0,0,.06)'); circle(868, 92, 4.5, 'rgba(0,0,0,.06)');
-  drawVolcano(700, 400, 0.7, '#1b2a44', 0);
+  drawVolcano(700, 448, 0.82, '#2a3c5c', 0);
   drawHills(0, '#c9dcf0', 420, 30, 3);
   endingSnow();
   // Goetti's station, the same hut as in the story, in its winter dress
