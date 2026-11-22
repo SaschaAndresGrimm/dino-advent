@@ -54,7 +54,7 @@ jobs:
           # Every deploy gets its own service-worker cache, so installed copies pick up the new game.
           sed -i "s/dino-advent-dev/dino-advent-${GITHUB_SHA::7}/" _site/sw.js
           grep -n "const CACHE" _site/sw.js
-      - uses: actions/configure-pages@v5
+      - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
