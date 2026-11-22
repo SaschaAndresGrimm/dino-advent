@@ -43,7 +43,7 @@ Add `?day=12` to the URL to pretend it is 12 December (see "Testing the calendar
 - **Browser console:** `__dino.startLevel(i)` starts level `i` (0 to 23).
 
 ## More to do in the game
-- **Laden** (shop): Goetti sells colours, hats and fire colours. Tap an item to preview it live on Rex.
+- **Goettis Laden** (shop): Rex colours, fire colours, hats and jackets (each boy wears his own), accessories for Chili, and Goetti's vouchers for real outings (Velotour, Fischen, Dino-Museum). Tap an item to preview it live. Door gifts appear here too, marked "Geschenk".
 - **Dino-Buch:** 15 sticker cards. Unfound ones are silhouettes.
 - **Endlos-Lauf:** a random run in any finished theme that gets steadily harder (a new **Stufe** every ~26 segments). Best score per theme is saved.
 - **Riddle gate** at the end of every level: a wrong answer costs 1 amber; **Tipp** crosses out one wrong answer.

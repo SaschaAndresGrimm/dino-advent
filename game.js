@@ -35,6 +35,12 @@ save.learned = Object.assign({ duck: 0, stomp: 0, fire: 0, dash: 0, swim: 0, gli
 while (save.riddleSeen.length < 8) save.riddleSeen.push([]);
 if (!save.owned) save.owned = { skin: [0], hat: [0], fire: [0] };
 if (!save.equip) save.equip = { skin: 0, hat: 0, fire: 0 };
+// shop extras: jackets for both boys, Fabio's own hat, Chili's accessories, Goetti's vouchers
+for (const [k, v] of [['jacket', [0, 1]], ['chili', [0]], ['wish', []]]) if (!save.owned[k]) save.owned[k] = v;
+if (save.equip.jacket == null) save.equip.jacket = 0;
+if (save.equip.fabioJacket == null) save.equip.fabioJacket = 1;
+if (save.equip.fabioHat == null) save.equip.fabioHat = save.equip.hat;
+if (save.equip.chili == null) save.equip.chili = 0;
 if (!save.best) save.best = []; while (save.best.length < 8) save.best.push(0);
 if (save.volMusic == null) save.volMusic = 4; if (save.volSfx == null) save.volSfx = 4; if (!save.calm) save.calm = false;
 if (!save.dailyLast) save.dailyLast = 0; if (!save.dailyStreak) save.dailyStreak = 0; if (!save.dailyBoardDay) save.dailyBoardDay = 0; if (!save.installHint) save.installHint = false;
@@ -569,9 +575,27 @@ const FIRES = [
   { n: 'Gold', gift: 15, a: '255,240,150', b: '255,190,30', c: '200,120,0', fl: ['#fffbe0', '#ffe066', '#e8a317'], ball: '#ffd034', glow: '255,215,80' },
   { n: 'Regenbogen', gift: 19, rainbow: true, a: '255,200,100', b: '255,80,80', c: '200,0,60', fl: ['#fff', '#ff9a3c', '#ff4a8a'], ball: '#ff8a20', glow: '255,160,80' },
 ];
+// jackets: index 0 is Oli's red, 1 is Fabio's yellow (both free); a jacket comes with its scarf
+const JACKETS = [
+  { n: 'Rot', cost: 0, jac: ['#f26a5e', '#e0473c', '#a82e26'], scarf: '#2e9e5b', scarfD: 'rgba(15,70,35,.5)', zip: '#ffd34d', pocket: 'rgba(120,20,20,.55)' },
+  { n: 'Gelb', cost: 0, jac: ['#ffd65c', '#f5b324', '#c2800e'], scarf: '#2f8fd6', scarfD: 'rgba(15,50,100,.5)', zip: '#fff4c8', pocket: 'rgba(140,80,0,.55)' },
+  { n: 'Blau', cost: 150, jac: ['#6aa8f2', '#3a7ee0', '#22549e'], scarf: '#ffb02e', scarfD: 'rgba(120,70,0,.5)', zip: '#fff', pocket: 'rgba(20,40,100,.55)' },
+  { n: 'Grün', cost: 150, jac: ['#7fd67a', '#46ad4a', '#2a7a30'], scarf: '#e53935', scarfD: 'rgba(110,10,10,.5)', zip: '#ffe08a', pocket: 'rgba(20,70,20,.55)' },
+  { n: 'Lila', cost: 250, jac: ['#c49af0', '#9a5ed8', '#6a34a8'], scarf: '#ffd34d', scarfD: 'rgba(120,90,0,.5)', zip: '#fff', pocket: 'rgba(60,20,100,.55)' },
+  { n: 'Nacht', cost: 300, jac: ['#5a6aa8', '#34407a', '#1c2450'], scarf: '#40c4ff', scarfD: 'rgba(0,60,100,.5)', zip: '#ffd34d', pocket: 'rgba(0,0,30,.55)' },
+  { n: 'Weihnacht', cost: 400, jac: ['#e85a5a', '#c62828', '#8a1414'], scarf: '#ffffff', scarfD: 'rgba(160,160,170,.6)', zip: '#ffffff', pocket: 'rgba(255,255,255,.6)' },
+  { n: 'Gold', cost: 600, jac: ['#ffe680', '#f0c030', '#b08010'], scarf: '#c62828', scarfD: 'rgba(100,10,10,.5)', zip: '#fff8d0', pocket: 'rgba(120,80,0,.55)' },
+];
+const CHILI_ITEMS = [{ n: 'Ohne', cost: 0 }, { n: 'Schleife', cost: 80, k: 'bow' }, { n: 'Halstuch', cost: 120, k: 'scarf' }, { n: 'Mini-Mütze', cost: 150, k: 'santa' }, { n: 'Sonnenbrille', cost: 200, k: 'glasses' }, { n: 'Rucksack', cost: 250, k: 'pack' }, { n: 'Blumenkranz', cost: 300, k: 'flowers' }];
+// Goetti's vouchers: real outings, bought once with the shared amber and redeemed with Goetti
+const WISHES = [
+  { n: 'Velotour', cost: 600, text: 'eine grosse Velotour mit Goetti', icon: (x, y, k) => drawBike(x, y + 30 * k, 0.62 * k) },
+  { n: 'Fischen', cost: 900, text: 'einen Tag Fischen mit Goetti', icon: (x, y, k) => drawRod(x, y + 8 * k, 0.8 * k, T * 3) },
+  { n: 'Dino-Museum', cost: 1200, text: 'einen Ausflug ins Dino-Museum mit Goetti', icon: (x, y, k) => drawTrike(x - 2 * k, y + 22 * k, 0.62 * k, '#c98f5a', 0, false) },
+];
 function rgbStr(hex) { return `${parseInt(hex.slice(1, 3), 16)},${parseInt(hex.slice(3, 5), 16)},${parseInt(hex.slice(5, 7), 16)}`; }
 function fireOf(i) { const f = FIRES[i] || FIRES[0]; if (!f.rainbow) return f; const h = (T * 90) % 360, a = hslHex(h, 100, 78), b = hslHex(h, 100, 56), c = hslHex(h, 100, 36); return Object.assign({}, f, { a: rgbStr(a), b: rgbStr(b), c: rgbStr(c), fl: [hslHex(h, 100, 94), a, b], ball: b, glow: rgbStr(b) }); }
-function rexLook(wi) { const sk = SKINS[save.equip.skin] || SKINS[0], h = HATS[save.equip.hat] || HATS[0], jungle = wi === 0 && !sk.body; return { dive: wi === 6, rainbow: sk.rainbow, body: jungle ? '#22a98c' : sk.body, dark: jungle ? '#167a68' : sk.dark, belly: sk.belly, hat: h.k || (wi === 2 || wi === 4 || wi === 7 ? 'santa' : null) }; }
+function rexLook(wi) { const sk = SKINS[save.equip.skin] || SKINS[0], h = HATS[save.equip.hat] || HATS[0], h2 = HATS[save.equip.fabioHat] || HATS[0], auto = wi === 2 || wi === 4 || wi === 7 ? 'santa' : null, jungle = wi === 0 && !sk.body; return { hat2: h2.k || auto, dive: wi === 6, rainbow: sk.rainbow, body: jungle ? '#22a98c' : sk.body, dark: jungle ? '#167a68' : sk.dark, belly: sk.belly, hat: h.k || (wi === 2 || wi === 4 || wi === 7 ? 'santa' : null) }; }
 const WHO = { goetti: 'Goetti', chili: 'Chili', rex: () => save.rexName || 'T-Rex', mami: 'Mamasaurus', papi: 'Papasaurus', fabio: () => save.fabioName || 'Fabio', kiwi: 'Kiwi' };
 
 // =====================================================================
@@ -583,7 +607,7 @@ const KID = { // outfits: Oli in red with a green scarf, Fabio in yellow with a 
 };
 function drawOli(x, y, ph, hat, o = {}) {
   ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-  const K = KID[o.kid || 'oli'];
+  const K = Object.assign({}, KID[o.kid || 'oli'], o.jacket != null ? JACKETS[o.jacket] : null);
   const vy = clamp((o.vy || 0) / 900, -1, 1), flutter = Math.sin(ph - 1.3) * 3 - vy * 6;
   // legs: thigh, knee, shin, boot - the knee swings with the stride
   const kx = x + 9 + Math.sin(ph) * 2.5, ky = y + 6, fx = x + 5 + Math.sin(ph + 0.8) * 3, fy = y + 18;
@@ -777,8 +801,8 @@ function drawRex(x, y, s, ph, jaw, o = {}) {
     const lean = o.duck ? 0 : (o.lean || 0) + (o.air ? (vyn < 0 ? 0.12 : -0.08) : 0) - (jaw > 0.5 ? 0.16 : 0) - hurt * 0.3;
     ctx.save(); if (o.duck) { ctx.translate(-4, -86); ctx.rotate(0.9); } else { ctx.translate(-4, -92); ctx.rotate(lean); } ctx.scale(1.15, 1.15);
     // Fabio sits in front of Oli, smaller; Oli's rein arm wraps round him
-    const fab = () => { ctx.save(); ctx.translate(23, 10); ctx.scale(0.7, 0.7); drawOli(0, 0, ph + 0.6, o.hat, { vy: o.vy, dive: o.dive, kid: 'fabio', hold: true }); ctx.restore(); };
-    drawOli(0, 0, ph, o.hat, { vy: o.vy, dive: o.dive, front: fab }); ctx.restore();
+    const fab = () => { ctx.save(); ctx.translate(23, 10); ctx.scale(0.7, 0.7); drawOli(0, 0, ph + 0.6, o.hat2 !== undefined ? o.hat2 : o.hat, { vy: o.vy, dive: o.dive, kid: 'fabio', hold: true, jacket: save.equip.fabioJacket }); ctx.restore(); };
+    drawOli(0, 0, ph, o.hat, { vy: o.vy, dive: o.dive, front: fab, jacket: save.equip.jacket }); ctx.restore();
   }
   ctx.restore(); ctx.globalAlpha = 1;
 }
@@ -910,6 +934,16 @@ function drawPepper(x, y, s = 1, rot = 0.5) {
   ctx.restore();
 }
 const chiliFx = { vy: 0, dig: false, scared: 0, joy: 0, dive: false };
+let chiliAcc = null; // shop cards draw Chili with a given accessory; null = what Chili wears
+function drawChiliAcc(k) { // in Chili's coordinates: head at (15,-24) r12, ears from (6..14,-33), body centre (0,-15)
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  if (k === 'bow') { ctx.save(); ctx.translate(10, -35); ctx.rotate(-0.3); ctx.fillStyle = '#e53935'; for (const sx of [-1, 1]) { ctx.beginPath(); ctx.moveTo(0, 0); ctx.quadraticCurveTo(sx * 9, -8, sx * 10, 0); ctx.quadraticCurveTo(sx * 9, 8, 0, 0); ctx.fill(); } circle(0, 0, 2.6, '#b71c1c'); ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(-7, -3); ctx.lineTo(-4, -2); ctx.moveTo(7, -3); ctx.lineTo(4, -2); ctx.stroke(); ctx.restore(); }
+  else if (k === 'scarf') { ctx.fillStyle = '#2f8fd6'; ctx.beginPath(); ctx.moveTo(4, -17); ctx.quadraticCurveTo(13, -11, 23, -15); ctx.lineTo(18, -4); ctx.closePath(); ctx.fill(); ctx.strokeStyle = '#1c5a96'; ctx.lineWidth = 1; ctx.stroke(); for (const [dx, dy] of [[9, -13], [15, -12], [17, -8]]) circle(dx, dy, 1.1, '#fff'); }
+  else if (k === 'santa') { ctx.save(); ctx.translate(19, -34); ctx.rotate(0.35); ctx.fillStyle = '#e53935'; ctx.beginPath(); ctx.moveTo(-8, 0); ctx.quadraticCurveTo(-2, -16, 9, -14); ctx.lineTo(8, 0); ctx.closePath(); ctx.fill(); circle(10, -14, 3, '#fff'); rr(-9, -2, 19, 5, 2.5); ctx.fillStyle = '#fff'; ctx.fill(); ctx.restore(); }
+  else if (k === 'glasses') { ctx.fillStyle = '#1b2430'; ell(20.5, -26, 6, 4.6, 0, '#1b2430'); ctx.strokeStyle = '#1b2430'; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(14.5, -27); ctx.lineTo(6, -28); ctx.stroke(); ell(19, -27.5, 2.2, 1.2, -0.3, 'rgba(255,255,255,.55)'); }
+  else if (k === 'pack') { rr(-12, -33, 14, 16, 4); ctx.fillStyle = '#3a9a4a'; ctx.fill(); ctx.strokeStyle = '#1f5a28'; ctx.lineWidth = 1.4; ctx.stroke(); rr(-10, -24, 10, 6, 2); ctx.fillStyle = '#46ad4a'; ctx.fill(); ctx.stroke(); circle(-5, -21, 1, '#ffd34d'); ctx.strokeStyle = '#7a4a22'; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(2, -31); ctx.quadraticCurveTo(7, -22, 3, -13); ctx.stroke(); }
+  else if (k === 'flowers') { ctx.strokeStyle = '#4a8a3a'; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.arc(15, -24, 12.5, Math.PI * 1.12, Math.PI * 1.85); ctx.stroke(); [[1.15, '#ff8ab0'], [1.3, '#ffd34d'], [1.45, '#fff'], [1.6, '#ff8ab0'], [1.75, '#b39ddb']].forEach(([a, c]) => { const fx = 15 + Math.cos(Math.PI * a) * 12.5, fy = -24 + Math.sin(Math.PI * a) * 12.5; for (let i = 0; i < 5; i++) circle(fx + Math.cos(i * 1.257) * 2.2, fy + Math.sin(i * 1.257) * 2.2, 1.6, c); circle(fx, fy, 1.3, '#f0a020'); }); }
+}
 function drawChili(x, y, s, ph, flip) {
   ctx.save(); ctx.translate(x, y); ctx.scale(flip ? -s : s, s);
   const fx = clamp(chiliFx.vy / 600, -1, 1);
@@ -940,6 +974,7 @@ function drawChili(x, y, s, ph, flip) {
   else { circle(20, -26, 4.6, '#1b1210'); circle(21.6, -27.8, 1.8, '#fff'); circle(18.8, -24.2, 0.9, '#fff'); }
   if (chiliFx.dig) { ctx.strokeStyle = col; ctx.lineWidth = 4.5; ctx.lineCap = 'round'; for (const k of [0, 1.6]) { ctx.beginPath(); ctx.moveTo(12, -8); ctx.lineTo(22 + Math.sin(T * 34 + k) * 5, -1 + Math.cos(T * 34 + k) * 2); ctx.stroke(); } }
   circle(27, -21, 2.4, '#f48fb1');
+  { const acc = (CHILI_ITEMS[chiliAcc != null ? chiliAcc : save.equip.chili] || {}).k; if (acc) drawChiliAcc(acc); }
   if (chiliFx.dive) { // glass diving helmet with a golden collar
     ctx.save(); const g = ctx.createRadialGradient(8, -50, 3, 14, -38, 34); g.addColorStop(0, 'rgba(255,255,255,.55)'); g.addColorStop(0.5, 'rgba(170,225,255,.22)'); g.addColorStop(1, 'rgba(120,200,255,.3)');
     ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(16, -38, 20, 30, 0, 0, Math.PI * 2); ctx.fill(); ctx.lineWidth = 2.4; ctx.strokeStyle = 'rgba(210,240,255,.9)'; ctx.stroke(); ctx.strokeStyle = 'rgba(255,255,255,.8)'; ctx.lineWidth = 2.6; ctx.beginPath(); ctx.arc(16, -38, 15, Math.PI * 1.15, Math.PI * 1.45); ctx.stroke();
@@ -1149,7 +1184,7 @@ function drawPortrait(who, cx, cy, r, still) {
   else if (who === 'rex') { const s = r / 42; drawRex(cx - 88 * s, cy + 104 * s, s * 0.95, 0, 0.3 + 0.2 * Math.sin(T * 8)); }
   else if (who === 'mami' || who === 'papi') { const s = r / 34; drawLongneck(cx - 72 * s, cy + 146 * s, s, who === 'mami' ? '#b07cc6' : '#4f8fd6', T * 2); }
   else if (who === 'kiwi') { const s = r / 22; drawKiwi(cx - 16 * s, cy + 22 * s, s, T * 6); }
-  else if (who === 'fabio') { const k = r / 21; ctx.save(); ctx.translate(cx - 8 * k, cy + 44 * k); ctx.scale(k, k); drawOli(0, 0, 0.5, null, { kid: 'fabio', hold: true }); ctx.restore(); }
+  else if (who === 'fabio') { const k = r / 21; ctx.save(); ctx.translate(cx - 8 * k, cy + 44 * k); ctx.scale(k, k); drawOli(0, 0, 0.5, null, { kid: 'fabio', hold: true, jacket: save.equip.fabioJacket }); ctx.restore(); }
   ctx.restore();
   ctx.lineWidth = 4; ctx.strokeStyle = '#6b4a2b'; ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke();
 }
@@ -2335,7 +2370,7 @@ function go(s) {
   if (s === 'tmap') tmapT = 0;
   settingsOpen = false;
   if (scene === 'shop' && s !== 'shop' && save.newGifts.length) { save.newGifts = []; writeSave(); }
-  scene = s; shopConfirm = null; endlessPick = false; doorOverlay = null; parentMode = false; titlePress = 0; fadeT = 1; if (s === 'shop') { shopTab = 0; shopPage = 0; shopSel = save.equip.skin; shopTalk = { t: 4, text: 'Willkommen! Such dir etwas aus.' }; } parts = []; dialog = null; toasts = [];
+  scene = s; shopConfirm = null; wishShow = -1; endlessPick = false; doorOverlay = null; parentMode = false; titlePress = 0; fadeT = 1; if (s === 'shop') { shopTab = 0; shopPage = 0; shopSel = save.equip.skin; shopTalk = { t: 4, text: 'Willkommen! Such dir etwas aus.' }; } parts = []; dialog = null; toasts = [];
   if (s === 'map' && save.masterNew && save.treasureNew < 0 && !save.afterNew) { save.masterNew = 0; writeSave(); mapFW = 9; SFX.right(); startDialog([
     { who: 'goetti', text: 'Unglaublich, {oli} und {fabio}! Alle 72 Medaillen! Ihr seid die grössten Dino-Meister der Welt!' },
     { who: 'fabio', text: 'Wir sind Meister! Wir sind Meister!' },
@@ -4161,7 +4196,7 @@ function drawDoorOverlay() { // the door shakes, glows at the seam, swings open 
   const cosm = o.g.key !== 'amber', worn = cosm && save.equip[o.g.key] === o.g.i;
   if (cosm) {
     button('Zurück', 268, 432, 100, 44, () => { doorOverlay = null; }, { size: 19 });
-    button(worn ? 'Angelegt ✓' : 'Anziehen', 376, 432, 140, 44, () => { save.equip[o.g.key] = o.g.i; save.newGifts = save.newGifts.filter(k => k !== o.g.key + ':' + o.g.i); writeSave(); SFX.right(); }, { size: 19, color: worn ? '#d4f2bd' : '#9fd3ff', disabled: u < 1 || worn });
+    button(worn ? 'Angelegt ✓' : 'Anziehen', 376, 432, 140, 44, () => { save.equip[o.g.key] = o.g.i; if (o.g.key === 'hat') save.equip.fabioHat = o.g.i; save.newGifts = save.newGifts.filter(k => k !== o.g.key + ':' + o.g.i); writeSave(); SFX.right(); }, { size: 19, color: worn ? '#d4f2bd' : '#9fd3ff', disabled: u < 1 || worn });
     button('Los geht\'s!', 524, 432, 170, 44, () => { doorOverlay = null; launchLevel(o.i); }, { size: 20, icon: icon('play'), disabled: u < 1 });
   } else {
     button('Zurück', 270, 432, 150, 44, () => { doorOverlay = null; }, { size: 22 });
@@ -4443,7 +4478,35 @@ function drawFlameIcon(it, cx, cy, k) {
   for (const [sc, col] of [[1, `rgb(${it.b})`], [0.72, `rgb(${it.a})`], [0.4, '#fff']]) { ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(0, -30 * sc); ctx.bezierCurveTo(14 * sc, -12 * sc, 20 * sc, 4 * sc, 12 * sc, 16 * sc); ctx.bezierCurveTo(6 * sc, 26 * sc, -6 * sc, 26 * sc, -12 * sc, 16 * sc); ctx.bezierCurveTo(-20 * sc, 2 * sc, -8 * sc, -10 * sc, 0, -30 * sc); ctx.fill(); if (sc === 1) { ctx.lineWidth = 2.5; ctx.strokeStyle = 'rgba(0,0,0,.35)'; ctx.stroke(); } }
   ctx.restore();
 }
-const SHOP_TABS = [['Farbe', 'skin', SKINS], ['Hut', 'hat', HATS], ['Feuer', 'fire', FIRES]];
+// each tab: label, owned key, item list, equip slots (hats and jackets have one slot per boy, vouchers none), Goetti's line
+const SHOP_TABS = [
+  { lb: 'Rex', key: 'skin', list: SKINS, eq: ['skin'], say: 'Welche Farbe darf es sein?' },
+  { lb: 'Feuer', key: 'fire', list: FIRES, eq: ['fire'], say: 'Feuer in allen Farben!' },
+  { lb: 'Hüte', key: 'hat', list: HATS, eq: ['hat', 'fabioHat'], say: 'Hüte für {oli} und {fabio}!' },
+  { lb: 'Jacken', key: 'jacket', list: JACKETS, eq: ['jacket', 'fabioJacket'], say: 'Neue Jacken für euch zwei!' },
+  { lb: 'Chili', key: 'chili', list: CHILI_ITEMS, eq: ['chili'], say: 'Etwas Schönes für Chili?' },
+  { lb: 'Goetti', key: 'wish', list: WISHES, eq: [], say: 'Meine Gutscheine! Die lösen wir zusammen ein – in echt!' },
+];
+const kidShort = n => n.length > 7 ? n.slice(0, 6) + '.' : n;
+const kidNames = () => [kidShort(save.oliName || 'Oli'), kidShort(save.fabioName || 'Fabio')];
+let wishShow = -1; // voucher card on screen (index into WISHES)
+function drawVoucher(i) { // Goetti's voucher: a ticket with a dashed border, the outing, both names and Goetti's signature
+  const wv = WISHES[i], x = 230, y = 34, w = 500, h = 330;
+  ctx.fillStyle = 'rgba(8,10,24,.8)'; ctx.fillRect(0, 0, W, H);
+  ctx.save(); ctx.translate(W / 2, y + h / 2); ctx.rotate(-0.02); ctx.translate(-W / 2, -(y + h / 2));
+  rr(x + 6, y + 8, w, h, 18); ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.fill();
+  rr(x, y, w, h, 18); ctx.fillStyle = vgrad(y, y + h, '#fffaf0', '#fbe9c4'); ctx.fill(); ctx.lineWidth = 4; ctx.strokeStyle = '#8a5a2e'; ctx.stroke();
+  ctx.setLineDash([10, 7]); rr(x + 14, y + 14, w - 28, h - 28, 12); ctx.lineWidth = 2.5; ctx.strokeStyle = '#d9a23a'; ctx.stroke(); ctx.setLineDash([]);
+  txt('GUTSCHEIN', W / 2, y + 52, 40, '#c62828');
+  ctx.save(); ctx.beginPath(); ctx.arc(x + 110, y + 160, 62, 0, Math.PI * 2); ctx.fillStyle = '#fff3d6'; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = '#d9a23a'; ctx.stroke(); ctx.clip(); wv.icon(x + 110, y + 150, 1.5); ctx.restore();
+  const lines = wrapLines(fmt('Für {oli} und {fabio}: ' + wv.text + '!'), 270, 22);
+  lines.forEach((l, k) => txt(l, x + 330, y + 120 + k * 30, 22, '#3b2410'));
+  txt('Einzulösen bei Goetti', x + 330, y + 130 + lines.length * 30, 17, '#8a6a3a', 'center', 'normal');
+  ctx.save(); ctx.translate(x + 390, y + 270); ctx.rotate(-0.08); txt('Goetti', 0, 0, 30, '#1f4fa0'); ctx.strokeStyle = '#1f4fa0'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-54, 18); ctx.quadraticCurveTo(0, 26, 60, 12); ctx.stroke(); ctx.restore();
+  ctx.save(); ctx.translate(x + 120, y + 268); ctx.rotate(-0.25); ctx.strokeStyle = 'rgba(198,40,40,.7)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, 30, 0, Math.PI * 2); ctx.stroke(); txt('2026', 0, 1, 16, 'rgba(198,40,40,.8)'); ctx.restore();
+  ctx.restore();
+  buttons.length = 0; button('Super!', W / 2 - 90, y + h + 16, 180, 50, () => { wishShow = -1; SFX.click(); }, { color: '#9be38a', size: 24 });
+}
 let shopConfirm = null, shopTab = 0, shopPage = 0, shopSel = 0, shopTalk = { t: 0, text: 'Willkommen! Such dir etwas aus.' };
 function shopSay(text) { shopTalk = { t: 4, text }; }
 let shopBounce = 0;
@@ -4489,13 +4552,15 @@ function shopCounter() { // the counter Goetti stands behind
 function drawShop() {
   // wall, awning, counter
   shopScene();
-  woodFrame(300, 54, 360, 54, 14); txt('Bernstein-Laden', 480, 83, 30, '#3b2410');
+  woodFrame(300, 54, 360, 54, 14); txt('Goettis Laden', 480, 83, 30, '#3b2410');
   rr(756, 70, 176, 44, 22); ctx.fillStyle = 'rgba(40,24,10,.85)'; ctx.fill(); drawAmber(782, 92, 14); otxt(String(save.amber), 806, 93, 26, '#ffe08a', 'rgba(0,0,0,.7)', 5, 'left');
-  const [label, key, list] = SHOP_TABS[shopTab];
-  // live preview: equip the selection temporarily
-  const bak = Object.assign({}, save.equip); save.equip[key] = shopSel;
+  const tab = SHOP_TABS[shopTab], { key, list } = tab;
+  // live preview: equip the selection temporarily (on both boys for hats and jackets)
+  const bak = Object.assign({}, save.equip); for (const k of tab.eq) save.equip[k] = shopSel;
   const hopY = shopBounce > 0 ? -26 * Math.sin(Math.PI * (1 - shopBounce)) : 0;
-  oRex(262, 418 + hopY, 0.85, T * 3, 0.1, Object.assign(rexLook(2), { rider: true, hat: rexLook(2).hat || null, fire: key === 'fire' }));
+  if (key === 'chili') { shadow(262, 422, 60, 0.3); oChili(250, 420 + hopY, 2.1, T * 3, false); }
+  else if (key !== 'wish') oRex(262, 418 + hopY, 0.85, T * 3, 0.1, Object.assign(rexLook(2), { rider: true, hat: rexLook(2).hat || null, hat2: rexLook(2).hat2 || null, fire: key === 'fire' }));
+  else { ctx.save(); ctx.translate(262, 330 + hopY * 0.5); ctx.rotate(-0.05); rr(-110, -70, 220, 140, 12); ctx.fillStyle = '#fffaf0'; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = '#8a5a2e'; ctx.stroke(); ctx.setLineDash([6, 5]); rr(-100, -60, 200, 120, 8); ctx.strokeStyle = '#d9a23a'; ctx.lineWidth = 2; ctx.stroke(); ctx.setLineDash([]); txt('GUTSCHEIN', 0, -38, 22, '#c62828'); WISHES[shopSel].icon(0, 4, 0.95); txt(WISHES[shopSel].n, 0, 46, 18, '#3b2410'); ctx.restore(); }
   Object.assign(save.equip, bak);
   if (key === 'fire') { // Rex breathes the selected fire so the colour can be judged
     const f = fireOf(shopSel), cyc = (T % 2.6) / 2.6, mx = 262 + 116 * 0.85, my = 418 - 98 * 0.85;
@@ -4507,12 +4572,12 @@ function drawShop() {
   oGoetti(62, 420, 0.95, shopTalk.t > 0); shopCounter();
   if (shopTalk.t > 0 || true) { shopTalk.t = Math.max(0, shopTalk.t - DT); const lines = wrapLines(shopTalk.text, 230, 18); const bh = 20 + lines.length * 22; rr(20, 215 - bh + 10, 262, bh, 14); ctx.fillStyle = '#fffaf0'; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = '#6b4a2b'; ctx.stroke(); ctx.fillStyle = '#fffaf0'; ctx.beginPath(); ctx.moveTo(52, 225); ctx.lineTo(76, 225); ctx.lineTo(70, 252); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.fillRect(54, 223, 20, 4); lines.forEach((l, i) => txt(l, 151, 215 - bh + 32 + i * 22, 18, '#3b2410', 'center', 'normal')); }
   // tabs
-  SHOP_TABS.forEach(([lb], i) => button(lb, 440 + i * 168, 118, 160, 44, () => { shopTab = i; shopPage = 0; shopSel = save.equip[SHOP_TABS[i][1]]; shopSay(i === 0 ? 'Welche Farbe darf es sein?' : i === 1 ? 'Ein Hut für euch zwei?' : 'Feuer in allen Farben!'); }, { size: 22, color: i === shopTab ? '#ffd34d' : '#d9c9a0' }));
+  SHOP_TABS.forEach((tb, i) => button(tb.lb, 440 + i * 84, 118, 80, 44, () => { shopTab = i; shopPage = 0; shopSel = tb.eq.length ? save.equip[tb.eq[0]] : 0; shopSay(fmt(tb.say)); }, { size: 18, color: i === shopTab ? '#ffd34d' : '#d9c9a0' }));
   // item cards: 8 per page (4 x 2), gifts from the calendar show the door they come from
   const PER = 8, pages = Math.ceil(list.length / PER); shopPage = clamp(shopPage, 0, pages - 1);
   list.forEach((it, i) => {
     if (Math.floor(i / PER) !== shopPage) return;
-    const j = i % PER, x = 440 + (j % 4) * 126, y = 166 + Math.floor(j / 4) * 104, w = 118, h = 100, owned = save.owned[key].includes(i), eq = save.equip[key] === i, cost = it.cost || 0, can = !it.gift && save.amber >= cost, sel = shopSel === i;
+    const j = i % PER, x = 440 + (j % 4) * 126, y = 166 + Math.floor(j / 4) * 104, w = 118, h = 100, owned = save.owned[key].includes(i), who = tab.eq.filter(k => save.equip[k] === i), eq = who.length > 0, cost = it.cost || 0, can = !it.gift && save.amber >= cost, sel = shopSel === i;
     if (sel) { rr(x - 4, y - 4, w + 8, h + 8, 16); ctx.fillStyle = `rgba(255,211,77,${0.5 + 0.15 * Math.sin(T * 5)})`; ctx.fill(); }
     ctx.save(); rr(x, y + 3, w, h, 14); ctx.fillStyle = 'rgba(0,0,0,.22)'; ctx.fill(); ctx.restore();
     rr(x, y, w, h, 14); ctx.fillStyle = eq ? '#d4f2bd' : owned ? '#fffaf0' : it.gift ? (it.gift === 25 ? '#fff0b8' : '#ece4f6') : can ? '#fff0c8' : '#e8dec8'; ctx.fill(); ctx.lineWidth = sel ? 4 : 3; ctx.strokeStyle = sel ? '#e8a317' : eq ? '#2e7d32' : '#8a6a3a'; ctx.stroke();
@@ -4520,6 +4585,9 @@ function drawShop() {
     ctx.fillStyle = 'rgba(120,80,30,.12)'; ctx.beginPath(); ctx.ellipse(x + w / 2, y + 62, 34, 5, 0, 0, Math.PI * 2); ctx.fill();
     if (key === 'skin') oRex(x + w / 2 + 6, y + 62, 0.3, 0.5 + T * 0.0, 0.05, { body: it.body, dark: it.dark, belly: it.belly, rainbow: it.rainbow, rider: true, hat: HATS[save.equip.hat] && HATS[save.equip.hat].k });
     else if (key === 'hat') { if (it.k) { ctx.fillStyle = '#6b4a2b'; ctx.fillRect(x + w / 2 - 2, y + 40, 4, 22); rr(x + w / 2 - 14, y + 60, 28, 5, 2); ctx.fillStyle = '#8a5a2e'; ctx.fill(); circle(x + w / 2, y + 40, 9, '#e8c9a0'); drawHatIcon(it.k, x + w / 2, y + 22, 1.55); } else drawAutoHatIcon(x + w / 2, y + 34, 1.15); }
+    else if (key === 'jacket') { ctx.save(); ctx.translate(x + w / 2 - 3, y + 52); ctx.scale(0.74, 0.74); drawOli(0, 0, 0.5, null, { kid: i === 1 ? 'fabio' : 'oli', jacket: i, hold: true }); ctx.restore(); }
+    else if (key === 'chili') { chiliAcc = i; drawChili(x + w / 2 - 10, y + 64, 0.95, 0); chiliAcc = null; }
+    else if (key === 'wish') it.icon(x + w / 2, y + 34, 0.8);
     else drawFlameIcon(fireOf(i), x + w / 2, y + 36, 0.98);
     if (!owned) { ctx.fillStyle = it.gift ? 'rgba(90,70,130,.30)' : 'rgba(120,110,90,.34)'; ctx.fillRect(x, y, w, 70); }
     ctx.restore();
@@ -4527,8 +4595,8 @@ function drawShop() {
     if (save.newGifts.includes(key + ':' + i)) { ctx.save(); ctx.translate(x + 24, y + 16); ctx.rotate(-0.3); rr(-18, -9, 36, 18, 5); ctx.fillStyle = '#e53935'; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = '#fff'; ctx.stroke(); txt('NEU', 0, 1, 12, '#fff'); ctx.restore(); }
     const nm = it.n === 'Auto' ? 'Automatik' : it.n; txt(nm, x + w / 2, y + 77, nm.length > 9 ? 12 : 14, '#3b2410');
     const pill = (c0, c1, tc) => { rr(x + 12, y + 84, w - 24, 13, 6.5); ctx.fillStyle = vgrad(y + 84, y + 97, c0, c1); ctx.fill(); ctx.lineWidth = 1.2; ctx.strokeStyle = 'rgba(0,0,0,.25)'; ctx.stroke(); return tc; };
-    if (eq) txt('✓ Angelegt', x + w / 2, y + 91, 12, pill('#9be38a', '#5ebb5a', '#17420f')); else if (owned) txt('Gekauft', x + w / 2, y + 91, 12, pill('#f4ecd8', '#e2d6b8', '#6b4a2b'), 'center', 'normal'); else if (it.gift) txt(it.gift === 25 ? '72 Medaillen' : `Tür ${it.gift}`, x + w / 2, y + 91, 12, pill(it.gift === 25 ? '#ffe9a0' : '#d8c8f4', it.gift === 25 ? '#f0c040' : '#b9a0e6', it.gift === 25 ? '#6a4800' : '#3a2470')); else { const tc = pill(can ? '#ffe6a0' : '#e6dcc4', can ? '#f4c24a' : '#d4c8a8', can ? '#6a4800' : '#8a7a58'); drawAmber(x + w / 2 - 17, y + 91, 6); txt(String(cost), x + w / 2 - 7, y + 91, 13, tc, 'left'); }
-    buttons.push({ x, y, w, h, cb: () => { shopSel = i; shopBounce = 1; SFX.click(); shopSay(owned ? (eq ? 'Das trägst du gerade.' : 'Das steht dir gut!') : it.gift ? (it.gift === 25 ? 'Sammle alle 72 Medaillen – dann gehört das dir!' : `Das findest du hinter Tür ${it.gift} im Kalender!`) : can ? `Das kostet ${cost} Bernstein.` : 'Sammle noch etwas Bernstein!'); } });
+    if (eq) txt(tab.eq.length > 1 ? (who.length > 1 ? '✓ Beide' : '✓ ' + kidNames()[tab.eq.indexOf(who[0])]) : '✓ Angelegt', x + w / 2, y + 91, 12, pill('#9be38a', '#5ebb5a', '#17420f')); else if (owned && key === 'wish') txt('✓ Gutschein', x + w / 2, y + 91, 12, pill('#ffe6a0', '#f4c24a', '#6a4800')); else if (owned) txt(it.gift ? 'Geschenk' : cost ? 'Gekauft' : 'Gratis', x + w / 2, y + 91, 12, pill('#f4ecd8', '#e2d6b8', '#6b4a2b'), 'center', 'normal'); else if (it.gift) txt(it.gift === 25 ? '72 Medaillen' : `Tür ${it.gift}`, x + w / 2, y + 91, 12, pill(it.gift === 25 ? '#ffe9a0' : '#d8c8f4', it.gift === 25 ? '#f0c040' : '#b9a0e6', it.gift === 25 ? '#6a4800' : '#3a2470')); else { const tc = pill(can ? '#ffe6a0' : '#e6dcc4', can ? '#f4c24a' : '#d4c8a8', can ? '#6a4800' : '#8a7a58'); drawAmber(x + w / 2 - 17, y + 91, 6); txt(String(cost), x + w / 2 - 7, y + 91, 13, tc, 'left'); }
+    buttons.push({ x, y, w, h, cb: () => { shopSel = i; shopBounce = 1; SFX.click(); shopSay(key === 'wish' ? (owned ? 'Den habt ihr schon! Wann gehen wir?' : fmt(`Ein Gutschein für ${it.text}! Kostet ${cost} Bernstein.`)) : owned ? (eq ? 'Das ist gerade angezogen.' : 'Das steht euch gut!') : it.gift ? (it.gift === 25 ? 'Sammle alle 72 Medaillen – dann gehört das dir!' : `Das findest du hinter Tür ${it.gift} im Kalender!`) : can ? `Das kostet ${cost} Bernstein.` : 'Sammle noch etwas Bernstein!'); } });
   });
   if (pages > 1) {
     button('‹', 440, 376, 56, 32, () => { shopPage = (shopPage + pages - 1) % pages; }, { size: 24, color: '#e0d2b0' });
@@ -4536,22 +4604,25 @@ function drawShop() {
     button('›', 880, 376, 56, 32, () => { shopPage = (shopPage + 1) % pages; }, { size: 24, color: '#e0d2b0' });
   }
   // buy / equip bar
-  const it = list[shopSel], owned = save.owned[key].includes(shopSel), eq = save.equip[key] === shopSel, cost = it.cost || 0, can = !it.gift && save.amber >= cost, BY = 412;
-  if (eq) button('Angelegt', 440, BY, 496, 52, () => {}, { disabled: true, icon: icon('check'), size: 26 });
-  else if (owned) button('Anlegen', 440, BY, 496, 52, () => { save.equip[key] = shopSel; writeSave(); SFX.right(); shopSay('Sieht super aus!'); shopBounce = 1; burst(262, 330, 26, ['#fff', '#ffe08a', '#ffd34d'], 280, 300, 5, 0.9); }, { color: '#9be38a', size: 26 });
+  const it = list[shopSel], owned = save.owned[key].includes(shopSel), eq = tab.eq.length > 0 && save.equip[tab.eq[0]] === shopSel, cost = it.cost || 0, can = !it.gift && save.amber >= cost, BY = 412;
+  if (owned && key === 'wish') button('Gutschein ansehen', 440, BY, 496, 52, () => { wishShow = shopSel; SFX.click(); }, { color: '#ffe08a', size: 24 });
+  else if (owned && tab.eq.length > 1) tab.eq.forEach((k, n) => { const on = save.equip[k] === shopSel, nm = kidNames()[n]; button(on ? nm + ' ✓' : nm + ' anziehen', 440 + n * 252, BY, 244, 52, () => { if (on) return; save.equip[k] = shopSel; writeSave(); SFX.right(); shopSay(fmt(n ? 'Sieht super aus, {fabio}!' : 'Sieht super aus, {oli}!')); shopBounce = 1; burst(262, 330, 26, ['#fff', '#ffe08a', '#ffd34d'], 280, 300, 5, 0.9); }, on ? { disabled: true, size: 20 } : { color: '#9be38a', size: 20 }); });
+  else if (eq) button('Angelegt', 440, BY, 496, 52, () => {}, { disabled: true, icon: icon('check'), size: 26 });
+  else if (owned) button('Anlegen', 440, BY, 496, 52, () => { save.equip[tab.eq[0]] = shopSel; writeSave(); SFX.right(); shopSay('Sieht super aus!'); shopBounce = 1; burst(262, 330, 26, ['#fff', '#ffe08a', '#ffd34d'], 280, 300, 5, 0.9); }, { color: '#9be38a', size: 26 });
   else if (it.gift) button(it.gift === 25 ? 'Mit allen 72 Medaillen' : `Aus Tür ${it.gift} im Kalender`, 440, BY, 496, 52, () => { SFX.wrong(); shopSay(it.gift === 25 ? `Du hast ${medalTotal()} von 72 Medaillen.` : `Öffne am ${it.gift}. Dezember die Tür ${it.gift}!`); }, { disabled: true, size: 22 });
-  else if (can) button(`Kaufen  ·  ${cost}`, 440, BY, 496, 52, () => { shopConfirm = { key, sel: shopSel, cost, name: it.n }; SFX.click(); }, { size: 26, icon: icon('amber') });
+  else if (can) button(`Kaufen  ·  ${cost}`, 440, BY, 496, 52, () => { shopConfirm = { key, sel: shopSel, cost, name: key === 'wish' ? 'Gutschein: ' + it.n : it.n, eq: tab.eq }; SFX.click(); }, { size: 26, icon: icon('amber') });
   else button('Zu wenig Bernstein', 440, BY, 496, 52, () => { SFX.wrong(); toast('Noch zu wenig Bernstein!', '#ffb4a8'); shopSay('Sammle noch etwas Bernstein!'); }, { disabled: true, size: 24 });
   button('Zurück', W - 224, H - 56, 200, 46, () => go('map'), { size: 24, icon: icon('back') });
-  if (!owned && !it.gift) { ctx.font = 'bold 15px sans-serif'; const lbl = 'Vorschau – noch nicht gekauft', pw = 214; rr(262 - pw / 2, 462, pw, 28, 14); ctx.fillStyle = 'rgba(40,24,10,.78)'; ctx.fill(); txt(lbl, 262, 477, 15, '#ffe9b0'); }
+  if (!owned && !it.gift && key !== 'wish') { ctx.font = 'bold 15px sans-serif'; const lbl = 'Vorschau – noch nicht gekauft', pw = 214; rr(262 - pw / 2, 462, pw, 28, 14); ctx.fillStyle = 'rgba(40,24,10,.78)'; ctx.fill(); txt(lbl, 262, 477, 15, '#ffe9b0'); }
   if (shopConfirm) { // are you sure? nothing is bought by accident
     buttons.length = 0; const sc = shopConfirm;
     ctx.fillStyle = 'rgba(8,10,24,.62)'; ctx.fillRect(0, 0, W, H); woodFrame(290, 150, 380, 240, 24);
     txt('Wirklich kaufen?', W / 2, 196, 32, '#3b2410'); txt(sc.name, W / 2, 238, 26, '#6b4a2b');
     drawAmber(W / 2 - 62, 280, 15); txt(`${sc.cost} Bernstein`, W / 2 - 40, 281, 24, '#8a5a00', 'left'); txt(`Danach hast du noch ${save.amber - sc.cost}.`, W / 2, 312, 15, '#8a6a3a', 'center', 'normal');
     button('Nein', 310, 330, 150, 46, () => { shopConfirm = null; shopSay('Überleg es dir in Ruhe!'); }, { size: 22 });
-    button('Ja, kaufen!', 480, 330, 170, 46, () => { if (save.amber >= sc.cost && !save.owned[sc.key].includes(sc.sel)) { save.amber -= sc.cost; save.owned[sc.key].push(sc.sel); save.equip[sc.key] = sc.sel; writeSave(); SFX.right(); shopSay('Viel Spass damit!'); burst(262, 330, 46, ['#ffd34d', '#fff', '#ff9f1c', '#69f0ae'], 420, 600, 7, 1.1); } shopConfirm = null; }, { color: '#9be38a', size: 22, icon: icon('amber') });
+    button('Ja, kaufen!', 480, 330, 170, 46, () => { if (save.amber >= sc.cost && !save.owned[sc.key].includes(sc.sel)) { save.amber -= sc.cost; save.owned[sc.key].push(sc.sel); if (sc.eq.length === 1) save.equip[sc.eq[0]] = sc.sel; if (sc.key === 'wish') wishShow = sc.sel; writeSave(); SFX.right(); shopSay(sc.key === 'wish' ? 'Abgemacht! Den lösen wir zusammen ein.' : sc.eq.length > 1 ? 'Gekauft! Wer zieht es an?' : 'Viel Spass damit!'); burst(262, 330, 46, ['#ffd34d', '#fff', '#ff9f1c', '#69f0ae'], 420, 600, 7, 1.1); } shopConfirm = null; }, { color: '#9be38a', size: 22, icon: icon('amber') });
   }
+  if (wishShow >= 0) drawVoucher(wishShow);
   drawParts(0);
 }
 
@@ -4798,7 +4869,7 @@ function drawSheet() {
     ctx.fillStyle = '#1d5a3e'; ctx.beginPath(); ctx.moveTo(0, 170); ctx.quadraticCurveTo(60, 110, 120, 150); ctx.quadraticCurveTo(180, 120, 256, 160); ctx.lineTo(256, 256); ctx.lineTo(0, 256); ctx.fill();
     palm(26, 214, 120, '#1f6a3a'); palm(236, 214, 96, '#1f6a3a');
     ctx.fillStyle = vgrad(206, S, '#4aa83a', '#2e7a2a'); ctx.fillRect(0, 206, S, 10); ctx.fillStyle = vgrad(214, S, '#6a4a2a', '#3a2614'); ctx.fillRect(0, 214, S, 42);
-    shadow(128, 216, 92, 0.35); oRex(128, 214, 0.78, 0.4, 0.28, Object.assign(rexLook(0), { rider: true, hat: null }));
+    shadow(128, 216, 92, 0.35); oRex(128, 214, 0.78, 0.4, 0.28, Object.assign(rexLook(0), { rider: true, hat: null, hat2: null }));
     const eg = ctx.createRadialGradient(60, 192, 4, 60, 192, 64); eg.addColorStop(0, 'rgba(255,240,150,.9)'); eg.addColorStop(1, 'rgba(255,220,90,0)'); ctx.fillStyle = eg; ctx.fillRect(0, 130, 130, 126);
     drawEgg(58, 190, 33, '#ffd700', '#fff3b0', 0.6, -0.18); drawStar(30, 150, 8, '#fff'); drawStar(96, 176, 5, '#fff3b0'); drawStar(84, 142, 4, '#fff');
     return;
@@ -5016,7 +5087,7 @@ function drawEnding() {
   oGoetti(325, 452, 1.1, E.phase === 'party' && !save.treasures[0]);
   if (save.treasures[0]) drawGuitar(332, 372 + (E.phase === 'party' ? Math.sin(T * 8) * 2 : 0), 0.85, -1.05);
   if (save.treasures[3]) oKiwi(572, 454 - (E.phase === 'party' ? Math.abs(Math.sin(T * 9 + 1)) * 16 : 0), 1.25, T * 8, true);
-  oRex(640, 452, 1.0, E.phase === 'party' ? T * 6 : 0, E.phase === 'party' ? 0.3 + 0.3 * Math.sin(T * 5) : 0.1, Object.assign(rexLook(2), { rider: true, flip: true, hat: rexLook(2).hat || 'santa' }));
+  oRex(640, 452, 1.0, E.phase === 'party' ? T * 6 : 0, E.phase === 'party' ? 0.3 + 0.3 * Math.sin(T * 5) : 0.1, Object.assign(rexLook(2), { rider: true, flip: true, hat: rexLook(2).hat || 'santa', hat2: rexLook(2).hat2 || 'santa' }));
   oChili(395, 456 - (E.phase === 'party' ? Math.abs(Math.sin(T * 8)) * 18 : 0), 1.4, T * 6, false);
   // nest + egg
   ell(480, 445, 62, 16, 0, '#7a5230');
