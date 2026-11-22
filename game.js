@@ -4469,7 +4469,7 @@ function playTreasure(i) {
 }
 function drawChest() {
   // Goetti's treasure chest: open lid, gold hoard, the four lost treasures sitting inside
-  { const cx0 = 262, cw = 420, cy0 = H - 122, rim = cy0 + 56;
+  { const cx0 = 300, cw = 360, cy0 = H - 122, rim = cy0 + 56;
     if (chestFull()) buttons.push({ x: cx0, y: cy0 - 10, w: cw, h: 130, silent: true, cb: () => chestParty() }); // tap the full chest to celebrate again
     shadow(cx0 + cw / 2, H - 8, cw * 0.55, 0.35);
     if (chestPartyT > 0) { chestPartyT -= DT; const u = clamp(chestPartyT / 7, 0, 1), gl = ctx.createRadialGradient(cx0 + cw / 2, rim - 10, 10, cx0 + cw / 2, rim - 10, 260); gl.addColorStop(0, `rgba(255,236,150,${0.55 * Math.min(1, u * 4)})`); gl.addColorStop(1, 'rgba(255,236,150,0)'); ctx.fillStyle = gl; ctx.fillRect(cx0 - 120, rim - 250, cw + 240, 330);
@@ -4480,19 +4480,20 @@ function drawChest() {
     ctx.fillStyle = '#7b4a28'; ctx.fill(); ctx.lineWidth = 3.5; ctx.strokeStyle = '#2b1a0c'; ctx.stroke();
     ctx.beginPath(); ctx.moveTo(cx0 + 30, rim - 2); ctx.lineTo(cx0 + 24, cy0 + 26); ctx.quadraticCurveTo(cx0 + cw / 2, cy0 - 6, cx0 + cw - 24, cy0 + 26); ctx.lineTo(cx0 + cw - 30, rim - 2); ctx.closePath();
     ctx.fillStyle = vgrad(cy0, rim, '#9b2a3a', '#6f1626', '#4a0e1a'); ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#d4a017'; ctx.stroke();
+    { ctx.save(); ctx.beginPath(); ctx.moveTo(cx0 + 30, rim - 2); ctx.lineTo(cx0 + 24, cy0 + 26); ctx.quadraticCurveTo(cx0 + cw / 2, cy0 - 6, cx0 + cw - 24, cy0 + 26); ctx.lineTo(cx0 + cw - 30, rim - 2); ctx.closePath(); ctx.clip(); const sh = ctx.createRadialGradient(cx0 + cw / 2, cy0 + 40, 10, cx0 + cw / 2, cy0 + 40, cw * 0.5); sh.addColorStop(0, 'rgba(255,170,150,.28)'); sh.addColorStop(1, 'rgba(255,170,150,0)'); ctx.fillStyle = sh; ctx.fillRect(cx0, cy0 - 20, cw, 90); ctx.restore(); }
     ctx.strokeStyle = 'rgba(0,0,0,.18)'; ctx.lineWidth = 2; for (let i = 1; i < 9; i++) { ctx.beginPath(); ctx.moveTo(cx0 + 24 + i * (cw - 48) / 9, cy0 + 24 - Math.sin(i / 9 * Math.PI) * 18); ctx.lineTo(cx0 + 30 + i * (cw - 60) / 9, rim - 2); ctx.stroke(); }
-    otxt('Goettis Schatzkiste', cx0 + cw / 2, cy0 - 10, 17, '#ffd34d', 'rgba(40,16,0,.85)', 5);
+    otxt(`Goettis Schatzkiste  ${save.treasures.filter(Boolean).length}/4`, cx0 + cw / 2, cy0 - 12, 17, chestFull() ? '#fff6b0' : '#ffd34d', 'rgba(40,16,0,.85)', 5);
     // gold hoard filling the chest
     ctx.beginPath(); ctx.moveTo(cx0 + 12, rim + 6); ctx.quadraticCurveTo(cx0 + 40, rim - 14, cx0 + 90, rim - 6); ctx.quadraticCurveTo(cx0 + cw / 2, rim - 22, cx0 + cw - 90, rim - 6); ctx.quadraticCurveTo(cx0 + cw - 40, rim - 14, cx0 + cw - 12, rim + 6); ctx.closePath(); ctx.fillStyle = vgrad(rim - 18, rim + 6, '#ffe27a', '#e8a317'); ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#8a5a00'; ctx.stroke();
     for (let i = 0; i < 22; i++) { const gx = cx0 + 24 + hash(i + 70) * (cw - 48), gy = rim - 10 + hash(i + 80) * 12 - Math.abs(gx - cx0 - cw / 2) * 0.02; circle(gx, gy, 5, '#ffd34d'); circle(gx - 1, gy - 1, 3.2, '#fff0a0'); }
     for (const [gx, col] of [[cx0 + 60, '#e53935'], [cx0 + cw - 70, '#40c4ff'], [cx0 + cw / 2 + 4, '#69f0ae']]) { drawStar(gx, rim - 8, 7, col); }
     // the four treasure slots (found = the item itself, missing = a dim ?)
     for (let i = 0; i < 4; i++) {
-      const x = 316 + i * 110, y = rim - 28, has = save.treasures[i];
+      const x = cx0 + 45 + i * 90, y = rim - 28, has = save.treasures[i];
       chestPop[i] = Math.max(0, chestPop[i] - DT * 2);
       if (has) { const gl = ctx.createRadialGradient(x, y, 4, x, y, 44); gl.addColorStop(0, 'rgba(255,240,170,.65)'); gl.addColorStop(1, 'rgba(255,240,170,0)'); ctx.fillStyle = gl; ctx.beginPath(); ctx.arc(x, y, 44, 0, Math.PI * 2); ctx.fill(); ctx.save(); ctx.translate(x, y); const sc = 1 + chestPop[i] * 0.4; ctx.scale(sc, sc); ctx.rotate(Math.sin(T * 20) * chestPop[i] * 0.3); drawTreasure(i, 0, 0, 0.6, T * 6); ctx.restore(); }
-      else { ctx.globalAlpha = 0.85; rr(x - 22, y - 22, 44, 44, 10); ctx.fillStyle = 'rgba(30,14,18,.8)'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#d4a017'; ctx.stroke(); ctx.globalAlpha = 1; txt('?', x, y + 2, 28, 'rgba(255,225,150,.7)'); }
-      buttons.push({ x: x - 50, y: y - 40, w: 100, h: 80, silent: true, cb: () => playTreasure(i) });
+      else { const pu = 0.5 + 0.5 * Math.sin(T * 2.4 + i * 1.3); const gl = ctx.createRadialGradient(x, y, 6, x, y, 38); gl.addColorStop(0, `rgba(255,226,122,${0.22 + 0.2 * pu})`); gl.addColorStop(1, 'rgba(255,226,122,0)'); ctx.fillStyle = gl; ctx.beginPath(); ctx.arc(x, y, 38, 0, Math.PI * 2); ctx.fill(); rr(x - 22, y - 22, 44, 44, 11); ctx.fillStyle = vgrad(y - 22, y + 22, '#6f3a52', '#3d1830'); ctx.fill(); ctx.lineWidth = 2.5; ctx.strokeStyle = `rgba(255,214,90,${0.7 + 0.3 * pu})`; ctx.setLineDash([6, 4]); ctx.stroke(); ctx.setLineDash([]); otxt('?', x, y + 2, 28, '#ffe27a', 'rgba(40,10,30,.9)', 4); }
+      buttons.push({ x: x - 45, y: y - 40, w: 90, h: 80, silent: true, cb: () => playTreasure(i) });
     }
     // front of the chest: wooden planks, iron-gold bands, lock
     rr(cx0, rim + 4, cw, 50, 10); ctx.fillStyle = vgrad(rim, H - 10, '#a56a35', '#80501f', '#5a3416'); ctx.fill(); ctx.lineWidth = 3.5; ctx.strokeStyle = '#2b1a0c'; ctx.stroke();
@@ -4540,9 +4541,9 @@ const DOORS = { cols: 8, w: 100, h: 80, gx: 12, gy: 8, x0: 34, y0: 96 };
 function doorRect(i) { const c = i % DOORS.cols, r = Math.floor(i / DOORS.cols); return { x: DOORS.x0 + c * (DOORS.w + DOORS.gx), y: DOORS.y0 + r * (DOORS.h + DOORS.gy), w: DOORS.w, h: DOORS.h }; }
 function drawDoor(i, today) {
   const { x, y, w, h } = doorRect(i), lv = LEVELS[i], day = i + 1, th = WORLDS[lv.wi], open = day <= today, opened = save.gifts.includes(day) || !giftFor(day) && save.lvDone[i], done = save.lvDone[i], isToday = day === today && !done;
-  const pulse = isToday ? 1 + 0.04 * Math.sin(T * 5) : 1;
+  const pulse = isToday ? 1.1 + 0.04 * Math.sin(T * 5) : 1;
   ctx.save(); ctx.translate(x + w / 2, y + h / 2); ctx.scale(pulse, pulse); ctx.translate(-w / 2, -h / 2);
-  if (isToday) { const g = ctx.createRadialGradient(w / 2, h / 2, 20, w / 2, h / 2, 90); g.addColorStop(0, `rgba(255,230,140,${0.55 + 0.2 * Math.sin(T * 4)})`); g.addColorStop(1, 'rgba(255,230,140,0)'); ctx.fillStyle = g; ctx.fillRect(-40, -40, w + 80, h + 80); }
+  if (isToday) { const g = ctx.createRadialGradient(w / 2, h / 2, 20, w / 2, h / 2, 100); g.addColorStop(0, `rgba(255,230,140,${0.8 + 0.2 * Math.sin(T * 4)})`); g.addColorStop(1, 'rgba(255,230,140,0)'); ctx.fillStyle = g; ctx.fillRect(-60, -60, w + 120, h + 120); for (let k = 0; k < 5; k++) { const a = T * 1.6 + k * 1.2566, sx = w / 2 + Math.cos(a) * (w * 0.62), sy = h / 2 + Math.sin(a) * (h * 0.7); drawStar(sx, sy, 4.5 + 2 * Math.sin(T * 7 + k), k % 2 ? '#fff' : '#ffe27a'); } }
   // frame (arched top) in the colour of the theme
   const fr = open ? th.far : '#6a5a4a'; ctx.beginPath(); ctx.moveTo(0, h); ctx.lineTo(0, 22); ctx.quadraticCurveTo(0, 0, w / 2, 0); ctx.quadraticCurveTo(w, 0, w, 22); ctx.lineTo(w, h); ctx.closePath();
   ctx.fillStyle = vgrad(0, h, shade(fr, 1.2), shade(fr, 0.8)); ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = '#2b1a0c'; ctx.stroke();
@@ -4558,15 +4559,15 @@ function drawDoor(i, today) {
     ctx.fillStyle = vgrad(iy, h, open ? '#b07a42' : '#7a6a58', open ? '#7a4e24' : '#4f4438'); ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(0,0,0,.45)'; ctx.stroke();
     ctx.strokeStyle = 'rgba(0,0,0,.22)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(w / 2, iy + 2); ctx.lineTo(w / 2, h); ctx.moveTo(ix + 3, h * 0.58); ctx.lineTo(ix + iw - 3, h * 0.58); ctx.stroke();
     if (open) { ctx.save(); ctx.beginPath(); ctx.moveTo(ix, h); ctx.lineTo(ix, iy + 18); ctx.quadraticCurveTo(ix, iy, w / 2, iy); ctx.quadraticCurveTo(ix + iw, iy, ix + iw, iy + 18); ctx.lineTo(ix + iw, h); ctx.closePath(); ctx.clip(); ctx.globalAlpha = 0.32; ctx.fillStyle = th.far; ctx.fillRect(ix, iy, iw, ih); ctx.restore(); // theme tint
-      ctx.save(); rr(w / 2 - 22, h * 0.56, 44, 26, 8); ctx.clip(); ctx.drawImage(doorScene(i, false) || doorScene(i, true), w / 2 - 22, h * 0.56, 44, 26); ctx.restore(); rr(w / 2 - 22, h * 0.56, 44, 26, 8); ctx.lineWidth = 2; ctx.strokeStyle = '#2b1a0c'; ctx.stroke(); }
+      const pw = isToday ? 70 : 44, ph = isToday ? 30 : 26, py = isToday ? h * 0.57 : h * 0.56, sc2 = doorScene(i, false) || doorScene(i, true); ctx.save(); rr(w / 2 - pw / 2, py, pw, ph, 8); ctx.clip(); if (isToday) ctx.drawImage(sc2, 0, 14, sc2.width, sc2.height - 28, w / 2 - pw / 2, py, pw, ph); else ctx.drawImage(sc2, w / 2 - pw / 2, py, pw, ph); ctx.restore(); rr(w / 2 - pw / 2, py, pw, ph, 8); ctx.lineWidth = isToday ? 3 : 2; ctx.strokeStyle = isToday ? '#ffd34d' : '#2b1a0c'; ctx.stroke(); }
     circle(w - 14, h * 0.5, 3.4, open ? '#ffd34d' : '#9a8a78');
   }
   // number tag
-  if (!done) { circle(w / 2, h * 0.36, 16, open ? '#fff3c0' : 'rgba(255,255,255,.7)'); ctx.lineWidth = 2; ctx.strokeStyle = open ? '#a06a00' : '#6a5a4a'; ctx.stroke(); txt(String(day), w / 2, h * 0.36 + 1, 20, open ? '#7a3a00' : '#6a5a4a'); }
+  if (!done) { const ny = isToday ? h * 0.36 : h * 0.36; circle(w / 2, ny, isToday ? 14 : 16, open ? '#fff3c0' : 'rgba(255,255,255,.7)'); ctx.lineWidth = 2; ctx.strokeStyle = open ? '#a06a00' : '#6a5a4a'; ctx.stroke(); txt(String(day), w / 2, ny + 1, isToday ? 19 : 20, open ? '#7a3a00' : '#6a5a4a'); }
   else { circle(w - 14, 22, 13, '#fff7e0'); ctx.lineWidth = 2; ctx.strokeStyle = '#2b1a0c'; ctx.stroke(); txt(String(day), w - 14, 23, 15, '#3b2410'); }
   if (!open) ico('lock', w / 2, h * 0.72, 20);
-  if (isToday) { ctx.save(); ctx.translate(14, 14); ctx.rotate(-0.35); rr(-24, -9, 48, 18, 5); ctx.fillStyle = '#e53935'; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = '#fff'; ctx.stroke(); txt('HEUTE', 0, 1, 11, '#fff'); ctx.restore(); }
-  if (done) { rr(w / 2 - 36, h - 23, 72, 20, 10); ctx.fillStyle = 'rgba(30,18,8,.6)'; ctx.fill(); for (let k = 0; k < 3; k++) drawMedal(w / 2 - 22 + k * 22, h - 13, 7, k, save.lvM[i][k]); }
+  if (isToday) { ctx.save(); ctx.shadowColor = '#ffd34d'; ctx.shadowBlur = 10 + 6 * Math.sin(T * 5); ctx.strokeStyle = '#ffd34d'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(0, h); ctx.lineTo(0, 22); ctx.quadraticCurveTo(0, 0, w / 2, 0); ctx.quadraticCurveTo(w, 0, w, 22); ctx.lineTo(w, h); ctx.stroke(); ctx.restore(); ctx.save(); ctx.translate(w / 2, 1 + Math.sin(T * 5) * 1.2); rr(-32, -12, 64, 24, 7); ctx.fillStyle = '#e53935'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#fff'; ctx.stroke(); txt('HEUTE', 0, 1, 15, '#fff'); ctx.restore(); }
+  if (done) { rr(w / 2 - 44, h - 30, 88, 27, 13); ctx.fillStyle = 'rgba(30,18,8,.68)'; ctx.fill(); for (let k = 0; k < 3; k++) drawMedal(w / 2 - 26 + k * 26, h - 16.5, 10, k, save.lvM[i][k]); }
   if (lv.boss && open) { drawStar(14, h - 14, 9, '#ff6a3a'); }
   if (open && worldMedalsDone(lv.wi)) { ctx.save(); ctx.shadowColor = '#ffd34d'; ctx.shadowBlur = 8 + 4 * Math.sin(T * 3 + i); ctx.strokeStyle = '#ffd34d'; ctx.lineWidth = 3.5; ctx.beginPath(); ctx.moveTo(0, h); ctx.lineTo(0, 22); ctx.quadraticCurveTo(0, 0, w / 2, 0); ctx.quadraticCurveTo(w, 0, w, 22); ctx.lineTo(w, h); ctx.stroke(); ctx.restore(); }
   ctx.restore();
@@ -4886,7 +4887,8 @@ function drawMap() { // the advent calendar
   // the wooden calendar board
   woodFrame(14, 84, W - 28, 3 * (DOORS.h + DOORS.gy) + 30, 22, '#3a2f55');
   ctx.save(); rr(25, 95, W - 50, 3 * (DOORS.h + DOORS.gy) + 8, 14); ctx.clip(); ctx.fillStyle = vgrad(95, 400, '#2a2250', '#1d1740'); ctx.fillRect(0, 0, W, H); for (let i = 0; i < 40; i++) { ctx.globalAlpha = 0.25 + 0.3 * Math.abs(Math.sin(T * 0.8 + i)); circle(30 + hash(i + 3) * (W - 60), 100 + hash(i + 11) * 290, 1.2, '#ffe9a8'); } ctx.globalAlpha = 1; ctx.restore();
-  for (let i = 0; i < 24; i++) drawDoor(i, today);
+  for (let i = 0; i < 24; i++) if (!(i + 1 === today && !save.lvDone[i])) drawDoor(i, today);
+  if (today >= 1 && today <= 24 && !save.lvDone[today - 1]) drawDoor(today - 1, today); // today's door on top so its glow is never covered
   { const n = 4, seg = (W - 28) / n, cols = ['#ff5a5a', '#ffd34d', '#5ad07a', '#5ab4ff']; // string of fairy lights
     for (let q = 0; q < n; q++) {
       const x0 = 14 + q * seg; ctx.strokeStyle = '#141414'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x0, 86); ctx.quadraticCurveTo(x0 + seg / 2, 86 + 28, x0 + seg, 86); ctx.stroke();
@@ -4896,19 +4898,19 @@ function drawMap() { // the advent calendar
   // header
   otxt('Adventskalender', 30, 38, 38, '#ffd34d', '#3b1d00', 9, 'left');
   const left = Math.ceil((ADVENT_START - new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate())) / 86400000);
-  otxt(today === 0 && save.dayOverride == null ? (left > 0 ? `Noch ${left} ${left === 1 ? 'Tag' : 'Tage'} bis zum 1. Dezember!` : 'Gleich geht es los!') : today >= 24 ? 'Alle Türen sind offen – frohe Weihnachten!' : fmt(`Heute: Tür ${today} – {rex} und Chili sind bereit!`), 32, 70, 19, '#fff', 'rgba(0,0,0,.7)', 5, 'left');
+  otxt(today === 0 && save.dayOverride == null ? (left > 0 ? `Noch ${left} ${left === 1 ? 'Tag' : 'Tage'} bis zum 1. Dezember!` : 'Gleich geht es los!') : today >= 24 ? 'Alle Türen sind offen – frohe Weihnachten!' : fmt(`Heute: Tür ${today} – {rex} und Chili sind bereit!`), 32, 70, 22, today === 0 ? '#fff' : '#fff6b0', 'rgba(0,0,0,.75)', 6, 'left');
   buttons.push({ x: 20, y: 14, w: 330, h: 40, silent: true, cb: () => {} , hold: true });
   drawAmber(W - 210, 36, 14); otxt(String(save.amber), W - 188, 37, 24, '#ffe08a', 'rgba(0,0,0,.7)', 5, 'left');
   drawMedal(W - 318, 44, 12, 1, true); otxt(`${medalTotal()}/72`, W - 298, 37, 24, save.master ? '#fff6b0' : '#ffe08a', save.master ? '#8a5a00' : 'rgba(0,0,0,.7)', 5, 'left'); if (save.master) { drawStar(W - 336, 22, 9 + 1.5 * Math.sin(T * 5), '#ffd34d'); drawStar(W - 226 + 0, 20, 5 + Math.sin(T * 6 + 1), '#fff'); }
   drawChest();
   button(save.muted ? 'Aus' : 'Ton', W - 130, 16, 112, 42, () => { settingsOpen = true; }, { size: 20, color: '#e0d2b0', icon: icon(save.muted ? 'mute' : 'sound') });
   button('Dino-Buch', 24, H - 82, 210, 60, () => { bookSel = -1; go('book'); }, { icon: icon('book') });
-  { const unread = bookUnread(); if (unread) { ctx.save(); ctx.translate(204, H - 80 + Math.sin(T * 6 + 1) * 2); ctx.rotate(0.22); rr(-32, -11, 64, 22, 6); ctx.fillStyle = '#e53935'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#fff'; ctx.stroke(); txt(unread > 1 ? `${unread} NEU` : 'NEU', 0, 1, 14, '#fff'); ctx.restore(); } }
+  { const unread = bookUnread(); if (unread) { ctx.save(); ctx.translate(204, H - 80 + Math.sin(T * 6 + 1) * 2); ctx.rotate(0.22); rr(-32, -11, 64, 22, 6); ctx.fillStyle = '#e53935'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#fff'; ctx.stroke(); txt(unread > 9 ? '9+ NEU' : unread > 1 ? `${unread} NEU` : 'NEU', 0, 1, 14, '#fff'); ctx.restore(); } }
   button('Laden', 24, H - 150, 210, 56, () => go('shop'), { color: '#ffe08a', icon: icon('amber') });
   if (save.newGifts.length) { ctx.save(); ctx.translate(214, H - 146 + Math.sin(T * 6) * 2); ctx.rotate(0.3); rr(-24, -11, 48, 22, 6); ctx.fillStyle = '#e53935'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#fff'; ctx.stroke(); txt('NEU', 0, 1, 14, '#fff'); ctx.restore(); }
-  if (save.lvDone.some(Boolean) || save.finished) { button('Endlos', W - 274, H - 150, 176, 56, () => { endlessPick = true; }, { color: '#9fd3ff', icon: icon('loop'), size: 24 }); button('', W - 92, H - 150, 68, 56, () => { boardTab = -1; go('board'); }, { color: '#ffe08a', icon: icon('trophy') }); }
-  if (save.finished) button('Finale', W - 274, H - 82, 176, 60, () => startEnding(), { color: '#e57373', textColor: '#fff', icon: icon('star'), size: 22 });
-  button('', W - 92, H - 82, 68, 60, () => { tmapNew = -1; go('tmap'); }, { color: '#f2dfb0', icon: icon('scroll') });
+  if (save.lvDone.some(Boolean) || save.finished) { button('Endlos', W - 262, H - 150, 150, 56, () => { endlessPick = true; }, { color: '#9fd3ff', icon: icon('loop'), size: 24 }); button('', W - 104, H - 150, 84, 56, () => { boardTab = -1; go('board'); }, { color: '#ffe08a' }); ico('trophy', W - 62, H - 130, 26); txt('Rekorde', W - 62, H - 105, 14, '#2b1a00'); }
+  if (save.finished) button('Finale', W - 262, H - 82, 150, 60, () => startEnding(), { color: '#e57373', textColor: '#fff', icon: icon('star'), size: 22 });
+  button('', W - 104, H - 82, 84, 60, () => { tmapNew = -1; go('tmap'); }, { color: '#f2dfb0' }); ico('scroll', W - 62, H - 61, 28); txt('Karte', W - 62, H - 34, 14, '#2b1a00');
   if (endlessPick) drawEndlessPicker();
   if (mapFW > 0) { mapFW -= DT; if (Math.random() < 0.09) { const c = ['#ff5252', '#ffd740', '#69f0ae', '#40c4ff', '#ea80fc', '#fff']; burst(100 + Math.random() * 760, 70 + Math.random() * 280, 36, [c[Math.floor(Math.random() * 6)], '#fff'], 300, 160, 5, 1.4); tone(220 + Math.random() * 220, 0.3, 'triangle', 0.04, 80); } }
   drawParts(0);
