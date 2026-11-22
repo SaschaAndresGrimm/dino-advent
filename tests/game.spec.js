@@ -131,6 +131,17 @@ test('shop: Europa-Park voucher costs 2500 and opens its card', async ({ game, p
   expect(game.errors).toEqual([]);
 });
 
+test('map: Dino-Buch badge counts unread cards and clears when opened', async ({ game, page }) => {
+  await game.open({ lvDone: [1, 1, ...new Array(22).fill(0)] });
+  expect(await game.eval(() => window.__dino.bookUnread())).toBe(2);
+  await game.eval(() => window.__dino.go('book'));
+  await page.waitForTimeout(300);
+  await page.mouse.click(28 + 71, 94 + 45); // first card
+  expect(await game.eval(() => window.__dino.bookUnread())).toBe(1);
+  await page.waitForTimeout(200);
+  expect(game.errors).toEqual([]);
+});
+
 test('book: found cards open, NEU is cleared once seen', async ({ game, page }) => {
   await game.open({ lvDone: [1, ...new Array(23).fill(0)] });
   await game.eval(() => window.__dino.go('book'));

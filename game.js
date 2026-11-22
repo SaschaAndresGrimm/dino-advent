@@ -4903,6 +4903,7 @@ function drawMap() { // the advent calendar
   drawChest();
   button(save.muted ? 'Aus' : 'Ton', W - 130, 16, 112, 42, () => { settingsOpen = true; }, { size: 20, color: '#e0d2b0', icon: icon(save.muted ? 'mute' : 'sound') });
   button('Dino-Buch', 24, H - 82, 210, 60, () => { bookSel = -1; go('book'); }, { icon: icon('book') });
+  { const unread = bookUnread(); if (unread) { ctx.save(); ctx.translate(204, H - 80 + Math.sin(T * 6 + 1) * 2); ctx.rotate(0.22); rr(-32, -11, 64, 22, 6); ctx.fillStyle = '#e53935'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#fff'; ctx.stroke(); txt(unread > 1 ? `${unread} NEU` : 'NEU', 0, 1, 14, '#fff'); ctx.restore(); } }
   button('Laden', 24, H - 150, 210, 56, () => go('shop'), { color: '#ffe08a', icon: icon('amber') });
   if (save.newGifts.length) { ctx.save(); ctx.translate(214, H - 146 + Math.sin(T * 6) * 2); ctx.rotate(0.3); rr(-24, -11, 48, 22, 6); ctx.fillStyle = '#e53935'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#fff'; ctx.stroke(); txt('NEU', 0, 1, 14, '#fff'); ctx.restore(); }
   if (save.lvDone.some(Boolean) || save.finished) { button('Endlos', W - 274, H - 150, 176, 56, () => { endlessPick = true; }, { color: '#9fd3ff', icon: icon('loop'), size: 24 }); button('', W - 92, H - 150, 68, 56, () => { boardTab = -1; go('board'); }, { color: '#ffe08a', icon: icon('trophy') }); }
@@ -5405,6 +5406,7 @@ function drawSheet() {
   }
 }
 let bookSel = -1;
+function bookUnread() { const seen = save.bookSeen || []; return save.lvDone.reduce((n, d, i) => n + (d && !seen[i] ? 1 : 0), 0); } // found cards not yet opened in the Dino-Buch
 function leatherCover() {
   ctx.fillStyle = vgrad(0, H, '#6a4528', '#4f3119', '#33200f'); ctx.fillRect(0, 0, W, H);
   ctx.save(); ctx.strokeStyle = 'rgba(0,0,0,.14)'; ctx.lineWidth = 1; for (let i = 0; i < 260; i++) { const x = hash(i) * W, y = hash(i + 7) * H; ctx.beginPath(); ctx.arc(x, y, 1 + hash(i + 3) * 2, 0, 6.3); ctx.stroke(); } ctx.restore();
@@ -5683,5 +5685,5 @@ function frame(now) {
 requestAnimationFrame(frame);
 
 // debug hook for testing in the browser console
-window.__dino = { get mus() { return mus; }, useAudio(ctx) { AC = ctx; noiseBuf = null; buildAudioGraph(); mus.key = null; mus.trans = null; mus.saved = {}; mus.g = 1; mus.vt = 1; amb.wi = null; amb.node = null; amb.lvl = -1; }, musicTick, SFX, ambTick, ambEvent, AMB, SONGS, startSplash, get splash() { return splash; }, bossDmg, medalTotal, worldMedalsDone, chestFull, chestParty, get chestPartyT() { return chestPartyT; }, startDaily, dailyWorld, dayKey, get dialog() { return dialog; }, DAY_STORY, DAY_AFTER, launchLevel, finishLevel, fmt, cleanNick, boardAdd, boardQualifies, boardAll, endRun, get scene() { return scene; }, get doorOverlay() { return doorOverlay; }, get buttons() { return buttons; }, pitFall, get lowfx() { return LOWFX; }, set lowfx(v) { LOWFX = v; }, get G() { return G; }, get E() { return E; }, save, startLevel, startEnding, go, jump, roar, updatePlay, updateEnding, answer, retry, tapEgg, openGate, playTreasure, drawPlay, duckDown, duckUp, shootFire, drawShop, buildSong, dash, LEVELS, adventDay, openDoorGift, giftFor, clickDoor, skillsFor, bookOpen(i) { bookSel = i; }, sheet(p) { sheetPage = p || 'hero'; scene = 'sheet'; } };
+window.__dino = { bookUnread, get mus() { return mus; }, useAudio(ctx) { AC = ctx; noiseBuf = null; buildAudioGraph(); mus.key = null; mus.trans = null; mus.saved = {}; mus.g = 1; mus.vt = 1; amb.wi = null; amb.node = null; amb.lvl = -1; }, musicTick, SFX, ambTick, ambEvent, AMB, SONGS, startSplash, get splash() { return splash; }, bossDmg, medalTotal, worldMedalsDone, chestFull, chestParty, get chestPartyT() { return chestPartyT; }, startDaily, dailyWorld, dayKey, get dialog() { return dialog; }, DAY_STORY, DAY_AFTER, launchLevel, finishLevel, fmt, cleanNick, boardAdd, boardQualifies, boardAll, endRun, get scene() { return scene; }, get doorOverlay() { return doorOverlay; }, get buttons() { return buttons; }, pitFall, get lowfx() { return LOWFX; }, set lowfx(v) { LOWFX = v; }, get G() { return G; }, get E() { return E; }, save, startLevel, startEnding, go, jump, roar, updatePlay, updateEnding, answer, retry, tapEgg, openGate, playTreasure, drawPlay, duckDown, duckUp, shootFire, drawShop, buildSong, dash, LEVELS, adventDay, openDoorGift, giftFor, clickDoor, skillsFor, bookOpen(i) { bookSel = i; }, sheet(p) { sheetPage = p || 'hero'; scene = 'sheet'; } };
 })();
