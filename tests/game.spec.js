@@ -225,7 +225,7 @@ test('boss: losing in phase 3 restarts that phase with full boss hp, not the who
   await page.evaluate(() => { const d = window.__dino, G = d.G; for (let i = 0; i < 600; i++) { G.p.hearts = 99; d.updatePlay(1 / 60); } G.boss.phase = 2; G.boss.hp = 1; G.bossCp = 2; G.boss.state = 'taunt'; G.p.hearts = 1; G.p.inv = 0; G.p.y = 900; for (let i = 0; i < 5; i++) d.updatePlay(1 / 60); });
   expect(await game.eval(() => window.__dino.G.overlay && window.__dino.G.overlay.type)).toBe('retry');
   await game.eval(() => window.__dino.retry());
-  expect(await game.eval(() => ({ phase: window.__dino.G.boss.phase, hp: window.__dino.G.boss.hp, hearts: window.__dino.G.p.hearts }))).toEqual({ phase: 2, hp: 3, hearts: 3 });
+  expect(await game.eval(() => ({ phase: window.__dino.G.boss.phase, hp: window.__dino.G.boss.hp, hearts: window.__dino.G.p.hearts }))).toEqual({ phase: 2, hp: 3, hearts: 4 });
 });
 
 test('endless run: ends when hearts are gone and stores the best score', async ({ game, page }) => {
@@ -353,12 +353,12 @@ test('hearts come back: pickups, checkpoint flags; full hearts turn into amber',
     const d = window.__dino, G = d.G, p = G.p, L = G.L; const out = { hearts: L.hearts.length }; L.obs.length = 0; L.pits.length = 0;
     p.hearts = 1; const h = L.hearts[0]; p.wx = h.x - 10; p.y = h.y + 50; d.updatePlay(1 / 60); out.afterPickup = p.hearts;
     p.hearts = 1; const cp = L.cps.find(c => !c.on); p.wx = cp.x + 1; d.updatePlay(1 / 60); out.flag = p.hearts;
-    const h2 = L.hearts[1]; p.hearts = 3; const a0 = G.amber; p.wx = h2.x - 10; p.y = h2.y + 50; d.updatePlay(1 / 60); out.full = [p.hearts, G.amber - a0];
+    const h2 = L.hearts[1]; p.hearts = G.maxH; const a0 = G.amber; p.wx = h2.x - 10; p.y = h2.y + 50; d.updatePlay(1 / 60); out.full = [p.hearts, G.amber - a0];
     return out;
   });
   expect(r.hearts).toBeGreaterThanOrEqual(2);
   expect(r.afterPickup).toBe(2);
-  expect(r.full).toEqual([3, 5]);
+  expect(r.full).toEqual([4, 5]);
   expect(r.flag).toBe(2);
 });
 
@@ -458,13 +458,13 @@ test('boss fights: FLITZ lunges forward and back, the boss walks home between ph
   expect(r.got).toBe(true);
 });
 
-test('safety net: the third retry at one checkpoint gives a shield that absorbs one hit; Chili speaks', async ({ game }) => {
+test('safety net: the second retry at one checkpoint gives a shield that absorbs one hit; Chili speaks', async ({ game }) => {
   await game.open();
   await game.start(0);
   const r = await game.eval(() => {
     const d = window.__dino, G = d.G, p = G.p; const out = {};
     out.greeting = !!G.chiliSay;
-    for (let i = 0; i < 2; i++) { p.hearts = 1; p.inv = 0; d.retry(); } out.afterTwo = !!G.shield;
+    p.hearts = 1; p.inv = 0; d.retry(); out.afterTwo = !!G.shield;
     p.hearts = 1; p.inv = 0; d.retry(); out.afterThree = !!G.shield;
     p.hearts = 3; p.inv = 0; p.dashT = 0; G.chiliCd = 0; G.chiliSay = null; G.p.inv = 0;
     // a hit with the shield up costs no heart; the next one does and Chili comments
@@ -472,12 +472,25 @@ test('safety net: the third retry at one checkpoint gives a shield that absorbs 
     return Object.assign(out, { before });
   });
   expect(r.greeting).toBe(true);
-  expect(r.afterTwo).toBe(false);
-  expect(r.afterThree).toBe(true);
+  expect(r.afterTwo).toBe(false); // after one retry
+  expect(r.afterThree).toBe(true); // after the second
   const h = await game.eval(() => { const d = window.__dino, G = d.G, p = G.p, L = G.L; p.hearts = 3; p.inv = 0; p.dashT = 0; const o = { type: 'rock', x: p.wx + 5, w: 40, h: 40 }; L.obs.push(o); for (let i = 0; i < 30; i++) d.updatePlay(1 / 60); return { hearts: p.hearts, shield: G.shield }; });
   expect(h.shield).toBe(false);
   expect(h.hearts).toBe(3);
   expect(game.errors).toEqual([]);
+});
+
+test('4 hearts in story levels, 3 in endless; the boss fight starts with a shield', async ({ game }) => {
+  await game.open();
+  await game.start(0);
+  expect(await game.eval(() => ({ h: window.__dino.G.p.hearts, m: window.__dino.G.maxH }))).toEqual({ h: 4, m: 4 });
+  await game.eval(() => { const G = window.__dino.G; G.p.hearts = 1; window.__dino.retry(); });
+  expect(await game.eval(() => window.__dino.G.p.hearts)).toBe(4);
+  await game.start(5);
+  await game.eval(() => { const d = window.__dino, G = d.G; G.startT = 0; G.coach = null; G.L.obs.length = 0; G.L.pits.length = 0; for (let i = 0; i < 4000 && !G.bossStarted; i++) { G.p.hearts = 4; G.p.inv = 9; G.p.wx = Math.min(G.L.bossX + 5, G.p.wx + 40); d.updatePlay(1 / 60); } });
+  expect(await game.eval(() => !!window.__dino.G.shield)).toBe(true);
+  await game.start(0, true);
+  expect(await game.eval(() => window.__dino.G.p.hearts)).toBe(3);
 });
 
 test('local Bestenliste: nickname filter, top 10 per world, ranks and persistence', async ({ game, page }) => {

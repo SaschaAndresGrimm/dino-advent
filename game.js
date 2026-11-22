@@ -729,6 +729,7 @@ const LEVEL_THEMES = [0, 0, 0, 5, 5, 5, 1, 1, 1, 6, 6, 6, 2, 2, 2, 7, 7, 7, 3, 3
 const LEVEL_TITLES = ['Erste Schritte', 'Hoch hinaus', 'Brüll-Training', 'Sandburgen-Rennen', 'Krabbenstrand', 'Der Krabbenkönig', 'Raptor-Rudel', 'Duck dich!', 'Heisse Schlucht', 'Tauchgang', 'Korallenlabyrinth', 'Das Seeungeheuer', 'Mammut-Pfad', 'Stampf-Meister', 'Eiskalte Ebene', 'Gipfelweg', 'Wolkensprung', 'Die Adlerkönigin', 'Vulkan-Aufstieg', 'Lavafluss', 'Feuer-Chili', 'Verschneite Nacht', 'Sternenwald', 'Der Krallenkönig'];
 const BOSS_DAYS = { 6: 'crab', 12: 'kraken', 18: 'queen', 24: 'king' };
 const TREASURE_DAY = { 3: 0, 9: 1, 15: 2, 21: 3 }; // Goetti's guitar, bike, rod and Kiwi
+const MAX_HEARTS = 4; // story levels; endless and daily runs keep 3 (score challenge)
 const LEVELS = LEVEL_THEMES.map((wi, li) => { const sub = li % 3, day = li + 1, boss = BOSS_DAYS[day] || null; return { li, day, wi, sub, title: LEVEL_TITLES[li], boss, treasure: TREASURE_DAY[day] != null ? TREASURE_DAY[day] : -1, segs: Math.round(46 + li * 0.9 - (boss ? 14 : 0)), speedMul: [0.98, 1.04, 1.1][sub], maxTier: [2, 3, 3][sub] }; });
 // skills arrive with the calendar: dash on day 4, duck on 7, swim on 10, stomp on 13, glide on 16, fire on 19
 const SKILL_DAYS = { dash: 4, duck: 7, swim: 10, stomp: 13, glide: 16, fire: 19 };
@@ -2613,11 +2614,11 @@ function startLevel(arg, endless) { // endless: arg = theme index. otherwise arg
   const LV = endless ? null : LEVELS[arg], wi = endless ? arg : LV.wi;
   const L = buildLevel(wi, !!endless, LV);
   G = { L, wi, li: endless ? -1 : arg, sk: skillsFor(endless ? null : arg, wi), cam: 0, t: 0, startT: 1.6, stopped: false, overlay: null, shake: 0, tip: null, eggsGot: [false, false, false], amber: 0,
-    p: { wx: 200, y: GROUND, vy: 0, onGround: true, jumps: 0, coyote: 0, inv: 0, roarT: 0, roarCd: 0, hearts: 3, ph: 0, duck: false, stomp: false, spin: 1, fireT: 0, fireCd: 0, breathT: 0, roarMax: 3 },
+    p: { wx: 200, y: GROUND, vy: 0, onGround: true, jumps: 0, coyote: 0, inv: 0, roarT: 0, roarCd: 0, hearts: endless ? 3 : MAX_HEARTS, ph: 0, duck: false, stomp: false, spin: 1, fireT: 0, fireCd: 0, breathT: 0, roarMax: 3 },
     duckHeld: null, fireballs: [], flames: [],
     chili: { wx: 95, y: GROUND, ph: 0, dig: null, digT: 0 }, cp: 200, rings: [],
     boss: null, bossStarted: false, golden: null, gotGolden: false, atGate: false, gateT: 0, gateOpening: false, gateOpen: 0, finished: false,
-    coach: null, flyEggs: [], slotPop: [0, 0, 0], hitFlash: 0, endless: !!endless, score: 0, heartAt: 500, tier: 1 };
+    coach: null, flyEggs: [], slotPop: [0, 0, 0], hitFlash: 0, endless: !!endless, maxH: endless ? 3 : MAX_HEARTS, score: 0, heartAt: 500, tier: 1 };
   if (!endless) { G.chiliSay = { text: fmt('Los geht\'s, ihr zwei!'), t: 2.6 }; G.chiliCd = 4; }
   if (endless) { G.tip = { text: 'Endlos-Lauf! Es wird immer schneller und gefährlicher. Alle 500 Punkte gibt es ein Herz zurück.', t: 5 }; G.startT = 1.2; }
 }
@@ -2752,8 +2753,8 @@ function retry() {
   if (isBossKey(mus.key)) mus.key = null;
   const p = G.p, L = G.L;
   const fk = G.bossStarted ? 'b' + (G.bossCp || 0) : String(G.cp); G.fails = G.fails || {}; G.fails[fk] = (G.fails[fk] || 0) + 1;
-  if (G.fails[fk] >= 3 && !G.endless && !G.shield) { G.shield = true; G.fails[fk] = 0; setTimeout(() => { if (G && scene === 'play') toast('Chili schenkt dir einen Schutzschild!', '#9fd3ff'); }, 700); }
-  G.overlay = null; p.hearts = 3; p.inv = 2; p.wx = G.bossStarted ? G.cp : safeSpawn(G.cp); p.y = GROUND; p.vy = 0; p.roarCd = 0; p.stomp = false; p.spin = 1; G.duckHeld = null; G.fireballs = []; G.flames = [];
+  if (G.fails[fk] >= 2 && !G.endless && !G.shield) { G.shield = true; G.fails[fk] = 0; setTimeout(() => { if (G && scene === 'play') toast('Chili schenkt dir einen Schutzschild!', '#9fd3ff'); }, 700); }
+  G.overlay = null; p.hearts = G.maxH; p.inv = 2; p.wx = G.bossStarted ? G.cp : safeSpawn(G.cp); p.y = GROUND; p.vy = 0; p.roarCd = 0; p.stomp = false; p.spin = 1; G.duckHeld = null; G.fireballs = []; G.flames = [];
   G.chili.wx = p.wx - 145; G.chili.dig = null; resetCrumble(L);
   for (const s of L.spots) if (s.state === 'dig') s.state = 'idle';
   for (const o of L.obs) if ((o.type === 'raptor' || o.type === 'ptero' || o.type === 'compy' || o.type === 'hopper' || o.type === 'seed') && o.x > G.cp - 300 && o.x < G.cp + 700) o.dead = true;
@@ -2887,7 +2888,7 @@ function updatePlay(dt) {
   for (const h of L.hearts) if (!h.got) { const mx = p.wx + 10 - h.x, my = p.y - 50 - h.y; if (Math.abs(mx) < 170 && Math.abs(my) < 150) { h.x += mx * Math.min(1, dt * 5); h.y += my * Math.min(1, dt * 3); } } // hearts are drawn to Rex
   for (const h of L.hearts) if (!h.got && Math.abs(h.x - p.wx - 10) < 60 && Math.abs(h.y - (p.y - 50)) < 80) {
     h.got = true; SFX.heart(); burst(h.x, h.y, 26, ['#ff5a7a', '#ffb4c4', '#fff'], 320, 300, 7, 0.9);
-    if (p.hearts < 3) { p.hearts++; toast('Ein Herz zurück!', '#ff8a9a'); } else { G.amber += 5; toast('Alle Herzen voll – 5 Bernstein extra!', '#ffe08a'); }
+    if (p.hearts < G.maxH) { p.hearts++; toast('Ein Herz zurück!', '#ff8a9a'); } else { G.amber += 5; toast('Alle Herzen voll – 5 Bernstein extra!', '#ffe08a'); }
   }
   if (G.stopped && G.bossStarted) for (const a of L.amb.concat(L.hearts)) if (!a.got && a.x > p.wx + 10) a.x = Math.max(p.wx + 10, a.x - 240 * dt); if (G.stopped && G.bossStarted) for (const a of L.amb) if (!a.got && Math.abs(a.x - p.wx - 10) < 90) a.y += (clamp(a.y, GROUND - 150, GROUND - 40) - a.y) * Math.min(1, dt * 6);
   for (const f of G.fireballs) {
@@ -2914,10 +2915,10 @@ function updatePlay(dt) {
   p.inv -= dt; p.roarT -= dt; p.roarCd -= dt;
   G.cam = p.wx - (p.lungeOff || 0) - 270;
   if (G.endless) { let tr = 1; for (const tx of L.tierX) if (p.wx >= tx) tr++; if (tr > G.tier) { G.tier = tr; SFX.power(); G.shake = Math.max(G.shake, 0.3); toast(['', '', 'Stufe 2 – mehr Gegner!', 'Stufe 3 – neue Gefahren!', 'Stufe 4 – doppelte Gefahren!'][tr] || `Stufe ${tr} – nur für Profis!`, '#ff9a5a'); }
-    G.score = Math.max(G.score, Math.floor((p.wx - 200) / 25) + G.amber * 3); if (G.score >= G.heartAt) { G.heartAt += 500; if (p.hearts < 3) { p.hearts++; SFX.heart(); toast('Ein Herz zurück!', '#ff8a9a'); } else toast(G.score + ' Punkte!', '#ffe08a'); } }
+    G.score = Math.max(G.score, Math.floor((p.wx - 200) / 25) + G.amber * 3); if (G.score >= G.heartAt) { G.heartAt += 500; if (p.hearts < G.maxH) { p.hearts++; SFX.heart(); toast('Ein Herz zurück!', '#ff8a9a'); } else toast(G.score + ' Punkte!', '#ffe08a'); } }
   // tips, checkpoints
   for (const t of L.tips) if (!t.shown && p.wx >= t.x) { t.shown = true; G.tip = { text: t.text, t: 6.5 }; }
-  for (const c of L.cps) if (!c.on && p.wx >= c.x) { c.on = true; G.cp = c.x; SFX.flag(); chiliSay(pick(['Fähnchen! Weiter so!', 'Pfoten hoch, ihr zwei!', 'Prima, das war stark!'])); if (p.hearts < 3) { p.hearts++; toast('Fähnchen erreicht – ein Herz zurück!', '#ff8a9a'); } else toast('Fähnchen erreicht!', '#ffe08a'); }
+  for (const c of L.cps) if (!c.on && p.wx >= c.x) { c.on = true; G.cp = c.x; SFX.flag(); chiliSay(pick(['Fähnchen! Weiter so!', 'Pfoten hoch, ihr zwei!', 'Prima, das war stark!'])); if (p.hearts < G.maxH) { p.hearts++; toast('Fähnchen erreicht – ein Herz zurück!', '#ff8a9a'); } else toast('Fähnchen erreicht!', '#ffe08a'); }
   // amber
   for (const a of L.amb) if (!a.got && Math.abs(a.x - p.wx - 10) < 42 && Math.abs(a.y - (p.y - 50)) < 62) { a.got = true; G.amber++; G.combo = G.t - (G.lastAmb || -9) < 0.6 ? Math.min(G.combo + 1, 8) : 0; G.lastAmb = G.t; SFX.amberNote(G.combo); burst(a.x, a.y, 6, ['#ffd166', '#ff9f1c'], 150, 200, 4, 0.4); }
   // eggs
@@ -3019,7 +3020,7 @@ function updatePlay(dt) {
   }
   // boss
   if (L.bossX && !G.bossStarted && p.wx >= L.bossX) {
-    G.bossStarted = true; G.stopped = true; p.wx = L.bossX; G.cp = L.bossX; G.boss = newBoss(0); G.bossCp = 0; bossBanner(bossKind(G.boss).name, 'taucht auf!', '#ff6a3a'); SFX.roar(); G.shake = Math.max(G.shake, 0.4);
+    G.bossStarted = true; if (!G.shield) { G.shield = true; setTimeout(() => { if (G && scene === 'play') toast('Chili schenkt dir einen Schutzschild!', '#9fd3ff'); }, 900); } G.stopped = true; p.wx = L.bossX; G.cp = L.bossX; G.boss = newBoss(0); G.bossCp = 0; bossBanner(bossKind(G.boss).name, 'taucht auf!', '#ff6a3a'); SFX.roar(); G.shake = Math.max(G.shake, 0.4);
     { const K = bossKind(G.boss), n = K.phases.length, w = ['', '', 'zwei', 'drei', 'vier'][n], pr = G.boss.kind === 'queen' ? 'sie' : 'ihn'; G.tip = { text: G.boss.kind === 'king' ? 'Der Krallenkönig hat das goldene Ei geklaut – hol es zurück! Besiege ihn in vier Runden.' : `${K.name} hält ein Stück der Schatzkarte! Besiege ${pr} in ${w} Runden.`, t: 6 }; }
   }
   if (G.boss) updateBoss(dt);
@@ -3930,7 +3931,7 @@ function dashPos() { return G.sk.duck ? [196, H - 58, 46] : [76, H - 78, 54]; }
 function drawHUD() {
   const p = G.p, th = WORLDS[G.wi];
   const bossBar = !!(G.boss && G.boss.state !== 'enter' && !G.golden && !G.bossDone); // boss health replaces the egg pill
-  for (let i = 0; i < 3; i++) drawHeart(34 + i * 40, 38, 1.25, i < p.hearts);
+  for (let i = 0; i < G.maxH; i++) drawHeart(34 + i * 40, 38, 1.25, i < p.hearts);
   if (G.endless) { rr(W / 2 - 110, 12, 220, 54, 27); ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fill(); otxt(String(G.score), W / 2, 36, 32, '#ffe08a', 'rgba(0,0,0,.7)', 6); txt('Rekord ' + Math.max(save.best[G.wi] || 0, G.score), W / 2, 58, 14, 'rgba(255,255,255,.8)', 'center', 'normal'); rr(W / 2 - 52, 72, 104, 24, 12); ctx.fillStyle = G.tier >= 4 ? 'rgba(200,50,30,.85)' : G.tier >= 2 ? 'rgba(230,140,30,.85)' : 'rgba(40,110,170,.85)'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(255,255,255,.6)'; ctx.stroke(); txt('Stufe ' + G.tier, W / 2, 85, 16, '#fff'); }
   else if (!bossBar) { rr(W / 2 - 92, 12, 184, 54, 27); ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fill(); }
   if (!G.endless && !bossBar) for (let k = 0; k < 3; k++) { const got = G.eggsGot[k] && !G.flyEggs.some(f => f.k === k), before = G.li >= 0 && save.lvE[G.li][k]; drawEgg(W / 2 - 50 + k * 50, 39, 17 * (1 + G.slotPop[k]), got || before ? th.egg : 'rgba(255,255,255,.15)', got || before ? th.eggSpot : 'rgba(255,255,255,.1)', got ? 0.6 : 0, 0, got ? 1 : before ? 0.45 : 1); }
