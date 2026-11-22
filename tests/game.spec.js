@@ -95,22 +95,24 @@ test('shop: select to preview, buy only with enough amber, then equip and persis
 
 test('shop: hats and jackets per boy, Chili items, Goetti vouchers', async ({ game, page }) => {
   await game.open({ amber: 1000 });
+  // Buttons are registered while drawing, so give the game a frame or two between taps (slow CI runners need it).
+  const tap = async (x, y) => { await page.mouse.click(x, y); await page.waitForTimeout(80); };
   await game.eval(() => window.__dino.go('shop'));
   await page.waitForTimeout(300);
   const tab = t => [440 + t * 84 + 40, 140], card = j => [440 + (j % 4) * 126 + 59, 166 + Math.floor(j / 4) * 104 + 50];
   const buy = [688, 438], yes = [565, 353], oliBtn = [562, 438], fabioBtn = [814, 438];
-  await page.mouse.click(...tab(3)); await page.mouse.click(...card(2)); await page.mouse.click(...buy); await page.mouse.click(...yes); // Blau jacket, 150
+  await tap(...tab(3)); await tap(...card(2)); await tap(...buy); await tap(...yes); // Blau jacket, 150
   let r = await game.eval(() => { const s = window.__dino.save; return { amber: s.amber, owned: s.owned.jacket, oli: s.equip.jacket, fabio: s.equip.fabioJacket }; });
   expect(r).toEqual({ amber: 850, owned: [0, 1, 2], oli: 0, fabio: 1 }); // bought, but nobody wears it yet
-  await page.mouse.click(...fabioBtn);
+  await tap(...fabioBtn);
   expect(await game.eval(() => window.__dino.save.equip.fabioJacket)).toBe(2);
-  await page.mouse.click(...tab(2)); await page.mouse.click(...card(1)); await page.mouse.click(...buy); await page.mouse.click(...yes); // Mütze, 150
-  await page.mouse.click(...oliBtn);
+  await tap(...tab(2)); await tap(...card(1)); await tap(...buy); await tap(...yes); // Mütze, 150
+  await tap(...oliBtn);
   r = await game.eval(() => { const s = window.__dino.save; return { hat: s.equip.hat, fabioHat: s.equip.fabioHat }; });
   expect(r.hat).toBe(1); expect(r.fabioHat).toBe(0);
-  await page.mouse.click(...tab(4)); await page.mouse.click(...card(1)); await page.mouse.click(...buy); await page.mouse.click(...yes); // Schleife, 80
+  await tap(...tab(4)); await tap(...card(1)); await tap(...buy); await tap(...yes); // Schleife, 80
   expect(await game.eval(() => window.__dino.save.equip.chili)).toBe(1);
-  await page.mouse.click(...tab(5)); await page.mouse.click(...card(0)); await page.mouse.click(...buy); await page.mouse.click(...yes); // Velotour, 600
+  await tap(...tab(5)); await tap(...card(0)); await tap(...buy); await tap(...yes); // Velotour, 600
   r = await game.eval(() => { const s = window.__dino.save; return { amber: s.amber, wish: s.owned.wish }; });
   expect(r).toEqual({ amber: 20, wish: [0] });
   await page.waitForTimeout(200);
