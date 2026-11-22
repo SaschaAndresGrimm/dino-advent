@@ -59,6 +59,16 @@ test('riddle: wrong answer locks buttons and costs amber; hint crosses out a wro
   expect(game.errors).toEqual([]);
 });
 
+test('riddle: difficulty follows the day (first level easy, boss and treasure days hard)', async ({ game, page }) => {
+  for (const [day, want] of [[1, [1]], [2, [1, 2]], [3, [3]], [6, [3]], [9, [3]]]) {
+    await game.open({});
+    await game.start(day - 1);
+    const d = await game.eval(() => { const d = window.__dino; const out = []; for (let k = 0; k < 40; k++) { d.openRiddle(); out.push(d.G.overlay.r.d); } return out; });
+    for (const x of d) expect(want, 'day ' + day).toContain(x);
+  }
+  expect(game.errors).toEqual([]);
+});
+
 test('riddle: correct answer solves it and the gate opens', async ({ game, page }) => {
   await game.open();
   await game.start(0);

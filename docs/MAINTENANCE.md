@@ -33,7 +33,7 @@ The calendar start is a constant, `ADVENT_START` in `game.js` (1 December 2026).
 | What | Where |
 |---|---|
 | Story and dialog text | `DAY_STORY`, `DAY_AFTER`, `TEASERS`, `startStory`, `startEnding` |
-| Riddles | `WORLDS[i].riddles` (10 per theme) |
+| Riddles | `WORLDS[i].riddles` (15 per theme, each with a difficulty `d` 1-3 that the level picks by day; append new ones at the end so `save.riddleSeen` indices stay valid; set `trick: true` only for real trick questions) |
 | Dino cards and facts | `FACTS`, `STECK` (add an entry for each card) |
 | Shop items, gifts | `SKINS`, `HATS`, `FIRES`, `JACKETS`, `WISHES` (real-life vouchers and prices) |
 | Blocked nicknames | `BAD_WORDS` |
