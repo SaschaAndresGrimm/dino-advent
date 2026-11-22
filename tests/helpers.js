@@ -16,6 +16,7 @@ const test = base.extend({
         await page.addInitScript(([k, s]) => { if (!localStorage.getItem(k)) localStorage.setItem(k, JSON.stringify(s)); }, [KEY, { ...BASE_SAVE, ...save }]);
         await page.goto('/');
         await page.waitForFunction(() => window.__dino);
+        await page.evaluate(() => window.__dino.go('title')); // tests skip the tap-to-start splash
       },
       // start a level with the coach and intro countdown skipped
       async start(wi, endless = false) {

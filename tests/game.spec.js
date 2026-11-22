@@ -1,5 +1,16 @@
 const { test, expect, KEY, FAKE_AUDIO } = require('./helpers');
 
+test('splash waits for a tap, unlocks sound, and leads to the title', async ({ page }) => {
+  const errors = []; page.on('pageerror', e => errors.push(e.message));
+  await page.addInitScript(() => localStorage.setItem('olisDinoRettung.v1', JSON.stringify({ rexName: 'Rexi', fabioName: 'Fabio', oliName: 'Oli', unlocked: 3, tutorialDone: true })));
+  await page.goto('/'); await page.waitForFunction(() => window.__dino);
+  await page.waitForTimeout(1500);
+  expect(await page.evaluate(() => window.__dino.scene)).toBe('splash'); // no tap, no progress
+  await page.mouse.click(480, 300);
+  await page.waitForFunction(() => window.__dino.scene === 'title', null, { timeout: 5000 });
+  expect(errors).toEqual([]);
+});
+
 test('title screen loads without errors', async ({ game, page }) => {
   await game.open({});
   expect(await game.eval(() => window.__dino.scene)).toBe('title');
