@@ -299,7 +299,7 @@ function drawEmbers() {
 // toasts & tips
 let toasts = [];
 const BOSS_QUIET = /Fähnchen|Helfer kommen|Noch \d Mal|erschöpft|Boss selbst/; // the boss bar and the roar prompt already say this
-function toast(text, color = '#fff') { const inBoss = scene === 'play' && G && G.boss; if (inBoss && BOSS_QUIET.test(text)) return; if (inBoss) toasts.length = 0; const ex = toasts.find(q => q.text === text); if (ex) { ex.t = 2.6; return; } toasts.push({ text, color, t: 2.6 }); if (toasts.length > 3) toasts.shift(); }
+function toast(text, color = '#fff') { const inBoss = scene === 'play' && G && G.boss; if (scene === 'play' && G && G.L && G.L.bossX && G.p.wx >= G.L.bossX - 5 && BOSS_QUIET.test(text)) return; if (inBoss) toasts.length = 0; const ex = toasts.find(q => q.text === text); if (ex) { ex.t = 2.6; return; } toasts.push({ text, color, t: 2.6 }); if (toasts.length > 3) toasts.shift(); }
 function drawToasts() {
   const inBoss = scene === 'play' && G && G.boss, ty = inBoss ? 78 : 196;
   toasts.forEach((t, i) => { t.t -= DT; const a = clamp(t.t * 2, 0, 1); ctx.globalAlpha = a; const fs = inBoss ? 19 : 24, bh = inBoss ? 32 : 40, sp = inBoss ? 38 : 46; setFont(fs); const w = ctx.measureText(t.text).width + 36; rr(W / 2 - w / 2, ty + i * sp, w, bh, bh / 2); ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.fill(); txt(t.text, W / 2, ty + bh / 2 + 1 + i * sp, fs, t.color); ctx.globalAlpha = 1; });
@@ -2184,7 +2184,8 @@ function outlined(key, x, y, bx, by, bw, bh, fn, alpha = 1, lw = 2.6) {
   cb.setTransform(1, 0, 0, 1, 0, 0); cb.globalCompositeOperation = 'source-over'; cb.clearRect(0, 0, cw + 2, ch + 2);
   cb.drawImage(P.a, 0, 0); cb.globalCompositeOperation = 'source-in'; cb.fillStyle = '#1b120c'; cb.fillRect(0, 0, cw, ch); cb.globalCompositeOperation = 'source-over';
   ctx.save(); ctx.globalAlpha = alpha;
-  for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2; ctx.drawImage(P.b, 0, 0, cw, ch, X + Math.cos(a) * lw, Y + Math.sin(a) * lw, cw / k, ch / k); }
+  const nO = bw * bh * k * k > 60000 ? 4 : 8, rO = nO === 4 ? lw * 1.2 : lw; // big sprites (the bosses) use fewer outline stamps: it is the costliest draw in a fight
+  for (let i = 0; i < nO; i++) { const a = i / nO * Math.PI * 2 + (nO === 4 ? Math.PI / 4 : 0); ctx.drawImage(P.b, 0, 0, cw, ch, X + Math.cos(a) * rO, Y + Math.sin(a) * rO, cw / k, ch / k); }
   ctx.drawImage(P.a, 0, 0, cw, ch, X, Y, cw / k, ch / k);
   ctx.restore();
 }
@@ -2800,8 +2801,8 @@ function updatePlay(dt) {
   }
   // boss
   if (L.bossX && !G.bossStarted && p.wx >= L.bossX) {
-    G.bossStarted = true; G.stopped = true; p.wx = L.bossX; G.cp = L.bossX; G.boss = newBoss(0); G.bossCp = 0;
-    G.tip = { text: 'Der Krallenkönig hat das goldene Ei geklaut – hol es zurück! Besiege ihn in vier Runden.', t: 6 };
+    G.bossStarted = true; G.stopped = true; p.wx = L.bossX; G.cp = L.bossX; G.boss = newBoss(0); G.bossCp = 0; bossBanner(bossKind(G.boss).name, 'taucht auf!', '#ff6a3a'); SFX.roar(); G.shake = Math.max(G.shake, 0.4);
+    { const K = bossKind(G.boss), n = K.phases.length, w = ['', '', 'zwei', 'drei', 'vier'][n], pr = G.boss.kind === 'queen' ? 'sie' : 'ihn'; G.tip = { text: G.boss.kind === 'king' ? 'Der Krallenkönig hat das goldene Ei geklaut – hol es zurück! Besiege ihn in vier Runden.' : `${K.name} hält ein Stück der Schatzkarte! Besiege ${pr} in ${w} Runden.`, t: 6 }; }
   }
   if (G.boss) updateBoss(dt);
   if (G.golden && !G.gotGolden) {
@@ -2849,7 +2850,7 @@ function updateBoss(dt) {
     return { type: k, x, spd: ((k === 'raptor' ? 175 : 190) + (3 - b.hp) * 12) * (b.kind === 'king' ? [1, 1.5, 0.78, 1.28, 0.9, 1.4][i % 6] : 1), ph: i, alpha: 1, minion: true };
   };
   switch (b.state) {
-    case 'enter': b.x -= 230 * dt; if (b.x <= home) { b.x = home; SFX.roar(); G.shake = 0.5; startBossPhase(b); } break;
+    case 'enter': b.x -= 230 * dt; G.shake = Math.max(G.shake, 0.16); if ((b.dust = (b.dust || 0) - dt) <= 0) { b.dust = 0.14; burst(b.x - 30, GROUND - 6, 5, ['#d8c9a6', '#efe5cc', '#b9a784'], 110, 60, 8, 0.7); } if (b.x <= home) { b.x = home; SFX.roar(); G.shake = 0.5; startBossPhase(b); } break;
     case 'taunt':
       if (b.t > (b.phase === 0 ? 1.0 : 0.9)) {
         b.n++; b.t = 0;
@@ -2909,7 +2910,7 @@ function updateBoss(dt) {
       if (b.meter >= 0.97) { b.state = 'flee'; b.t = 0; G.slowT = 1.4; G.shake = 1; G.hitFlash = 0; bossBanner('K.O.!', 'Der Krallenkönig fliegt davon!', '#9cff8a'); SFX.smash(); setTimeout(SFX.roar, 150); burst(b.x, GROUND - 120, 80, ['#ffd740', '#fff', '#ff7043', '#ff5252'], 700, 500, 9, 1.4); toast('Der Krallenkönig rennt davon!', '#9cff8a'); }
       else if (b.meter < 0.06 && b.duelT > 3.5) { hurt(); b.meter = 0.35; b.duelT = 0; G.shake = 0.5; toast('Nicht aufgeben – brüll lauter!', '#ffb4a8'); }
     } break;
-    case 'flee': b.x += 620 * dt; b.y -= 260 * dt;
+    case 'flee': b.x += 620 * dt; b.y -= 260 * dt; if ((b.trail = (b.trail || 0) - dt) <= 0) { b.trail = 0.05; burst(b.x - 40, GROUND + b.y - 110, 2, ['#ffd740', '#fff', '#ff8a65'], 140, 0, 9, 0.7); }
       if (b.t > 1.2 && !G.golden && !G.bossDone) { if (b.kind === 'king') { G.golden = { x: p.wx + 330, y: -60, vy: 0, landed: false }; SFX.pop(); } else { G.bossDone = true; G.stopped = false; SFX.right(); } }
       break;
   }
@@ -3517,7 +3518,7 @@ function drawFamilyCliff(L, cam) {
   oLong(x0 + 340, 232 - hop(1), 0.68, '#4f8fd6', T * 3 + 1, false);
   const lbl = (s, x) => { setFont(14); const w = ctx.measureText(s).width + 14; rr(x - w / 2, 242, w, 20, 10); ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.fill(); txt(s, x, 252, 14, '#3b2410'); };
   lbl('Mamasaurus', x0 + 180); lbl('Papasaurus', x0 + 320);
-  if (cheer) {
+  if (cheer && !toasts.length && !G.banner) {
     const lines = [[fmt('Los, {oli}!'), x0 + 200, 92], [fmt('Du schaffst das, {rex}!'), x0 + 390, 88], [fmt('Brüll, {fabio}, brüll!'), x0 + 470, 94]];
     lines.forEach(([s, x, y], i) => { if (Math.floor(T / 3) % 3 === i && (T / 3) % 1 < 0.8) { setFont(18); const w = ctx.measureText(s).width + 20; rr(x - w / 2, y - 16, w, 32, 14); ctx.fillStyle = '#fff'; ctx.fill(); txt(s, x, y, 18, '#3b2410'); } });
   }
@@ -3590,7 +3591,7 @@ function drawPlay() {
     ctx.translate(bx + ({ crab: -40, queen: -110, kraken: -20 }[b.kind] || 0), by); let rot = 0, sy = 1, sx = 0;
     if (st === 'crouch') sy = 0.84 + 0.02 * Math.sin(T * 30); if (st === 'tired') rot = -0.13; if (st === 'stagger' || st === 'duel') sx = Math.sin(T * 60) * (st === 'duel' ? 4 : 2.5);
     if (st === 'leap') rot = -0.25 * Math.sin(clamp(b.t / 0.7, 0, 1) * Math.PI);
-    ctx.translate(sx, 0); ctx.rotate(rot); ctx.scale(1, sy);
+    ctx.translate(sx, 0); if (st === 'flee') { ctx.translate(0, -110); ctx.rotate(b.kind === 'king' ? Math.sin(b.t * 14) * 0.35 : b.t * 7); ctx.translate(0, 110); } // the king's outline cache is axis-aligned, so he wobbles instead of tumbling ctx.rotate(rot); ctx.scale(1, sy);
     const BC = [['#8b1a1a', '#4a0a0a'], ['#7a3a1a', '#3d1a08'], ['#5a2a7a', '#2a0f40'], ['#b01c10', '#5a0a04']][b.phase] || ['#8b1a1a', '#4a0a0a'];
     const anim = st === 'taunt' || st === 'tired' ? (b.kind === 'king' ? 0 : b.ph * 0.5) : b.ph, face = st !== 'flee';
     const dmg = bossDmg(b), ko = st === 'flee'; if (b.kind === 'crab') drawCrabKing(0, 0, 1.5, anim, face, { dmg, ko }); else if (b.kind === 'kraken') drawKraken(0, 0, 1.45, anim, face, { dmg, ko }); else if (b.kind === 'queen') drawQueen(0, 0, 1.7, anim, face, { dmg, ko }); else oRaptor(0, 0, 2.3, anim, face, { col: BC[0], dark: BC[1], crown: true, dmg, ko });
@@ -3667,6 +3668,7 @@ function drawPlay() {
   if (TOD > 0.01) { const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, `rgba(255,110,70,${0.1 * TOD})`); g.addColorStop(0.6, `rgba(255,150,70,${0.2 * TOD})`); g.addColorStop(1, `rgba(110,40,70,${0.16 * TOD})`); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H); }
   vignette(ART(G.wi));
   ctx.restore(); TOD = 0; chiliFx.dive = false;
+  if (G.boss && G.boss.state === 'enter') { const wa = 0.18 + 0.14 * Math.sin(T * 12), wg = ctx.createRadialGradient(W / 2, H / 2, 200, W / 2, H / 2, 560); wg.addColorStop(0, 'rgba(255,40,20,0)'); wg.addColorStop(1, `rgba(255,40,20,${wa})`); ctx.fillStyle = wg; ctx.fillRect(0, 0, W, H); }
   // boss prompt
   if (G.boss && ((G.boss.state === 'charge' && G.boss.x - p.wx < 390) || G.boss.state === 'tired') && Math.sin(T * 20) > -0.5) { otxt('JETZT BRÜLLEN!', W / 2, 200, 38, '#ff5252', '#000', 8); }
   // incoming-danger badges at the right edge
@@ -3895,10 +3897,14 @@ function drawOverlay() {
     if (G.newTreasure) { drawTreasure(G.L.treasure.k, W / 2 - 200, 380, 0.8); txt(TREASURES[G.L.treasure.k].name + ' gefunden!', W / 2 + 20, 384, 26, '#2e7d32'); }
     else { const tk = lv.treasure; const nextOpen = lv.day < 24 && lv.day === adventDay(); const missing = 3 - save.lvE[G.li].filter(Boolean).length;
       txt(nextOpen && TEASERS[lv.day] ? TEASERS[lv.day] : nextOpen ? `Morgen öffnet sich Tür ${lv.day + 1} – bis dann!` : tk >= 0 && !save.treasures[tk] ? 'Goetti vermisst hier noch etwas … Schau mal ganz weit oben!' : missing ? 'Chili schnuppert: Hier sind noch Eier versteckt!' : 'Super gemacht!', W / 2, 384, 19, '#6b4a2b', 'center', 'normal'); }
-    { const hop = Math.abs(Math.sin(T * 7)) * 16, hop2 = Math.abs(Math.sin(T * 7 + 1.2)) * 14; shadow(240, 506, 52 - hop * 0.6, 0.25); shadow(724, 506, 22, 0.25);
+    { const hop = Math.abs(Math.sin(T * 7)) * 16, hop2 = Math.abs(Math.sin(T * 7 + 1.2)) * 14; shadow(240, 506, 52 - hop * 0.6, 0.25); shadow(752, 506, 22, 0.25);
       oRex(240, 502 - hop, 0.55, T * 8, 0.85, Object.assign(rexLook(G.wi), { rider: true, vy: -200 }));
-      chiliFx.joy = 1; oChili(724, 504 - hop2, 1.0, T * 12, true); chiliFx.joy = 0;
+      chiliFx.joy = 1; oChili(752, 504 - hop2, 1.0, T * 12, true); chiliFx.joy = 0;
       if (Math.sin(T * 7) > 0.9) burst(G.cam + 250, 440, 2, ['#ffd740', '#fff', '#ff8a9a'], 140, 300, 5, 0.6); }
+    if (lv.boss) { // the beaten boss, bandaged and dizzy, next to the cheering heroes
+      const kk = lv.boss, bo = { dmg: 1, ko: true, wid: 'res' }; shadow(668, 508, kk === 'king' ? 62 : 48, 0.25);
+      if (kk === 'crab') drawCrabKing(668, 506, 0.45, T * 2, true, bo); else if (kk === 'kraken') drawKraken(668, 506, 0.3, T * 2, true, bo); else if (kk === 'queen') drawQueen(668, 506, 0.45, T * 2, true, bo); else oRaptor(668, 506, 0.6, T * 2, true, { col: '#b01c10', dark: '#4a0a0a', crown: true, dmg: 1, ko: true, wid: 'res' });
+    }
     if (lv.day === 24) button('Weiter!', W / 2 - 150, 422, 300, 62, () => startEnding(), { color: '#e57373', textColor: '#fff' });
     else button('Zur Karte', W / 2 - 150, 422, 300, 62, () => go('map'));
   }
