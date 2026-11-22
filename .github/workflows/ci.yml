@@ -55,7 +55,7 @@ jobs:
           sed -i "s/dino-advent-dev/dino-advent-${GITHUB_SHA::7}/" _site/sw.js
           grep -n "const CACHE" _site/sw.js
       - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: _site
       - id: deployment
