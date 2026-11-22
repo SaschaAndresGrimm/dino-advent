@@ -3963,13 +3963,23 @@ function drawDialog() {
 }
 const nameBox = document.getElementById('nameBox'), nameInput = document.getElementById('nameInput'), nameOk = document.getElementById('nameOk'), nameLabel = document.getElementById('nameLabel');
 function nameOpen() { return nameBox.style.display === 'flex'; }
+// The on-screen keyboard (Android especially) covers the fixed name card. Keep the card inside the part of the screen that is still visible
+// (the visual viewport) and switch to a compact one-row layout when little room is left.
+function fitNameBox() {
+  const vv = window.visualViewport;
+  if (!vv || nameBox.style.display === 'none') return;
+  nameBox.style.inset = 'auto'; nameBox.style.left = vv.offsetLeft + 'px'; nameBox.style.top = vv.offsetTop + 'px'; nameBox.style.width = vv.width + 'px'; nameBox.style.height = vv.height + 'px';
+  nameBox.classList.toggle('compact', vv.height < 460);
+}
+function unfitNameBox() { nameBox.style.inset = ''; nameBox.style.left = nameBox.style.top = nameBox.style.width = nameBox.style.height = ''; nameBox.classList.remove('compact'); }
+if (window.visualViewport) for (const ev of ['resize', 'scroll']) window.visualViewport.addEventListener(ev, fitNameBox);
 function askName(label, def, cb, validate, prefill) {
-  nameLabel.textContent = label; nameLabel.style.color = ''; nameInput.value = prefill ? def : ''; nameInput.placeholder = def; nameBox.style.display = 'flex';
+  nameLabel.textContent = label; nameLabel.style.color = ''; nameInput.value = prefill ? def : ''; nameInput.placeholder = def; nameBox.style.display = 'flex'; fitNameBox();
   setTimeout(() => { nameInput.focus(); if (prefill) nameInput.select(); }, 60);
   const finish = () => {
     let v = nameInput.value.trim().slice(0, 14); if (!v) v = def; v = v.charAt(0).toUpperCase() + v.slice(1);
     if (validate) { const msg = validate(v); if (msg) { nameLabel.textContent = msg; nameLabel.style.color = '#b3261e'; SFX.wrong(); return; } }
-    nameBox.style.display = 'none'; nameInput.blur(); nameOk.onclick = null; nameInput.onkeydown = null; audio(); SFX.right(); cb(v);
+    nameBox.style.display = 'none'; unfitNameBox(); nameInput.blur(); nameOk.onclick = null; nameInput.onkeydown = null; audio(); SFX.right(); cb(v);
   };
   nameOk.onclick = finish;
   nameInput.onkeydown = e => { e.stopPropagation(); if (e.key === 'Enter') finish(); };
@@ -4079,9 +4089,9 @@ function startStory() {
     save.rexName = name; writeSave();
     startDialog([
       { who: 'rex', text: 'ROOOAAARRR! ({rex} gefällt der Name!)' },
-      { who: 'goetti', text: '{oli} sitzt hinten und hält die Zügel. {fabio} sitzt vorne und hält sich gut fest.' },
+      { who: 'goetti', text: '{rex} – super Name! {oli} sitzt hinten und hält die Zügel. {fabio} sitzt vorne und hält sich gut fest.' },
       { who: 'fabio', text: 'Hü, {rex}, hü!' },
-      { who: 'goetti', text: '{rex} – super Name! Und Chili kommt auch mit. Mit der Hasennase findet Chili jedes versteckte Ei!' },
+      { who: 'goetti', text: 'Und Chili kommt auch mit. Mit der Hasennase findet Chili jedes versteckte Ei!' },
       { who: 'chili', text: 'Schnupper, schnupper… Chili ist bereit!' },
       { who: 'goetti', text: 'Jeden Tag bis Weihnachten öffnet sich eine neue Tür in meinem Adventskalender – hinter jeder wartet ein Abenteuer! Und am Schluss warten der Krallenkönig und das goldene Ei. Los geht\'s!' },
     ], () => go('map'), true);
