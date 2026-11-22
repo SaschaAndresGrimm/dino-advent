@@ -23,5 +23,5 @@ async function auditInPage(cfg) {
   return out;
 }
 const ALL_SONGS = ['map', '0', '1', '2', '3', '4', '5', '6', '7', 'ending', 'boss_crab', 'boss_kraken', 'boss_queen', 'boss_king'];
-const SFX_LIST = [['jump'], ['dash'], ['amber'], ['amberNote', [3]], ['egg'], ['hurt'], ['lose'], ['lowHeart'], ['right'], ['smash'], ['roar'], ['stomp'], ['land', [900]], ['heart'], ['bubble'], ['whoosh'], ['buy'], ['chirp'], ['sparkle'], ['victory', [false]], ['victory', [true]], ['power'], ['fire']];
+const SFX_LIST = [['jump'], ['dash'], ['amber'], ['amberNote', [3]], ['egg'], ['hurt'], ['lose'], ['lowHeart'], ['right'], ['smash'], ['roar'], ['stomp'], ['land', [900]], ['heart'], ['bubble'], ['whoosh'], ['buy'], ['chirp'], ['sparkle'], ['victory', [false]], ['victory', [true]], ['power'], ['fire'], ['runeChime', [0]], ['runeChime', [2]], ['tabletThud'], ['riddleWin'], ['gateRumble']];
 module.exports = { auditInPage, ALL_SONGS, SFX_LIST };

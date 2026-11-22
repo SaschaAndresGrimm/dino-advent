@@ -149,6 +149,13 @@ const SFX = {
   },
   wrong() { tone(220, 0.2, 'square', 0.09, 160); tone(160, 0.25, 'square', 0.09, 120, 0.15); },
   right() { [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.3, 'triangle', 0.14, null, i * 0.1)); },
+  runeChime(k) { // a gate rune lights up: a bell on the song's scale, climbing with each rune
+    const m = SONGS[mus.key] || { root: 330, sc: 'maj' }, sc = SCALES[m.sc], rt = m.root * Math.pow(2, (mus.lift || 0) / 12), f = rt * 2 * Math.pow(2, (sc[[0, 2, 4][k % 3]] + 12) / 12);
+    tone(f, 0.9, 'sine', 0.1, null, 0, { att: 0.01 }); tone(f * 2, 0.5, 'sine', 0.04); tone(f * 3, 0.25, 'sine', 0.015); for (let i = 0; i < 4; i++) tone(f * 2 * Math.pow(1.122, i * 2), 0.18, 'sine', 0.02, null, 0.05 * i);
+  },
+  tabletThud() { duck(0.5, 0.25); tone(70, 0.5, 'sine', 0.26, 36); noise(0.4, 0.3, 380); noise(0.25, 0.1, 5000, 0.04, 'highpass'); tone(523, 1.1, 'sine', 0.05, null, 0.12, { att: 0.02 }); tone(784, 1.0, 'sine', 0.035, null, 0.2, { att: 0.02 }); },
+  riddleWin() { fanNotes(261.6, [[0, 0], [7, 0.12], [12, 0.24], [16, 0.38, 0.7], [19, 0.38, 0.7]]); [1568, 2093, 2637].forEach((f, i) => tone(f, 0.3, 'sine', 0.03, null, 0.5 + i * 0.07)); },
+  gateRumble() { duck(0.6, 0.6); noise(1.6, 0.22, 240); tone(58, 1.4, 'sawtooth', 0.07, 40, 0, { lp: 220 }); tone(88, 1.2, 'triangle', 0.08, 55); for (let i = 0; i < 5; i++) noise(0.08, 0.1, 700, 0.2 + i * 0.22); },
   dig() { noise(0.18, 0.15, 1800); noise(0.18, 0.15, 1800, 0.25); noise(0.18, 0.15, 1800, 0.5); },
   smash() { duck(0.55, 0.15); noise(0.35, 0.4, 350); tone(90, 0.3, 'square', 0.12, 40); },
   click() { tone(720, 0.05, 'square', 0.05); },
@@ -243,7 +250,7 @@ const isBossKey = k => typeof k === 'string' && k.startsWith('boss_');
 function musicLevel() { // how tense the music is: 0 calm, 1 busy, 2 full drums, 3 (boss final round and duel) everything
   if (scene === 'ending') return E ? { talk: 0, tap: 1, hatch: 2, party: 2 }[E.phase] || 0 : 0;
   if (!G || scene !== 'play') return 0;
-  if (G.overlay && G.overlay.type !== 'riddle') return 0; // results, pause and retry screens get the calm version
+  if (G.overlay) return 0; // riddle, results, pause and retry screens get the calm version
   if (G.boss && G.boss.state !== 'flee') return G.boss.state === 'duel' || G.boss.phase >= bossKind(G.boss).phases.length - 1 ? 3 : 2;
   if (G.endless) return G.tier >= 4 ? 2 : G.tier >= 2 ? 1 : 0;
   const pr = clamp((G.p.wx - 200) / Math.max(1, G.L.gateX - 200), 0, 1);
@@ -265,6 +272,8 @@ function musicOpts() { // vol: fade target (pause and results duck the song, dea
   if (ov && ov.type !== 'riddle') { o.vol = ov.type === 'pause' || ov.type === 'complete' ? 0.25 : 0; return o; }
   if (!G.endless && !G.boss && G.L && G.p.wx > 200 + (G.L.gateX - 200) * 0.86) o.lift = 2;
   o.danger = G.p.hearts === 1;
+  if (ov) { o.vol = ov.solved ? 0.7 : 0.4; o.think = !ov.solved; o.danger = false; } // riddle: the song steps back, soft celesta notes carry the thinking
+  else if (G.atGate && !G.gateOpening) o.vol = 0.65; // the build-up to the riddle
   return o;
 }
 function bossFanfare(root) { // short victory fanfare when the boss theme ends
@@ -334,6 +343,10 @@ function musicTick(key, level = 0, o = { vol: 1, lift: 0, danger: false }) {
     if (!m.epic && level >= 2 && mus.bar === nb - 8 && i === 0) { noise(0.9, 0.1, 5000, d, 'highpass'); tone(70, 0.5, 'sine', 0.2, 32, d); } // crash into the last verse
     if (m.bells && i % 4 === 0) { noise(0.05, 0.05, 9000, d); tone(3100, 0.08, 'triangle', 0.012, null, d); } // sleigh bells
     if (m.epic) epicLayer(m, rt, bar, i, d, st, level);
+    if (o.think && !m.epic && i % 4 === 0 && (mus.bar * 4 + i / 4) % 3 !== 2) { // riddle: sparse celesta, a slow wandering line on the song's scale
+      const k = [0, 2, 1, 3, 2, 4, 3, 1][(mus.bar * 4 + i / 4) % 8], f = rt * 2 * Math.pow(2, (sc[k % 5] + 12) / 12);
+      tone(f, st * 5, 'sine', 0.07, null, d, { att: 0.008 }); tone(f * 2, st * 2.5, 'sine', 0.022, null, d); tone(f * 3, st, 'sine', 0.008, null, d);
+    }
     if (o.danger && (i % 8 === 0 || i % 8 === 3)) tone(65, 0.2, 'sine', 0.16, 40, d); // heartbeat when only one heart is left
     if (mus.trans && mus.trans.left <= 8) { bus = 'fanfare'; noise(0.07, 0.04 + 0.1 * (1 - mus.trans.left / 8), 3200, d); bus = 'music'; } // snare roll that speeds the build-up
     mus.next += st; mus.step++; if (mus.step >= 16) { mus.step = 0; mus.bar = (mus.bar + 1) % nb; }
@@ -2675,7 +2688,7 @@ function startLevel(arg, endless) { // endless: arg = theme index. otherwise arg
     p: { wx: 200, y: GROUND, vy: 0, onGround: true, jumps: 0, coyote: 0, inv: 0, roarT: 0, roarCd: 0, hearts: endless ? 3 : MAX_HEARTS, ph: 0, duck: false, stomp: false, spin: 1, fireT: 0, fireCd: 0, breathT: 0, roarMax: 3 },
     duckHeld: null, fireballs: [], flames: [],
     chili: { wx: 95, y: GROUND, ph: 0, dig: null, digT: 0 }, cp: 200, rings: [],
-    boss: null, bossStarted: false, golden: null, gotGolden: false, atGate: false, gateT: 0, gateOpening: false, gateOpen: 0, finished: false,
+    boss: null, bossStarted: false, golden: null, gotGolden: false, atGate: false, gateT: 0, gateStep: 0, gateGlow: 0, nudge: 0, gateOpening: false, gateOpen: 0, finished: false,
     coach: null, flyEggs: [], slotPop: [0, 0, 0], hitFlash: 0, endless: !!endless, maxH: endless ? 3 : MAX_HEARTS, score: 0, heartAt: 500, tier: 1 };
   if (!endless) { G.chiliSay = { text: fmt('Los geht\'s, ihr zwei!'), t: 2.6 }; G.chiliCd = 4; }
   if (endless) { G.tip = { text: 'Endlos-Lauf! Es wird immer schneller und gefährlicher. Alle 500 Punkte gibt es ein Herz zurück.', t: 5 }; G.startT = 1.2; }
@@ -2866,7 +2879,7 @@ function revealEgg(s) {
   const e = G.L.eggs[s.k]; e.hidden = false; e.popping = true; e.ty = e.y; e.x0 = s.x; e.x = s.x; e.y = GROUND - 10; e.vy = -900; e.vx = (G.p.wx + 640 - s.x) / 1.1; SFX.pop();
   burst(s.x, GROUND - 5, 20, ['#8b5a2b', '#a0703a', '#ffe08a'], 260, 900, 7, 0.8);
 }
-const lastRiddle = {};
+const lastRiddle = {}, GATE_INTRO = 1.8, GATE_RUNES = [0.4, 0.85, 1.3]; // seconds of build-up before the riddle appears; when each rune lights
 function openRiddle() {
   toasts = []; const pool = WORLDS[G.wi].riddles;
   if (!Array.isArray(save.riddleSeen) || save.riddleVer !== 2) { save.riddleSeen = [[], [], [], []]; save.riddleVer = 2; }
@@ -2881,17 +2894,19 @@ function openRiddle() {
   const k = free[Math.floor(Math.random() * free.length)];
   seen = seen.filter(i => i !== k); seen.push(k); save.riddleSeen[G.wi] = seen; writeSave();
   const r = pool[k]; lastRiddle[G.wi] = r;
-  G.overlay = { type: 'riddle', r, order: [0, 1, 2].sort(() => Math.random() - 0.5), wrong: [], msg: '', shake: 0, solved: false, lock: 0, hinted: false };
+  G.overlay = { type: 'riddle', r, order: [0, 1, 2].sort(() => Math.random() - 0.5), wrong: [], msg: '', shake: 0, solved: false, lock: 0, hinted: false, t: 0, tries: 0, say: { who: 'goetti', text: 'Rätsel-Zeit!', at: 0.55, t: 2.2 } };
 }
 function answer(i) {
   const o = G.overlay, r = o.r;
-  if (i === r.ok) { SFX.right(); o.solved = true; o.msg = ''; burst(G.cam + W / 2, 200, 40, ['#ffd740', '#ff5252', '#69f0ae', '#40c4ff', '#fff'], 450, 600, 7, 1.2); }
+  if (i === r.ok) { SFX.right(); SFX.riddleWin(); o.solved = true; o.msg = ''; o.say = { who: 'chili', text: pick(['Juhu, geschafft!', 'Du bist so schlau!', 'Hoppla, richtig!']), at: o.t + 0.2, t: 2.4 }; burst(G.cam + W / 2, 200, 40, ['#ffd740', '#ff5252', '#69f0ae', '#40c4ff', '#fff'], 450, 600, 7, 1.2); }
   else {
+    // gentle on kids: the first miss is free and short, only repeated misses cost one amber
     SFX.wrong(); if (!o.wrong.includes(i)) o.wrong.push(i); o.msg = (r.wrongMsg && r.wrongMsg[i]) || (r.trick ? 'Achtung, Trickfrage! Lies nochmal genau.' : 'Nicht ganz – denk nochmal nach!'); o.shake = 0.4;
-    o.lock = 2.5; if (save.amber > 0) { save.amber--; writeSave(); o.msg += ' (−1 Bernstein)'; }
+    o.lock = 1; o.tries++; o.say = { who: 'chili', text: pick(['Nicht schlimm!', 'Du schaffst das!', 'Probier nochmal!', 'Fast! Weiter so!']), at: o.t, t: 2 }; setTimeout(() => SFX.chirp(), 250);
+    if (o.tries > 1 && save.amber > 0) { save.amber--; writeSave(); o.msg += ' (−1 Bernstein)'; }
   }
 }
-function openGate() { G.overlay = null; G.gateOpening = true; toast('Das Tor geht auf!', '#9cff8a'); burst(G.L.gateX - 10, GROUND - 200, 50, ['#ffd740', '#ff5252', '#69f0ae', '#40c4ff', '#fff'], 500, 700, 8, 1.4); }
+function openGate() { G.overlay = null; G.gateOpening = true; SFX.gateRumble(); G.shake = Math.max(G.shake, 0.35); toast('Das Tor geht auf!', '#9cff8a'); burst(G.L.gateX - 10, GROUND - 200, 50, ['#ffd740', '#ff5252', '#69f0ae', '#40c4ff', '#fff'], 500, 700, 8, 1.4); }
 function finishLevel() {
   const li = G.li, lv = LEVELS[li], wasDone = save.lvDone[li];
   for (let k = 0; k < 3; k++) if (G.eggsGot[k]) save.lvE[li][k] = 1;
@@ -2974,7 +2989,7 @@ function updatePlay(dt) {
   G.flames = G.flames.filter(f => f.life > 0);
   if (p.y > H + 120) pitFall();
   p.inv -= dt; p.roarT -= dt; p.roarCd -= dt;
-  G.cam = p.wx - (p.lungeOff || 0) - 270;
+  G.cam = p.wx - (p.lungeOff || 0) - 270 + G.nudge;
   if (G.endless) { let tr = 1; for (const tx of L.tierX) if (p.wx >= tx) tr++; if (tr > G.tier) { G.tier = tr; SFX.power(); G.shake = Math.max(G.shake, 0.3); toast(['', '', 'Stufe 2 – mehr Gegner!', 'Stufe 3 – neue Gefahren!', 'Stufe 4 – doppelte Gefahren!'][tr] || `Stufe ${tr} – nur für Profis!`, '#ff9a5a'); }
     G.score = Math.max(G.score, Math.floor((p.wx - 200) / 25) + G.amber * 3); if (G.score >= G.heartAt) { G.heartAt += 500; if (p.hearts < G.maxH) { p.hearts++; SFX.heart(); toast('Ein Herz zurück!', '#ff8a9a'); } else toast(G.score + ' Punkte!', '#ffe08a'); } }
   // tips, checkpoints
@@ -3091,8 +3106,13 @@ function updatePlay(dt) {
     if (Math.hypot(gd.x - p.wx - 10, gd.y - (p.y - 50)) < 70) { G.gotGolden = true; SFX.egg(); setTimeout(SFX.right, 300); toast('Das goldene Ei!', '#ffd700'); burst(gd.x, gd.y, 50, ['#ffd700', '#fff3b0', '#ffae00'], 420, 400, 8, 1.3); }
   }
   // gate
-  if (!G.atGate && p.wx >= L.gateX - 220) { G.atGate = true; G.stopped = true; p.wx = L.gateX - 220; G.gateT = 0.5; }
-  if (G.atGate && !G.gateOpening && G.gateT > 0) { G.gateT -= dt; if (G.gateT <= 0) openRiddle(); }
+  if (!G.atGate && p.wx >= L.gateX - 220) { G.atGate = true; G.stopped = true; p.wx = L.gateX - 220; G.gateT = GATE_INTRO; G.gateStep = 0; toasts = []; G.tip = null; chiliSay(pick(['Hier stimmt was nicht …', 'Das Tor leuchtet!', 'Hoppla! Ein Geheimnis!']), true, 'worried'); }
+  if (G.atGate && !G.gateOpening && G.gateT > 0) { // anticipation: the runes light up one by one, then the riddle tablet drops in
+    G.gateT -= dt; const e = GATE_INTRO - G.gateT;
+    while (G.gateStep < 3 && e >= GATE_RUNES[G.gateStep]) { const k = G.gateStep++, rx = L.gateX + (k === 0 ? -85 : k === 1 ? 85 : 0), ry = GROUND - (k === 2 ? 110 : 130); SFX.runeChime(k); burst(rx, ry, 16, ['#ffd34d', '#fff3b0', '#fff'], 220, -60, 5, 0.9); G.rings.push({ x: rx, y: ry, r: 10, a: 1, c: '255,226,120' }); }
+    if (G.gateT <= 0) { SFX.tabletThud(); burst(G.cam + W / 2, 470, 22, ['#c9c2b4', '#9a9488', '#e8e2d4'], 300, 500, 8, 0.8); openRiddle(); }
+  }
+  G.gateGlow += ((G.atGate ? G.gateStep / 3 : 0) - G.gateGlow) * Math.min(1, dt * 6); G.nudge += ((G.atGate && !G.gateOpening ? 60 : 0) - G.nudge) * Math.min(1, dt * 3);
   if (G.gateOpening) { G.gateOpen = Math.min(1, G.gateOpen + dt * 0.9); if (G.gateOpen >= 1 && !G.entering) G.stopped = false; }
   if (G.gateOpen >= 1 && !G.entering && p.wx >= L.gateX - 4) { G.entering = 0.001; G.stopped = true; p.wx = L.gateX; SFX.flag(); burst(L.gateX, GROUND - 100, 36, ['#fff3b0', '#ffd740', '#fff'], 360, 200, 6, 1.1); }
   if (G.entering) { G.entering += dt / 1.25; p.ph += dt * 11; if (G.entering >= 1 && !G.finished) { G.finished = true; finishLevel(); } }
@@ -3750,9 +3770,11 @@ function drawGate(L, cam, front) {
     for (const px of [gx - hw - 46, gx + hw]) { rr(px, GROUND - 232, 46, 232, 6); ctx.fillStyle = stone; ctx.fill(); ctx.fillStyle = 'rgba(0,0,0,.15)'; for (let i = 0; i < 5; i++) ctx.fillRect(px, GROUND - 232 + i * 46, 46, 3); ctx.strokeStyle = 'rgba(0,0,0,.45)'; ctx.lineWidth = 2.5; rr(px, GROUND - 232, 46, 232, 6); ctx.stroke(); }
     rr(gx - hw - 60, GROUND - 274, hw * 2 + 120, 46, 8); ctx.fillStyle = stone; ctx.fill(); ctx.strokeStyle = 'rgba(0,0,0,.45)'; ctx.lineWidth = 2.5; ctx.stroke();
     drawEgg(gx, GROUND - 251, 16, WORLDS[G.wi].egg, WORLDS[G.wi].eggSpot);
-    for (const px of [gx - hw - 46, gx + hw]) { // glowing runes on the pillars, stone footings
-      const cx = px + 23, cy = GROUND - 130, gl = 0.35 + 0.65 * open; ctx.save(); ctx.shadowColor = '#ffd34d'; ctx.shadowBlur = 8 * gl; ctx.strokeStyle = `rgba(255,226,150,${0.35 + 0.5 * gl})`; ctx.lineWidth = 2.4; ctx.beginPath(); ctx.arc(cx, cy, 13, 0, 7); ctx.moveTo(cx - 8, cy + 4); ctx.lineTo(cx, cy - 9); ctx.lineTo(cx + 8, cy + 4); ctx.moveTo(cx - 5, cy + 1); ctx.lineTo(cx + 5, cy + 1); ctx.stroke(); ctx.restore();
-      ctx.strokeStyle = 'rgba(255,230,170,.3)'; ctx.lineWidth = 2; for (const yy of [GROUND - 196, GROUND - 64]) { ctx.beginPath(); ctx.moveTo(px + 8, yy); ctx.lineTo(px + 38, yy); ctx.moveTo(px + 14, yy + 6); ctx.lineTo(px + 32, yy + 6); ctx.stroke(); }
+    for (const [pk, px] of [[0, gx - hw - 46], [1, gx + hw]]) { // glowing runes on the pillars (they light one by one before the riddle), stone footings
+      const lit = open > 0 || (G.gateStep || 0) > pk ? 1 : 0, pulse = lit ? 0.5 + 0.5 * Math.sin(T * 5 + pk * 2) : 0, cx = px + 23, cy = GROUND - 130, gl = 0.35 + 0.65 * lit;
+      if (lit) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; const hg = ctx.createRadialGradient(cx, cy, 4, cx, cy, 70); hg.addColorStop(0, `rgba(255,214,110,${0.45 + 0.25 * pulse})`); hg.addColorStop(1, 'rgba(255,190,80,0)'); ctx.fillStyle = hg; ctx.fillRect(cx - 70, cy - 70, 140, 140); ctx.restore(); }
+      ctx.save(); ctx.shadowColor = '#ffd34d'; ctx.shadowBlur = 8 + 10 * gl * (0.6 + 0.4 * pulse); ctx.strokeStyle = `rgba(255,${lit ? 240 : 226},${lit ? 190 : 150},${0.35 + 0.65 * gl})`; ctx.lineWidth = 2.4 + lit; ctx.beginPath(); ctx.arc(cx, cy, 13, 0, 7); ctx.moveTo(cx - 8, cy + 4); ctx.lineTo(cx, cy - 9); ctx.lineTo(cx + 8, cy + 4); ctx.moveTo(cx - 5, cy + 1); ctx.lineTo(cx + 5, cy + 1); ctx.stroke(); ctx.restore();
+      ctx.strokeStyle = `rgba(255,230,170,${0.3 + 0.45 * lit})`; ctx.lineWidth = 2; for (const yy of [GROUND - 196, GROUND - 64]) { ctx.beginPath(); ctx.moveTo(px + 8, yy); ctx.lineTo(px + 38, yy); ctx.moveTo(px + 14, yy + 6); ctx.lineTo(px + 32, yy + 6); ctx.stroke(); }
       rr(px - 6, GROUND - 14, 58, 14, 4); ctx.fillStyle = shade(stone, 0.85); ctx.fill(); ctx.strokeStyle = 'rgba(0,0,0,.4)'; ctx.lineWidth = 2; ctx.stroke();
     }
     for (const bx of [gx - hw - 40, gx + hw + 40]) { // braziers on the lintel
@@ -3779,6 +3801,7 @@ function drawGate(L, cam, front) {
   ctx.save(); ctx.beginPath(); ctx.rect(gx - hw, GROUND - 214, hw * 2, 214); ctx.clip();
   rr(gx - hw + 2, GROUND - 212 - dy, hw * 2 - 4, 212, 6); ctx.fillStyle = '#6b4a2b'; ctx.fill();
   ctx.strokeStyle = '#4a3020'; ctx.lineWidth = 4; for (let i = 1; i < 5; i++) { ctx.beginPath(); ctx.moveTo(gx - hw + i * (hw * 2 / 5), GROUND - 212 - dy); ctx.lineTo(gx - hw + i * (hw * 2 / 5), GROUND - dy); ctx.stroke(); }
+  if (!open && (G.gateStep || 0) >= 3) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; const qg = ctx.createRadialGradient(gx, GROUND - 110, 6, gx, GROUND - 110, 80); qg.addColorStop(0, `rgba(255,220,120,${0.5 + 0.2 * Math.sin(T * 6)})`); qg.addColorStop(1, 'rgba(255,200,90,0)'); ctx.fillStyle = qg; ctx.fillRect(gx - 80, GROUND - 190, 160, 160); ctx.restore(); }
   otxt('?', gx, GROUND - 110 - dy, 64, '#ffd34d', '#3b1d00', 8);
   ctx.restore();
   for (const [sw, sy] of [[hw * 2 + 44, 10], [hw * 2 + 16, 17]]) { rr(gx - sw / 2, GROUND - sy, sw, sy, 3); ctx.fillStyle = vgrad(GROUND - sy, GROUND, shade(stone, 1.15), shade(stone, 0.8)); ctx.fill(); ctx.strokeStyle = 'rgba(0,0,0,.4)'; ctx.lineWidth = 2; ctx.stroke(); }
@@ -3889,7 +3912,7 @@ function drawPlay() {
   // chili
   if (G.entering) { const u = clamp(G.entering, 0, 1), gx = L.gateX - cam, k = 1 - 0.62 * u; ctx.save(); ctx.translate(gx, GROUND); ctx.scale(k, k); ctx.translate(-gx, -GROUND); ctx.globalAlpha = 1 - 0.7 * u * u; }
   const c = G.chili; shadow(c.wx - cam + 6, GROUND + 2, 22 * clamp(1 - (GROUND - c.y) / 200, 0.4, 1), 0.25); chiliFx.vy = c.vy || 0; chiliFx.dig = !!c.dig; chiliFx.scared = G.p.hitT > 0 && !G.overlay ? G.p.hitT / 0.45 : 0; chiliFx.joy = c.joy > 0 ? c.joy / 0.9 : 0; oChili(c.wx - cam, c.y, 1.25, c.ph, c.dig ? false : (G.bossStarted && !G.golden));
-  if (G.chiliSay && !G.overlay) { const cs = G.chiliSay, bx = clamp(c.wx - cam, 70, W - 200), by = c.y - 92, al = clamp(cs.t * 3, 0, 1) * clamp((2.6 - cs.t) * 6, 0, 1); setFont(19); const bw = ctx.measureText(cs.text).width + 30; ctx.save(); ctx.globalAlpha = al; rr(bx - bw / 2 + 30, by - 19, bw, 38, 17); ctx.fillStyle = '#fffdf6'; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = '#6b4a2b'; ctx.stroke(); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.moveTo(bx - 4, by + 15); ctx.lineTo(bx + 4, by + 28); ctx.lineTo(bx + 16, by + 15); ctx.fill(); txt(cs.text, bx + 30, by, 19, '#3b2410'); ctx.restore(); }
+  if (G.chiliSay && !G.overlay) { const cs = G.chiliSay, by = c.y - (G.atGate ? 200 : 92), al = clamp(cs.t * 3, 0, 1) * clamp((2.6 - cs.t) * 6, 0, 1); setFont(19); const bw = ctx.measureText(cs.text).width + 30, bx = clamp(c.wx - cam, Math.max(70, bw / 2 - 15), W - 200); ctx.save(); ctx.globalAlpha = al; rr(bx - bw / 2 + 30, by - 19, bw, 38, 17); ctx.fillStyle = '#fffdf6'; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = '#6b4a2b'; ctx.stroke(); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.moveTo(bx - 4, by + 15); ctx.lineTo(bx + 4, by + 28); ctx.lineTo(bx + 16, by + 15); ctx.fill(); txt(cs.text, bx + 30, by, 19, '#3b2410'); ctx.restore(); }
   if (c.dig) otxt('!', c.wx - cam + 20, c.y - 70 - Math.abs(Math.sin(T * 10)) * 6, 36, '#ffd34d', '#3b1d00', 6);
   // baby + kiwi followers
   if (save.treasures[3]) oKiwi(p.wx - cam - 225, GROUND - (G.startT > 0 || G.stopped ? 0 : Math.abs(Math.sin(p.ph * 0.7 + 1)) * 12), 1.1, p.ph * 1.3);
@@ -4123,11 +4146,21 @@ function drawOverlay() {
     txt('Chili meint: Nochmal ab dem letzten Fähnchen!', W / 2, 300, 22, '#6b4a2b', 'center', 'normal');
     button('Nochmal!', 290, 340, 200, 62, retry); button('Karte', 510, 340, 160, 62, () => go('map'), { color: '#e0d2b0' });
   } else if (o.type === 'riddle') {
-    const r = o.r; o.shake = Math.max(0, o.shake - DT); o.solvedT = o.solved ? (o.solvedT || 0) + DT : 0;
-    ctx.fillStyle = 'rgba(8,10,24,.55)'; ctx.fillRect(0, 0, W, H);
-    // Goetti stands beside the tablet and points at it
-    shadow(120, 508, 60, 0.35); oGoetti(120, 504, 1.25, !o.solved || (o.solvedT || 0) < 1.5);
-    ctx.save(); if (o.shake > 0) ctx.translate(Math.sin(T * 60) * 8 * o.shake, 0);
+    const r = o.r, b0 = buttons.length; o.shake = Math.max(0, o.shake - DT); o.solvedT = o.solved ? (o.solvedT || 0) + DT : 0; o.t += DT;
+    // entrance: the tablet drops in from above and bounces once on landing, Goetti and Chili hop in from the left
+    const u = clamp(o.t / 0.6, 0, 1), bn = u < 0.55 ? (u / 0.55) ** 2 : u < 0.8 ? 1 - 0.07 * Math.sin((u - 0.55) / 0.25 * Math.PI) : 1 - 0.015 * Math.sin((u - 0.8) / 0.2 * Math.PI), ty = -(1 - bn) * 560;
+    ctx.fillStyle = `rgba(8,10,24,${0.55 * clamp(o.t / 0.35, 0, 1)})`; ctx.fillRect(0, 0, W, H);
+    // Goetti stands beside the tablet and points at it, Chili cheers next to him
+    const hop = Math.abs(Math.sin(o.t * 9)) * 26 * (1 - u), gx0 = -(1 - u) * 220;
+    shadow(130 + gx0, 508, 60, 0.35); oGoetti(130 + gx0, 504 - hop, 1.25, !o.solved || (o.solvedT || 0) < 1.5);
+    { const cj = o.solved || (o.say && o.say.who === 'chili' && o.t - o.say.at < o.say.t) ? Math.abs(Math.sin(T * 9)) * 14 : 0; shadow(52 + gx0, 510, 24, 0.3); chiliFx.joy = cj > 0 ? 1 : 0; oChili(52 + gx0, 506 - cj - hop, 0.85, T * 12, false); chiliFx.joy = 0; }
+    if (o.say) { // speech bubble above Goetti / Chili
+      const sy = o.t - o.say.at; if (sy > 0 && sy < o.say.t) {
+        const al = clamp(sy * 5, 0, 1) * clamp((o.say.t - sy) * 5, 0, 1), tx = o.say.who === 'chili' ? 56 : 120; setFont(20); const bw = Math.min(ctx.measureText(o.say.text).width + 30, 200), bx = clamp(tx, bw / 2 + 8, 226 - bw / 2), by = 262 - (o.say.who === 'chili' ? 0 : 0);
+        ctx.save(); ctx.globalAlpha = al; rr(bx - bw / 2, by - 19, bw, 38, 17); ctx.fillStyle = '#fffdf6'; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = '#6b4a2b'; ctx.stroke(); ctx.fillStyle = '#fffdf6'; ctx.beginPath(); ctx.moveTo(tx - 10, by + 17); ctx.lineTo(tx, by + 34); ctx.lineTo(tx + 10, by + 17); ctx.fill(); txt(o.say.text, bx, by + 1, 20, '#3b2410'); ctx.restore();
+      }
+    }
+    ctx.save(); ctx.translate(o.shake > 0 ? Math.sin(T * 60) * 8 * o.shake : 0, ty);
     stoneTablet(236, 30, 700, 480);
     // rune medallion: dim until the riddle is solved, then it glows gold
     const rx = 296, ry = 96, glow = o.solved ? Math.min(1, o.solvedT * 3) : 0;
@@ -4157,6 +4190,7 @@ function drawOverlay() {
       button('Tor öffnen!', 585 - 140, 424, 280, 62, openGate, { size: 28, icon: icon('play') });
     }
     ctx.restore();
+    if (o.t < 0.6) buttons.length = b0; // no taps while the tablet is still dropping in
   } else if (o.type === 'complete') {
     o.t += DT; const lv = LEVELS[G.li];
     panel(150, 24, 660, 492);

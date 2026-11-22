@@ -53,9 +53,26 @@ test('riddle: wrong answer locks buttons and costs amber; hint crosses out a wro
   const r = await game.eval(() => {
     const d = window.__dino, o = d.G.overlay, bad = [0, 1, 2].find(i => i !== o.r.ok);
     d.answer(bad);
-    return { lock: o.lock, amber: d.save.amber, wrong: o.wrong.length };
+    const first = { lock: o.lock, amber: d.save.amber, wrong: o.wrong.length };   // the first miss is free and short
+    const bad2 = [0, 1, 2].find(i => i !== o.r.ok && i !== bad); d.answer(bad2);
+    return { first, amber2: d.save.amber, wrong: o.wrong.length };                // the second one costs one amber
   });
-  expect(r).toEqual({ lock: 2.5, amber: 9, wrong: 1 });
+  expect(r).toEqual({ first: { lock: 1, amber: 10, wrong: 1 }, amber2: 9, wrong: 2 });
+  expect(game.errors).toEqual([]);
+});
+
+test('riddle: the gate builds up (runes light, camera nudges, music thinks) before the tablet drops in', async ({ game, page }) => {
+  await game.open();
+  await game.start(0);
+  await game.eval(() => { const G = window.__dino.G; G.p.wx = G.L.gateX - 215; });
+  await page.waitForFunction(() => window.__dino.G.atGate);
+  const early = await game.eval(() => { const G = window.__dino.G; return { overlay: G.overlay, stopped: G.stopped }; });
+  expect(early).toEqual({ overlay: null, stopped: true });                           // build-up first, no instant popup
+  await page.waitForFunction(() => window.__dino.G.overlay && window.__dino.G.overlay.type === 'riddle');
+  const r = await game.eval(() => { const G = window.__dino.G; return { step: G.gateStep, glow: G.gateGlow > 0.5, nudge: G.nudge > 20 }; });
+  expect(r).toEqual({ step: 3, glow: true, nudge: true });
+  await page.waitForTimeout(800);
+  expect(await game.eval(() => window.__dino.buttons.length > 3)).toBe(true);        // answers are tappable once the tablet has landed
   expect(game.errors).toEqual([]);
 });
 
