@@ -298,10 +298,11 @@ function drawEmbers() {
 
 // toasts & tips
 let toasts = [];
-function toast(text, color = '#fff') { const ex = toasts.find(q => q.text === text); if (ex) { ex.t = 2.6; return; } toasts.push({ text, color, t: 2.6 }); if (toasts.length > 3) toasts.shift(); }
+const BOSS_QUIET = /Fähnchen|Helfer kommen|Noch \d Mal|erschöpft|Boss selbst/; // the boss bar and the roar prompt already say this
+function toast(text, color = '#fff') { const inBoss = scene === 'play' && G && G.boss; if (inBoss && BOSS_QUIET.test(text)) return; if (inBoss) toasts.length = 0; const ex = toasts.find(q => q.text === text); if (ex) { ex.t = 2.6; return; } toasts.push({ text, color, t: 2.6 }); if (toasts.length > 3) toasts.shift(); }
 function drawToasts() {
-  const ty = scene === 'play' && G && G.boss ? 300 : 196;
-  toasts.forEach((t, i) => { t.t -= DT; const a = clamp(t.t * 2, 0, 1); ctx.globalAlpha = a; setFont(24); const w = ctx.measureText(t.text).width + 40; rr(W / 2 - w / 2, ty + i * 46, w, 40, 20); ctx.fillStyle = 'rgba(0,0,0,.6)'; ctx.fill(); txt(t.text, W / 2, ty + 21 + i * 46, 24, t.color); ctx.globalAlpha = 1; });
+  const inBoss = scene === 'play' && G && G.boss, ty = inBoss ? 78 : 196;
+  toasts.forEach((t, i) => { t.t -= DT; const a = clamp(t.t * 2, 0, 1); ctx.globalAlpha = a; const fs = inBoss ? 19 : 24, bh = inBoss ? 32 : 40, sp = inBoss ? 38 : 46; setFont(fs); const w = ctx.measureText(t.text).width + 36; rr(W / 2 - w / 2, ty + i * sp, w, bh, bh / 2); ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.fill(); txt(t.text, W / 2, ty + bh / 2 + 1 + i * sp, fs, t.color); ctx.globalAlpha = 1; });
   toasts = toasts.filter(t => t.t > 0);
 }
 
@@ -2563,11 +2564,11 @@ function newBoss(phase = 0) {
   const home = G.L.bossX + 620;
   return { kind: G.L.bossKind || 'king', x: phase === 0 ? G.L.bossX + 1000 : home, y: 0, hp: 3, phase, state: phase === 0 ? 'enter' : 'taunt', t: 0, ph: 0, flash: 0, n: 0, rocks: [], hazards: [], volley: null, meter: 0.15, duelT: 0 };
 }
-function bossBanner(text, sub, col = '#ffd34d') { G.banner = { t: 2.6, text, sub, col }; }
+function bossBanner(text, sub, col = '#ffd34d') { G.banner = { t: 2.0, text, sub, col }; }
 function startBossPhase(b) {
   const ph = bossKind(b).phases[b.phase]; b.hp = 3; b.state = 'taunt'; b.t = 0; b.n = 0; b.rocks = []; b.hazards = []; G.bossCp = b.phase;
   bossBanner(`PHASE ${b.phase + 1}`, ph.name, b.phase === bossKind(b).phases.length - 1 && b.kind === 'king' ? '#ff6a3a' : '#ffd34d'); SFX.roar(); G.shake = Math.max(G.shake, 0.5);
-  G.tip = { text: ph.say, t: 5 };
+  G.tip = { text: ph.say, t: 4 };
 }
 function bossHurt(b, bx) { // a successful roar: flash, shake, count down this phase's hp
   const p = G.p, K = bossKind(b); p.roarT = 0; b.hp--; b.flash = 0.5; SFX.smash(); G.shake = 0.5; G.hitFlash = 0;
@@ -3517,8 +3518,8 @@ function drawFamilyCliff(L, cam) {
   const lbl = (s, x) => { setFont(14); const w = ctx.measureText(s).width + 14; rr(x - w / 2, 242, w, 20, 10); ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.fill(); txt(s, x, 252, 14, '#3b2410'); };
   lbl('Mamasaurus', x0 + 180); lbl('Papasaurus', x0 + 320);
   if (cheer) {
-    const lines = [[fmt('Los, {oli}!'), x0 + 200, 96], [fmt('Du schaffst das, {rex}!'), x0 + 390, 84], [fmt('Brüll, {fabio}, brüll!'), x0 + 470, 118]];
-    lines.forEach(([s, x, y], i) => { if (Math.sin(T * 1.5 + i * 2.1) > -0.2) { setFont(18); const w = ctx.measureText(s).width + 20; rr(x - w / 2, y - 16, w, 32, 14); ctx.fillStyle = '#fff'; ctx.fill(); txt(s, x, y, 18, '#3b2410'); } });
+    const lines = [[fmt('Los, {oli}!'), x0 + 200, 92], [fmt('Du schaffst das, {rex}!'), x0 + 390, 88], [fmt('Brüll, {fabio}, brüll!'), x0 + 470, 94]];
+    lines.forEach(([s, x, y], i) => { if (Math.floor(T / 3) % 3 === i && (T / 3) % 1 < 0.8) { setFont(18); const w = ctx.measureText(s).width + 20; rr(x - w / 2, y - 16, w, 32, 14); ctx.fillStyle = '#fff'; ctx.fill(); txt(s, x, y, 18, '#3b2410'); } });
   }
 }
 function drawAurora() {
@@ -3667,7 +3668,7 @@ function drawPlay() {
   vignette(ART(G.wi));
   ctx.restore(); TOD = 0; chiliFx.dive = false;
   // boss prompt
-  if (G.boss && ((G.boss.state === 'charge' && G.boss.x - p.wx < 390) || G.boss.state === 'tired') && Math.sin(T * 20) > -0.5) { otxt('JETZT BRÜLLEN!', W / 2, 262, 48, '#ff5252', '#000', 10); otxt(fmt('{fabio}, das ist dein Job!'), W / 2, 306, 26, '#ffe08a', '#000', 7); }
+  if (G.boss && ((G.boss.state === 'charge' && G.boss.x - p.wx < 390) || G.boss.state === 'tired') && Math.sin(T * 20) > -0.5) { otxt('JETZT BRÜLLEN!', W / 2, 200, 38, '#ff5252', '#000', 8); }
   // incoming-danger badges at the right edge
   for (const o of L.obs) {
     if (o.dead || o.scared || (o.type !== 'raptor' && o.type !== 'ptero')) continue;
@@ -3727,7 +3728,7 @@ function drawHUD() {
     if (b.state === 'duel') { rr(x0, y0 + 2, 380, 16, 8); ctx.fillStyle = '#400'; ctx.fill(); rr(x0, y0 + 2, Math.max(8, 380 * b.meter), 16, 8); ctx.fillStyle = vgrad(y0, y0 + 18, '#ffe27a', '#ff7a20'); ctx.fill(); }
     else for (let i = 0; i < bossKind(b).phases.length; i++) { const nP = bossKind(b).phases.length, sw = (380 - (nP - 1) * 8) / nP, sx = x0 + i * (sw + 8), frac = i < b.phase ? 0 : i === b.phase ? Math.max(0, b.hp) / 3 : 1; rr(sx, y0 + 2, sw, 16, 8); ctx.fillStyle = '#400'; ctx.fill(); if (frac > 0) { rr(sx, y0 + 2, Math.max(8, sw * frac), 16, 8); ctx.fillStyle = i === b.phase ? vgrad(y0, y0 + 18, '#ff6a5a', '#c01818') : '#8a2a2a'; ctx.fill(); } rr(sx, y0 + 2, sw, 16, 8); ctx.lineWidth = 1.5; ctx.strokeStyle = 'rgba(255,255,255,.4)'; ctx.stroke(); }
   }
-  if (G.banner) { const bn = G.banner, u = clamp(bn.t / 2.6, 0, 1), pop = 1 + 0.35 * clamp((bn.t - 2.2) / 0.4, 0, 1), al = clamp(bn.t * 2, 0, 1) * clamp((2.6 - bn.t) * 6, 0, 1); ctx.save(); ctx.globalAlpha = al; ctx.translate(W / 2, 128); ctx.scale(pop, pop); otxt(bn.text, 0, 0, 56, bn.col, '#000', 11); otxt(bn.sub, 0, 46, 28, '#fff', '#000', 8); ctx.restore(); }
+  if (G.banner) { const bn = G.banner, u = clamp(bn.t / 2.0, 0, 1), pop = 1 + 0.22 * clamp((bn.t - 1.7) / 0.3, 0, 1), al = clamp(bn.t * 2, 0, 1) * clamp((2.0 - bn.t) * 6, 0, 1); ctx.save(); ctx.globalAlpha = al; ctx.translate(W / 2, 134); ctx.scale(pop, pop); otxt(bn.text, 0, 0, 38, bn.col, '#000', 8); otxt(bn.sub, 0, 30, 20, '#fff', '#000', 6); ctx.restore(); }
   if (G.boss && G.boss.state === 'duel') { const b = G.boss; ctx.globalAlpha = 0.6 + 0.4 * Math.sin(T * 18); otxt('BRÜLL! BRÜLL! BRÜLL!', W / 2, 330, 40, '#ffe27a', '#7a1000', 9); ctx.globalAlpha = 1; }
   if (G.tip && !G.overlay) { ctx.globalAlpha = clamp(G.tip.t * 2, 0, 1); const x0 = G.sk.dash && G.sk.duck && !G.L.swim ? 258 : 190, x1 = 790, lines = wrapLines(G.tip.text, x1 - x0 - 92, 17), h = 16 + lines.length * 22, tipY = H - h - 6; rr(x0, tipY, x1 - x0, h, 16); ctx.fillStyle = 'rgba(255,247,224,.95)'; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = '#6b4a2b'; ctx.stroke(); drawPortrait('goetti', x0 + 36, tipY + h / 2, 24); lines.forEach((l, i) => txt(l, (x0 + 68 + x1 - 12) / 2, tipY + 20 + i * 22, 17, '#3b2410')); ctx.globalAlpha = 1; }
   if (G.overlay) return;
@@ -4503,11 +4504,27 @@ function tmPieceFace(k) { // paper: fibres, stains, fold lines, scorched edges
   ctx.restore();
   tmPiecePath(k); ctx.lineWidth = 3; ctx.strokeStyle = '#6a3c14'; ctx.stroke(); ctx.save(); tmPiecePath(k); ctx.clip(); ctx.lineWidth = 12; ctx.strokeStyle = 'rgba(90,40,5,.28)'; tmPiecePath(k); ctx.stroke(); ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(255,245,215,.55)'; ctx.translate(2.5, 0); tmPiecePath(k); ctx.stroke(); ctx.restore();
 }
+// The treasure map is expensive (paper fibres, scenery, shadows, clips), so each piece and the wooden table are drawn into an
+// offscreen canvas and blitted. Pieces refresh at about 12 fps (staggered) to keep the little animations; the table never does.
+const tmCache = {};
+function tmCached(key, X, Y, w, h, every, stagger, draw) {
+  const m = ctx.getTransform(), k = Math.min(2, Math.hypot(m.a, m.b) || 1), cw = Math.ceil(w * k), ch = Math.ceil(h * k);
+  let c = tmCache[key]; if (!c) c = tmCache[key] = { cv: document.createElement('canvas'), next: -1 };
+  if (c.cv.width !== cw || c.cv.height !== ch) { c.cv.width = cw; c.cv.height = ch; c.next = -1; }
+  if (c.next < 0 || (every && T >= c.next)) {
+    const old = ctx, cc = c.cv.getContext('2d'); cc.setTransform(1, 0, 0, 1, 0, 0); cc.clearRect(0, 0, cw, ch); ctx = cc; ctx.setTransform(k, 0, 0, k, -X * k, -Y * k);
+    try { draw(); } finally { ctx = old; }
+    c.next = every ? T + every + (c.next < 0 ? stagger : 0) : 1e9;
+  }
+  ctx.drawImage(c.cv, 0, 0, cw, ch, X, Y, w, h);
+}
 function drawTMap() {
   if (tmapNew >= 0 || tmapLast !== 'x') tmapT += DT;
+  tmCached('bg', 0, 0, W, H, 0, 0, () => {
   ctx.fillStyle = vgrad(0, H, '#5a3a22', '#35200f'); ctx.fillRect(0, 0, W, H);
   for (let y = 0; y < H; y += 54) { ctx.fillStyle = (y / 54) % 2 ? 'rgba(255,220,160,.05)' : 'rgba(0,0,0,.08)'; ctx.fillRect(0, y, W, 54); ctx.strokeStyle = 'rgba(0,0,0,.35)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); for (let i = 0; i < 10; i++) { ctx.strokeStyle = 'rgba(0,0,0,.09)'; ctx.lineWidth = 1; const gy = y + 6 + hash(i + y) * 42; ctx.beginPath(); ctx.moveTo(hash(i * 3 + y) * W, gy); ctx.bezierCurveTo(hash(i + 5) * W, gy - 4, hash(i + 8) * W, gy + 4, hash(i * 3 + y) * W + 140, gy); ctx.stroke(); } }
   const dg = ctx.createRadialGradient(W / 2, H / 2, 200, W / 2, H / 2, 620); dg.addColorStop(0, 'rgba(255,200,120,.10)'); dg.addColorStop(1, 'rgba(0,0,0,.45)'); ctx.fillStyle = dg; ctx.fillRect(0, 0, W, H);
+  });
   const got = [0, 1, 2].filter(tmHave).length, done = save.lvDone.filter(Boolean).length, walk = clamp((done - (save.lvDone[23] ? 0 : 0)) / 24, 0, 1), all = got === 3;
   rr(W / 2 - 200, 12, 400, 50, 14); ctx.fillStyle = vgrad(12, 62, '#8a5a2e', '#5a3818'); ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = '#2b1a0c'; ctx.stroke(); rr(W / 2 - 192, 18, 384, 38, 10); ctx.lineWidth = 2; ctx.strokeStyle = '#d4a017'; ctx.stroke(); for (const sx of [W / 2 - 184, W / 2 + 184]) { circle(sx, 37, 4, '#d4a017'); circle(sx - 1, 36, 1.4, '#fff3c0'); }
   otxt('Die Schatzkarte', W / 2, 38, 32, '#ffe08a', '#2b1a0c', 8);
@@ -4519,9 +4536,11 @@ function drawTMap() {
       tmPiecePath(k); ctx.fillStyle = 'rgba(15,8,2,.5)'; ctx.fill(); ctx.setLineDash([10, 8]); ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(255,211,77,.7)'; ctx.stroke(); ctx.setLineDash([]);
       otxt('?', cx, cy - 20, 90, 'rgba(255,225,150,.85)', '#3b1d00', 10); txt(`Kartenstück ${k + 1}`, cx, cy + 40, 22, '#f2dfb0'); txt(['Krabbenkönig · Tür 6', 'Seeungeheuer · Tür 12', 'Adlerkönigin · Tür 18'][k], cx, cy + 70, 16, '#d9bb80', 'center', 'normal');
     } else {
-      ctx.save(); tmPiecePath(k); ctx.shadowColor = 'rgba(0,0,0,.55)'; ctx.shadowBlur = 16; ctx.shadowOffsetY = 6; ctx.fillStyle = '#e9d09a'; ctx.fill(); ctx.restore();
-      tmPieceFace(k);
-      ctx.save(); tmPiecePath(k); ctx.clip(); const pos = tmRoute(walk, done); ctx.restore(); if (k === 0) tmMarker = pos;
+      tmCached('p' + k, TM_X[k] - 28, TM_TOP - 34, TM_W + 56, TM_BOT - TM_TOP + 68, 1 / 12, k * 0.03, () => {
+        ctx.save(); tmPiecePath(k); ctx.shadowColor = 'rgba(0,0,0,.55)'; ctx.shadowBlur = 16; ctx.shadowOffsetY = 6; ctx.fillStyle = '#e9d09a'; ctx.fill(); ctx.restore();
+        tmPieceFace(k);
+        ctx.save(); tmPiecePath(k); ctx.clip(); const pos = tmRoute(walk, done); ctx.restore(); if (k === 0) tmMarker = pos;
+      });
     }
     ctx.restore();
   }
@@ -4627,7 +4646,7 @@ function drawVoucher(i) { // Goetti's voucher: a ticket with a dashed border, th
   lines.forEach((l, k) => txt(l, x + 330, y + 120 + k * 30, 22, '#3b2410'));
   txt('Einzulösen bei Goetti', x + 330, y + 130 + lines.length * 30, 17, '#8a6a3a', 'center', 'normal');
   ctx.save(); ctx.translate(x + 390, y + 270); ctx.rotate(-0.08); txt('Goetti', 0, 0, 30, '#1f4fa0'); ctx.strokeStyle = '#1f4fa0'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-54, 18); ctx.quadraticCurveTo(0, 26, 60, 12); ctx.stroke(); ctx.restore();
-  ctx.save(); ctx.translate(x + 120, y + 268); ctx.rotate(-0.25); ctx.strokeStyle = 'rgba(198,40,40,.7)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, 30, 0, Math.PI * 2); ctx.stroke(); txt('2026', 0, 1, 16, 'rgba(198,40,40,.8)'); ctx.restore();
+  ctx.save(); ctx.translate(x + 120, y + 268); ctx.rotate(-0.25); ctx.strokeStyle = 'rgba(198,40,40,.7)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, 30, 0, Math.PI * 2); ctx.stroke(); txt('2027', 0, 1, 16, 'rgba(198,40,40,.8)'); ctx.restore();
   ctx.restore();
   buttons.length = 0; button('Super!', W / 2 - 90, y + h + 16, 180, 50, () => { wishShow = -1; SFX.click(); }, { color: '#9be38a', size: 24 });
 }
@@ -5186,7 +5205,7 @@ function updateEnding(dt) {
     if (E.hatchT > 1.6 && !E.asked) {
       E.asked = true;
       if (!save.babyName) startDialog([{ who: 'goetti', text: 'Ein Dino-Baby – mit Weihnachtsmütze! {fabio}, du hast das Ei als Erster wackeln sehen. Du darfst ihm einen Namen geben!' }], () => askName('Wie soll das Dino-Baby heissen?', 'Krümel', n => { save.babyName = n; writeSave(); afterBabyName(); }), true);
-      else afterBabyName();
+      else startDialog([{ who: 'goetti', text: 'Möchtest du dem Dino-Baby einen neuen Namen geben? Wenn nicht, tippe einfach auf OK.' }], () => askName('Wie soll das Dino-Baby heissen?', save.babyName, n => { save.babyName = n; writeSave(); afterBabyName(); }, null, true), true);
     }
   }
   if (E.phase === 'party') { E.fw -= dt; if (E.fw <= 0) { E.fw = 0.45 + Math.random() * 0.4; const c = ['#ff5252', '#ffd740', '#69f0ae', '#40c4ff', '#ea80fc', '#fff']; burst(120 + Math.random() * 720, 60 + Math.random() * 150, 40, [c[Math.floor(Math.random() * 6)], '#fff'], 300, 160, 5, 1.5); tone(200 + Math.random() * 200, 0.3, 'triangle', 0.04, 80); } }
