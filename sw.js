@@ -1,6 +1,6 @@
 // Offline support: network first (so updates arrive), cache as fallback.
-const CACHE = 'olis-dino-v48';
-const FILES = ['./', 'index.html', 'game.js', 'manifest.webmanifest', 'icon.svg', 'icon-192.png', 'icon-512.png'];
+const CACHE = 'dino-advent-dev'; // the deploy workflow replaces this with 'dino-advent-<commit>'
+const FILES = ['./', 'index.html', 'game.js', 'manifest.webmanifest', 'icon-180.png', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => Promise.allSettled(FILES.map(f => c.add(f)))).then(() => self.skipWaiting()));
 });

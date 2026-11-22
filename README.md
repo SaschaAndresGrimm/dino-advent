@@ -1,76 +1,77 @@
-# Oli & Fabios Dino-Abenteuer
+# Oli & Fabios Dino-Advent
 
-A Christmas **advent calendar game** for the brothers Oli and Fabio: a runner where both ride a T-Rex they name themselves (Oli steers, Fabio sits in front and roars), with Chili the rabbit and Goetti's dino station, to save dinosaurs. **A new level opens every day from 1 to 24 December 2026.** Each door hides a level (about 2 minutes), a daily cosmetic gift and a Dino-Buch card. Missed days stay playable. The last door holds the Krallenkönig boss fight, the golden egg and the Christmas ending.
+![Title screen: Oli and Fabio riding the T-Rex Rexi, with Chili the rabbit](docs/screenshots/title.png)
 
-The game text is in German. There is no build step and no external assets: plain HTML, Canvas 2D and synthesised sound.
+**A Christmas advent-calendar game for two brothers.** Oli steers a T-Rex, Fabio sits in front and roars, and Chili the rabbit hops along. Together they save dinosaurs, one door a day from **1 to 24 December**.
 
-Developers: see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). AI coding agents: see [CLAUDE.md](CLAUDE.md).
+## ▶ Play now
 
-## Run locally
-```bash
-npm run serve        # python3 -m http.server 8765  ->  http://localhost:8765
-```
-Add `?day=12` to the URL to pretend it is 12 December (see "Testing the calendar").
+**<https://saschaandresgrimm.github.io/dino-advent/>**
 
-### Controls
-- **Tap / Space:** jump (twice for a double jump). Hold in the air to glide (from day 16). Tap to swim up underwater.
-- **FLITZ / F:** dash through walls, waves and enemies (from day 4).
-- **DUCKEN / ↓ / S:** hold to duck under low branches and flyers (from day 7). In the air it becomes **STAMPF** (ground pound, from day 13).
-- **BRÜLL / R:** roar. Scares raptors, flyers and hoppers, smashes big boulders. 3 s cooldown (1 s in boss fights). With a Feuer-Chili it becomes **FEUER!** for 8 s.
-- **Esc:** pause.
+Open the link in any modern browser (tablet, phone or computer). There is nothing to install or sign up for. Tap **Tippe zum Starten** and go.
 
-## The calendar
-| Days | Theme | New skill | Boss |
+> The game is in **German**. The levels are short and hints appear in short speech bubbles, so it is easy to follow along.
+
+## How it works
+
+- **24 doors, one per day.** Door N opens on December N. Before 1 December the calendar shows a countdown. Missed days stay playable, so nobody falls behind.
+- **Each door is a short level** (about 2 minutes): run, jump and roar through the jungle, beach, canyon, deep sea, ice age, mountains, a volcano and finally a Christmas night.
+- **Every door hides a gift:** a hat, a new colour for Rexi or a fire colour, plus a new card for the Dino-Buch.
+- **New skills as you go:** double jump, dash (day 4), duck (7), swim (10), ground pound (13), glide (16) and fire breath (19).
+- **Four boss fights** on days 6, 12, 18 and 24. The last door holds the Krallenkönig, the golden egg and the Christmas ending.
+- Goetti's shop, a collectible Dino-Buch, riddles, an endless run and a daily run keep it fun after the story is done.
+
+| | |
+|---|---|
+| ![The advent calendar with 24 doors](docs/screenshots/calendar.png) | ![Running through the jungle](docs/screenshots/jungle.png) |
+| **The calendar:** a new door opens every day | **Jungle:** jump, roar and collect amber |
+| ![Swimming underwater](docs/screenshots/underwater.png) | ![Boss fight against the Crab King](docs/screenshots/boss.png) |
+| **Underwater:** days 10 to 12 | **Boss fights:** each one has several phases |
+| ![Goetti's shop](docs/screenshots/shop.png) | ![The Dino-Buch sticker album](docs/screenshots/dino-book.png) |
+| **Goettis Laden:** hats, colours and real-life vouchers | **Dino-Buch:** 24 cards with real dino facts |
+
+## Controls
+
+| Action | Touch | Keyboard | From day |
 |---|---|---|---|
-| 1–3 | Jungle | jump, double jump, roar | |
-| 4–6 | Beach | **FLITZ** (dash) | Crab King (6) |
-| 7–9 | Canyon | duck | |
-| 10–12 | Underwater | **swim** (tap = up, TAUCHEN = down) | Sea monster (12) |
-| 13–15 | Ice Age | stomp | |
-| 16–18 | Mountains | **glide** | Eagle queen (18) |
-| 19–21 | Volcano | fire chili | |
-| 22–24 | Christmas night | everything | Krallenkönig (24) |
+| Jump (tap twice to double jump) | tap the screen | Space, ↑ or W | 1 |
+| Roar: scares enemies, smashes boulders | **BRÜLL!** | R, X or → | 1 |
+| Dash through walls, waves and enemies | **FLITZ** | F, Shift or ← | 4 |
+| Duck under low branches and flyers | **DUCKEN** | ↓ or S | 7 |
+| Swim up (tap) or down | tap / **TAUCHEN** | Space / ↓ | 10 |
+| Ground pound (in the air) | **STAMPF** | ↓ or S | 13 |
+| Glide (hold in the air) | hold | hold Space | 16 |
+| Fire breath (after a Feuer-Chili) | **FEUER!** | R | 19 |
+| Pause | ⏸ | Esc | |
 
-- **Doors:** day N opens on December N (device date). Before 1 December the calendar shows a countdown.
-- **Gifts:** the first time a door opens, its gift joins the shop (11 hats, 6 skins, 4 fire colours, 3 amber bonuses).
-- **Difficulty:** the first level of each theme is the easiest, the third the hardest; levels start at medium tier and get denser through the level.
-- **Enemies and hazards:** raptors, pterosaurs, Kompsis, hopper frogs, spitting plants, meteors, bounce mushrooms, crumbling steps, walls, waves, icicles, geysers, jellyfish and more. Each is introduced with a hint.
-- **Bosses:** every boss has several phases. Each cleared phase drops a heart; a lost fight restarts at the phase you were in. The Krallenkönig ends with a roar duel.
+## Install it on a tablet
 
-### Testing the calendar
-- **Parent mode:** press and hold the "Adventskalender" title for 1.5 s. Set the day with − / +, open all doors, or go back to the device date.
-- **`?day=N`** in the URL sets the day without touching the save.
-- **Browser console:** `__dino.startLevel(i)` starts level `i` (0 to 23).
+Playing in the browser works fine, but installing gives a full-screen app that also works **offline**.
 
-## More to do in the game
-- **Goettis Laden** (shop): Rex colours, fire colours, hats and jackets (each boy wears his own), accessories for Chili, and Goetti's vouchers for real outings (Velotour, Fischen, Dino-Museum). Tap an item to preview it live. Door gifts appear here too, marked "Geschenk".
-- **Dino-Buch:** 15 sticker cards. Unfound ones are silhouettes.
-- **Endlos-Lauf:** a random run in any finished theme that gets steadily harder (a new **Stufe** every ~26 segments). Best score per theme is saved.
-- **Riddle gate** at the end of every level: a wrong answer costs 1 amber; **Tipp** crosses out one wrong answer.
+- **iPad / iPhone:** open the link in Safari → Share → **Zum Home-Bildschirm**.
+- **Android:** open the link in Chrome → ⋮ → **App installieren**.
+- **Computer (Chrome, Edge):** click the install icon in the address bar.
 
-## Put it on the tablet
-1. Host the folder on any static HTTPS host (GitHub Pages, Netlify, Cloudflare Pages). The service worker needs HTTPS for offline play.
-2. iPad: Safari → Share → "Zum Home-Bildschirm". Android: Chrome ⋮ → "App installieren".
-3. It runs fullscreen in landscape and works offline. Progress is saved on the device (`localStorage`).
+Turn the device to landscape. Progress is saved on the device.
 
-After every release, bump the cache name in `sw.js` (`olis-dino-vN`), otherwise installed copies keep the old game.
+## Good to know (parents)
 
-## Tests
-One-time setup: `npm install && npx playwright install chromium`.
-- `npm run check`: syntax check of `game.js` and `sw.js`.
-- `npm test`: headless browser tests (about 30 s). Includes an autoplayer that completes all 24 levels, bots for the four boss fights, calendar logic with a mocked clock, gifts, shop, riddles, endless run, save migration and the music engine.
+- **Progress is saved in the browser on that device.** Clearing the site data or switching browsers starts a new save. There are no accounts and no network traffic: nothing leaves the device, and names stay local.
+- **Try other days:** press and hold the title "Adventskalender" on the calendar for 1.5 seconds to open parent mode. There you can set the day, open all doors or clear the high-score list. Adding `?day=12` to the address pretends it is 12 December without touching the save.
+- **Calm mode** in the settings turns off screen shake and red flashes.
+- **Updates:** the game updates itself when you open it with an internet connection.
 
-## Files
-- `game.js`: the whole game (see the section map in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md))
-- `index.html`: canvas and name-entry box
-- `sw.js`, `manifest.webmanifest`, `icon*`: the installable PWA
-- `tests/`: Playwright tests and helpers
-- `docs/ARCHITECTURE.md`, `CLAUDE.md`: developer and agent documentation
+## For developers and maintainers
 
-## Quick tweaks
-- **Story and dialog text:** search for `startStory`, `startEnding`, `afterBabyName`.
-- **Riddles:** `WORLDS[i].riddles` (10 per theme, each asked once before repeats).
-- **Dino cards:** `FACTS`. **Shop items:** `SKINS`, `HATS`, `FIRES`. **Gifts:** the `gift: <day>` field on those items.
-- **Start date:** `ADVENT_START` in `game.js`.
-- **Reset progress:** run `localStorage.removeItem('olisDinoRettung.v1')` in the browser console.
-- **Character sheets:** `__dino.sheet('rex' | 'hero' | 'cast' | 'react' | 'faces')` shows every character large.
+| Document | For |
+|---|---|
+| [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) | Run, test and change the game |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | How `game.js` is organised |
+| [docs/MAINTENANCE.md](docs/MAINTENANCE.md) | Releases, deployment, yearly rollover, dependencies |
+| [CLAUDE.md](CLAUDE.md) | Project rules for AI coding agents |
+
+Quick start: `npm install && npx playwright install chromium && npm run serve`, then open <http://localhost:8765>.
+
+## Credits
+
+A Christmas present for Oli and Fabio. Plain HTML, Canvas 2D and synthesised sound: no build step, no external assets, no tracking.

@@ -1,10 +1,15 @@
 {
-  "name": "olis-dino-rettung",
+  "name": "dino-advent",
+  "version": "1.0.0",
+  "description": "Oli & Fabios Dino-Advent: a browser advent-calendar game with 24 daily dino levels",
   "private": true,
+  "repository": { "type": "git", "url": "git+https://github.com/SaschaAndresGrimm/dino-advent.git" },
+  "engines": { "node": ">=20" },
   "scripts": {
     "serve": "python3 -m http.server 8765",
-    "check": "node --check game.js && node --check sw.js",
-    "test": "playwright test"
+    "check": "node --check game.js && node --check sw.js && node --check scripts/screenshots.js",
+    "test": "playwright test",
+    "screenshots": "node scripts/screenshots.js"
   },
   "devDependencies": {
     "@playwright/test": "^1.65.1"

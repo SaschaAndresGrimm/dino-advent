@@ -1,0 +1,62 @@
+name: CI and deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npx playwright install --with-deps chromium
+      - run: npm test
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-results
+          path: test-results/
+          retention-days: 7
+
+  deploy:
+    # Publishes to GitHub Pages, only from main and only when the tests passed.
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Assemble site (shipped files only)
+        run: |
+          mkdir _site
+          cp index.html game.js sw.js manifest.webmanifest icon-180.png icon-192.png icon-512.png icon-maskable-512.png og-image.png _site/
+          # Every deploy gets its own service-worker cache, so installed copies pick up the new game.
+          sed -i "s/dino-advent-dev/dino-advent-${GITHUB_SHA::7}/" _site/sw.js
+          grep -n "const CACHE" _site/sw.js
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4

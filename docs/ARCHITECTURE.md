@@ -1,5 +1,7 @@
 # Architecture
 
+Overview of `game.js`. For setup, tests and conventions see [DEVELOPMENT.md](DEVELOPMENT.md); for releases see [MAINTENANCE.md](MAINTENANCE.md).
+
 Everything is in `game.js` (one IIFE, about 3,800 lines, no modules, no build). Search for the section comments (`// ====` banners) to navigate. Line numbers drift; use the names.
 
 ## Section map of `game.js`

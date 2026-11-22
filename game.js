@@ -1,5 +1,5 @@
 'use strict';
-/* Oli & Fabios Dino-Abenteuer – ein Weihnachtsgeschenk von Goetti */
+/* Oli & Fabios Dino-Advent – ein Weihnachtsgeschenk von Goetti */
 (() => {
 // =====================================================================
 // Setup
@@ -4070,7 +4070,7 @@ function logo(cx, cy) {
     ctx.fillStyle = vgrad(y - 34 * k, y + 34 * k, '#fff6b0', '#ffd34d', '#f08a1a'); ctx.fillText(t, 0, y);
     ctx.save(); ctx.beginPath(); ctx.rect(-480, y - 40 * k, 960, 30 * k); ctx.clip(); ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.fillText(t, 0, y); ctx.restore();
   };
-  line('Oli & Fabios', 52, -38); line('Dino-Abenteuer', 76, 18);
+  line('Oli & Fabios', 52, -38); line('Dino-Advent', 76, 18);
   for (let i = 0; i < 4; i++) { const a = 0.5 + 0.5 * Math.sin(T * 3 + i * 1.7), px = [-300, -90, 150, 320][i], py = [-38, 34, -40, 30][i]; ctx.globalAlpha = a; ctx.fillStyle = '#fff'; ctx.beginPath(); for (let k = 0; k < 8; k++) { const ang = k / 8 * Math.PI * 2, r = k % 2 ? 2.5 : 10; ctx.lineTo(px + Math.cos(ang) * r, py + Math.sin(ang) * r); } ctx.fill(); }
   ctx.globalAlpha = 1; ctx.restore();
 }
@@ -5103,16 +5103,23 @@ function drawSheet() {
   ctx.fillStyle = '#d8e6d6'; ctx.fillRect(0, 0, W, H);
   const row = (y, label) => { ctx.fillStyle = 'rgba(0,0,0,.12)'; ctx.fillRect(0, y, W, 2); txt(label, 14, y - 10, 14, '#3b2410', 'left'); };
   const t = T * 8, fx = o => Object.assign(chiliFx, { vy: 0, dig: false, scared: 0, joy: 0 }, o);
-  if (sheetPage === 'appicon') { // 256 x 256 logical px, screenshot at 2x gives icon-512.png
-    const S = 256, sk = ctx.createLinearGradient(0, 0, 0, S); sk.addColorStop(0, '#0e3b3c'); sk.addColorStop(0.55, '#3f8f78'); sk.addColorStop(1, '#a6d8a0'); ctx.fillStyle = sk; ctx.fillRect(0, 0, S, S);
-    ctx.save(); ctx.translate(196, 66); for (let i = 0; i < 12; i++) { ctx.rotate(Math.PI / 6); ctx.fillStyle = 'rgba(255,236,160,.16)'; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(-14, -230); ctx.lineTo(14, -230); ctx.fill(); } ctx.restore();
-    const sg = ctx.createRadialGradient(196, 66, 6, 196, 66, 70); sg.addColorStop(0, 'rgba(255,240,170,.95)'); sg.addColorStop(0.4, 'rgba(255,200,100,.5)'); sg.addColorStop(1, 'rgba(255,200,100,0)'); ctx.fillStyle = sg; ctx.fillRect(100, 0, 156, 160); circle(196, 66, 26, '#ffe08a');
-    ctx.fillStyle = '#1d5a3e'; ctx.beginPath(); ctx.moveTo(0, 170); ctx.quadraticCurveTo(60, 110, 120, 150); ctx.quadraticCurveTo(180, 120, 256, 160); ctx.lineTo(256, 256); ctx.lineTo(0, 256); ctx.fill();
-    palm(26, 214, 120, '#1f6a3a'); palm(236, 214, 96, '#1f6a3a');
-    ctx.fillStyle = vgrad(206, S, '#4aa83a', '#2e7a2a'); ctx.fillRect(0, 206, S, 10); ctx.fillStyle = vgrad(214, S, '#6a4a2a', '#3a2614'); ctx.fillRect(0, 214, S, 42);
-    shadow(128, 216, 92, 0.35); oRex(128, 214, 0.78, 0.4, 0.28, Object.assign(rexLook(0), { rider: true, hat: null, hat2: null }));
-    const eg = ctx.createRadialGradient(60, 192, 4, 60, 192, 64); eg.addColorStop(0, 'rgba(255,240,150,.9)'); eg.addColorStop(1, 'rgba(255,220,90,0)'); ctx.fillStyle = eg; ctx.fillRect(0, 130, 130, 126);
-    drawEgg(58, 190, 33, '#ffd700', '#fff3b0', 0.6, -0.18); drawStar(30, 150, 8, '#fff'); drawStar(96, 176, 5, '#fff3b0'); drawStar(84, 142, 4, '#fff');
+  if (sheetPage === 'appicon') { // 256 x 256 logical px (screenshot at 4x gives the 1024 master). Everything important sits inside the central 80 % circle so the same art works as a maskable icon
+    const S = 256, EX = 178, EY = 84;
+    const sk = ctx.createLinearGradient(0, 0, 0, S); sk.addColorStop(0, '#071a44'); sk.addColorStop(0.42, '#17566e'); sk.addColorStop(0.78, '#3f9c84'); sk.addColorStop(1, '#8fd19a'); ctx.fillStyle = sk; ctx.fillRect(0, 0, S, S);
+    for (let i = 0; i < 40; i++) { ctx.globalAlpha = 0.35 + 0.6 * hash(i + 3); circle(hash(i) * S, hash(i + 50) * 120, hash(i + 9) < 0.15 ? 1.5 : 0.8, '#fff'); } ctx.globalAlpha = 1;
+    ctx.save(); ctx.translate(EX, EY); for (let i = 0; i < 16; i++) { ctx.rotate(Math.PI / 8); ctx.fillStyle = 'rgba(255,230,140,.13)'; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(-13, -300); ctx.lineTo(13, -300); ctx.fill(); } ctx.restore();
+    const hg = ctx.createRadialGradient(EX, EY, 8, EX, EY, 120); hg.addColorStop(0, 'rgba(255,236,150,.85)'); hg.addColorStop(0.4, 'rgba(255,200,90,.35)'); hg.addColorStop(1, 'rgba(255,200,90,0)'); ctx.fillStyle = hg; ctx.fillRect(0, 0, S, S);
+    ctx.fillStyle = '#1b5f63'; ctx.beginPath(); ctx.moveTo(0, 176); ctx.quadraticCurveTo(50, 118, 112, 160); ctx.quadraticCurveTo(170, 126, 256, 168); ctx.lineTo(256, S); ctx.lineTo(0, S); ctx.fill();
+    ctx.fillStyle = '#0f4448'; ctx.beginPath(); ctx.moveTo(0, 196); ctx.quadraticCurveTo(70, 156, 140, 190); ctx.quadraticCurveTo(200, 168, 256, 192); ctx.lineTo(256, S); ctx.lineTo(0, S); ctx.fill();
+    palm(22, 218, 128, '#0a3033'); palm(240, 218, 104, '#0a3033');
+    ctx.fillStyle = vgrad(206, S, '#58b844', '#2f7d30'); ctx.fillRect(0, 206, S, 12); ctx.fillStyle = vgrad(216, S, '#6a4528', '#2e1c0e'); ctx.fillRect(0, 216, S, 40);
+    ctx.fillStyle = 'rgba(255,255,255,.22)'; ctx.fillRect(0, 206, S, 2);
+    circle(EX, EY, 46, 'rgba(255,236,150,.35)'); drawEgg(EX, EY, 39, '#ffd34a', '#fff3b0', 1.4, 0.1);
+    for (const [sx, sy, sr] of [[EX - 52, EY - 34, 8], [EX + 50, EY - 18, 6], [EX + 36, EY + 50, 5], [EX - 36, EY + 44, 4]]) drawStar(sx, sy, sr, '#fff6c0');
+    shadow(116, 216, 62, 0.3);
+    oRex(116, 214, 0.68, 0.5, 0.3, Object.assign(rexLook(0), { rider: true, hat: null, hat2: null }));
+    for (let i = 0; i < 18; i++) { const fx = hash(i + 80) * S, fy = 150 + hash(i + 95) * 56; const g = ctx.createRadialGradient(fx, fy, 0, fx, fy, 5); g.addColorStop(0, 'rgba(255,245,170,.9)'); g.addColorStop(1, 'rgba(255,245,170,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(fx, fy, 5, 0, 7); ctx.fill(); }
+    const vg = ctx.createRadialGradient(S / 2, S / 2, 100, S / 2, S / 2, 190); vg.addColorStop(0, 'rgba(0,0,10,0)'); vg.addColorStop(1, 'rgba(0,0,10,.38)'); ctx.fillStyle = vg; ctx.fillRect(0, 0, S, S);
     return;
   }
   if (sheetPage === 'icons') { // every UI icon, large
