@@ -119,6 +119,18 @@ test('shop: hats and jackets per boy, Chili items, Goetti vouchers', async ({ ga
   expect(game.errors).toEqual([]);
 });
 
+test('shop: Europa-Park voucher costs 2500 and opens its card', async ({ game, page }) => {
+  await game.open({ amber: 2700 });
+  const tap = async (x, y) => { await page.mouse.click(x, y); await page.waitForTimeout(80); };
+  await game.eval(() => window.__dino.go('shop'));
+  await page.waitForTimeout(300);
+  await tap(440 + 5 * 84 + 40, 140); await tap(440 + 3 * 126 + 59, 166 + 50); await tap(688, 438); await tap(565, 353);
+  const r = await game.eval(() => { const s = window.__dino.save; return { amber: s.amber, wish: s.owned.wish }; });
+  expect(r).toEqual({ amber: 200, wish: [3] });
+  await page.waitForTimeout(200);
+  expect(game.errors).toEqual([]);
+});
+
 test('book: found cards open, NEU is cleared once seen', async ({ game, page }) => {
   await game.open({ lvDone: [1, ...new Array(23).fill(0)] });
   await game.eval(() => window.__dino.go('book'));

@@ -788,6 +788,7 @@ const WISHES = [
   { n: 'Velotour', cost: 600, text: 'eine grosse Velotour mit Goetti', icon: (x, y, k) => drawBike(x, y + 30 * k, 0.62 * k) },
   { n: 'Fischen', cost: 900, text: 'einen Tag Fischen mit Goetti', icon: (x, y, k) => drawRod(x, y + 8 * k, 0.8 * k, T * 3) },
   { n: 'Dino-Museum', cost: 1200, text: 'einen Ausflug ins Dino-Museum mit Goetti', icon: (x, y, k) => drawTrike(x - 2 * k, y + 22 * k, 0.62 * k, '#c98f5a', 0, false) },
+  { n: 'Europa-Park', cost: 2500, text: 'eine Reise in den Europa-Park mit Goetti', icon: (x, y, k) => drawCoaster(x, y + 4 * k, 0.9 * k) },
 ];
 function rgbStr(hex) { return `${parseInt(hex.slice(1, 3), 16)},${parseInt(hex.slice(3, 5), 16)},${parseInt(hex.slice(5, 7), 16)}`; }
 function fireOf(i) { const f = FIRES[i] || FIRES[0]; if (!f.rainbow) return f; const h = (T * 90) % 360, a = hslHex(h, 100, 78), b = hslHex(h, 100, 56), c = hslHex(h, 100, 36); return Object.assign({}, f, { a: rgbStr(a), b: rgbStr(b), c: rgbStr(c), fl: [hslHex(h, 100, 94), a, b], ball: b, glow: rgbStr(b) }); }
@@ -1279,6 +1280,15 @@ function drawRod(x, y, s, ph = 0) {
   const fx = 36 + Math.sin(ph) * 3, fy = 2;
   ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(28, -56); ctx.lineTo(fx, fy - 8); ctx.stroke();
   ell(fx, fy, 10, 5.5, Math.sin(ph) * 0.3, '#ff8f3a'); ctx.fillStyle = '#ff8f3a'; ctx.beginPath(); ctx.moveTo(fx - 8, fy); ctx.lineTo(fx - 15, fy - 6); ctx.lineTo(fx - 15, fy + 6); ctx.fill(); circle(fx + 5, fy - 1, 1.3, '#222');
+  ctx.restore();
+}
+function drawCoaster(x, y, s) { // roller coaster: a looping track on stilts with a little red car, for the Europa-Park voucher
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  const trk = () => { ctx.beginPath(); ctx.moveTo(-46, 6); ctx.lineTo(-30, 6); ctx.quadraticCurveTo(-18, 6, -10, -22); ctx.quadraticCurveTo(-4, -44, 6, -44); ctx.quadraticCurveTo(18, -44, 20, -22); ctx.quadraticCurveTo(22, 2, 34, 2); ctx.lineTo(46, -8); };
+  ctx.strokeStyle = '#8a7a68'; ctx.lineWidth = 2.5; for (const sx of [-30, -14, 6, 20, 34]) { const ty = sx < -20 ? 6 : sx < 0 ? -14 : sx < 14 ? -42 : sx < 28 ? -24 : 2; ctx.beginPath(); ctx.moveTo(sx, ty + 3); ctx.lineTo(sx, 26); ctx.stroke(); }
+  ctx.strokeStyle = '#8a7a68'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-34, 26); ctx.lineTo(40, 26); ctx.stroke();
+  trk(); ctx.strokeStyle = '#7a1c1c'; ctx.lineWidth = 7; ctx.stroke(); trk(); ctx.strokeStyle = '#e8453c'; ctx.lineWidth = 4.5; ctx.stroke();
+  ctx.save(); ctx.translate(-4, -32); ctx.rotate(-0.9); rr(-9, -5, 18, 9, 3); ctx.fillStyle = '#ffd34d'; ctx.fill(); ctx.strokeStyle = '#8a5a00'; ctx.lineWidth = 1.5; ctx.stroke(); circle(-3, -6, 3, '#f6d3b0'); circle(3, -6, 3, '#f6d3b0'); ctx.restore();
   ctx.restore();
 }
 function drawKiwi(x, y, s, ph = 0, flip = false) {
