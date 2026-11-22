@@ -1,6 +1,6 @@
-# Olis Dino-Rettung
+# Oli & Fabios Dino-Abenteuer
 
-A Christmas **advent calendar game** for Oli: a runner where a T-Rex he names himself, Chili the rabbit and Goetti's dino station save dinosaurs. **A new level opens every day from 1 to 24 December 2026.** Each door hides a level (about 2 minutes), a daily cosmetic gift and a Dino-Buch card. Missed days stay playable. The last door holds the Krallenkönig boss fight, the golden egg and the Christmas ending.
+A Christmas **advent calendar game** for the brothers Oli and Fabio: a runner where both ride a T-Rex they name themselves (Oli steers, Fabio sits in front and roars), with Chili the rabbit and Goetti's dino station, to save dinosaurs. **A new level opens every day from 1 to 24 December 2026.** Each door hides a level (about 2 minutes), a daily cosmetic gift and a Dino-Buch card. Missed days stay playable. The last door holds the Krallenkönig boss fight, the golden egg and the Christmas ending.
 
 The game text is in German. There is no build step and no external assets: plain HTML, Canvas 2D and synthesised sound.
 

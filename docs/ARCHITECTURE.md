@@ -12,7 +12,7 @@ Everything is in `game.js` (one IIFE, about 3,800 lines, no modules, no build). 
 | Helpers | `clamp`, `rr` (rounded rect), `circle`, `ell`, `hash`, `rng`, UI kit (`woodFrame`, `panel`, `button`, `ico`) |
 | Game data | `WORLDS` (per-theme data: speed, obstacle patterns, riddles, colours), `FACTS` (dino cards), `SKINS`/`HATS`/`FIRES` |
 | Advent calendar | `ADVENT_START`, `adventDay()`, `LEVEL_THEMES`, `LEVEL_TITLES`, `BOSS_DAYS`, `LEVELS`, `SKILL_DAYS`, `skillsFor`, gifts |
-| Character drawing | Rex, Oli, Chili, Goetti, professor, raptors, compys, crab king… plus the dev character sheet |
+| Character drawing | Rex, Oli and Fabio (`drawOli`, `o.kid`), Chili, Goetti, professor, raptors, compys, crab king… plus the dev character sheet |
 | Scenery | `GFX[]` palettes, `drawBackground`, `drawGround`, platforms, per-theme art (`ART(wi)`) |
 | Level generation | `buildLevel(wi, endless, LV)` |
 | Play state | `startLevel`, `updatePlay`, `drawPlay`, `hurt`, `pitFall`, `retry`, obstacles, boss engine (`BOSS_KINDS`, `updateBoss`), riddle gate, results |
@@ -61,7 +61,7 @@ Enemies that walk toward the player only move when `o.x - p.wx < ~760` (or `o.mi
 
 | Field | Meaning |
 |---|---|
-| `rexName`, `babyName` | Names Oli chose |
+| `rexName`, `babyName`, `oliName`, `fabioName` | Names the boys chose |
 | `amber` | Currency |
 | `lvDone[24]`, `lvE[24][3]`, `lvM[24][3]` | Per level: finished, eggs, medals |
 | `gifts[]` | Days whose gift was opened |

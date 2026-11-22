@@ -1,5 +1,5 @@
 'use strict';
-/* Olis Dino-Rettung – ein Weihnachtsgeschenk von Goetti */
+/* Oli & Fabios Dino-Abenteuer – ein Weihnachtsgeschenk von Goetti */
 (() => {
 // =====================================================================
 // Setup
@@ -24,7 +24,7 @@ window.addEventListener('resize', resize); resize();
 // Save game
 // =====================================================================
 const SAVE_KEY = 'olisDinoRettung.v1';
-let save = { rexName: '', babyName: '', unlocked: 0, eggs: [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], amber: 0, finished: false, muted: false, tutorialDone: false, learned: { duck: 0, stomp: 0, fire: 0, dash: 0, swim: 0, glide: 0 }, riddleSeen: [[], [], [], []],
+let save = { rexName: '', babyName: '', fabioName: '', unlocked: 0, eggs: [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], amber: 0, finished: false, muted: false, tutorialDone: false, learned: { duck: 0, stomp: 0, fire: 0, dash: 0, swim: 0, glide: 0 }, riddleSeen: [[], [], [], []],
   medals: [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], treasures: [0,0,0,0], treasureNew: -1 };
 try { const s = JSON.parse(localStorage.getItem(SAVE_KEY)); if (s) save = Object.assign(save, s); } catch (e) {}
 // calendar progress: one entry per level (24 days). Old 4-world saves keep names, amber and shop items but start the calendar fresh.
@@ -197,7 +197,7 @@ function setFont(size, weight = 'bold') { ctx.font = `${weight} ${size}px ${FONT
 function txt(s, x, y, size, color, align = 'center', weight = 'bold') { setFont(size, weight); ctx.fillStyle = color; ctx.textAlign = align; ctx.textBaseline = 'middle'; ctx.fillText(s, x, y); }
 function otxt(s, x, y, size, color, stroke = 'rgba(0,0,0,.75)', lw = 6, align = 'center') { setFont(size); ctx.textAlign = align; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round'; ctx.strokeStyle = stroke; ctx.lineWidth = lw; ctx.strokeText(s, x, y); ctx.fillStyle = color; ctx.fillText(s, x, y); }
 function wrapLines(s, maxW, size) { setFont(size); const out = []; let cur = ''; for (const w of s.split(' ')) { const t = cur ? cur + ' ' + w : w; if (ctx.measureText(t).width > maxW && cur) { out.push(cur); cur = w; } else cur = t; } if (cur) out.push(cur); return out; }
-function fmt(s) { return s.replace(/\{oli\}/g, save.oliName || 'Oli').replace(/\{rex\}/g, save.rexName || 'Rexi').replace(/\{baby\}/g, save.babyName || 'Baby'); }
+function fmt(s) { return s.replace(/\{oli\}/g, save.oliName || 'Oli').replace(/\{fabio\}/g, save.fabioName || 'Fabio').replace(/\{rex\}/g, save.rexName || 'Rexi').replace(/\{baby\}/g, save.babyName || 'Baby'); }
 function overlap(a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; }
 
 // immediate-mode buttons (rebuilt every frame)
@@ -467,44 +467,44 @@ const FACTS_NEW = [
 // one card per level (24 days). Order follows the calendar: jungle, beach, canyon, underwater, ice age, mountains, volcano, Christmas.
 const FACTS = [...FACTS_OLD.slice(0, 3), ...FACTS_NEW.slice(0, 3), ...FACTS_OLD.slice(3, 6), ...FACTS_NEW.slice(3, 6), ...FACTS_OLD.slice(6, 9), ...FACTS_NEW.slice(6, 9), ...FACTS_OLD.slice(9, 12), ...FACTS_OLD.slice(12, 15)];
 const TREASURES = [
-  { name: 'Goettis Gitarre', line: 'Meine Gitarre! Danke, {oli}! Tipp sie in der Schatzkiste an – dann spiele ich dir was vor.', tap: 'Goetti spielt ein Lied!' },
-  { name: 'Goettis Velo', line: 'Mein Velo! Das hat der Vulkan bis in den Canyon geschleudert. Damit machen wir zwei mal eine grosse Tour!', tap: 'Kling, kling!' },
+  { name: 'Goettis Gitarre', line: 'Meine Gitarre! Danke, ihr zwei! Tippt sie in der Schatzkiste an – dann spiele ich euch was vor.', tap: 'Goetti spielt ein Lied!' },
+  { name: 'Goettis Velo', line: 'Mein Velo! Das hat der Vulkan bis in den Canyon geschleudert. Damit machen wir drei mal eine grosse Tour!', tap: 'Kling, kling!' },
   { name: 'Goettis Angel', line: 'Meine Angelrute! Weisst du was? Im Winter kann man sogar durch ein Loch im Eis fischen. Das machen wir mal zusammen!', tap: 'Platsch! Ein Fisch!' },
-  { name: 'Kiwi', line: 'Kiwi! Mein kleiner Freund ist wieder da! Kiwis sind das Wahrzeichen von Neuseeland und können nicht fliegen – darum läuft Kiwi ab jetzt mit dir mit.', tap: 'Kiwi! Kiwi!' },
+  { name: 'Kiwi', line: 'Kiwi! Mein kleiner Freund ist wieder da! Kiwis sind das Wahrzeichen von Neuseeland und können nicht fliegen – darum läuft Kiwi ab jetzt mit euch mit.', tap: 'Kiwi! Kiwi!' },
 ];
 // =====================================================================
 // Story: the Krallenkönig stole the dino family's golden egg. Three bosses each hold a piece of his map.
 // DAY_STORY plays once before a level (first time), DAY_AFTER once on the map after a boss, TEASERS on the results screen.
 // =====================================================================
 const DAY_STORY = {
-  1: [{ who: 'goetti', text: 'Tür 1! Hier im Dschungel hat der Vulkan die meisten Eier verloren. Und schau mal: riesige Krallenspuren!' }, { who: 'chili', text: 'Schnupper, schnupper … Das riecht nach dem Krallenkönig! Folgen wir der Spur!' }],
-  2: [{ who: 'goetti', text: 'Die Spuren führen hoch hinauf. Der Räuber ist über die Baumwipfel geklettert – spring hinterher, {oli}!' }],
-  3: [{ who: 'goetti', text: 'Heute lernst du das BRÜLLEN! Damit verjagst du jeden Raptor. Und irgendwo hier liegt meine Gitarre – der Vulkan hat sie weit weggeschleudert.' }],
-  4: [{ who: 'goetti', text: 'Die Spuren enden am Strand! Ab heute kannst du FLITZEN – sogar mitten durch Sandmauern.' }, { who: 'chili', text: 'Mümmel! Hier riecht es nach Meer und nach Krallenkönig.' }],
-  5: [{ who: 'goetti', text: 'Krabbenstrand! Pass auf die Krabben auf – sie benehmen sich, als würden sie etwas bewachen …' }],
-  6: [{ who: 'goetti', text: 'Da vorne sitzt der Krabbenkönig! Und schau: Um seinen Hals hängt ein Stück Pergament!' }, { who: 'fabio', text: '(Funkspruch) Das ist ein Teil von der Schatzkarte des Krallenkönigs! Hol es dir, {oli}!' }],
-  7: [{ who: 'goetti', text: 'Die heisse Schlucht! Der Räuber hat hier gelagert – die Asche ist noch warm. Ab heute kannst du DUCKEN: Halte den Knopf, dann kommst du unter tiefen Ästen durch.' }],
-  8: [{ who: 'goetti', text: 'Duck dich! Die Flugsaurier kreisen hier ständig. Sie kennen den Krallenkönig – und sie mögen keine Fremden.' }],
-  9: [{ who: 'goetti', text: 'Ein Raptor-Rudel! Der Krallenkönig hat sie als Wachen zurückgelassen. Brüll sie weg! Irgendwo hier liegt auch mein Velo …' }],
-  10: [{ who: 'goetti', text: 'Tauchgang! Das Kartenstück zeigt: Der Weg geht unter Wasser weiter. Ab heute kannst du SCHWIMMEN – tippen heisst nach oben, TAUCHEN nach unten.' }],
+  1: [{ who: 'goetti', text: 'Tür 1! Hier im Dschungel hat der Vulkan die meisten Eier verloren. Und schaut mal: riesige Krallenspuren!' }, { who: 'fabio', text: 'Die sind ja grösser als ich!' }, { who: 'chili', text: 'Schnupper, schnupper … Das riecht nach dem Krallenkönig! Folgen wir der Spur!' }],
+  2: [{ who: 'goetti', text: 'Die Spuren führen hoch hinauf. Der Räuber ist über die Baumwipfel geklettert – springt hinterher, ihr zwei!' }],
+  3: [{ who: 'goetti', text: 'Heute lernt {rex} BRÜLLEN! {fabio}, das ist dein Job: Du bist ab heute unser Brüll-Chef. Drück BRÜLL, dann rennt jeder Raptor davon!' }, { who: 'fabio', text: 'ROOOAAARRR!' }, { who: 'goetti', text: 'Und irgendwo hier liegt meine Gitarre – der Vulkan hat sie weit weggeschleudert.' }],
+  4: [{ who: 'goetti', text: 'Die Spuren enden am Strand! Ab heute könnt ihr FLITZEN – sogar mitten durch Sandmauern.' }, { who: 'chili', text: 'Mümmel! Hier riecht es nach Meer und nach Krallenkönig.' }],
+  5: [{ who: 'goetti', text: 'Krabbenstrand! Passt auf die Krabben auf – sie benehmen sich, als würden sie etwas bewachen …' }],
+  6: [{ who: 'goetti', text: 'Da vorne sitzt der Krabbenkönig! Und schaut: Um seinen Hals hängt ein Stück Pergament!' }, { who: 'papi', text: '(Funkspruch) Das ist ein Teil von der Schatzkarte des Krallenkönigs! Holt es euch, {oli} und {fabio}!' }],
+  7: [{ who: 'goetti', text: 'Die heisse Schlucht! Der Räuber hat hier gelagert – die Asche ist noch warm. Ab heute könnt ihr DUCKEN: Halte den Knopf, dann kommt ihr unter tiefen Ästen durch.' }],
+  8: [{ who: 'goetti', text: 'Duckt euch! Die Flugsaurier kreisen hier ständig. Sie kennen den Krallenkönig – und sie mögen keine Fremden.' }],
+  9: [{ who: 'goetti', text: 'Ein Raptor-Rudel! Der Krallenkönig hat sie als Wachen zurückgelassen. {fabio}, Brüll-Chef – jetzt brauchen wir dich! Irgendwo hier liegt auch mein Velo …' }],
+  10: [{ who: 'goetti', text: 'Tauchgang! Das Kartenstück zeigt: Der Weg geht unter Wasser weiter. Ab heute könnt ihr SCHWIMMEN – tippen heisst nach oben, TAUCHEN nach unten.' }, { who: 'fabio', text: 'Blubb, blubb!' }],
   11: [{ who: 'goetti', text: 'Das Korallenlabyrinth! Die Fische flüstern, dass hier ein Seeungeheuer wohnt. Es mag keine Besucher …' }],
-  12: [{ who: 'goetti', text: 'Da ist es: das Seeungeheuer! Und es hält das zweite Kartenstück in seinen Tentakeln!' }, { who: 'papi', text: '(Funkspruch) Wir drücken euch die Daumen, {oli}! Bring unser Ei zurück!' }],
-  13: [{ who: 'goetti', text: 'Die Eiszeit! Alles ist gefroren. Ab heute kannst du STAMPFEN: Spring hoch und drück STAMPF – das knackt sogar Bernstein-Steine.' }],
+  12: [{ who: 'goetti', text: 'Da ist es: das Seeungeheuer! Und es hält das zweite Kartenstück in seinen Tentakeln!' }, { who: 'fabio', text: 'Ich hab keine Angst. Gar keine! … Ein bisschen.' }, { who: 'mami', text: '(Funkspruch) Wir drücken euch die Daumen, ihr zwei! Bringt unser Ei zurück!' }],
+  13: [{ who: 'goetti', text: 'Die Eiszeit! Alles ist gefroren. Ab heute könnt ihr STAMPFEN: Springt hoch und drückt STAMPF – das knackt sogar Bernstein-Steine.' }],
   14: [{ who: 'goetti', text: 'Die Krallenspuren sind im Schnee ganz frisch. Wir holen auf!' }],
-  15: [{ who: 'goetti', text: 'Eiskalte Ebene! Und dort im Eis steckt meine Angelrute – siehst du sie?' }],
-  16: [{ who: 'goetti', text: 'Der Gipfelweg! Ab heute kannst du GLEITEN: Halte in der Luft die Taste gedrückt und schwebe über die Schluchten.' }],
-  17: [{ who: 'goetti', text: 'Über den Wolken wohnt die Adlerkönigin. Sie hütet das letzte Kartenstück. Pass auf die Windwellen auf!' }],
-  18: [{ who: 'goetti', text: 'Die Adlerkönigin! Das letzte Kartenstück liegt in ihrem Nest.' }, { who: 'mami', text: '(Funkspruch) Du bist so mutig, {oli}! Wir sind in Gedanken bei dir!' }],
-  19: [{ who: 'goetti', text: 'Der Vulkan! Heiss, heiss, heiss. Sammle die roten Feuer-Chilis, dann kann {rex} FEUER spucken!' }],
-  20: [{ who: 'goetti', text: 'Der Lavafluss! Hüpf von Stein zu Stein – und lass dich nicht in die Lava fallen.' }],
-  21: [{ who: 'goetti', text: 'Seine Krallenspuren glühen noch – der Räuber ist ganz nah! Und hörst du das? Irgendwo ruft ein Kiwi …' }],
-  22: [{ who: 'goetti', text: 'Wir haben den Vulkan hinter uns! Es schneit. Es ist Weihnachtsnacht – und der Krallenkönig ist ganz nah.' }],
-  23: [{ who: 'goetti', text: 'Der Sternenwald. Hörst du das? Ein leises Klopfen … Das Dino-Baby im goldenen Ei ruft nach uns!' }, { who: 'fabio', text: '(Funkspruch) Bitte beeil dich, {oli}! Mein Geschwisterchen friert!' }],
-  24: [{ who: 'goetti', text: 'Das ist seine Höhle! Der Krallenkönig sitzt auf dem goldenen Ei – und er sieht gar nicht fröhlich aus.' }, { who: 'mami', text: 'Wir stehen hinter dir, {oli}!' }, { who: 'papi', text: 'Du schaffst das, {rex}! Und Chili auch!' }, { who: 'goetti', text: 'Das ist der letzte Kampf. Los, {oli}!' }],
+  15: [{ who: 'goetti', text: 'Eiskalte Ebene! Und dort im Eis steckt meine Angelrute – seht ihr sie?' }],
+  16: [{ who: 'goetti', text: 'Der Gipfelweg! Ab heute könnt ihr GLEITEN: Halte in der Luft die Taste gedrückt und schwebe über die Schluchten.' }, { who: 'fabio', text: 'Wir fliegen! {oli}, wir fliegen!' }],
+  17: [{ who: 'goetti', text: 'Über den Wolken wohnt die Adlerkönigin. Sie hütet das letzte Kartenstück. Passt auf die Windwellen auf!' }],
+  18: [{ who: 'goetti', text: 'Die Adlerkönigin! Das letzte Kartenstück liegt in ihrem Nest.' }, { who: 'papi', text: '(Funkspruch) Ihr seid so mutig, {oli} und {fabio}! Wir sind in Gedanken bei euch!' }],
+  19: [{ who: 'goetti', text: 'Der Vulkan! Heiss, heiss, heiss. Sammelt die roten Feuer-Chilis, dann kann {rex} FEUER spucken!' }, { who: 'fabio', text: 'Feuer! Darf ich drücken? Bitte, bitte!' }],
+  20: [{ who: 'goetti', text: 'Der Lavafluss! Hüpft von Stein zu Stein – und lasst euch nicht in die Lava fallen.' }],
+  21: [{ who: 'goetti', text: 'Seine Krallenspuren glühen noch – der Räuber ist ganz nah! Und hört ihr das? Irgendwo ruft ein Kiwi …' }],
+  22: [{ who: 'goetti', text: 'Wir haben den Vulkan hinter uns! Es schneit. Es ist Weihnachtsnacht – und der Krallenkönig ist ganz nah.' }, { who: 'fabio', text: 'Es schneit! {oli}, schau, es schneit!' }],
+  23: [{ who: 'goetti', text: 'Der Sternenwald. Hört ihr das? Ein leises Klopfen … Das Dino-Baby im goldenen Ei ruft nach uns!' }, { who: 'mami', text: '(Funkspruch) Bitte beeilt euch! Unserem Baby ist so kalt!' }],
+  24: [{ who: 'goetti', text: 'Das ist seine Höhle! Der Krallenkönig sitzt auf dem goldenen Ei – und er sieht gar nicht fröhlich aus.' }, { who: 'mami', text: 'Wir stehen hinter euch, {oli} und {fabio}!' }, { who: 'papi', text: 'Du schaffst das, {rex}! Und Chili auch!' }, { who: 'goetti', text: 'Das ist der letzte Kampf. {oli} lenkt, {fabio} brüllt – los, ihr zwei!' }],
 };
 const DAY_AFTER = {
-  6: [{ who: 'goetti', text: 'Geschafft! Der Krabbenkönig hat ein Kartenstück verloren. Darauf ist das Meer gezeichnet – und ein goldenes Ei!' }, { who: 'chili', text: 'Mümmel! Noch zwei Stücke fehlen, dann kennen wir den Weg zum Versteck.' }],
-  12: [{ who: 'goetti', text: 'Das zweite Stück! Jetzt sehen wir hohe Berge – und einen rauchenden Vulkan.' }, { who: 'chili', text: 'Mümmel! Nur noch ein Stück, {oli}!' }],
+  6: [{ who: 'fabio', text: 'Wir haben es! Wir haben das Kartenstück!' }, { who: 'goetti', text: 'Geschafft! Der Krabbenkönig hat ein Kartenstück verloren. Darauf ist das Meer gezeichnet – und ein goldenes Ei!' }, { who: 'chili', text: 'Mümmel! Noch zwei Stücke fehlen, dann kennen wir den Weg zum Versteck.' }],
+  12: [{ who: 'goetti', text: 'Das zweite Stück! Jetzt sehen wir hohe Berge – und einen rauchenden Vulkan.' }, { who: 'chili', text: 'Mümmel! Nur noch ein Stück, ihr zwei!' }],
   18: [{ who: 'goetti', text: 'Alle drei Stücke! Zusammengelegt zeigen sie den Weg: über den Vulkan, und dahinter liegt die Höhle des Krallenkönigs.' }, { who: 'chili', text: 'Mümmel! Auf zum Vulkan!' }],
 };
 const TEASERS = { 5: 'Morgen wartet der Krabbenkönig mit dem ersten Kartenstück!', 11: 'Morgen taucht das Seeungeheuer auf …', 17: 'Morgen: die Adlerkönigin! Sie hütet das letzte Kartenstück.', 23: 'Morgen ist der grosse Tag – der Krallenkönig wartet!' };
@@ -572,33 +572,39 @@ const FIRES = [
 function rgbStr(hex) { return `${parseInt(hex.slice(1, 3), 16)},${parseInt(hex.slice(3, 5), 16)},${parseInt(hex.slice(5, 7), 16)}`; }
 function fireOf(i) { const f = FIRES[i] || FIRES[0]; if (!f.rainbow) return f; const h = (T * 90) % 360, a = hslHex(h, 100, 78), b = hslHex(h, 100, 56), c = hslHex(h, 100, 36); return Object.assign({}, f, { a: rgbStr(a), b: rgbStr(b), c: rgbStr(c), fl: [hslHex(h, 100, 94), a, b], ball: b, glow: rgbStr(b) }); }
 function rexLook(wi) { const sk = SKINS[save.equip.skin] || SKINS[0], h = HATS[save.equip.hat] || HATS[0], jungle = wi === 0 && !sk.body; return { dive: wi === 6, rainbow: sk.rainbow, body: jungle ? '#22a98c' : sk.body, dark: jungle ? '#167a68' : sk.dark, belly: sk.belly, hat: h.k || (wi === 2 || wi === 4 || wi === 7 ? 'santa' : null) }; }
-const WHO = { goetti: 'Goetti', chili: 'Chili', rex: () => save.rexName || 'T-Rex', mami: 'Mamasaurus', papi: 'Papasaurus', fabio: 'Fabiosaurus', kiwi: 'Kiwi' };
+const WHO = { goetti: 'Goetti', chili: 'Chili', rex: () => save.rexName || 'T-Rex', mami: 'Mamasaurus', papi: 'Papasaurus', fabio: () => save.fabioName || 'Fabio', kiwi: 'Kiwi' };
 
 // =====================================================================
 // Character drawing
 // =====================================================================
+const KID = { // outfits: Oli in red with a green scarf, Fabio in yellow with a blue scarf
+  oli: { pants: '#2f5aa8', knee: '#4f7ac2', scarf: '#2e9e5b', scarfD: 'rgba(15,70,35,.5)', jac: ['#f26a5e', '#e0473c', '#a82e26'], zip: '#ffd34d', pocket: 'rgba(120,20,20,.55)' },
+  fabio: { pants: '#3b4f8f', knee: '#5a6eb0', scarf: '#2f8fd6', scarfD: 'rgba(15,50,100,.5)', jac: ['#ffd65c', '#f5b324', '#c2800e'], zip: '#fff4c8', pocket: 'rgba(140,80,0,.55)' },
+};
 function drawOli(x, y, ph, hat, o = {}) {
   ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  const K = KID[o.kid || 'oli'];
   const vy = clamp((o.vy || 0) / 900, -1, 1), flutter = Math.sin(ph - 1.3) * 3 - vy * 6;
   // legs: thigh, knee, shin, boot - the knee swings with the stride
   const kx = x + 9 + Math.sin(ph) * 2.5, ky = y + 6, fx = x + 5 + Math.sin(ph + 0.8) * 3, fy = y + 18;
-  ctx.strokeStyle = '#2f5aa8'; ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(x - 1, y - 4); ctx.lineTo(kx, ky); ctx.lineTo(fx, fy); ctx.stroke();
+  ctx.strokeStyle = K.pants; ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(x - 1, y - 4); ctx.lineTo(kx, ky); ctx.lineTo(fx, fy); ctx.stroke();
   ctx.strokeStyle = 'rgba(255,255,255,.22)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x - 3, y - 3); ctx.lineTo(kx - 3, ky - 1); ctx.lineTo(fx - 2, fy - 4); ctx.stroke();
-  ell(kx + 0.5, ky, 3.4, 2.6, 0.3, '#4f7ac2'); ctx.strokeStyle = 'rgba(20,40,90,.5)'; ctx.lineWidth = 0.7; ctx.beginPath(); ctx.moveTo(kx - 2, ky - 1); ctx.lineTo(kx + 3, ky + 1); ctx.stroke();
+  ell(kx + 0.5, ky, 3.4, 2.6, 0.3, K.knee); ctx.strokeStyle = 'rgba(20,40,90,.5)'; ctx.lineWidth = 0.7; ctx.beginPath(); ctx.moveTo(kx - 2, ky - 1); ctx.lineTo(kx + 3, ky + 1); ctx.stroke();
   ell(fx + 2, fy + 1, 5.8, 3.4, 0.1, '#5a3416'); ell(fx + 2, fy + 3.2, 6, 1.4, 0.1, '#efe6d2'); ell(fx + 0.5, fy - 0.5, 2.6, 1.2, 0.2, 'rgba(255,255,255,.28)'); ctx.strokeStyle = '#efe6d2'; ctx.lineWidth = 0.8; ctx.beginPath(); ctx.moveTo(fx + 2, fy - 1.6); ctx.lineTo(fx + 4.5, fy - 0.8); ctx.moveTo(fx + 0.6, fy - 1.4); ctx.lineTo(fx + 3, fy - 0.4); ctx.stroke();
   // scarf tail streaming behind
-  ctx.fillStyle = '#2e9e5b'; ctx.beginPath(); ctx.moveTo(x - 8, y - 30); ctx.quadraticCurveTo(x - 20, y - 31 + flutter * 0.5, x - 27, y - 26 + flutter); ctx.lineTo(x - 25, y - 21 + flutter); ctx.quadraticCurveTo(x - 17, y - 24 + flutter * 0.4, x - 8, y - 24); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = K.scarf; ctx.beginPath(); ctx.moveTo(x - 8, y - 30); ctx.quadraticCurveTo(x - 20, y - 31 + flutter * 0.5, x - 27, y - 26 + flutter); ctx.lineTo(x - 25, y - 21 + flutter); ctx.quadraticCurveTo(x - 17, y - 24 + flutter * 0.4, x - 8, y - 24); ctx.closePath(); ctx.fill();
   // torso
-  rr(x - 10, y - 28, 20, 28, 7); ctx.fillStyle = hgrad(x - 10, x + 10, '#f26a5e', '#e0473c', '#a82e26'); ctx.fill();
-  ctx.fillStyle = '#ffd34d'; ctx.fillRect(x - 1, y - 26, 2, 22);
+  rr(x - 10, y - 28, 20, 28, 7); ctx.fillStyle = hgrad(x - 10, x + 10, ...K.jac); ctx.fill();
+  ctx.fillStyle = K.zip; ctx.fillRect(x - 1, y - 26, 2, 22);
   rr(x - 10, y - 6, 20, 5, 2); ctx.fillStyle = '#5a3416'; ctx.fill(); rr(x - 3, y - 6.6, 6, 6.2, 1.2); ctx.fillStyle = '#e8c04a'; ctx.fill(); ctx.strokeStyle = '#8a6a1a'; ctx.lineWidth = 0.7; ctx.stroke();
-  rr(x + 3, y - 17, 6, 5, 1.4); ctx.strokeStyle = 'rgba(120,20,20,.55)'; ctx.lineWidth = 1; ctx.stroke(); circle(x + 0.2, y - 23.5, 1.1, '#fff0b0');
-  rr(x - 11, y - 32, 22, 7, 3.5); ctx.fillStyle = '#2e9e5b'; ctx.fill(); ctx.strokeStyle = 'rgba(15,70,35,.5)'; ctx.lineWidth = 0.8; ctx.beginPath(); ctx.moveTo(x - 8, y - 29.5); ctx.lineTo(x + 8, y - 29); ctx.moveTo(x - 7, y - 27.5); ctx.lineTo(x + 7, y - 27.2); ctx.stroke();
-  ctx.strokeStyle = '#2e9e5b'; ctx.lineWidth = 1.4; for (let i = 0; i < 3; i++) { const py = y - 25.5 + flutter + i * 2.4; ctx.beginPath(); ctx.moveTo(x - 26 + i * 0.3, py); ctx.lineTo(x - 30 + i * 0.3, py + 1 + flutter * 0.1); ctx.stroke(); }
-  // arm holding the rein
-  const hy = y - 15 + Math.sin(ph) * 1.5, hx = x + 17;
-  ctx.strokeStyle = '#7a4a22'; ctx.lineWidth = 2.2; ctx.beginPath(); ctx.moveTo(hx + 1, hy); ctx.quadraticCurveTo(x + 28, y + 4 + Math.sin(ph) * 2, x + 40, y + 1); ctx.stroke();
-  ctx.strokeStyle = '#e0473c'; ctx.lineWidth = 6.5; ctx.beginPath(); ctx.moveTo(x + 4, y - 21); ctx.lineTo(x + 12, y - 12 + Math.sin(ph) * 1.5); ctx.lineTo(hx, hy); ctx.stroke();
+  rr(x + 3, y - 17, 6, 5, 1.4); ctx.strokeStyle = K.pocket; ctx.lineWidth = 1; ctx.stroke(); circle(x + 0.2, y - 23.5, 1.1, '#fff0b0');
+  rr(x - 11, y - 32, 22, 7, 3.5); ctx.fillStyle = K.scarf; ctx.fill(); ctx.strokeStyle = K.scarfD; ctx.lineWidth = 0.8; ctx.beginPath(); ctx.moveTo(x - 8, y - 29.5); ctx.lineTo(x + 8, y - 29); ctx.moveTo(x - 7, y - 27.5); ctx.lineTo(x + 7, y - 27.2); ctx.stroke();
+  ctx.strokeStyle = K.scarf; ctx.lineWidth = 1.4; for (let i = 0; i < 3; i++) { const py = y - 25.5 + flutter + i * 2.4; ctx.beginPath(); ctx.moveTo(x - 26 + i * 0.3, py); ctx.lineTo(x - 30 + i * 0.3, py + 1 + flutter * 0.1); ctx.stroke(); }
+  if (o.front) o.front(); // whoever sits in front goes between the body and the arm, so the arm wraps round them
+  // arm holding the rein (Fabio holds on to the saddle horn instead)
+  const hy = y - 15 + Math.sin(ph) * 1.5 + (o.hold ? 5 : 0), hx = x + (o.hold ? 14 : 17);
+  if (!o.hold) { ctx.strokeStyle = '#7a4a22'; ctx.lineWidth = 2.2; ctx.beginPath(); ctx.moveTo(hx + 1, hy); ctx.quadraticCurveTo(x + 28, y + 4 + Math.sin(ph) * 2, x + 40, y + 1); ctx.stroke(); }
+  ctx.strokeStyle = K.jac[1]; ctx.lineWidth = 6.5; ctx.beginPath(); ctx.moveTo(x + 4, y - 21); ctx.lineTo(x + 12, y - 12 + Math.sin(ph) * 1.5); ctx.lineTo(hx, hy); ctx.stroke();
   rr(hx - 4.5, hy - 4.4, 6, 5, 2); ctx.fillStyle = '#ffe9a8'; ctx.fill();
   circle(hx + 1, hy, 4, '#f4cfa6'); ell(hx + 3.4, hy - 2.4, 1.6, 1.1, 0.5, '#f4cfa6'); ctx.strokeStyle = 'rgba(160,100,60,.5)'; ctx.lineWidth = 0.6; ctx.beginPath(); ctx.moveTo(hx + 1, hy + 1); ctx.lineTo(hx + 4, hy + 1.4); ctx.stroke();
   // head: blond curls (back), face, ear, fringe curls, face details
@@ -767,10 +773,12 @@ function drawRex(x, y, s, ph, jaw, o = {}) {
   else { rexLeg(6, ph, body, dark, o.air, true); ell(-2, -56, 7, 10, 0.25, 'rgba(255,255,255,.16)'); }
   if (o.fire) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; const fl = 0.55 + 0.35 * Math.sin(T * 17) + 0.1 * Math.sin(T * 41), fc = fireOf(save.equip.fire || 0); const g = ctx.createRadialGradient(108, -96, 2, 108, -96, 40); g.addColorStop(0, `rgba(255,255,255,${0.6 * fl})`); g.addColorStop(0.3, `rgba(${fc.a},${fl})`); g.addColorStop(1, `rgba(${fc.b},0)`); ctx.fillStyle = g; ctx.fillRect(68, -136, 80, 80); ell(104, -96, 22, 2.6 + jaw * 6, 0.02, `rgba(${fc.a},${fl})`); ctx.restore(); }
   if (o.rider) {
-    rr(-24, -96, 38, 11, 5); ctx.fillStyle = '#c0392b'; ctx.fill(); ctx.fillStyle = '#f4c542'; ctx.fillRect(-22, -87, 34, 2.5); ctx.strokeStyle = 'rgba(255,230,180,.6)'; ctx.lineWidth = 0.9; ctx.setLineDash([3, 2.5]); ctx.beginPath(); ctx.moveTo(-20, -93); ctx.lineTo(10, -93); ctx.stroke(); ctx.setLineDash([]);
+    rr(-24, -96, 48, 11, 5); ctx.fillStyle = '#c0392b'; ctx.fill(); ctx.fillStyle = '#f4c542'; ctx.fillRect(-22, -87, 34, 2.5); ctx.strokeStyle = 'rgba(255,230,180,.6)'; ctx.lineWidth = 0.9; ctx.setLineDash([3, 2.5]); ctx.beginPath(); ctx.moveTo(-20, -93); ctx.lineTo(10, -93); ctx.stroke(); ctx.setLineDash([]);
     const lean = o.duck ? 0 : (o.lean || 0) + (o.air ? (vyn < 0 ? 0.12 : -0.08) : 0) - (jaw > 0.5 ? 0.16 : 0) - hurt * 0.3;
     ctx.save(); if (o.duck) { ctx.translate(-4, -86); ctx.rotate(0.9); } else { ctx.translate(-4, -92); ctx.rotate(lean); } ctx.scale(1.15, 1.15);
-    drawOli(0, 0, ph, o.hat, { vy: o.vy, dive: o.dive }); ctx.restore();
+    // Fabio sits in front of Oli, smaller; Oli's rein arm wraps round him
+    const fab = () => { ctx.save(); ctx.translate(23, 10); ctx.scale(0.7, 0.7); drawOli(0, 0, ph + 0.6, o.hat, { vy: o.vy, dive: o.dive, kid: 'fabio', hold: true }); ctx.restore(); };
+    drawOli(0, 0, ph, o.hat, { vy: o.vy, dive: o.dive, front: fab }); ctx.restore();
   }
   ctx.restore(); ctx.globalAlpha = 1;
 }
@@ -1141,7 +1149,7 @@ function drawPortrait(who, cx, cy, r, still) {
   else if (who === 'rex') { const s = r / 42; drawRex(cx - 88 * s, cy + 104 * s, s * 0.95, 0, 0.3 + 0.2 * Math.sin(T * 8)); }
   else if (who === 'mami' || who === 'papi') { const s = r / 34; drawLongneck(cx - 72 * s, cy + 146 * s, s, who === 'mami' ? '#b07cc6' : '#4f8fd6', T * 2); }
   else if (who === 'kiwi') { const s = r / 22; drawKiwi(cx - 16 * s, cy + 22 * s, s, T * 6); }
-  else if (who === 'fabio') { const s = r / 26; drawTrike(cx - 36 * s, cy + 36 * s, s, '#f39c34', 0); }
+  else if (who === 'fabio') { const k = r / 21; ctx.save(); ctx.translate(cx - 8 * k, cy + 44 * k); ctx.scale(k, k); drawOli(0, 0, 0.5, null, { kid: 'fabio', hold: true }); ctx.restore(); }
   ctx.restore();
   ctx.lineWidth = 4; ctx.strokeStyle = '#6b4a2b'; ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke();
 }
@@ -2329,13 +2337,14 @@ function go(s) {
   if (scene === 'shop' && s !== 'shop' && save.newGifts.length) { save.newGifts = []; writeSave(); }
   scene = s; shopConfirm = null; endlessPick = false; doorOverlay = null; parentMode = false; titlePress = 0; fadeT = 1; if (s === 'shop') { shopTab = 0; shopPage = 0; shopSel = save.equip.skin; shopTalk = { t: 4, text: 'Willkommen! Such dir etwas aus.' }; } parts = []; dialog = null; toasts = [];
   if (s === 'map' && save.masterNew && save.treasureNew < 0 && !save.afterNew) { save.masterNew = 0; writeSave(); mapFW = 9; SFX.right(); startDialog([
-    { who: 'goetti', text: 'Unglaublich, {oli}! Alle 72 Medaillen! Du bist der grösste Dino-Meister der Welt!' },
-    { who: 'mami', text: 'Wir sind so stolz auf dich, {oli}!' },
+    { who: 'goetti', text: 'Unglaublich, {oli} und {fabio}! Alle 72 Medaillen! Ihr seid die grössten Dino-Meister der Welt!' },
+    { who: 'fabio', text: 'Wir sind Meister! Wir sind Meister!' },
+    { who: 'mami', text: 'Wir sind so stolz auf euch zwei!' },
     { who: 'papi', text: 'Und {rex} strahlt wie Gold!' },
     { who: 'goetti', text: 'Dafür habe ich etwas ganz Besonderes: den Dino-Meister-Anzug und die Meister-Krone. {rex} trägt sie schon – im Laden kannst du sie jederzeit wechseln!' },
   ]); }
   if (s === 'map' && save.afterNew > 0 && save.treasureNew < 0) { const d = save.afterNew; save.afterNew = 0; writeSave(); startDialog(DAY_AFTER[d] || [], () => { if (d === 6 || d === 12 || d === 18) { tmapNew = d / 6 - 1; go('tmap'); } }); }
-  if (s === 'map' && save.treasureNew >= 0) { const k = save.treasureNew; save.treasureNew = -1; writeSave(); chestPop[k] = 1; startDialog([{ who: k === 3 ? 'kiwi' : 'goetti', text: k === 3 ? 'Kiwi! Kiwi! (Kiwi hüpft vor Freude.)' : TREASURES[k].line }].concat(k === 3 ? [{ who: 'goetti', text: TREASURES[3].line }] : []), () => { if (chestFull() && !save.chestSeen) { save.chestSeen = 1; writeSave(); startDialog([{ who: 'goetti', text: 'Meine Schatzkiste ist wieder voll! Gitarre, Velo, Angel und Kiwi – danke, {oli}!' }, { who: 'kiwi', text: 'Kiwi! Kiwi! (Kiwi macht einen Freudentanz.)' }], () => chestParty()); } }); }
+  if (s === 'map' && save.treasureNew >= 0) { const k = save.treasureNew; save.treasureNew = -1; writeSave(); chestPop[k] = 1; startDialog([{ who: k === 3 ? 'kiwi' : 'goetti', text: k === 3 ? 'Kiwi! Kiwi! (Kiwi hüpft vor Freude.)' : TREASURES[k].line }].concat(k === 3 ? [{ who: 'goetti', text: TREASURES[3].line }] : []), () => { if (chestFull() && !save.chestSeen) { save.chestSeen = 1; writeSave(); startDialog([{ who: 'goetti', text: 'Meine Schatzkiste ist wieder voll! Gitarre, Velo, Angel und Kiwi – danke, ihr zwei!' }, { who: 'kiwi', text: 'Kiwi! Kiwi! (Kiwi macht einen Freudentanz.)' }], () => chestParty()); } }); }
 }
 
 function startLevel(arg, endless) { // endless: arg = theme index. otherwise arg = calendar level index 0..23
@@ -2348,7 +2357,7 @@ function startLevel(arg, endless) { // endless: arg = theme index. otherwise arg
     chili: { wx: 95, y: GROUND, ph: 0, dig: null, digT: 0 }, cp: 200, rings: [],
     boss: null, bossStarted: false, golden: null, gotGolden: false, atGate: false, gateT: 0, gateOpening: false, gateOpen: 0, finished: false,
     coach: null, flyEggs: [], slotPop: [0, 0, 0], hitFlash: 0, endless: !!endless, score: 0, heartAt: 500, tier: 1 };
-  if (!endless) { G.chiliSay = { text: fmt('Los geht\'s, {oli}!'), t: 2.6 }; G.chiliCd = 4; }
+  if (!endless) { G.chiliSay = { text: fmt('Los geht\'s, ihr zwei!'), t: 2.6 }; G.chiliCd = 4; }
   if (endless) { G.tip = { text: 'Endlos-Lauf! Es wird immer schneller und gefährlicher. Alle 500 Punkte gibt es ein Herz zurück.', t: 5 }; G.startT = 1.2; }
 }
 
@@ -2447,7 +2456,7 @@ function hurt(force) {
   p.hearts--; p.hitT = 0.45; G.hits = (G.hits || 0) + 1; p.inv = 1.8; SFX.hurt(); G.shake = p.hearts <= 0 ? 0 : 0.35; G.hitFlash = 0.45;
   try { if (navigator.vibrate) navigator.vibrate(180); } catch (e) {}
   if (!force) p.vy = Math.min(p.vy, -450);
-  chiliSay(pick(['Aua! Nicht aufgeben!', 'Weiter geht\'s, {oli}!', 'Du schaffst das!']), true);
+  chiliSay(pick(['Aua! Nicht aufgeben!', 'Weiter geht\'s, ihr zwei!', 'Du schaffst das!']), true);
   if (p.hearts <= 0) { if (G.endless) endRun(); else G.overlay = { type: 'retry' }; }
 }
 function endRun() {
@@ -2645,7 +2654,7 @@ function updatePlay(dt) {
     G.score = Math.max(G.score, Math.floor((p.wx - 200) / 25) + G.amber * 3); if (G.score >= G.heartAt) { G.heartAt += 500; if (p.hearts < 3) { p.hearts++; SFX.power(); toast('Ein Herz zurück!', '#ff8a9a'); } else toast(G.score + ' Punkte!', '#ffe08a'); } }
   // tips, checkpoints
   for (const t of L.tips) if (!t.shown && p.wx >= t.x) { t.shown = true; G.tip = { text: t.text, t: 6.5 }; }
-  for (const c of L.cps) if (!c.on && p.wx >= c.x) { c.on = true; G.cp = c.x; SFX.flag(); chiliSay(pick(['Fähnchen! Weiter so!', 'Pfoten hoch, {oli}!', 'Prima, das war stark!'])); if (p.hearts < 3) { p.hearts++; toast('Fähnchen erreicht – ein Herz zurück!', '#ff8a9a'); } else toast('Fähnchen erreicht!', '#ffe08a'); }
+  for (const c of L.cps) if (!c.on && p.wx >= c.x) { c.on = true; G.cp = c.x; SFX.flag(); chiliSay(pick(['Fähnchen! Weiter so!', 'Pfoten hoch, ihr zwei!', 'Prima, das war stark!'])); if (p.hearts < 3) { p.hearts++; toast('Fähnchen erreicht – ein Herz zurück!', '#ff8a9a'); } else toast('Fähnchen erreicht!', '#ffe08a'); }
   // amber
   for (const a of L.amb) if (!a.got && Math.abs(a.x - p.wx - 10) < 42 && Math.abs(a.y - (p.y - 50)) < 62) { a.got = true; G.amber++; G.combo = G.t - (G.lastAmb || -9) < 0.6 ? Math.min(G.combo + 1, 8) : 0; G.lastAmb = G.t; if (G.combo > 0) tone(880 * Math.pow(1.0595, G.combo * 2), 0.12, 'triangle', 0.1); else SFX.amber(); burst(a.x, a.y, 6, ['#ffd166', '#ff9f1c'], 150, 200, 4, 0.4); }
   // eggs
@@ -3352,11 +3361,10 @@ function drawFamilyCliff(L, cam) {
   const hop = i => cheer ? Math.abs(Math.sin(T * 7 + i)) * 10 : 0;
   oLong(x0 + 200, 232 - hop(0), 0.62, '#b07cc6', T * 3, false);
   oLong(x0 + 340, 232 - hop(1), 0.68, '#4f8fd6', T * 3 + 1, false);
-  oTrike(x0 + 450, 232 - hop(2), 0.9, '#f39c34', 0, false);
   const lbl = (s, x) => { setFont(14); const w = ctx.measureText(s).width + 14; rr(x - w / 2, 242, w, 20, 10); ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.fill(); txt(s, x, 252, 14, '#3b2410'); };
-  lbl('Mamasaurus', x0 + 180); lbl('Papasaurus', x0 + 320); lbl('Fabiosaurus', x0 + 450);
+  lbl('Mamasaurus', x0 + 180); lbl('Papasaurus', x0 + 320);
   if (cheer) {
-    const lines = [[fmt('Los, {oli}!'), x0 + 240, 96], [fmt('Du schaffst das, {rex}!'), x0 + 390, 84], [fmt('{oli}! {oli}! {oli}!'), x0 + 480, 112]];
+    const lines = [[fmt('Los, {oli}!'), x0 + 200, 96], [fmt('Du schaffst das, {rex}!'), x0 + 390, 84], [fmt('Brüll, {fabio}, brüll!'), x0 + 470, 118]];
     lines.forEach(([s, x, y], i) => { if (Math.sin(T * 1.5 + i * 2.1) > -0.2) { setFont(18); const w = ctx.measureText(s).width + 20; rr(x - w / 2, y - 16, w, 32, 14); ctx.fillStyle = '#fff'; ctx.fill(); txt(s, x, y, 18, '#3b2410'); } });
   }
 }
@@ -3796,49 +3804,61 @@ function drawTitle() {
   oRex(280, GROUND, 1.3, T * 13, 0.12 + 0.12 * Math.sin(T * 2), Object.assign(rexLook(0), { rider: true }));
   if (save.babyName) oBaby(120, GROUND - Math.abs(Math.sin(T * 10)) * 9, 1, T * 10);
   drawAmbient(0); drawForeground(0, cam); vignette(0);
-  logo(W / 2, 110);
+  logo(W / 2, 96);
   otxt(save.rexName ? `Ein Abenteuer mit ${save.rexName} und Chili` : 'Ein Abenteuer mit Chili und einem T-Rex', W / 2, 178, 26, '#fff', 'rgba(0,0,0,.7)', 6);
   { const pu = 1 + 0.04 * Math.sin(T * 4); ctx.save(); ctx.translate(722, 312); ctx.scale(pu, pu); rr(-170, -34, 340, 68, 34); ctx.fillStyle = 'rgba(20,40,20,.35)'; ctx.fill(); rr(-174, -38, 340, 68, 34); ctx.fillStyle = vgrad(-38, 30, '#ffe27a', '#ff9a2a'); ctx.fill(); ctx.lineWidth = 5; ctx.strokeStyle = '#2a1200'; ctx.stroke(); ctx.fillStyle = '#3b1d00'; ctx.beginPath(); ctx.moveTo(-146, -13); ctx.lineTo(-146, 13); ctx.lineTo(-124, 0); ctx.fill(); txt('Tippe zum Starten', 20, -2, 26, '#3b1d00'); ctx.restore(); }
-  txt('Ein Weihnachtsgeschenk von Goetti · 2026', W / 2, 515, 17, 'rgba(255,255,255,.75)');
+  txt('Ein Weihnachtsgeschenk von Goetti für Oli und Fabio · 2026', W / 2, 515, 17, 'rgba(255,255,255,.75)');
 }
 function logo(cx, cy) {
   ctx.save(); ctx.translate(cx, cy); ctx.rotate(-0.03);
-  const t = 'Olis Dino-Rettung'; setFont(78); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
-  ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fillText(t, 4, 9);
-  ctx.strokeStyle = '#2a1200'; ctx.lineWidth = 18; ctx.strokeText(t, 0, 0);
-  ctx.strokeStyle = '#ff8a1f'; ctx.lineWidth = 8; ctx.strokeText(t, 0, 0);
-  ctx.fillStyle = vgrad(-34, 34, '#fff6b0', '#ffd34d', '#f08a1a'); ctx.fillText(t, 0, 0);
-  ctx.save(); ctx.beginPath(); ctx.rect(-400, -40, 800, 30); ctx.clip(); ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.fillText(t, 0, 0); ctx.restore();
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
+  const line = (t, sz, y) => { // two lines: the boys' names small on top, the title big below
+    setFont(sz); const k = sz / 78;
+    ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fillText(t, 4 * k, y + 9 * k);
+    ctx.strokeStyle = '#2a1200'; ctx.lineWidth = 18 * k; ctx.strokeText(t, 0, y);
+    ctx.strokeStyle = '#ff8a1f'; ctx.lineWidth = 8 * k; ctx.strokeText(t, 0, y);
+    ctx.fillStyle = vgrad(y - 34 * k, y + 34 * k, '#fff6b0', '#ffd34d', '#f08a1a'); ctx.fillText(t, 0, y);
+    ctx.save(); ctx.beginPath(); ctx.rect(-480, y - 40 * k, 960, 30 * k); ctx.clip(); ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.fillText(t, 0, y); ctx.restore();
+  };
+  line('Oli & Fabios', 52, -38); line('Dino-Abenteuer', 76, 18);
   for (let i = 0; i < 4; i++) { const a = 0.5 + 0.5 * Math.sin(T * 3 + i * 1.7), px = [-300, -90, 150, 320][i], py = [-38, 34, -40, 30][i]; ctx.globalAlpha = a; ctx.fillStyle = '#fff'; ctx.beginPath(); for (let k = 0; k < 8; k++) { const ang = k / 8 * Math.PI * 2, r = k % 2 ? 2.5 : 10; ctx.lineTo(px + Math.cos(ang) * r, py + Math.sin(ang) * r); } ctx.fill(); }
   ctx.globalAlpha = 1; ctx.restore();
 }
-function pressTitle() { tryFullscreen(); if (!save.rexName) startStory(); else go('map'); }
+function pressTitle() {
+  tryFullscreen();
+  if (!save.rexName) startStory();
+  else if (!save.fabioName) { go('story'); startDialog([{ who: 'goetti', text: 'Neu im Team: Fabio! Ab jetzt reitet ihr zu zweit auf {rex}.' }], () => askName('Wie soll Fabios Forschername sein?', 'Fabio', name => { save.fabioName = name; writeSave(); go('map'); }, null, true), true); }
+  else go('map');
+}
 
 function startStory() {
   go('story');
   const rexPart = () => startDialog([
-    { who: 'goetti', text: 'Zum Glück hast du einen starken Freund: einen jungen T-Rex! Aber er hat noch keinen Namen…' },
-  ], () => askName('Wie soll dein T-Rex heissen?', 'Rexi', name => {
+    { who: 'goetti', text: 'Zum Glück habt ihr einen starken Freund: einen jungen T-Rex! Er ist so gross, dass ihr zu zweit auf ihm reiten könnt. Aber er hat noch keinen Namen…' },
+  ], () => askName('Wie soll euer T-Rex heissen?', 'Rexi', name => {
     save.rexName = name; writeSave();
     startDialog([
       { who: 'rex', text: 'ROOOAAARRR! ({rex} gefällt der Name!)' },
+      { who: 'goetti', text: '{oli} sitzt hinten und hält die Zügel. {fabio} sitzt vorne und hält sich gut fest.' },
+      { who: 'fabio', text: 'Hü, {rex}, hü!' },
       { who: 'goetti', text: '{rex} – super Name! Und Chili kommt auch mit. Mit der Hasennase findet Chili jedes versteckte Ei!' },
       { who: 'chili', text: 'Schnupper, schnupper… Chili ist bereit!' },
       { who: 'goetti', text: 'Jeden Tag bis Weihnachten öffnet sich eine neue Tür in meinem Adventskalender – hinter jeder wartet ein Abenteuer! Und am Schluss warten der Krallenkönig und das goldene Ei. Los geht\'s!' },
     ], () => go('map'), true);
   }), true);
   const missionPart = () => startDialog([
-    { who: 'goetti', text: 'Willkommen im Team, {oli}! Heute Nacht hat der Vulkan gebebt – und alle meine Dino-Eier sind davongerollt!' },
+    { who: 'goetti', text: 'Willkommen im Team, {oli} und {fabio}! Heute Nacht hat der Vulkan gebebt – und alle meine Dino-Eier sind davongerollt!' },
     { who: 'goetti', text: 'Und das Schlimmste: Auch das goldene Ei meiner Nachbarn, der Dino-Familie, ist verschwunden!' },
-    { who: 'fabio', text: '(Funkspruch) Hilfe! Der Krallenkönig hat das Ei geklaut! Er ist riesig und hat ganz scharfe Krallen!' },
-    { who: 'goetti', text: 'Ich brauche den mutigsten Dino-Forscher der Welt. Und das bist DU, {oli}!' },
+    { who: 'mami', text: '(Funkspruch) Hilfe! Der Krallenkönig hat unser Ei geklaut! Er ist riesig und hat ganz scharfe Krallen!' },
+    { who: 'goetti', text: 'Ich brauche die mutigsten Dino-Forscher der Welt. Und das seid IHR zwei!' },
   ], rexPart, true);
-  if (save.oliName) { if (save.rexName) go('map'); else missionPart(); return; }
+  const fabioPart = () => askName('Und wie soll Fabios Forschername sein?', 'Fabio', name => { save.fabioName = name; writeSave(); missionPart(); }, null, true);
+  if (save.oliName) { if (!save.fabioName) fabioPart(); else if (save.rexName) go('map'); else missionPart(); return; }
   startDialog([
-    { who: 'goetti', text: 'Hallo Oli! Hier ist Goetti, aus meiner Dino-Forschungsstation in Neuseeland – direkt am grossen Vulkan.' },
+    { who: 'goetti', text: 'Hallo Oli, hallo Fabio! Hier ist Goetti, aus meiner Dino-Forschungsstation in Neuseeland – direkt am grossen Vulkan.' },
     { who: 'goetti', text: 'Bei uns am anderen Ende der Welt ist alles etwas anders – sogar die Vögel: Unsere Kiwis können nicht fliegen!' },
-    { who: 'goetti', text: 'Du wirst ab heute ein richtiger Dino-Forscher! Dafür darfst du dir einen Forschernamen aussuchen – du kannst Oli bleiben oder dir etwas ganz Neues ausdenken.' },
-  ], () => askName('Wie soll dein Forschername sein?', 'Oli', name => { save.oliName = name; writeSave(); missionPart(); }, null, true), true);
+    { who: 'goetti', text: 'Ihr zwei werdet ab heute richtige Dino-Forscher! Dafür darf sich jeder einen Forschernamen aussuchen – ihr könnt Oli und Fabio bleiben oder euch etwas ganz Neues ausdenken.' },
+  ], () => askName('Wie soll Olis Forschername sein?', 'Oli', name => { save.oliName = name; writeSave(); fabioPart(); }, null, true), true);
 }
 function drawNZFlag(x, y, w, h, t, pole = 70) { // flag on a pole, waving a little, with cloth shading and a gold finial
   ctx.save(); ctx.translate(x, y);
@@ -4487,7 +4507,7 @@ function drawShop() {
   oGoetti(62, 420, 0.95, shopTalk.t > 0); shopCounter();
   if (shopTalk.t > 0 || true) { shopTalk.t = Math.max(0, shopTalk.t - DT); const lines = wrapLines(shopTalk.text, 230, 18); const bh = 20 + lines.length * 22; rr(20, 215 - bh + 10, 262, bh, 14); ctx.fillStyle = '#fffaf0'; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = '#6b4a2b'; ctx.stroke(); ctx.fillStyle = '#fffaf0'; ctx.beginPath(); ctx.moveTo(52, 225); ctx.lineTo(76, 225); ctx.lineTo(70, 252); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.fillRect(54, 223, 20, 4); lines.forEach((l, i) => txt(l, 151, 215 - bh + 32 + i * 22, 18, '#3b2410', 'center', 'normal')); }
   // tabs
-  SHOP_TABS.forEach(([lb], i) => button(lb, 440 + i * 168, 118, 160, 44, () => { shopTab = i; shopPage = 0; shopSel = save.equip[SHOP_TABS[i][1]]; shopSay(i === 0 ? 'Welche Farbe darf es sein?' : i === 1 ? 'Ein Hut für Oli?' : 'Feuer in allen Farben!'); }, { size: 22, color: i === shopTab ? '#ffd34d' : '#d9c9a0' }));
+  SHOP_TABS.forEach(([lb], i) => button(lb, 440 + i * 168, 118, 160, 44, () => { shopTab = i; shopPage = 0; shopSel = save.equip[SHOP_TABS[i][1]]; shopSay(i === 0 ? 'Welche Farbe darf es sein?' : i === 1 ? 'Ein Hut für euch zwei?' : 'Feuer in allen Farben!'); }, { size: 22, color: i === shopTab ? '#ffd34d' : '#d9c9a0' }));
   // item cards: 8 per page (4 x 2), gifts from the calendar show the door they come from
   const PER = 8, pages = Math.ceil(list.length / PER); shopPage = clamp(shopPage, 0, pages - 1);
   list.forEach((it, i) => {
@@ -4932,11 +4952,11 @@ function startEnding() {
   go('ending');
   E = { phase: 'talk', taps: 0, wob: 0, hatchT: 0, fw: 0, asked: false };
   startDialog([
-    { who: 'goetti', text: '{oli}, {rex}, Chili – ihr habt es geschafft! Alle Eier sind wieder sicher in der Station.' },
+    { who: 'goetti', text: '{oli}, {fabio}, {rex}, Chili – ihr habt es geschafft! Alle Eier sind wieder sicher in der Station.' },
     { who: 'goetti', text: 'Der Krallenkönig ist weit weggeflogen. Ich glaube, er wollte das Ei nur wärmen – in seiner Höhle war es so kalt.' },
-    { who: 'goetti', text: 'Und schaut mal, wer zum Feiern gekommen ist: Mamasaurus, Papasaurus und Fabiosaurus!' },
+    { who: 'goetti', text: 'Und schaut mal, wer zum Feiern gekommen ist: Mamasaurus und Papasaurus!' },
     { who: 'fabio', text: '{oli}! {oli}! Das goldene Ei wackelt!!' },
-    { who: 'goetti', text: 'Tatsächlich! Tippe ganz oft auf das Ei, {oli} – hilf dem Baby beim Schlüpfen!' },
+    { who: 'goetti', text: 'Tatsächlich! Tippt ganz oft auf das Ei – helft dem Baby beim Schlüpfen!' },
   ], () => { E.phase = 'tap'; }, true);
 }
 function tapEgg() {
@@ -4946,16 +4966,16 @@ function tapEgg() {
 function treasureLines() {
   const n = save.treasures.reduce((a, b) => a + b, 0), L = [];
   if (save.treasures[3]) L.push({ who: 'kiwi', text: 'Kiwi! Kiwi! (Kiwi will auch mitfeiern.)' });
-  if (n === 4) L.push({ who: 'goetti', text: 'Und dank dir habe ich meine Gitarre, mein Velo, meine Angel – und Kiwi wieder! Das beste Weihnachten überhaupt!' });
-  else if (n > 0) L.push({ who: 'goetti', text: 'Ein paar meiner verlorenen Sachen hast du auch gefunden – danke! Vielleicht entdeckst du ja noch den Rest …' });
-  else L.push({ who: 'goetti', text: 'Meine Gitarre, mein Velo, meine Angel und mein Kiwi sind leider noch irgendwo da draussen … Vielleicht findest du sie ja!' });
+  if (n === 4) L.push({ who: 'goetti', text: 'Und dank euch habe ich meine Gitarre, mein Velo, meine Angel – und Kiwi wieder! Das beste Weihnachten überhaupt!' });
+  else if (n > 0) L.push({ who: 'goetti', text: 'Ein paar meiner verlorenen Sachen habt ihr auch gefunden – danke! Vielleicht entdeckt ihr ja noch den Rest …' });
+  else L.push({ who: 'goetti', text: 'Meine Gitarre, mein Velo, meine Angel und mein Kiwi sind leider noch irgendwo da draussen … Vielleicht findet ihr sie ja!' });
   return L;
 }
 function afterBabyName() {
   startDialog([
     { who: 'mami', text: '{baby}! Was für ein wunderschöner Name!' },
     { who: 'papi', text: 'Willkommen in der Familie, {baby}!' },
-    { who: 'fabio', text: 'Darf ich {baby} auch mal streicheln? Bitte, bitte!' },
+    { who: 'fabio', text: 'Hallo {baby}! Ich bin {fabio}. Ich pass auf dich auf!' },
     { who: 'chili', text: 'Mümmel, mümmel! (Chili freut sich riesig.)' },
     ...treasureLines(),
     { who: 'goetti', text: '{baby} kommt ab jetzt bei jedem Abenteuer mit. Und jetzt: Lasst uns Weihnachten feiern!' },
@@ -4967,7 +4987,7 @@ function updateEnding(dt) {
     E.hatchT += dt;
     if (E.hatchT > 1.6 && !E.asked) {
       E.asked = true;
-      if (!save.babyName) startDialog([{ who: 'goetti', text: 'Ein Dino-Baby – mit Weihnachtsmütze! {oli}, du darfst ihm einen Namen geben.' }], () => askName('Wie soll das Dino-Baby heissen?', 'Krümel', n => { save.babyName = n; writeSave(); afterBabyName(); }), true);
+      if (!save.babyName) startDialog([{ who: 'goetti', text: 'Ein Dino-Baby – mit Weihnachtsmütze! {fabio}, du hast das Ei als Erster wackeln sehen. Du darfst ihm einen Namen geben!' }], () => askName('Wie soll das Dino-Baby heissen?', 'Krümel', n => { save.babyName = n; writeSave(); afterBabyName(); }), true);
       else afterBabyName();
     }
   }
@@ -4990,10 +5010,9 @@ function drawEnding() {
   rr(230, 425, 30, 26, 3); ctx.fillStyle = '#d63a3a'; ctx.fill(); ctx.fillStyle = '#ffd740'; ctx.fillRect(243, 425, 5, 26);
   rr(280, 432, 26, 20, 3); ctx.fillStyle = '#40a4ff'; ctx.fill(); ctx.fillStyle = '#fff'; ctx.fillRect(291, 432, 4, 20);
   // family (right)
-  for (const [sx, sw] of [[790, 50], [895, 56], [714, 34], [640, 52], [395, 24], [325, 30], [570, 20]]) shadow(sx, 454, sw, 0.18);
+  for (const [sx, sw] of [[790, 50], [895, 56], [640, 52], [395, 24], [325, 30], [570, 20]]) shadow(sx, 454, sw, 0.18);
   oLong(800, 452, 0.72, '#b07cc6', T * 2, true);
   oLong(905, 452, 0.8, '#4f8fd6', T * 2 + 1, true);
-  oTrike(720, 455 - (E.phase === 'party' ? Math.abs(Math.sin(T * 6)) * 12 : 0), 1, '#f39c34', 0, true);
   oGoetti(325, 452, 1.1, E.phase === 'party' && !save.treasures[0]);
   if (save.treasures[0]) drawGuitar(332, 372 + (E.phase === 'party' ? Math.sin(T * 8) * 2 : 0), 0.85, -1.05);
   if (save.treasures[3]) oKiwi(572, 454 - (E.phase === 'party' ? Math.abs(Math.sin(T * 9 + 1)) * 16 : 0), 1.25, T * 8, true);
@@ -5018,9 +5037,9 @@ function drawEnding() {
   drawParts(0);
   drawSnow(1);
   if (E.phase === 'party') {
-    ctx.save(); ctx.translate(W / 2, 105); ctx.rotate(Math.sin(T * 2) * 0.02);
-    otxt(fmt('Frohe Weihnachten, {oli}!'), 0, 0, 62, '#ffd34d', '#7a1010', 14); ctx.restore();
-    otxt('Alles Liebe – dein Goetti', W / 2, 165, 30, '#fff', 'rgba(0,0,0,.7)', 6);
+    ctx.save(); ctx.translate(W / 2, 82); ctx.rotate(Math.sin(T * 2) * 0.02);
+    otxt('Frohe Weihnachten,', 0, 0, 56, '#ffd34d', '#7a1010', 13); otxt(fmt('{oli} und {fabio}!'), 0, 58, 50, '#ffd34d', '#7a1010', 12); ctx.restore();
+    otxt('Alles Liebe – euer Goetti', W / 2, 190, 28, '#fff', 'rgba(0,0,0,.7)', 6);
     button('Lied nochmal', 24, 20, 180, 50, () => jingle(), { size: 20, color: '#e0d2b0' });
     button('Zur Karte', W - 204, 20, 180, 50, () => go('map'), { size: 22 });
   }
