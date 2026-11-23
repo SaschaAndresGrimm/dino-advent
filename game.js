@@ -690,33 +690,33 @@ WORLDS.push(
 );
 
 const FACTS_OLD = [
-  { name: 'T-Rex', text: 'Der T-Rex biss etwa zehnmal so fest zu wie ein Löwe – stark genug, um Knochen zu zermalmen. Seine winzigen Arme waren trotzdem sehr muskulös.' },
-  { name: 'Triceratops', text: 'Im Maul hatte der Triceratops mehrere Hundert Zähne in dichten Reihen, die ständig nachwuchsen – perfekt für zähe Pflanzen. Sein Schädel war über 2 Meter lang!' },
-  { name: 'Brachiosaurus', text: 'Der Brachiosaurus war bis zu 13 m hoch und rund 50 Tonnen schwer. Wie bei einer Giraffe waren seine Vorderbeine länger als die hinteren. Sein Herz musste das Blut bis in den Kopf hochpumpen!' },
-  { name: 'Velociraptor', text: 'Der echte Velociraptor war nur so gross wie ein Truthahn. Dass er Federn trug, weiss man von Knubbeln am Unterarmknochen, wo Federkiele festsassen. Die Film-Raptoren waren viel zu gross!' },
-  { name: 'Pteranodon', text: 'Der Pteranodon hatte keine Zähne, dafür einen langen Schnabel und einen Knochenkamm auf dem Kopf. Er war kein Dino, sondern ein Flugsaurier – seine Flügel spannten bis zu 6 Meter.' },
-  { name: 'Stegosaurus', text: 'Der Stegosaurus lebte etwa 80 Mio. Jahre vor dem T-Rex – der T-Rex lebte also zeitlich näher an uns als am Stegosaurus! Sein Gehirn war nur so gross wie eine Walnuss.' },
-  { name: 'Wollhaarmammut', text: 'Die letzten Mammuts lebten auf der Wrangelinsel noch vor rund 4000 Jahren – da standen die Pyramiden von Gizeh schon! Ihre Stosszähne wurden bis zu 4 Meter lang.' },
-  { name: 'Ankylosaurus', text: 'Der Ankylosaurus war ein wandelnder Panzer: Knochenplatten schützten Rücken, Kopf und sogar die Augenlider. Mit der Schwanzkeule konnte er einem Angreifer die Knochen brechen.' },
-  { name: 'Dino-Eier', text: 'Selbst die riesigsten Dinos legten nur Eier von der Grösse eines Fussballs – dickere Schalen hätten das Küken ersticken lassen. Das längste bekannte Dino-Ei misst über 40 cm.' },
-  { name: 'Spinosaurus', text: 'Der Spinosaurus war länger als der T-Rex. Mit krokodilartiger Schnauze, hoch sitzenden Nasenlöchern und einem paddelförmigen Schwanz jagte er wohl im Wasser nach Fischen.' },
-  { name: 'Huhn', text: 'Forscher fanden im Knochen eines T-Rex noch Eiweiss-Reste – und sie ähnelten denen eines Huhns am meisten! Alle Vögel sind lebende Dinosaurier.' },
-  { name: 'Meteorit', text: 'Der Meteorit schlug bei Chicxulub in Mexiko ein und riss einen Krater von rund 180 km. Staub verdunkelte den Himmel, Pflanzen starben. Nur kleine Tiere überlebten – auch die ersten Vögel.' },
-  { name: 'Nadelbäume', text: 'Nadelbäume gibt es seit rund 300 Mio. Jahren. Die Wollemie galt als ausgestorben, bis man 1994 in Australien lebende Bäume fand – ein Baum direkt aus der Dino-Zeit!' },
-  { name: 'Polar-Dinos', text: 'Vor 110 Mio. Jahren lag Südaustralien nahe am Südpol. Der kleine Leaellynasaura hatte grosse Augen für die Polarnacht – und seinen Namen von der Tochter der Finder.' },
-  { name: 'Federkleid', text: '1996 fand man in China den ersten Dino mit Federn – an seinem Schwanz sind sogar noch rotbraune Streifen zu erkennen! Auch der 9 m lange Yutyrannus, ein T-Rex-Verwandter, trug Federn.' },
+  { name: 'T-Rex', text: 'Der T-Rex biss etwa zehnmal so fest zu wie ein Löwe – stark genug, um Knochen zu zermalmen.|Seine winzigen Arme waren trotzdem sehr muskulös.' },
+  { name: 'Triceratops', text: 'Der Triceratops hatte mehrere Hundert Zähne, die ständig nachwuchsen.|Sie sassen in dichten Reihen – perfekt für zähe Pflanzen. Sein Schädel war über 2 Meter lang!' },
+  { name: 'Brachiosaurus', text: 'Der Brachiosaurus war bis zu 13 m hoch und rund 50 Tonnen schwer.|Wie bei einer Giraffe waren seine Vorderbeine länger als die hinteren. Sein Herz musste das Blut bis in den Kopf hochpumpen!' },
+  { name: 'Velociraptor', text: 'Der echte Velociraptor war nur so gross wie ein Truthahn.|Dass er Federn trug, weiss man von Knubbeln am Unterarmknochen, wo Federkiele festsassen. Die Film-Raptoren waren viel zu gross!' },
+  { name: 'Pteranodon', text: 'Der Pteranodon war kein Dino, sondern ein Flugsaurier – seine Flügel spannten bis zu 6 Meter.|Er hatte keine Zähne, dafür einen langen Schnabel und einen Knochenkamm auf dem Kopf.' },
+  { name: 'Stegosaurus', text: 'Der T-Rex lebte zeitlich näher an uns als am Stegosaurus!|Zwischen den beiden liegen etwa 80 Mio. Jahre. Und sein Gehirn war nur so gross wie eine Walnuss.' },
+  { name: 'Wollhaarmammut', text: 'Die letzten Mammuts lebten noch vor rund 4000 Jahren – da standen die Pyramiden von Gizeh schon!|Sie überlebten auf der Wrangelinsel. Ihre Stosszähne wurden bis zu 4 Meter lang.' },
+  { name: 'Ankylosaurus', text: 'Der Ankylosaurus war ein wandelnder Panzer.|Knochenplatten schützten Rücken, Kopf und sogar die Augenlider. Mit der Schwanzkeule konnte er einem Angreifer die Knochen brechen.' },
+  { name: 'Dino-Eier', text: 'Selbst die riesigsten Dinos legten nur Eier von der Grösse eines Fussballs.|Dickere Schalen hätten das Küken ersticken lassen. Das längste bekannte Dino-Ei misst über 40 cm.' },
+  { name: 'Spinosaurus', text: 'Der Spinosaurus war länger als der T-Rex – und jagte wohl im Wasser.|Krokodilartige Schnauze, hoch sitzende Nasenlöcher und ein paddelförmiger Schwanz: perfekt für Fische.' },
+  { name: 'Huhn', text: 'Im Knochen eines T-Rex fand man Eiweiss-Reste – sie ähnelten denen eines Huhns am meisten!|Alle Vögel sind lebende Dinosaurier.' },
+  { name: 'Meteorit', text: 'Der Meteorit schlug bei Chicxulub in Mexiko ein und riss einen Krater von rund 180 km.|Staub verdunkelte den Himmel, Pflanzen starben. Nur kleine Tiere überlebten – auch die ersten Vögel.' },
+  { name: 'Nadelbäume', text: 'Die Wollemie galt als ausgestorben, bis man 1994 in Australien lebende Bäume fand!|Ein Baum direkt aus der Dino-Zeit – Nadelbäume gibt es seit rund 300 Mio. Jahren.' },
+  { name: 'Polar-Dinos', text: 'Vor 110 Mio. Jahren lag Südaustralien nahe am Südpol.|Der kleine Leaellynasaura hatte grosse Augen für die Polarnacht – und seinen Namen von der Tochter der Finder.' },
+  { name: 'Federkleid', text: '1996 fand man in China den ersten Dino mit Federn.|An seinem Schwanz sind sogar noch rotbraune Streifen zu erkennen! Auch der 9 m lange Yutyrannus, ein T-Rex-Verwandter, trug Federn.' },
 ];
 
 const FACTS_NEW = [
-  { name: 'Ammonit', text: 'Ammoniten schwammen in Urzeit-Meeren und starben zusammen mit den Dinos aus. Weil sich ihre Gehäuse so schnell veränderten, verraten sie Forschern genau, wie alt ein Gestein ist.' },
-  { name: 'Archelon', text: 'Der Archelon wog über 2 Tonnen. Statt eines harten Panzers hatte er einen Rücken aus Lederhaut mit Knochenstreben – und Flossen, die zusammen etwa 4 Meter spannten.' },
-  { name: 'Fussspuren', text: 'Bei Courtedoux im Jura fand man tausende Fussabdrücke von Langhals-Dinos. Aus dem Abstand der Spuren berechnen Forscher sogar, wie schnell ein Dino lief.' },
-  { name: 'Ichthyosaurus', text: 'Der Ichthyosaurus sah aus wie ein Delfin, war aber ein Reptil. Er atmete Luft und gebar lebende Junge im Wasser – meist mit dem Schwanz voran, damit sie nicht ertranken.' },
-  { name: 'Mosasaurus', text: 'Der Mosasaurus war ein Riesen-Verwandter der Warane und Schlangen und hatte sogar eine zweite Zahnreihe im Gaumen. Seinen ersten Schädel fand man bei Maastricht – daher der Name.' },
-  { name: 'Plesiosaurus', text: 'Das erste fast vollständige Plesiosaurus-Skelett fand 1823 die Fossiliensammlerin Mary Anning. Sein Hals hatte über 30 Wirbel – Menschen und Giraffen haben nur 7!' },
-  { name: 'Quetzalcoatlus', text: 'Der Quetzalcoatlus war am Boden so hoch wie eine Giraffe – und konnte trotzdem fliegen! Am Boden lief er auf allen vieren und stocherte wie ein Storch nach Beute.' },
-  { name: 'Archaeopteryx', text: '1861 fand man in Bayern ein Skelett mit Federn, Zähnen und Krallen an den Flügeln – ein Beweis, dass Vögel von Dinos abstammen. Wie gut er flog, ist bis heute umstritten.' },
-  { name: 'Therizinosaurus', text: 'Man fand zuerst nur seine Riesenkrallen (bis 50 cm) und hielt sie für Teile einer Riesenschildkröte! Dabei war er ein gefiederter Pflanzenfresser.' },
+  { name: 'Ammonit', text: 'Ammoniten schwammen in Urzeit-Meeren und starben zusammen mit den Dinos aus.|Weil sich ihre Gehäuse so schnell veränderten, verraten sie Forschern genau, wie alt ein Gestein ist.' },
+  { name: 'Archelon', text: 'Der Archelon wog über 2 Tonnen – und hatte keinen harten Panzer.|Sein Rücken bestand aus Lederhaut mit Knochenstreben. Seine Flossen spannten zusammen etwa 4 Meter.' },
+  { name: 'Fussspuren', text: 'Bei Courtedoux im Jura fand man tausende Fussabdrücke von Langhals-Dinos.|Aus dem Abstand der Spuren berechnen Forscher sogar, wie schnell ein Dino lief.' },
+  { name: 'Ichthyosaurus', text: 'Der Ichthyosaurus sah aus wie ein Delfin, war aber ein Reptil.|Er atmete Luft und gebar lebende Junge im Wasser – meist mit dem Schwanz voran, damit sie nicht ertranken.' },
+  { name: 'Mosasaurus', text: 'Der Mosasaurus war ein Riesen-Verwandter der Warane und Schlangen.|Er hatte sogar eine zweite Zahnreihe im Gaumen. Seinen ersten Schädel fand man bei Maastricht – daher der Name.' },
+  { name: 'Plesiosaurus', text: 'Der Plesiosaurus hatte über 30 Halswirbel – Menschen und Giraffen haben nur 7!|Das erste fast vollständige Skelett fand 1823 die Fossiliensammlerin Mary Anning.' },
+  { name: 'Quetzalcoatlus', text: 'Der Quetzalcoatlus war am Boden so hoch wie eine Giraffe – und konnte trotzdem fliegen!|Am Boden lief er auf allen vieren und stocherte wie ein Storch nach Beute.' },
+  { name: 'Archaeopteryx', text: '1861 fand man in Bayern ein Skelett mit Federn, Zähnen und Krallen an den Flügeln.|Ein Beweis, dass Vögel von Dinos abstammen. Wie gut er flog, ist bis heute umstritten.' },
+  { name: 'Therizinosaurus', text: 'Man hielt seine Riesenkrallen (bis 50 cm) zuerst für Teile einer Riesenschildkröte!|Dabei war er ein gefiederter Pflanzenfresser.' },
 ];
 // one card per level (24 days). Order follows the calendar: jungle, beach, canyon, underwater, ice age, mountains, volcano, Christmas.
 const FACTS = [...FACTS_OLD.slice(0, 3), ...FACTS_NEW.slice(0, 3), ...FACTS_OLD.slice(3, 6), ...FACTS_NEW.slice(3, 6), ...FACTS_OLD.slice(6, 9), ...FACTS_NEW.slice(6, 9), ...FACTS_OLD.slice(9, 12), ...FACTS_OLD.slice(12, 15)];
@@ -4202,6 +4202,11 @@ function drawOverlay() {
     txt(`${save.lvE[G.li].filter(Boolean).length} von 3 Eiern`, W / 2 - 238, 196, 16, '#6b4a2b', 'center', 'normal');
     if (u <= 0) drawEgg(W / 2, 148, 30, th.egg, th.eggSpot, 0.6, Math.sin(T * 14) * 0.2);
     else { const sc = G.newCard ? (u < 1 ? 0.3 + u * 0.95 : 1 + 0.03 * Math.sin(T * 6)) : 1; ctx.save(); ctx.translate(W / 2, 152); ctx.rotate((hash(G.li * 3 + 1) - 0.5) * 0.08); ctx.scale(sc * 1.3, sc * 1.3); rr(-62, -46, 124, 92, 12); ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.save(); ctx.translate(2, 4); ctx.fill(); ctx.restore(); ctx.fillStyle = '#fffaf0'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#8a6a3a'; ctx.stroke(); rr(-56, -40, 112, 62, 8); ctx.fillStyle = th.sky[1]; ctx.fill(); drawCardArt(G.li, 0, -10, 104, false); txt(FACTS[G.li].name, 0, 36, FACTS[G.li].name.length > 11 ? 14 : 17, '#2b1a00'); if (G.newCard && u >= 1) { ctx.save(); ctx.translate(46, -42); ctx.rotate(0.35); rr(-20, -10, 40, 20, 5); ctx.fillStyle = '#e53935'; ctx.fill(); txt('NEU', 0, 1, 13, '#fff'); ctx.restore(); } ctx.restore(); }
+    if (u >= 1) { // the card is a door into the Dino-Buch, and its headline fact is read out right here
+      const pz = 1 + 0.06 * Math.sin(T * 5); ctx.save(); ctx.translate(W / 2 - 74, 106); ctx.rotate(-0.3); ctx.scale(pz, pz); rr(-28, -10, 56, 20, 6); ctx.fillStyle = '#ffc400'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#7a4a00'; ctx.stroke(); txt('Lesen', 0, 1, 13, '#3b1d00'); ctx.restore();
+      buttons.push({ x: W / 2 - 80, y: 100, w: 160, h: 128, cb: () => openBookCard(G.li) });
+      const hl = wrapLines(FACTS[G.li].text.split('|')[0], 520, 14); ctx.save(); ctx.globalAlpha = G.newCard ? clamp((o.t - 1.3) * 2, 0, 1) : 1; drawBulb(W / 2 - 290, 346 + (hl.length - 1) * 8); hl.slice(0, 2).forEach((l, i) => txt(l, W / 2 + 10, 346 + i * 17, 14, '#3b2410', 'center')); ctx.restore();
+    }
     drawAmber(W / 2 + 232, 150, 20); txt('+' + G.amber, W / 2 + 232, 190, 22, '#8a5a00');
     for (let k = 0; k < 3; k++) {
       const x = W / 2 - 200 + k * 200, on = save.lvM[G.li][k], isNew = G.newMedals.includes(k);
@@ -5363,6 +5368,7 @@ const CARD_ART = [
   [drawFeathered, 110, 80, 0],
 ];
 const cardCache = {};
+const cardBox = [];
 function cardSprite(i, silhouette) { // pre-rendered, outlined sticker art at 2x, auto-fitted to the card
   const key = i + (silhouette ? 's' : 'c'); if (cardCache[key]) return cardCache[key];
   const [fn, w, h, ox] = CARD_ART[i], R = 2, CW = 280, CH = 170, sc0 = Math.min(CW / (w + 14), CH / (h + 14)), old = ctx, oldT = T;
@@ -5373,6 +5379,7 @@ function cardSprite(i, silhouette) { // pre-rendered, outlined sticker art at 2x
   const d = probe.getContext('2d').getImageData(0, 0, BW, BH).data; let x0 = BW, y0 = BH, x1 = 0, y1 = 0;
   for (let y = 0; y < BH; y++) for (let x = 0; x < BW; x++) if (d[(y * BW + x) * 4 + 3] > 12) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
   const bw = Math.max(1, x1 - x0 + 1), bh = Math.max(1, y1 - y0 + 1), f = Math.min((CW - 44) / bw, (CH - 56) / bh, 2.4), cx0 = CW / 2, cy0 = CH * 0.47;
+  cardBox[i] = { w: bw * f, h: bh * f, cy: cy0 }; // the animal's real extent inside the 280 x 170 sprite (the size ruler and habitat scene use it)
   const fx = cx0 + (fx0 - (x0 + x1) / 2) * f, fy = cy0 + (fy0 - (y0 + y1) / 2) * f;
   // 2) final art at 2x
   const c = document.createElement('canvas'); c.width = CW * R; c.height = CH * R;
@@ -5484,7 +5491,8 @@ function drawSheet() {
     ['goetti', 'chili', 'rex', 'mami', 'papi', 'fabio', 'kiwi'].forEach((w, i) => drawPortrait(w, 70 + i * 130, 485, 38));
   }
 }
-let bookSel = -1; const bookAnim = { sel: -1, t: 0 };
+function openBookCard(i) { bookMode = 'grid'; bookSel = i; if (!save.bookSeen) save.bookSeen = []; save.bookSeen[i] = true; writeSave(); go('book'); }
+let bookSel = -1, bookTapped = false, bookMode = 'grid', lineScroll = 0, lineTarget = 0, lineDrag = null, lineHits = [], lineLayout = null; const bookAnim = { sel: -1, t: 0 }, bookRoar = { t: -9, i: -1 };
 function bookUnread() { const seen = save.bookSeen || []; return save.lvDone.reduce((n, d, i) => n + (d && !seen[i] ? 1 : 0), 0); } // found cards not yet opened in the Dino-Buch
 function leatherCover() {
   ctx.fillStyle = vgrad(0, H, '#6a4528', '#4f3119', '#33200f'); ctx.fillRect(0, 0, W, H);
@@ -5497,30 +5505,30 @@ function leatherCover() {
 }
 // ---------- Dino-Buch "Steckbrief": era, diet and a size comparison with a child ----------
 const STECK = [ // order = FACTS. nm/nl: the "Name bedeutet" chip (nl overrides its label); m: metres for the ruler (0 = custom comparison)
-  { l: 'Lebte vor', e: '68 Mio. Jahren', d: 'Fleisch', dk: 'meat', m: 12, nm: '«König der Tyrannen-Echsen»' },
-  { l: 'Lebte vor', e: '68 Mio. Jahren', d: 'Pflanzen', dk: 'leaf', m: 9, nm: '«Dreihorn-Gesicht»' },
-  { l: 'Lebte vor', e: '150 Mio. Jahren', d: 'Pflanzen', dk: 'leaf', m: 25, nm: '«Arm-Echse» (lange Vorderbeine)' },
-  { l: 'Lebte vor', e: '400–66 Mio. Jahren', d: 'Plankton', dk: 'fish', m: 0.3, ml: 'Meist', nm: '«Ammons Horn» (Gott Amun)' },
-  { l: 'Lebte vor', e: '75 Mio. Jahren', d: 'Quallen', dk: 'fish', m: 4.6, nm: '«Herrscher-Schildkröte»' },
-  { l: 'Spuren von vor', e: '150 Mio. Jahren', d: '–', dk: 'none', m: 0.5, ml: 'Abdruck', nl: 'Fachwort', nm: 'Spurenfossil' },
-  { l: 'Lebte vor', e: '75 Mio. Jahren', d: 'Fleisch', dk: 'meat', m: 2, nm: '«Schneller Räuber»' },
-  { l: 'Lebte vor', e: '85 Mio. Jahren', d: 'Fische', dk: 'fish', m: 6, ml: 'Spannweite', nm: '«Flügel ohne Zähne»' },
-  { l: 'Lebte vor', e: '150 Mio. Jahren', d: 'Pflanzen', dk: 'leaf', m: 9, nm: '«Dach-Echse»' },
-  { l: 'Lebte vor', e: '200 Mio. Jahren', d: 'Fische', dk: 'fish', m: 3, nm: '«Fisch-Echse»' },
-  { l: 'Lebte vor', e: '75 Mio. Jahren', d: 'Fleisch', dk: 'meat', m: 12, nm: '«Maas-Echse» (Fundort Maastricht)' },
-  { l: 'Lebte vor', e: '200 Mio. Jahren', d: 'Fische', dk: 'fish', m: 4, nm: '«Fast-Echse»' },
-  { l: 'Starb aus vor', e: '4000 Jahren', d: 'Pflanzen', dk: 'leaf', m: 4, nl: 'Fachname', nm: 'Mammuthus primigenius' },
-  { l: 'Lebte vor', e: '68 Mio. Jahren', d: 'Pflanzen', dk: 'leaf', m: 7, nm: '«Verwachsene Echse»' },
-  { l: 'Gelegt vor', e: '70 Mio. Jahren', d: '–', dk: 'none', m: 0.3, ml: 'Grösse', nl: 'Fachwort', nm: 'Oologie = Eier-Forschung' },
-  { l: 'Lebte vor', e: '68 Mio. Jahren', d: 'Fleisch', dk: 'meat', m: 10, ml: 'Spannweite', nm: '«Gefiederte Schlange» (Aztekengott)' },
-  { l: 'Lebte vor', e: '150 Mio. Jahren', d: 'Insekten', dk: 'meat', m: 0.5, nm: '«Alte Feder»' },
-  { l: 'Lebte vor', e: '70 Mio. Jahren', d: 'Pflanzen', dk: 'leaf', m: 10, nm: '«Sichel-Echse»' },
-  { l: 'Lebte vor', e: '95 Mio. Jahren', d: 'Fische', dk: 'fish', m: 14, nm: '«Dornen-Echse»' },
-  { l: 'Lebt', e: 'heute noch', d: 'Alles', dk: 'all', m: 0.5, nl: 'Fachname', nm: 'Gallus gallus' },
-  { l: 'Schlug ein vor', e: '66 Mio. Jahren', d: '–', dk: 'none', m: 0, cmp: 'everest', txt: 'Etwa 10 km breit – breiter, als der Mount Everest hoch ist!', nl: 'Einschlag bei', nm: 'Chicxulub in Mexiko' },
-  { l: 'Gibt es seit', e: '300 Mio. Jahren', d: 'Sonne', dk: 'none', m: 30, ml: 'Höhe', nl: 'Fachwort', nm: 'Koniferen = Zapfenträger' },
-  { l: 'Lebte vor', e: '110 Mio. Jahren', d: 'Pflanzen', dk: 'leaf', m: 1, nl: 'Bekanntester Polar-Dino', nm: 'Leaellynasaura' },
-  { l: 'Lebte vor', e: '125 Mio. Jahren', d: 'Fleisch', dk: 'meat', m: 1, nl: 'Erster Feder-Dino', nm: 'Sinosauropteryx (China)' },
+  { tl: [68, 66], l: 'Lebte vor', e: '68 Mio. Jahren', d: 'Fleisch', dk: 'meat', m: 12, nm: '«König der Tyrannen-Echsen»' },
+  { tl: [68, 66], l: 'Lebte vor', e: '68 Mio. Jahren', d: 'Pflanzen', dk: 'leaf', m: 9, nm: '«Dreihorn-Gesicht»' },
+  { tl: [154, 150], l: 'Lebte vor', e: '150 Mio. Jahren', d: 'Pflanzen', dk: 'leaf', m: 25, nm: '«Arm-Echse» (lange Vorderbeine)' },
+  { tl: [400, 66], l: 'Lebte vor', e: '400–66 Mio. Jahren', d: 'Plankton', dk: 'fish', m: 0.3, ml: 'Meist', nm: '«Ammons Horn» (Gott Amun)' },
+  { tl: [75, 66], l: 'Lebte vor', e: '75 Mio. Jahren', d: 'Quallen', dk: 'fish', m: 4.6, nm: '«Herrscher-Schildkröte»' },
+  { tl: [152, 148], l: 'Spuren von vor', e: '150 Mio. Jahren', d: '–', dk: 'none', m: 0.5, ml: 'Abdruck', nl: 'Fachwort', nm: 'Spurenfossil' },
+  { tl: [75, 71], l: 'Lebte vor', e: '75 Mio. Jahren', d: 'Fleisch', dk: 'meat', m: 2, nm: '«Schneller Räuber»' },
+  { tl: [86, 84], l: 'Lebte vor', e: '85 Mio. Jahren', d: 'Fische', dk: 'fish', m: 6, ml: 'Spannweite', nm: '«Flügel ohne Zähne»' },
+  { tl: [155, 150], l: 'Lebte vor', e: '150 Mio. Jahren', d: 'Pflanzen', dk: 'leaf', m: 9, nm: '«Dach-Echse»' },
+  { tl: [200, 190], l: 'Lebte vor', e: '200 Mio. Jahren', d: 'Fische', dk: 'fish', m: 3, nm: '«Fisch-Echse»' },
+  { tl: [82, 66], l: 'Lebte vor', e: '75 Mio. Jahren', d: 'Fleisch', dk: 'meat', m: 12, nm: '«Maas-Echse» (Fundort Maastricht)' },
+  { tl: [200, 175], l: 'Lebte vor', e: '200 Mio. Jahren', d: 'Fische', dk: 'fish', m: 4, nm: '«Fast-Echse»' },
+  { tl: [0.4, 0.004], l: 'Starb aus vor', e: '4000 Jahren', d: 'Pflanzen', dk: 'leaf', m: 4, nl: 'Fachname', nm: 'Mammuthus primigenius' },
+  { tl: [68, 66], l: 'Lebte vor', e: '68 Mio. Jahren', d: 'Pflanzen', dk: 'leaf', m: 7, nm: '«Verwachsene Echse»' },
+  { tl: [80, 66], l: 'Gelegt vor', e: '70 Mio. Jahren', d: '–', dk: 'none', m: 0.6, ml: 'Gelege', nl: 'Fachwort', nm: 'Oologie = Eier-Forschung' },
+  { tl: [68, 66], l: 'Lebte vor', e: '68 Mio. Jahren', d: 'Fleisch', dk: 'meat', m: 10, ml: 'Spannweite', nm: '«Gefiederte Schlange» (Aztekengott)' },
+  { tl: [150, 148], l: 'Lebte vor', e: '150 Mio. Jahren', d: 'Insekten', dk: 'meat', m: 0.5, nm: '«Alte Feder»' },
+  { tl: [70, 66], l: 'Lebte vor', e: '70 Mio. Jahren', d: 'Pflanzen', dk: 'leaf', m: 10, nm: '«Sichel-Echse»' },
+  { tl: [99, 93], l: 'Lebte vor', e: '95 Mio. Jahren', d: 'Fische', dk: 'fish', m: 14, nm: '«Dornen-Echse»' },
+  { tl: [0, 0], l: 'Lebt', e: 'heute noch', d: 'Alles', dk: 'all', m: 0.5, nl: 'Fachname', nm: 'Gallus gallus' },
+  { tl: [66, 66], l: 'Schlug ein vor', e: '66 Mio. Jahren', d: '–', dk: 'none', m: 0, cmp: 'everest', txt: 'Etwa 10 km breit – breiter, als der Mount Everest hoch ist!', nl: 'Einschlag bei', nm: 'Chicxulub in Mexiko' },
+  { tl: [300, 0], l: 'Gibt es seit', e: '300 Mio. Jahren', d: 'Sonne', dk: 'sun', m: 30, ml: 'Höhe', fb: 1, nl: 'Fachwort', nm: 'Koniferen = Zapfenträger' },
+  { tl: [118, 110], l: 'Lebte vor', e: '110 Mio. Jahren', d: 'Pflanzen', dk: 'leaf', m: 1, nl: 'Bekanntester Polar-Dino', nm: 'Leaellynasaura' },
+  { tl: [125, 120], l: 'Lebte vor', e: '125 Mio. Jahren', d: 'Fleisch', dk: 'meat', m: 1, nl: 'Erster Feder-Dino', nm: 'Sinosauropteryx (China)' },
 ];
 function drawKid(x, base, h) { // a child silhouette, h pixels tall, standing at x
   const u = h / 100; ctx.save(); ctx.translate(x, base); ctx.scale(u, u);
@@ -5528,14 +5536,12 @@ function drawKid(x, base, h) { // a child silhouette, h pixels tall, standing at
   ctx.fillStyle = '#d8483a'; rr(-13, -72, 26, 34, 8); ctx.fill(); ctx.fillStyle = '#f0c9a0'; circle(0, -84, 13, '#f0c9a0'); ctx.fillStyle = '#e9c25e'; ctx.beginPath(); ctx.arc(0, -88, 13.5, Math.PI, 0); ctx.fill(); circle(-14, -82, 5, '#e9c25e'); circle(14, -82, 5, '#e9c25e');
   ctx.strokeStyle = '#d8483a'; ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(-13, -66); ctx.lineTo(-20, -44); ctx.moveTo(13, -66); ctx.lineTo(20, -44); ctx.stroke(); ctx.restore();
 }
-function drawSizeRuler(x, y, w, h, st, th) {
+function drawSizeRuler(x, y, w, h, st, th, ci) {
   rr(x, y, w, h, 14); ctx.fillStyle = 'rgba(255,250,235,.9)'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#b8a070'; ctx.stroke();
-  txt('Grösse im Vergleich', x + 16, y + 17, 13, '#8a6a3a', 'left', 'normal');
-  const base = y + h - 16;
-  if (st.cmp !== 'everest') { ctx.strokeStyle = 'rgba(138,106,58,.35)'; ctx.lineWidth = 2; ctx.setLineDash([5, 5]); ctx.beginPath(); ctx.moveTo(x + 14, base + 2); ctx.lineTo(x + w - 14, base + 2); ctx.stroke(); ctx.setLineDash([]); }
-  if (st.cmp === 'everest') { // meteorite vs. mountain, 6 px per km
-    const k = 6, bs = y + h - 32, mx = x + w * 0.3, cx = x + w * 0.7;
-    wrapLines(st.txt, w - 32, 14).forEach((l, i) => txt(l, x + w / 2, y + 40 + i * 18, 14, '#3b2410', 'center', 'normal'));
+  if (st.cmp === 'everest') { // meteorite vs. mountain, 5 px per km
+    txt('Grösse im Vergleich', x + 16, y + 17, 13, '#8a6a3a', 'left', 'normal');
+    const k = 5, bs = y + h - 32, mx = x + w * 0.3, cx = x + w * 0.7;
+    wrapLines(st.txt, w - 32, 14).forEach((l, i) => txt(l, x + w / 2, y + 40 + i * 17, 14, '#3b2410', 'center', 'normal'));
     ctx.fillStyle = '#8f98a6'; ctx.beginPath(); ctx.moveTo(mx - 40, bs); ctx.lineTo(mx, bs - 8.8 * k); ctx.lineTo(mx + 40, bs); ctx.closePath(); ctx.fill(); ctx.strokeStyle = '#4a525e'; ctx.lineWidth = 2; ctx.lineJoin = 'round'; ctx.stroke();
     const ty = bs - 8.8 * k; ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.moveTo(mx - 9, ty + 14); ctx.lineTo(mx, ty); ctx.lineTo(mx + 9, ty + 14); ctx.lineTo(mx + 3, ty + 11); ctx.lineTo(mx - 2, ty + 15); ctx.closePath(); ctx.fill();
     circle(cx, bs - 5 * k, 5 * k, '#6b5a4a'); circle(cx - 8, bs - 5 * k - 8, 6, 'rgba(255,255,255,.14)'); ctx.strokeStyle = '#2b1a0c'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(cx, bs - 5 * k, 5 * k, 0, 7); ctx.stroke();
@@ -5543,16 +5549,24 @@ function drawSizeRuler(x, y, w, h, st, th) {
     return;
   }
   const m = st.m >= 10 ? Math.round(st.m) : String(st.m).replace('.', ','), kids = Math.max(1, Math.round(st.m / 1.4));
-  const chain = kids >= 2 && st.m >= 2, sc = Math.min(48, (w - (chain ? 44 : 76)) / st.m), kidH = 1.4 * sc, len = st.m * sc, kx = x + 30;
-  txt(`${st.ml || 'Länge'}: ${m} m`, x + 16, y + 41, 22, '#3b2410', 'left');
-  txt(st.m < 1 ? 'kleiner als ein Kind' : `so lang wie ${kids} ${kids === 1 ? 'Kind' : 'Kinder'}`, x + w - 16, y + 17, 14, '#6b4a2b', 'right', 'normal');
-  if (!chain) drawKid(kx, base, Math.max(14, kidH));
-  const bx = chain ? x + 22 : kx + 22, bh = Math.max(10, Math.min(30, sc * 0.9)), by = base - bh, bl = Math.max(8, len);
+  txt(`${st.ml || 'Länge'}: ${m} m`, x + 16, y + 20, 20, '#3b2410', 'left');
+  txt(st.m < 1 ? 'kleiner als ein Kind' : `so lang wie ${kids} ${kids === 1 ? 'Kind' : 'Kinder'}`, x + w - 16, y + 20, 14, '#6b4a2b', 'right', 'normal');
+  const base = y + h - 26, kx = x + 30;
+  ctx.strokeStyle = 'rgba(138,106,58,.35)'; ctx.lineWidth = 2; ctx.setLineDash([5, 5]); ctx.beginPath(); ctx.moveTo(x + 14, base + 1); ctx.lineTo(x + w - 14, base + 1); ctx.stroke(); ctx.setLineDash([]);
+  const box = !st.fb && cardBox[ci] ? cardBox[ci] : null;
+  if (box) { // the real animal, drawn to scale next to a child, facing it
+    const ppm = Math.min(48, (w - 76) / st.m, (base - (y + 34)) / (st.m * box.h / box.w)), dw = st.m * ppm, k = dw / box.w, dx = kx + 22;
+    drawKid(kx, base, Math.max(11, 1.4 * ppm));
+    ctx.save(); ctx.translate(dx + dw / 2, 0); ctx.scale(-1, 1); ctx.drawImage(cardSprite(ci, false), -140 * k, base - (box.cy + box.h / 2) * k + 2, 280 * k, 170 * k); ctx.restore();
+    if (dw > 34) { ctx.strokeStyle = '#8a6a3a'; ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(dx, base + 7); ctx.lineTo(dx, base + 13); ctx.moveTo(dx, base + 10); ctx.lineTo(dx + dw, base + 10); ctx.moveTo(dx + dw, base + 7); ctx.lineTo(dx + dw, base + 13); ctx.stroke(); if (dw > 70) { rr(dx + dw / 2 - 20, base + 3, 40, 14, 7); ctx.fillStyle = 'rgba(255,250,235,1)'; ctx.fill(); txt(`${m} m`, dx + dw / 2, base + 10.5, 11, '#6b4a2b'); } }
+    return;
+  }
+  // fallback (a tree is taller than wide): bar with a chain of children
+  const sc = Math.min(48, (w - 44) / st.m), len = st.m * sc, bx = x + 22, bh = Math.max(10, Math.min(26, sc * 0.9)), by = base - bh, bl = Math.max(8, len);
   rr(bx, by, bl, bh, bh / 2); ctx.fillStyle = vgrad(by, base, shade(th.sky[0], 1.3), shade(th.sky[0], 0.8)); ctx.fill(); ctx.lineWidth = 2.5; ctx.strokeStyle = '#2b1a0c'; ctx.stroke();
-  if (st.m >= 2) { const step = st.m > 14 ? 5 : 1; ctx.save(); rr(bx, by, bl, bh, bh / 2); ctx.clip(); ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 1.5; for (let u = step; u < st.m; u += step) { ctx.beginPath(); ctx.moveTo(bx + u * sc, by + bh * 0.55); ctx.lineTo(bx + u * sc, base); ctx.stroke(); } ctx.restore(); }
-  if (chain) { const sp = bl / kids, hk = Math.max(16, Math.min(34, sp * 1.7)); for (let k = 0; k < kids; k++) drawKid(bx + sp * (k + 0.5), by - 3, hk); } // a chain of children, as long as the animal
-  else if (st.m >= 2) { ctx.strokeStyle = '#8a6a3a'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(bx, by - 11); ctx.lineTo(bx, by - 5); ctx.moveTo(bx, by - 8); ctx.lineTo(bx + bl, by - 8); ctx.moveTo(bx + bl, by - 11); ctx.lineTo(bx + bl, by - 5); ctx.stroke(); }
-  if (st.m >= 2) txt(st.m > 14 ? '1 Strich = 5 m' : '1 Strich = 1 m', x + w - 16, y + 41, 12, '#8a6a3a', 'right', 'normal');
+  const step = st.m > 14 ? 5 : 1; ctx.save(); rr(bx, by, bl, bh, bh / 2); ctx.clip(); ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 1.5; for (let u = step; u < st.m; u += step) { ctx.beginPath(); ctx.moveTo(bx + u * sc, by + bh * 0.55); ctx.lineTo(bx + u * sc, base); ctx.stroke(); } ctx.restore();
+  const sp = bl / kids, hk = Math.max(16, Math.min(34, sp * 1.7)); for (let q = 0; q < kids; q++) drawKid(bx + sp * (q + 0.5), by - 3, hk);
+  txt(st.m > 14 ? '1 Strich = 5 m' : '1 Strich = 1 m', x + w - 16, base + 14, 11, '#8a6a3a', 'right', 'normal');
 }
 function drawHourglass(x, y) { ctx.fillStyle = '#e8c070'; ctx.strokeStyle = '#6b4a2b'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x - 8, y - 10); ctx.lineTo(x + 8, y - 10); ctx.lineTo(x + 1.5, y); ctx.lineTo(x + 8, y + 10); ctx.lineTo(x - 8, y + 10); ctx.lineTo(x - 1.5, y); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#c98a3a'; ctx.beginPath(); ctx.moveTo(x - 5, y + 9); ctx.lineTo(x + 5, y + 9); ctx.lineTo(x, y + 3); ctx.fill(); }
 function drawDietIcon(k, x, y) {
@@ -5560,68 +5574,178 @@ function drawDietIcon(k, x, y) {
   if (k === 'leaf' || k === 'all') { ctx.save(); if (k === 'all') ctx.translate(-5, 0); ctx.fillStyle = '#5cb85c'; ctx.strokeStyle = '#2e7d32'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-8, 8); ctx.quadraticCurveTo(-10, -8, 8, -9); ctx.quadraticCurveTo(10, 8, -8, 8); ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.moveTo(-8, 8); ctx.lineTo(5, -5); ctx.stroke(); ctx.restore(); }
   if (k === 'meat' || k === 'all') { ctx.save(); if (k === 'all') ctx.translate(7, 2); ctx.fillStyle = '#c9603a'; ctx.strokeStyle = '#7a3418'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(-2, -2, 8, 6, -0.6, 0, 7); ctx.fill(); ctx.stroke(); ctx.strokeStyle = '#f4ecd8'; ctx.lineWidth = 3.5; ctx.beginPath(); ctx.moveTo(3, 3); ctx.lineTo(9, 9); ctx.stroke(); circle(10, 10, 2.6, '#f4ecd8'); ctx.restore(); }
   if (k === 'fish') { ctx.fillStyle = '#4f9ad8'; ctx.strokeStyle = '#2a5a8a'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(-1, 0, 9, 6, 0, 0, 7); ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.moveTo(7, 0); ctx.lineTo(13, -6); ctx.lineTo(13, 6); ctx.closePath(); ctx.fill(); ctx.stroke(); circle(-5, -1.5, 1.6, '#fff'); }
+  if (k === 'sun') { ctx.strokeStyle = '#e8a317'; ctx.lineWidth = 2.5; for (let q = 0; q < 8; q++) { const a = q * Math.PI / 4; ctx.beginPath(); ctx.moveTo(Math.cos(a) * 9, Math.sin(a) * 9); ctx.lineTo(Math.cos(a) * 13, Math.sin(a) * 13); ctx.stroke(); } circle(0, 0, 6.5, '#ffd34d'); ctx.strokeStyle = '#e8a317'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(0, 0, 6.5, 0, 7); ctx.stroke(); }
   if (k === 'none') { ctx.strokeStyle = '#a09070'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(-7, 0); ctx.lineTo(7, 0); ctx.stroke(); }
   ctx.restore();
 }
 function drawNameIcon(x, y) { circle(x, y, 11, '#f0d58a'); ctx.lineWidth = 2; ctx.strokeStyle = '#8a6a3a'; ctx.beginPath(); ctx.arc(x, y, 11, 0, 7); ctx.stroke(); txt('Aa', x, y + 1, 12, '#5a3a14', 'center'); }
 function fitTxt(s, x, y, maxW, size, min, color, align = 'center') { let fs = size; setFont(fs); while (ctx.measureText(s).width > maxW && fs > min) { fs--; setFont(fs); } txt(s, x, y, fs, color, align); }
+const TL_ERAS = [['Trias', 252, 201, '#e3b27a'], ['Jura', 201, 145, '#86c9a8'], ['Kreide', 145, 66, '#8ebaf0'], ['Heute', 66, 0, '#f5d870']];
+function tlPos(ma) { for (let k = 0; k < 4; k++) { const [, a, b] = TL_ERAS[k]; if (ma >= b) return (k + clamp((a - ma) / (a - b), 0, 1)) / 4; } return 1; }
+function timelineChip(x, y, w, st) { // era of life as a strip: Trias, Jura, Kreide, today; the animal's time span is marked in gold
+  rr(x, y + 2, w, 50, 13); ctx.fillStyle = 'rgba(0,0,0,.12)'; ctx.fill(); rr(x, y, w, 50, 13); ctx.fillStyle = '#fffaf0'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#b8a070'; ctx.stroke();
+  ctx.save(); ctx.translate(x + 24, y + 16); ctx.scale(0.8, 0.8); drawHourglass(0, 0); ctx.restore(); txt(st.l, x + 42, y + 15, 12, '#8a6a3a', 'left', 'normal'); setFont(12, 'normal'); const lw = ctx.measureText(st.l).width; txt(st.e, x + 48 + lw, y + 15, 15, '#2b1a00', 'left');
+  const bx = x + 14, bw = w - 28, by = y + 27, bh = 16, qw = bw / 4;
+  ctx.save(); rr(bx, by, bw, bh, 8); ctx.clip(); TL_ERAS.forEach(([nm, , , col], k) => { ctx.fillStyle = col; ctx.fillRect(bx + k * qw, by, qw + 1, bh); if (k) { ctx.fillStyle = 'rgba(80,50,20,.35)'; ctx.fillRect(bx + k * qw, by, 1.5, bh); } txt(nm, bx + k * qw + qw / 2, by + bh / 2 + 1, 10, 'rgba(59,36,16,.8)'); }); ctx.restore();
+  rr(bx, by, bw, bh, 8); ctx.lineWidth = 1.5; ctx.strokeStyle = '#8a6a3a'; ctx.stroke();
+  const x1 = bx + bw * tlPos(st.tl[0]), x2 = bx + bw * tlPos(st.tl[1]), mw = Math.max(10, x2 - x1), mx = clamp((x1 + x2) / 2 - mw / 2, bx - 2, bx + bw - mw + 2);
+  rr(mx, by - 3, mw, bh + 6, 6); ctx.fillStyle = 'rgba(255,196,0,.55)'; ctx.fill(); ctx.lineWidth = 2.5; ctx.strokeStyle = '#7a4a00'; ctx.stroke();
+}
 function steckChip(x, y, w, label, value, icon) {
-  rr(x, y + 2, w, 42, 12); ctx.fillStyle = 'rgba(0,0,0,.12)'; ctx.fill(); rr(x, y, w, 42, 12); ctx.fillStyle = '#fffaf0'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#b8a070'; ctx.stroke();
-  icon(x + 22, y + 21); txt(label, x + 42, y + 13, 12, '#8a6a3a', 'left', 'normal');
-  let fs = 16; setFont(fs); while (ctx.measureText(value).width > w - 50 && fs > 10) { fs--; setFont(fs); } txt(value, x + 42, y + 30, fs, '#2b1a00', 'left');
+  rr(x, y + 2, w, 50, 13); ctx.fillStyle = 'rgba(0,0,0,.12)'; ctx.fill(); rr(x, y, w, 50, 13); ctx.fillStyle = '#fffaf0'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#b8a070'; ctx.stroke();
+  icon(x + 26, y + 25); txt(label, x + 50, y + 15, 13, '#8a6a3a', 'left', 'normal');
+  let fs = 19; setFont(fs); while (ctx.measureText(value).width > w - 62 && fs > 11) { fs--; setFont(fs); } txt(value, x + 50, y + 35, fs, '#2b1a00', 'left');
 }
 function foil(x, y, w, h, r, t) { // diagonal shimmer on found cards
   ctx.save(); rr(x, y, w, h, r); ctx.clip(); const u = ((t * 0.35) % 1.6) - 0.3, gx = x + u * (w + h);
   const g = ctx.createLinearGradient(gx - 30, y, gx + 30, y + h); g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(0.5, 'rgba(255,255,255,.35)'); g.addColorStop(1, 'rgba(255,255,255,0)'); ctx.fillStyle = g; ctx.fillRect(x, y, w, h); ctx.restore();
 }
+function drawBulb(x, y) { circle(x, y - 2, 9, '#ffd34d'); ctx.strokeStyle = '#b8860b'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x, y - 2, 9, 0, 7); ctx.stroke(); ctx.fillStyle = '#8a6a3a'; rr(x - 4, y + 7, 8, 5, 2); ctx.fill(); ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x - 2, y - 4, 4, 3.4, 4.6); ctx.stroke(); }
+function drawHabitat(wi, x, y, w, h) { // a small painted scene of the animal's world; the ground line is y + h - 40
+  const th = WORLDS[wi], gy = y + h - 40;
+  ctx.save(); rr(x, y, w, h, 18); ctx.clip();
+  ctx.fillStyle = vgrad(y, gy, th.sky[0], th.sky[1]); ctx.fillRect(x, y, w, h);
+  { const g = ctx.createRadialGradient(x + w * 0.8, y + h * 0.28, 4, x + w * 0.8, y + h * 0.28, 110); g.addColorStop(0, 'rgba(255,255,255,.5)'); g.addColorStop(1, 'rgba(255,255,255,0)'); ctx.fillStyle = g; ctx.fillRect(x, y, w, h); }
+  for (const [col, off, amp, hh] of [[th.far, 0, 16, 56], [th.mid, 2, 12, 38]]) { ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(x, gy + 2); for (let u = 0; u <= w; u += 10) ctx.lineTo(x + u, gy - hh + amp * Math.sin(u * 0.021 + off * 2.1) + amp * 0.5 * Math.sin(u * 0.057 + off)); ctx.lineTo(x + w, gy + 2); ctx.closePath(); ctx.fill(); }
+  if (wi === 3) drawVolcano(x + w * 0.76, gy, 0.7, '#3a1410', 1);
+  else if (wi === 7) { ctx.fillStyle = '#7f98b8'; ctx.beginPath(); ctx.moveTo(x + w * 0.52, gy); ctx.lineTo(x + w * 0.74, y + 38); ctx.lineTo(x + w * 0.98, gy); ctx.fill(); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.moveTo(x + w * 0.74, y + 38); ctx.lineTo(x + w * 0.69, y + 66); ctx.lineTo(x + w * 0.79, y + 66); ctx.fill(); }
+  else if (wi === 5) { ctx.fillStyle = '#2a9ad0'; ctx.fillRect(x, gy - 22, w, 22); ctx.strokeStyle = 'rgba(255,255,255,.6)'; ctx.lineWidth = 2; for (let u = 0; u < 6; u++) { ctx.beginPath(); ctx.arc(x + 30 + u * 62, gy - 12, 8, Math.PI, 0); ctx.stroke(); } }
+  else if (wi === 6) { ctx.fillStyle = 'rgba(255,255,255,.1)'; for (let u = 0; u < 4; u++) { ctx.beginPath(); ctx.moveTo(x + 20 + u * 90, y); ctx.lineTo(x + 50 + u * 90, y); ctx.lineTo(x + 100 + u * 90, gy); ctx.lineTo(x + 40 + u * 90, gy); ctx.fill(); } }
+  if (wi === 0) { palm(x + 44, gy + 2, 130, '#1f5a35'); palm(x + w - 34, gy + 2, 100, '#2b6a40'); }
+  else if (wi === 1) { cactus(x + 46, gy + 2, 84, '#5f7a2a', 3); cactus(x + w - 40, gy + 2, 62, '#6a8a30', 1); }
+  else if (wi === 2 || wi === 4) { pine(x + 40, gy + 2, 120, wi === 4 ? '#14303f' : '#1d4a3f', wi === 4); pine(x + w - 36, gy + 2, 86, wi === 4 ? '#1a3a4c' : '#27594a', false); }
+  else if (wi === 5) palm(x + 42, gy + 2, 120, '#2f7d4a');
+  else if (wi === 7) pine(x + 38, gy + 2, 90, '#1d4a3f', false);
+  ctx.fillStyle = th.ground; ctx.fillRect(x, gy, w, h - (gy - y)); ctx.fillStyle = th.top || th.ground; ctx.fillRect(x, gy, w, 7);
+  ctx.fillStyle = th.dots || 'rgba(0,0,0,.12)'; for (let u = 0; u < 14; u++) circle(x + hash(u + 5) * w, gy + 14 + hash(u + 9) * (h - (gy - y) - 18), 2 + hash(u) * 2, th.dots || 'rgba(0,0,0,.12)');
+  if (wi === 6) { ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 1.5; for (let u = 0; u < 9; u++) { const t = (T * 0.16 + hash(u * 3) ) % 1; ctx.beginPath(); ctx.arc(x + 20 + hash(u + 1) * (w - 40) + Math.sin(T * 2 + u) * 4, gy - t * (gy - y), 2 + hash(u + 2) * 3, 0, 7); ctx.stroke(); } }
+  if (wi === 2 || wi === 4) { ctx.fillStyle = 'rgba(255,255,255,.85)'; for (let u = 0; u < 26; u++) { const t = (T * 0.09 + hash(u)) % 1; ctx.beginPath(); ctx.arc(x + ((hash(u + 11) + Math.sin(T * 0.7 + u) * 0.02) % 1) * w, y + t * (gy - y), 1.6 + hash(u + 3) * 1.4, 0, 7); ctx.fill(); } }
+  ctx.restore();
+}
+function drawHeroDino(i, x, y, w, h, animal) { // the animal standing on the habitat's ground; a tap makes it hop and roar
+  const c = cardSprite(i, false), bx = cardBox[i], gy = y + h - 40, feet = gy + 8, cxm = x + w / 2;
+  const k = Math.min(1.2, (w - 84) / bx.w, (feet - (y + 26)) / bx.h), ru = clamp((T - bookRoar.t) / 0.7, 0, 1), on = bookRoar.i === i && ru < 1;
+  const hop = on ? Math.sin(ru * Math.PI) * 24 : 0, sq = on ? 1 + 0.07 * Math.sin(ru * Math.PI * 4) : 1 + 0.012 * Math.sin(T * 2.4 + i);
+  ctx.save(); ctx.translate(cxm, feet - hop); ctx.scale(2 - sq, sq); ctx.drawImage(c, -140 * k, -(bx.cy + bx.h / 2) * k, 280 * k, 170 * k); ctx.restore();
+  if (on && animal) { ctx.save(); ctx.lineCap = 'round'; for (let r = 0; r < 3; r++) { const q = clamp(ru * 1.3 - r * 0.15, 0, 1); if (q <= 0) continue; ctx.strokeStyle = `rgba(255,255,255,${0.8 * (1 - q)})`; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(cxm + bx.w * k * 0.38, feet - bx.h * k * 0.72 - hop, 14 + q * 70, -0.7, 0.7); ctx.stroke(); } ctx.restore(); }
+}
+function lineBuild() { // every animal at one scale, smallest to largest
+  const ids = STECK.map((st, i) => i).filter(i => !STECK[i].fb && STECK[i].cmp !== 'everest').sort((a, b) => STECK[a].m - STECK[b].m || a - b);
+  for (const i of ids) cardSprite(i, !save.lvDone[i]); // measures cardBox
+  let ppm = 40; for (const i of ids) ppm = Math.min(ppm, 290 / (STECK[i].m * cardBox[i].h / cardBox[i].w));
+  const items = []; let x = 90; setFont(13);
+  for (const i of ids) { const dw = Math.max(5, STECK[i].m * ppm), nw = ctx.measureText(save.lvDone[i] ? FACTS[i].name : '???').width + 16, sw = Math.max(dw + 40, nw); items.push({ i, x, dw, sw, k: dw / cardBox[i].w }); x += sw + 26; }
+  return lineLayout = { items, ppm, total: x + 60 };
+}
+function drawLineup() {
+  const L = lineLayout || lineBuild(), PX = 28, PY = 76, PW = 904, PH = 392, GY = 408, maxS = Math.max(0, L.total - PW);
+  if (lineDrag) lineScroll = lineTarget; else lineScroll += (lineTarget - lineScroll) * Math.min(1, DT * 9);
+  lineTarget = clamp(lineTarget, 0, maxS); lineScroll = clamp(lineScroll, 0, maxS);
+  otxt('Grössenvergleich', W / 2, 38, 34, '#ffd34d', '#3b1d00', 9);
+  txt('Alle Tiere im gleichen Mass – zieh nach links: von winzig bis riesig!', W / 2, 64, 15, '#6b4a2b', 'center', 'normal');
+  ctx.save(); rr(PX, PY, PW, PH, 16); ctx.clip();
+  ctx.fillStyle = vgrad(PY, GY, '#e8f4ff', '#fff6dc'); ctx.fillRect(PX, PY, PW, PH);
+  ctx.fillStyle = '#d9c597'; ctx.fillRect(PX, GY, PW, PH - (GY - PY)); ctx.fillStyle = '#c4a96c'; ctx.fillRect(PX, GY, PW, 4);
+  const kh = Math.max(12, 1.4 * L.ppm); ctx.strokeStyle = 'rgba(138,106,58,.4)'; ctx.lineWidth = 1.5; ctx.setLineDash([6, 6]); ctx.beginPath(); ctx.moveTo(PX, GY - kh); ctx.lineTo(PX + PW, GY - kh); ctx.stroke(); ctx.setLineDash([]); // child-height guide line
+  for (let hm = 5; hm * L.ppm < GY - PY - 10; hm += 5) { const ly = GY - hm * L.ppm; ctx.strokeStyle = 'rgba(138,106,58,.25)'; ctx.lineWidth = 1.5; ctx.setLineDash([3, 7]); ctx.beginPath(); ctx.moveTo(PX, ly); ctx.lineTo(PX + PW, ly); ctx.stroke(); ctx.setLineDash([]); txt(`${hm} m`, PX + PW - 62, ly - 9, 12, '#a08a5a', 'right', 'normal'); } // height chart
+  lineHits = [];
+  for (const it of L.items) {
+    const sx = it.x - lineScroll; if (sx > PX + PW + 20 || sx + it.sw < PX - 20) continue;
+    const i = it.i, has = !!save.lvDone[i], st = STECK[i], bx = cardBox[i], cx = sx + it.sw / 2, dx = cx - it.dw / 2 + 8;
+    drawKid(dx - 14, GY, kh);
+    ctx.drawImage(cardSprite(i, !has), dx + it.dw / 2 - 140 * it.k, GY - (bx.cy + bx.h / 2) * it.k + 2, 280 * it.k, 170 * it.k);
+    ctx.strokeStyle = '#8a6a3a'; ctx.lineWidth = 2; ctx.lineCap = 'round'; if (it.dw > 20) { ctx.beginPath(); ctx.moveTo(dx, GY + 9); ctx.lineTo(dx + it.dw, GY + 9); ctx.moveTo(dx, GY + 6); ctx.lineTo(dx, GY + 12); ctx.moveTo(dx + it.dw, GY + 6); ctx.lineTo(dx + it.dw, GY + 12); ctx.stroke(); }
+    txt(has ? FACTS[i].name : '???', cx, GY + 26, 13, has ? '#2b1a00' : '#8a7a5a'); txt(has ? `${st.m >= 10 ? Math.round(st.m) : String(st.m).replace('.', ',')} m` : '? m', cx, GY + 44, 12, '#6b4a2b', 'center', 'normal');
+    if (st.m < 1.4 && has) txt('winzig!', cx, GY - kh - 10, 12, '#a0772a', 'center', 'normal');
+    if (has && bookSel < 0) lineHits.push({ x: sx, y: GY - 300, w: it.sw, h: 350, i });
+  }
+  ctx.restore();
+  rr(PX, PY, PW, PH, 16); ctx.lineWidth = 2.5; ctx.strokeStyle = '#a88a52'; ctx.stroke();
+  drawKid(PX + 22, PY + 36, 26); txt('Gestrichelte Linie = ein Kind (1,4 m)', PX + 40, PY + 22, 12, '#6b4a2b', 'left', 'normal');
+  if (maxS > 0) { const tx = 160, tw = 640; rr(tx, 484, tw, 8, 4); ctx.fillStyle = 'rgba(80,50,20,.22)'; ctx.fill(); const th2 = Math.max(40, tw * PW / L.total); rr(tx + (tw - th2) * lineScroll / maxS, 484, th2, 8, 4); ctx.fillStyle = '#c98a3a'; ctx.fill(); }
+  if (bookSel < 0) {
+    button('Zurück', 26, 14, 132, 42, () => { bookMode = 'grid'; }, { size: 20, icon: icon('back') });
+    for (const dir of [-1, 1]) { if (dir < 0 ? lineTarget <= 0 : lineTarget >= maxS) continue; const ax = dir < 0 ? PX + 30 : PX + PW - 30, ay = 250, hov = 1 + 0.06 * Math.sin(T * 4 + dir);
+      ctx.save(); ctx.translate(ax, ay); ctx.scale(hov, hov); circle(0, 4, 24, 'rgba(0,0,0,.3)'); circle(0, 0, 24, '#f4b400'); ctx.lineWidth = 3; ctx.strokeStyle = '#7a4a00'; ctx.beginPath(); ctx.arc(0, 0, 24, 0, 7); ctx.stroke(); ctx.strokeStyle = '#3b1d00'; ctx.lineWidth = 5.5; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.beginPath(); ctx.moveTo(-dir * 5, -10); ctx.lineTo(dir * 6, 0); ctx.lineTo(-dir * 5, 10); ctx.stroke(); ctx.restore();
+      buttons.push({ x: ax - 30, y: ay - 30, w: 60, h: 60, cb: () => { lineTarget = clamp(lineTarget + dir * 560, 0, maxS); } }); }
+  }
+}
+function lineDown(x, y) { if (x > 28 && x < 932 && y > 76 && y < 468) lineDrag = { x0: x, s0: lineTarget, moved: 0 }; }
+function lineMove(x) { if (!lineDrag) return; lineDrag.moved = Math.max(lineDrag.moved, Math.abs(x - lineDrag.x0)); if (lineLayout) lineTarget = clamp(lineDrag.s0 - (x - lineDrag.x0), 0, Math.max(0, lineLayout.total - 904)); }
+function lineUp(x, y) { const d = lineDrag; lineDrag = null; if (!d || d.moved > 8 || scene !== 'book' || bookMode !== 'lineup' || bookSel >= 0) return; const h = lineHits.find(q => x >= q.x && x <= q.x + q.w && y >= q.y && y <= q.y + q.h); if (h) { SFX.click(); bookSel = h.i; save.bookSeen[h.i] = true; writeSave(); } }
 function drawBook() {
   leatherCover();
-  const found = save.lvDone.filter(Boolean).length;
+  if (!save.bookSeen) save.bookSeen = [];
+  if (bookMode === 'lineup') drawLineup(); else drawBookGrid();
+  if (bookSel >= 0) drawBookDetail();
+}
+function drawBookGrid() {
+  const found = save.lvDone.filter(Boolean).length, day = adventDay();
   if (bookSel < 0) {
-    otxt('Oli & Fabios Dino-Buch', W / 2, 40, 34, '#ffd34d', '#3b1d00', 9);
-    const bw = 380, bx = (W - bw) / 2, by = 62, fr = found / FACTS.length; // progress pill
+    otxt('Oli & Fabios Dino-Buch', W / 2, 38, 34, '#ffd34d', '#3b1d00', 9);
+    const bw = 380, bx = (W - bw) / 2, by = 60, fr = found / FACTS.length; // progress pill
     rr(bx, by, bw, 20, 10); ctx.fillStyle = 'rgba(80,50,20,.22)'; ctx.fill();
     if (fr > 0) { ctx.save(); rr(bx, by, bw, 20, 10); ctx.clip(); ctx.fillStyle = vgrad(by, by + 20, '#ffe27a', '#f0b400'); ctx.fillRect(bx, by, Math.max(20, bw * fr), 20); ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.fillRect(bx, by + 2, Math.max(20, bw * fr), 5); ctx.restore(); }
     rr(bx, by, bw, 20, 10); ctx.lineWidth = 2; ctx.strokeStyle = '#8a6a3a'; ctx.stroke();
     txt(found >= FACTS.length ? 'Alle Karten gefunden – echte Dino-Forscher!' : `${found} von ${FACTS.length} Karten – jeden Tag eine neue!`, W / 2, by + 11, 13, '#3b1d00');
+    for (let g = 0; g < 8; g++) { // one ribbon per world: name, picture and three stars
+      const rx = 28 + (g % 2) * 456, ry = 88 + Math.floor(g / 2) * 104, rw = 446, wi = LEVEL_THEMES[g * 3], th = WORLDS[wi], got = [0, 1, 2].filter(k => save.lvDone[g * 3 + k]).length, full = got === 3;
+      if (full) { ctx.save(); ctx.shadowColor = 'rgba(255,200,40,.8)'; ctx.shadowBlur = 10; rr(rx, ry, rw, 18, 9); ctx.fillStyle = '#ffe9a0'; ctx.fill(); ctx.restore(); }
+      rr(rx, ry, rw, 18, 9); ctx.fillStyle = vgrad(ry, ry + 18, '#fffaf0', '#f0e2bf'); ctx.fill(); ctx.lineWidth = full ? 2.5 : 1.5; ctx.strokeStyle = full ? '#e8a317' : shade(th.sky[0], 0.9); ctx.stroke();
+      ctx.save(); rr(rx + 5, ry + 2, 26, 14, 4); ctx.clip(); drawThemeThumb(wi, rx + 5, ry + 2, 26, 14); ctx.restore();
+      txt(th.name, rx + 39, ry + 10, 13, '#3b2410', 'left');
+      if (full) txt('Komplett!', rx + rw / 2 + 20, ry + 10, 12, '#9a6a00');
+      for (let k = 0; k < 3; k++) drawStar(rx + rw - 16 - (2 - k) * 17, ry + 9.5, 7, k < got ? '#ffc400' : 'rgba(80,50,20,.25)');
+    }
   }
-  if (!save.bookSeen) save.bookSeen = [];
   for (let i = 0; i < FACTS.length; i++) {
-    const lv = LEVELS[i], th = WORLDS[lv.wi], has = !!save.lvDone[i];
-    const x = 28 + (i % 6) * 152, y = 94 + Math.floor(i / 6) * 91, w = 142, h = 86, isNew = has && !save.bookSeen[i];
+    const lv = LEVELS[i], th = WORLDS[lv.wi], has = !!save.lvDone[i], boss = !!BOSS_DAYS[i + 1], future = i + 1 > day;
+    const x = 28 + (i % 6) * 152, y = 88 + Math.floor(i / 6) * 104 + 21, w = 142, h = 78, isNew = has && !save.bookSeen[i];
     ctx.save(); ctx.translate(x + w / 2, y + h / 2); ctx.rotate((hash(i * 3 + 1) - 0.5) * 0.07); ctx.translate(-w / 2, -h / 2);
     rr(2, 4, w, h, 11); ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.fill();
-    rr(0, 0, w, h, 11); ctx.fillStyle = has ? '#fffaf0' : '#e6d8b8'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = has ? '#8a6a3a' : '#b8a888'; ctx.stroke();
+    rr(0, 0, w, h, 11); ctx.fillStyle = has ? '#fffaf0' : '#e6d8b8'; ctx.fill(); ctx.lineWidth = boss ? 3.5 : 2; ctx.strokeStyle = boss ? (has ? '#e8a317' : '#cfae62') : has ? '#8a6a3a' : '#b8a888'; ctx.stroke();
     rr(5, 5, w - 10, h - 10, 7); ctx.fillStyle = has ? vgrad(5, h - 5, shade(th.sky[1], 1.15), th.sky[1]) : '#d8c8a8'; ctx.fill();
-    if (has) { drawCardArt(i, w / 2, 34, 118, false); ctx.save(); rr(5, 5, w - 10, h - 10, 7); ctx.clip(); ctx.fillStyle = 'rgba(255,250,240,.9)'; ctx.fillRect(5, h - 26, w - 10, 21); ctx.restore(); fitTxt(FACTS[i].name, w / 2, h - 15, w - 22, 16, 11, '#2b1a00'); foil(5, 5, w - 10, h - 10, 7, T + i); }
-    else { ctx.save(); rr(5, 5, w - 10, h - 10, 7); ctx.clip(); ctx.globalAlpha = 0.45; ctx.fillStyle = vgrad(5, h - 5, th.sky[0], th.sky[1]); ctx.fillRect(5, 5, w - 10, h - 10); ctx.globalAlpha = 1; ctx.restore(); drawCardArt(i, w / 2, 34, 118, true); txt(`Tür ${i + 1}`, w / 2, h - 15, 14, '#a8987a', 'center', 'normal'); txt('?', w - 18, 20, 22, 'rgba(120,90,50,.5)'); }
+    if (has) { drawCardArt(i, w / 2, 30, 108, false); ctx.save(); rr(5, 5, w - 10, h - 10, 7); ctx.clip(); ctx.fillStyle = 'rgba(255,250,240,.9)'; ctx.fillRect(5, h - 25, w - 10, 20); ctx.restore(); fitTxt(FACTS[i].name, w / 2, h - 15, w - 22, 16, 11, '#2b1a00'); foil(5, 5, w - 10, h - 10, 7, T + i); }
+    else { ctx.save(); rr(5, 5, w - 10, h - 10, 7); ctx.clip(); ctx.globalAlpha = 0.45; ctx.fillStyle = vgrad(5, h - 5, th.sky[0], th.sky[1]); ctx.fillRect(5, 5, w - 10, h - 10); ctx.globalAlpha = 1; ctx.restore(); drawCardArt(i, w / 2, 30, 108, true); txt(future ? `ab ${i + 1}. Dez.` : `Tür ${i + 1}`, w / 2, h - 15, 14, '#5e4a2a', 'center', 'normal'); txt('?', w - 18, 20, 22, 'rgba(120,90,50,.5)'); }
+    if (boss) { ctx.save(); ctx.translate(15, 15); ctx.rotate(-0.2); drawStar(0, 0, 11, has ? '#ffc400' : '#cfae62'); ctx.lineWidth = 1.5; ctx.strokeStyle = '#7a4a00'; ctx.stroke(); ctx.restore(); }
     if (isNew) { ctx.save(); ctx.translate(w - 24, 18); ctx.rotate(0.35); rr(-20, -9, 40, 18, 5); ctx.fillStyle = '#e53935'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#fff'; ctx.stroke(); txt('NEU', 0, 1, 13, '#fff'); ctx.restore(); }
     ctx.restore();
-    if (bookSel < 0) buttons.push({ x, y, w, h, cb: () => { if (has) { bookSel = i; save.bookSeen[i] = true; writeSave(); } else toast(`Diese Karte findest du in Tür ${i + 1}.`, '#fff'); } });
+    if (bookSel < 0) buttons.push({ x, y, w, h, cb: () => { if (has) { bookSel = i; save.bookSeen[i] = true; writeSave(); } else toast(future ? `Diese Karte gibt es ab dem ${i + 1}. Dezember.` : `Diese Karte findest du in Tür ${i + 1}.`, '#fff'); } });
   }
-  if (bookSel < 0) button('Zurück', W / 2 - 100, H - 72, 200, 46, () => go('map'), { size: 24, icon: icon('back') });
-  else {
+  if (bookSel < 0) { button('Zurück', 26, 14, 132, 42, () => go('map'), { size: 20, icon: icon('back') }); button('Grössen', W - 158, 14, 132, 42, () => { bookMode = 'lineup'; lineLayout = null; lineScroll = lineTarget = 0; }, { size: 20, color: '#8fd16a' }); }
+}
+function drawBookDetail() {
+  {
     if (bookAnim.sel !== bookSel) { bookAnim.sel = bookSel; bookAnim.t = T; }
-    const th = WORLDS[LEVELS[bookSel].wi], st = STECK[bookSel], f = FACTS[bookSel], pu = clamp((T - bookAnim.t) * 7, 0, 1), pop = 0.94 + 0.06 * (1 - Math.pow(1 - pu, 3));
+    const wi = LEVELS[bookSel].wi, th = WORLDS[wi], st = STECK[bookSel], f = FACTS[bookSel], pu = clamp((T - bookAnim.t) * 7, 0, 1), pop = 0.94 + 0.06 * (1 - Math.pow(1 - pu, 3)), animal = (st.dk !== 'none' && st.dk !== 'sun') || bookSel === 19;
+    const [head, call = ''] = f.text.split('|'), RX = 470, RW = 412, HX = 78, HY = 44, HW = 360, HH = 186;
     ctx.save(); ctx.translate(W / 2, H / 2); ctx.scale(pop, pop); ctx.translate(-W / 2, -H / 2); ctx.globalAlpha = 0.4 + 0.6 * pu;
-    panel(80, 34, 800, 474);
-    ctx.save(); rr(112, 66, 350, 196, 18); ctx.clip(); ctx.fillStyle = vgrad(66, 262, shade(th.sky[1], 1.2), th.sky[1]); ctx.fillRect(112, 66, 350, 196); ctx.restore(); rr(112, 66, 350, 196, 18); ctx.lineWidth = 4; ctx.strokeStyle = '#fffaf0'; ctx.stroke(); rr(110, 64, 354, 200, 20); ctx.lineWidth = 2; ctx.strokeStyle = '#8a6a3a'; ctx.stroke();
-    drawCardArt(bookSel, 287, 160, 296, false); foil(112, 66, 350, 196, 18, T);
-    { const wl = th.name; setFont(13); const pw = ctx.measureText(wl).width + 50; rr(122, 228, pw, 26, 13); ctx.fillStyle = 'rgba(255,250,235,.92)'; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = '#b8a070'; ctx.stroke(); ctx.save(); rr(126, 232, 28, 18, 4); ctx.clip(); drawThemeThumb(LEVELS[bookSel].wi, 126, 232, 28, 18); ctx.restore(); txt(wl, 162, 242, 13, '#3b2410', 'left'); }
-    drawSizeRuler(112, 272, 350, 156, st, th);
-    fitTxt(f.name, 496, 98, 352, 38, 26, '#3b2410', 'left'); txt(`Tür ${bookSel + 1} · ${LEVELS[bookSel].title}`, 496, 132, 17, '#8a6a3a', 'left', 'normal');
-    let fs = 21, lines; for (; fs > 15; fs--) { lines = wrapLines(f.text, 352, fs); if (166 + (lines.length - 1) * fs * 1.28 <= 316) break; }
-    lines.forEach((l, i) => txt(l, 496, 166 + i * fs * 1.28, fs, '#3b2410', 'left', 'normal'));
-    if (st.d === '–') steckChip(496, 336, 352, st.l, st.e, (x, y) => drawHourglass(x, y)); else { steckChip(496, 336, 172, st.l, st.e, (x, y) => drawHourglass(x, y)); steckChip(676, 336, 172, 'Frisst', st.d, (x, y) => drawDietIcon(st.dk, x, y)); }
-    steckChip(496, 386, 352, st.nl || 'Name bedeutet', st.nm, drawNameIcon);
-    ctx.strokeStyle = 'rgba(138,106,58,.35)'; ctx.lineWidth = 2; ctx.setLineDash([2, 6]); ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(496, 322); ctx.lineTo(848, 322); ctx.stroke(); ctx.setLineDash([]);
-    button('Schliessen', W / 2 - 110, 444, 220, 46, () => { bookSel = -1; }, { icon: icon('check'), size: 24 });
+    panel(46, 12, 868, 516);
+    drawHabitat(wi, HX, HY, HW, HH); drawHeroDino(bookSel, HX, HY, HW, HH, animal); foil(HX, HY, HW, HH, 18, T);
+    rr(HX, HY, HW, HH, 18); ctx.lineWidth = 4; ctx.strokeStyle = '#fffaf0'; ctx.stroke(); rr(HX - 2, HY - 2, HW + 4, HH + 4, 20); ctx.lineWidth = 2; ctx.strokeStyle = '#8a6a3a'; ctx.stroke();
+    if (!bookTapped) { ctx.globalAlpha *= 0.65 + 0.35 * Math.sin(T * 4); otxt(animal ? 'Tippe – er brüllt!' : 'Tippe aufs Bild!', HX + HW - 14, HY + HH - 21, 14, '#fff', 'rgba(0,0,0,.6)', 4, 'right'); ctx.globalAlpha = 0.4 + 0.6 * pu; }
+    { const wl = th.name; setFont(13); const pw = ctx.measureText(wl).width + 50; rr(HX + 10, HY + HH - 34, pw, 26, 13); ctx.fillStyle = 'rgba(255,250,235,.93)'; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = '#b8a070'; ctx.stroke(); ctx.save(); rr(HX + 14, HY + HH - 30, 28, 18, 4); ctx.clip(); drawThemeThumb(wi, HX + 14, HY + HH - 30, 28, 18); ctx.restore(); txt(wl, HX + 50, HY + HH - 21, 13, '#3b2410', 'left'); }
+    if (BOSS_DAYS[bookSel + 1]) { rr(HX + HW - 112, HY + 10, 102, 24, 12); ctx.fillStyle = '#ffc400'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#7a4a00'; ctx.stroke(); drawStar(HX + HW - 94, HY + 22, 8, '#fff3b0'); txt('Boss-Karte', HX + HW - 52, HY + 22, 12, '#3b1d00'); }
+    drawSizeRuler(HX, 240, HW, 152, st, th, bookSel);
+    fitTxt(f.name, RX, 68, RW, 40, 26, '#3b2410', 'left'); txt(`Tür ${bookSel + 1} · ${LEVELS[bookSel].title}`, RX, 104, 17, '#8a6a3a', 'left', 'normal');
+    let hs = 24, hl; for (; hs > 17; hs--) { hl = wrapLines(head, RW, hs); if (hl.length <= 3) break; }
+    hl.forEach((l, i) => txt(l, RX, 138 + i * hs * 1.25, hs, '#3b2410', 'left'));
+    const cTop = 138 + (hl.length - 1) * hs * 1.25 + hs * 0.5 + 14; let cs = 20, cl; for (; cs > 14; cs--) { cl = wrapLines(call, RW - 34, cs); if (cTop + 38 + cl.length * cs * 1.3 + 8 <= 394) break; }
+    const cH = Math.max(38 + cl.length * cs * 1.3 + 8, 392 - cTop); rr(RX, cTop, RW, cH, 14); ctx.fillStyle = '#fff2c4'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#e2b94d'; ctx.stroke();
+    drawBulb(RX + 22, cTop + 20); txt('Wusstest du?', RX + 40, cTop + 20, 14, '#9a6a00', 'left');
+    { const y0 = cTop + 36 + (cH - 36 - cl.length * cs * 1.3) / 2 + cs * 0.65; cl.forEach((l, i) => txt(l, RX + 16, y0 + i * cs * 1.3, cs, '#3b2410', 'left', 'normal')); }
+    if (st.d !== '–') { setFont(13); const dw = ctx.measureText('Frisst: ' + st.d).width + 46; rr(HX + 10, HY + 10, dw, 26, 13); ctx.fillStyle = 'rgba(255,250,235,.93)'; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = '#b8a070'; ctx.stroke(); ctx.save(); ctx.translate(HX + 26, HY + 23); ctx.scale(0.8, 0.8); drawDietIcon(st.dk, 0, 0); ctx.restore(); txt('Frisst: ' + st.d, HX + 42, HY + 24, 13, '#3b2410', 'left'); }
+    const cy = 402;
+    timelineChip(HX, cy, 400, st);
+    steckChip(490, cy, 392, st.nl || 'Name bedeutet', st.nm, drawNameIcon);
+    button('Schliessen', W / 2 - 110, 464, 220, 44, () => { bookSel = -1; }, { icon: icon('check'), size: 24 });
     ctx.restore();
     buttons.unshift({ x: 0, y: 0, w: W, h: H, cb: () => { bookSel = -1; } });
+    buttons.push({ x: HX, y: HY, w: HW, h: HH, silent: true, cb: () => { bookTapped = true; bookRoar.t = T; bookRoar.i = bookSel; if (animal) SFX.roar(); else SFX.sparkle(); } });
     for (const dir of [-1, 1]) { // previous / next found card
       let j = bookSel; do { j = (j + dir + FACTS.length) % FACTS.length; } while (!save.lvDone[j] && j !== bookSel);
       if (j === bookSel) continue;
-      const ax = dir < 0 ? 44 : W - 44, ay = 270, hov = 1 + 0.06 * Math.sin(T * 4 + dir);
+      const ax = dir < 0 ? 46 : W - 46, ay = 270, hov = 1 + 0.06 * Math.sin(T * 4 + dir);
       ctx.save(); ctx.translate(ax, ay); ctx.scale(hov, hov); circle(0, 4, 27, 'rgba(0,0,0,.3)'); circle(0, 0, 27, '#f4b400'); ctx.lineWidth = 3; ctx.strokeStyle = '#7a4a00'; ctx.beginPath(); ctx.arc(0, 0, 27, 0, 7); ctx.stroke();
       ctx.strokeStyle = '#3b1d00'; ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.beginPath(); ctx.moveTo(-dir * 6, -12); ctx.lineTo(dir * 7, 0); ctx.lineTo(-dir * 6, 12); ctx.stroke(); ctx.restore();
       buttons.push({ x: ax - 34, y: ay - 34, w: 68, h: 68, cb: () => { bookSel = j; save.bookSeen[j] = true; writeSave(); } });
@@ -5745,8 +5869,11 @@ canvas.addEventListener('pointerdown', e => {
   if (scene === 'splash') { startSplash(); return; }
   if (hitButtons(x, y)) return;
   if (scene === 'title') pressTitle();
+  else if (scene === 'book' && bookMode === 'lineup') lineDown(x, y);
   else if (scene === 'play' && !G.overlay) { jump(); G.holdJump = e.pointerId; }
 });
+window.addEventListener('pointermove', e => { if (lineDrag) lineMove(toLogical(e).x); });
+for (const ev of ['pointerup', 'pointercancel']) window.addEventListener(ev, e => { if (lineDrag) { const q = toLogical(e); lineUp(q.x, q.y); } });
 for (const ev of ['pointerup', 'pointercancel']) window.addEventListener(ev, e => { titlePress = 0; duckUp(e.pointerId); if (G && G.holdJump === e.pointerId) G.holdJump = null; });
 window.addEventListener('keyup', e => { if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') duckUp('key'); if (G && G.holdJump === 'key' && (e.key === ' ' || e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W')) G.holdJump = null; });
 window.addEventListener('keydown', e => {
@@ -5818,5 +5945,5 @@ function frame(now) {
 requestAnimationFrame(frame);
 
 // debug hook for testing in the browser console
-window.__dino = { bookUnread, get mus() { return mus; }, useAudio(ctx) { AC = ctx; noiseBuf = null; buildAudioGraph(); mus.key = null; mus.trans = null; mus.saved = {}; mus.g = 1; mus.vt = 1; amb.wi = null; amb.node = null; amb.lvl = -1; }, musicTick, SFX, ambTick, ambEvent, AMB, SONGS, startSplash, get splash() { return splash; }, bossDmg, medalTotal, worldMedalsDone, chestFull, chestParty, get chestPartyT() { return chestPartyT; }, startDaily, dailyWorld, dayKey, get dialog() { return dialog; }, DAY_STORY, DAY_AFTER, launchLevel, finishLevel, fmt, cleanNick, boardAdd, boardQualifies, boardAll, endRun, get scene() { return scene; }, get doorOverlay() { return doorOverlay; }, get buttons() { return buttons; }, pitFall, get lowfx() { return LOWFX; }, set lowfx(v) { LOWFX = v; }, get G() { return G; }, get E() { return E; }, save, startLevel, startEnding, go, jump, roar, updatePlay, updateEnding, answer, openRiddle, retry, tapEgg, openGate, playTreasure, drawPlay, duckDown, duckUp, shootFire, drawShop, buildSong, dash, LEVELS, adventDay, openDoorGift, giftFor, clickDoor, skillsFor, bookOpen(i) { bookSel = i; }, sheet(p) { sheetPage = p || 'hero'; scene = 'sheet'; } };
+window.__dino = { bookUnread, get mus() { return mus; }, useAudio(ctx) { AC = ctx; noiseBuf = null; buildAudioGraph(); mus.key = null; mus.trans = null; mus.saved = {}; mus.g = 1; mus.vt = 1; amb.wi = null; amb.node = null; amb.lvl = -1; }, musicTick, SFX, ambTick, ambEvent, AMB, SONGS, startSplash, get splash() { return splash; }, bossDmg, medalTotal, worldMedalsDone, chestFull, chestParty, get chestPartyT() { return chestPartyT; }, startDaily, dailyWorld, dayKey, get dialog() { return dialog; }, DAY_STORY, DAY_AFTER, launchLevel, finishLevel, fmt, cleanNick, boardAdd, boardQualifies, boardAll, endRun, get scene() { return scene; }, get doorOverlay() { return doorOverlay; }, get buttons() { return buttons; }, pitFall, get lowfx() { return LOWFX; }, set lowfx(v) { LOWFX = v; }, get G() { return G; }, get E() { return E; }, save, startLevel, startEnding, go, jump, roar, updatePlay, updateEnding, answer, openRiddle, retry, tapEgg, openGate, playTreasure, drawPlay, duckDown, duckUp, shootFire, drawShop, buildSong, dash, LEVELS, adventDay, openDoorGift, giftFor, clickDoor, skillsFor, FACTS, STECK, bookOpen(i) { bookSel = i; }, bookMode(m) { bookMode = m; lineLayout = null; lineScroll = lineTarget = 0; }, lineupScroll(v) { lineTarget = lineScroll = v; }, openBookCard, sheet(p) { sheetPage = p || 'hero'; scene = 'sheet'; } };
 })();

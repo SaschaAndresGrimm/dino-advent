@@ -669,3 +669,26 @@ test('boss damage looks: bossDmg grows with every hit and phase, and is full onc
     for (let i = 1; i < seq.length; i++) expect(seq[i]).toBeGreaterThan(seq[i - 1]);
   }
 });
+
+test('book: size lineup scrolls and opens a card, results card opens the book', async ({ game, page }) => {
+  await game.open({ lvDone: new Array(24).fill(1), unlocked: 24 });
+  await game.eval(() => { const d = window.__dino; d.go('book'); d.bookMode('lineup'); });
+  await page.waitForTimeout(300);
+  await game.eval(() => window.__dino.lineupScroll(900));
+  await page.waitForTimeout(300);
+  await game.eval(() => window.__dino.bookMode('grid'));
+  // finishing a level for the first time shows the card; tapping it opens that card in the Dino-Buch
+  await game.eval(() => { const d = window.__dino; d.save.lvDone[8] = 0; d.startLevel(8); const G = d.G; G.startT = 0; G.coach = null; G.L.coach.forEach(c => (c.done = true)); d.finishLevel(); });
+  await page.waitForTimeout(1800);
+  await page.mouse.click(480, 150);
+  await page.waitForTimeout(300);
+  expect(await game.eval(() => window.__dino.scene)).toBe('book');
+  expect(await game.eval(() => window.__dino.save.bookSeen[8])).toBe(true);
+  expect(game.errors).toEqual([]);
+});
+
+test('book data: every card has headline|detail text and a full STECK entry', async ({ game }) => {
+  await game.open();
+  const bad = await game.eval(() => { const d = window.__dino, out = []; if (d.FACTS.length !== 24 || d.STECK.length !== 24) out.push('length'); d.FACTS.forEach((f, i) => { const st = d.STECK[i], p = f.text.split('|'); if (p.length !== 2 || p[0].length < 20 || p[1].length < 10) out.push('text ' + i); if (!st || !st.tl || st.tl.length !== 2 || !st.nm || !st.l || !st.e || (st.m === 0 && !st.cmp)) out.push('steck ' + i); if (/ß/.test(f.text + st.nm)) out.push('ss ' + i); }); return out; });
+  expect(bad).toEqual([]);
+});
