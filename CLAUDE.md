@@ -46,6 +46,8 @@ Run both check and test before every commit. Playwright needs `npx playwright in
 
 - **Followers:** Chili (145 px behind Rex), the baby (`FOL.baby`) and Kiwi (`FOL.kiwi`) replay Rex's path: `trailPush` records his height by world x each frame, `followY(x)` reads it (never below `GROUND`, plus a safety hop over pits), so they hop where Rex hopped without per-obstacle rules. Anything that teleports the player or respawns him must call `resetTrail()`. Keep follower offsets small enough to stay on screen (Rex is at screen x 270). The touch buttons (`duckPos()`, `dashPos()`, BRÜLL) live in the soil band below the ground line so they never hide the followers; the trail also remembers the platform Rex stood on, so followers ride a crumbled step down.
 
+- **Underwater roar (Blasen-Brüll):** in swim levels `roar()` uses `SFX.roarWater` and `swimRoar()` (bubbles, pale-blue ring, a wave front via `p.bubT`) and reacts to more than land: jellies drift out of Rex's lane (`o.ty`), urchins get bubble-wrapped (`o.scared`, no hitbox, 3 amber), amber within 360 px is pulled to Rex (`a.pull`). Never make any of this required to pass a level.
+
 ## Testing pitfalls
 - `tests/levels.spec.js` has a bot (`PLAY`) that must be able to finish every level. New obstacles usually need a rule there. If it fails with `done:false, steps:60000` the bot is stuck: step it in small chunks and print position, nearby pits/platforms/obstacles.
 - Tests run with service workers blocked and a fake clock only where they say so (`calendar.spec.js`).

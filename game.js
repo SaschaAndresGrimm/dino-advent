@@ -125,6 +125,7 @@ const SFX = {
   jump() { tone(330, 0.16, 'square', 0.07, 660); },
   jump2() { tone(500, 0.16, 'square', 0.07, 950); },
   roar() { duck(0.4, 0.28); noise(0.7, 0.45, 450); tone(120, 0.65, 'sawtooth', 0.16, 50); tone(180, 0.5, 'sawtooth', 0.09, 70); },
+  roarWater() { duck(0.4, 0.28); noise(0.8, 0.4, 240); tone(90, 0.7, 'sawtooth', 0.14, 42, 0, { lp: 520, lpTo: 140 }); tone(140, 0.55, 'sawtooth', 0.08, 60, 0, { lp: 420, lpTo: 130 }); for (let i = 0; i < 6; i++) { const f = 420 + Math.random() * 520; tone(f, 0.08, 'sine', 0.05, f * 1.8, 0.06 + i * 0.07); } }, // the roar muffled by water, with a gurgle of bubbles on top
   dash() { noise(0.28, 0.35, 2600); tone(300, 0.25, 'sawtooth', 0.07, 900); },
   amber() { tone(1250, 0.07, 'sine', 0.08); tone(1680, 0.1, 'sine', 0.07, null, 0.05); },
   amberNote(c) { // pickup chains climb the scale of the song that is playing, snapped to its 16th-note grid
@@ -2655,8 +2656,8 @@ function buildLevel(wi, endless, LV) { // LV = the calendar level spec (or undef
     avalanche: x => { firstTip('avalanche', x - 1200, 'Steinlawine! Spring drüber oder brüll sie kaputt!'); for (let i = 0; i < 2; i++) L.obs.push({ type: 'rollrock', x: x + 110 + i * 270, rot: 0 }); return 440; },
     // ---- underwater: swim ----
     coralgate: x => { const gh = 255, gy = 100 + Math.floor(R() * (GROUND - 100 - gh - 30)); L.obs.push({ type: 'cgate', x: x + 90, gapY: gy, gapH: gh }); for (let i = 0; i < 3; i++) L.amb.push({ x: x + 40 + i * 50, y: gy + gh / 2 + (i - 1) * 12, got: false }); return 190; },
-    jellies: x => { firstTip('jelly', x - 1200, 'Quallen! Schwimm drumherum.'); for (let i = 0; i < 3; i++) L.obs.push({ type: 'jelly', x: x + 90 + i * 230, y0: 175 + (i % 2) * 155 + R() * 15, amp: 24 + R() * 16, ph: R() * 6, y: 220 }); return 700; },
-    urchins: x => { firstTip('urchin', x - 1200, 'Seeigel am Boden! Schwimm drüber.'); for (let i = 0; i < 3; i++) L.obs.push({ type: 'urchin', x: x + 60 + i * 130 }); for (let i = 0; i < 4; i++) L.amb.push({ x: x + 40 + i * 90, y: 200 + Math.sin(i) * 20, got: false }); return 440; },
+    jellies: x => { firstTip('jelly', x - 1200, 'Quallen! Schwimm drumherum – oder brüll Blasen, dann schwimmen sie weg!'); for (let i = 0; i < 3; i++) L.obs.push({ type: 'jelly', x: x + 90 + i * 230, y0: 175 + (i % 2) * 155 + R() * 15, amp: 24 + R() * 16, ph: R() * 6, y: 220 }); return 700; },
+    urchins: x => { firstTip('urchin', x - 1200, 'Seeigel am Boden! Schwimm drüber – oder brüll sie in eine Blase!'); for (let i = 0; i < 3; i++) L.obs.push({ type: 'urchin', x: x + 60 + i * 130 }); for (let i = 0; i < 4; i++) L.amb.push({ x: x + 40 + i * 90, y: 200 + Math.sin(i) * 20, got: false }); return 440; },
     sword: x => { firstTip('sword', x - 1200, 'Ein Schwertfisch! Schwimm aus dem Weg – oder brüll ihn weg!'); L.obs.push({ type: 'sword', x: x + 220, y: 230 + R() * 150, spd: 340, ph: 0, alpha: 1 }); return 260; },
     bubbles: x => { for (let i = 0; i < 9; i++) L.amb.push({ x: x + i * 50, y: 270 + Math.sin(i * 0.8) * 95, got: false }); return 440; },
     rockwall: x => { L.obs.push({ type: 'boulder', x: x + 90, w: 110, h: 270 }); for (let i = 0; i < 3; i++) L.amb.push({ x: x + 40 + i * 50, y: 150, got: false }); return 170; },
@@ -2892,13 +2893,18 @@ function roar() {
   if (p.fireT > 0 && !G.boss) { shootFire(); return; }
   if (G.boss && G.boss.state === 'duel') { G.boss.meter = Math.min(1, G.boss.meter + 0.2); SFX.roar(); G.shake = Math.max(G.shake, 0.35); G.rings.push({ x: p.wx + 80, y: p.y - 100, r: 20, a: 1, c: '255,220,120' }); p.roarT = 0.3; return; }
   if (p.roarCd > 0 || G.startT > 0.3) return;
-  p.roarT = 0.55; p.roarMax = G.boss ? 1.0 : 3.0; p.roarCd = p.roarMax; SFX.roar(); G.shake = Math.max(G.shake, 0.3);
+  const sw = G.L.swim;
+  p.roarT = 0.55; p.roarMax = G.boss ? 1.0 : 3.0; p.roarCd = p.roarMax; if (sw) SFX.roarWater(); else SFX.roar(); G.shake = Math.max(G.shake, sw ? 0.1 : 0.3); // water dampens the shake
   const sc = G.L.secret; if (sc && sc.kind === 'tree' && sc.state === 'idle' && sc.x - p.wx > -80 && sc.x - p.wx < 640) openSecret(sc); // the roar shakes the big tree
-  G.rings.push({ x: p.wx + 80, y: p.y - 100, r: 20, a: 1, c: '255,220,120' });
+  if (sw) swimRoar(); else G.rings.push({ x: p.wx + 80, y: p.y - 100, r: 20, a: 1, c: '255,220,120' });
   for (const o of G.L.obs) {
     if (o.dead || o.scared) continue;
     const d = o.x - p.wx; if (d < -40 || d > 360) continue;
-    if (o.type === 'boulder' || o.type === 'rollrock') {
+    if (sw && o.type === 'jelly') { // the bubble wave shoves jellies out of Rex's lane (they float up or down, never pop)
+      const my = p.y - 50; o.ty = my < 270 ? 350 : 150; burst(o.x, o.y || o.y0, 7, ['#ffd6ec', '#fff', '#e8ffff'], 130, -90, 5, 0.8);
+    } else if (sw && o.type === 'urchin') { // an urchin gets wrapped in a bubble and drifts up, harmless; it leaves a little amber
+      o.scared = true; o.rise = 0; o.alpha = 1; SFX.bubble(); if (!o.minion) for (let i = 0; i < 3; i++) G.L.amb.push({ x: o.x - 30 + i * 30, y: GROUND - 85 - i * 25, got: false });
+    } else if (o.type === 'boulder' || o.type === 'rollrock') {
       o.dead = true; SFX.smash(); const th = WORLDS[G.wi];
       burst(o.x, GROUND - (o.h || 40) / 2, 22, o.type === 'icicle' ? ['#e0f4ff', '#9fd3ff', '#fff'] : [th.rock, '#5a4a3a', '#a89888'], 420, 1300, 10, 0.9);
       for (let i = 0; i < 3; i++) G.L.amb.push({ x: o.x + 40 + i * 40, y: GROUND - 60 - i * 20, got: false });
@@ -2906,6 +2912,14 @@ function roar() {
     else if (o.type === 'plant') { o.dead = true; SFX.smash(); burst(o.x, GROUND - 30, 20, ['#5fbf4a', '#2f7a2c', '#fff'], 360, 700, 8, 0.8); }
     else if (o.type === 'compy' && d < 300 && !G.compyHint) { G.compyHint = true; toast('Kompsis sind zu frech – spring drauf!', '#ffe08a'); }
   }
+  if (sw) for (const a of G.L.amb) { const d = a.x - p.wx; if (!a.got && d > -40 && d < 360) a.pull = 0.9; } // the bubble wave carries nearby amber to Rex
+}
+function swimRoar() { // bubbles instead of sound rings: a burst from the mouth, a wave that travels ahead, and a few from Chili
+  const p = G.p, c = G.chili;
+  G.rings.push({ x: p.wx + 80, y: p.y - 100, r: 14, a: 1, c: '210,245,255' }); // pale blue instead of gold
+  burst(p.wx + 80, p.y - 95, 16, ['#e8ffff', '#bfeaff', '#fff'], 170, -150, 8, 1.2);
+  p.bubT = 0.5;
+  if (c) burst(c.wx + 20, (c.y || p.y) - 50, 4, ['#e8ffff', '#fff'], 90, -140, 5, 0.9);
 }
 function hurt(force) {
   const p = G.p; if (!force && (p.inv > 0 || p.dashT > 0)) return;
@@ -3192,6 +3206,7 @@ function updatePlay(dt) {
   G.flames = G.flames.filter(f => f.life > 0);
   if (p.y > H + 120) pitFall();
   p.inv -= dt; p.roarT -= dt; p.roarCd -= dt;
+  if (p.bubT > 0) { p.bubT -= dt; const wx = p.wx + 80 + (1 - p.bubT / 0.5) * 280; burst(wx, p.y - 100 + (Math.random() - 0.5) * 170, 2, ['#e8ffff', '#bfeaff', '#fff'], 60, -170, 6, 0.9); } // the wave front travels about 280 px ahead
   G.cam = p.wx - (p.lungeOff || 0) - 270 + G.nudge;
   if (G.endless) { let tr = 1; for (const tx of L.tierX) if (p.wx >= tx) tr++; if (tr > G.tier) { G.tier = tr; SFX.power(); G.shake = Math.max(G.shake, 0.3); toast(['', '', 'Stufe 2 – mehr Gegner!', 'Stufe 3 – neue Gefahren!', 'Stufe 4 – doppelte Gefahren!'][tr] || `Stufe ${tr} – nur für Profis!`, '#ff9a5a'); }
     G.score = Math.max(G.score, Math.floor((p.wx - 200) / 25) + G.amber * 3); if (G.score >= G.heartAt) { G.heartAt += 500; if (p.hearts < G.maxH) { p.hearts++; SFX.heart(); toast('Ein Herz zurück!', '#ff8a9a'); } else toast(G.score + ' Punkte!', '#ffe08a'); } }
@@ -3199,6 +3214,7 @@ function updatePlay(dt) {
   for (const t of L.tips) if (!t.shown && p.wx >= t.x) { t.shown = true; G.tip = { text: t.text, t: 6.5 }; }
   for (const c of L.cps) if (!c.on && p.wx >= c.x) { c.on = true; G.cp = c.x; SFX.flag(); chiliSay(pick(['Fähnchen! Weiter so!', 'Pfoten hoch, ihr zwei!', 'Prima, das war stark!'])); if (p.hearts < G.maxH) { p.hearts++; toast('Fähnchen erreicht – ein Herz zurück!', '#ff8a9a'); } else toast('Fähnchen erreicht!', '#ffe08a'); }
   // amber
+  if (L.swim) for (const a of L.amb) if (!a.got && a.pull > 0) { a.pull -= dt; const k = Math.min(1, dt * 4); a.x += (p.wx + 10 - a.x) * k; a.y += (p.y - 50 - a.y) * k; }
   for (const a of L.amb) if (!a.got && Math.abs(a.x - p.wx - 10) < 42 && Math.abs(a.y - (p.y - 50)) < 62) { a.got = true; G.amber++; G.combo = G.t - (G.lastAmb || -9) < 0.6 ? Math.min(G.combo + 1, 8) : 0; G.lastAmb = G.t; SFX.amberNote(G.combo); burst(a.x, a.y, 6, ['#ffd166', '#ff9f1c'], 150, 200, 4, 0.4); }
   // eggs
   for (const e of L.eggs) {
@@ -3281,8 +3297,8 @@ function updatePlay(dt) {
       case 'wall': hb = { x: o.x - o.w / 2, y: GROUND - o.h, w: o.w, h: o.h }; break;
       case 'tide': if (d < 720) o.moving = true; if (o.moving) o.x -= 210 * dt; hb = { x: o.x - 70, y: GROUND - 118, w: 110, h: 118 }; break;
       case 'rollrock': if (d < 760 || o.minion) { o.x -= 250 * dt; o.rot = (o.rot || 0) - dt * 7; } hb = { x: o.x - 30, y: GROUND - 64, w: 60, h: 64 }; break;
-      case 'urchin': hb = { x: o.x - 17, y: GROUND - 38, w: 34, h: 38 }; break;
-      case 'jelly': if (o.minion && o.spd) o.x -= o.spd * dt; o.y = o.y0 + Math.sin(T * 2 + o.ph) * o.amp; hb = { x: o.x - 22, y: o.y - 24, w: 44, h: 48 }; break;
+      case 'urchin': if (o.scared) { o.rise += (110 + o.rise) * dt; o.alpha -= dt * 0.7; if (o.alpha <= 0) o.dead = true; break; } hb = { x: o.x - 17, y: GROUND - 38, w: 34, h: 38 }; break; // bubble-wrapped by a roar: no hitbox, floats away
+      case 'jelly': if (o.minion && o.spd) o.x -= o.spd * dt; if (o.ty != null) o.y0 += (o.ty - o.y0) * Math.min(1, dt * 4); o.y = o.y0 + Math.sin(T * 2 + o.ph) * o.amp; hb = { x: o.x - 22, y: o.y - 24, w: 44, h: 48 }; break;
       case 'sword':
         if (o.scared) { o.x += o.vx * dt; o.vy += 600 * dt; o.y += o.vy * dt; o.alpha -= dt * 1.2; if (o.alpha <= 0) o.dead = true; break; }
         if (d < 800 || o.minion) o.x -= o.spd * dt; hb = { x: o.x - 40, y: o.y - 12, w: 80, h: 24 }; break;
@@ -3785,7 +3801,7 @@ function drawObstacle(o, cam, th) {
     }
     case 'tide': { shadow(x, GROUND + 2, 70, 0.2); const wv = ctx.createLinearGradient(0, GROUND - 130, 0, GROUND); wv.addColorStop(0, '#bff3ff'); wv.addColorStop(0.35, '#4ac0ea'); wv.addColorStop(1, '#1d78c0'); ctx.fillStyle = wv; ctx.beginPath(); ctx.moveTo(x + 50, GROUND); ctx.lineTo(x + 50, GROUND - 40); ctx.quadraticCurveTo(x + 44, GROUND - 130, x - 20, GROUND - 126); ctx.quadraticCurveTo(x - 66, GROUND - 126, x - 74, GROUND - 88); ctx.quadraticCurveTo(x - 40, GROUND - 100, x - 50, GROUND - 60); ctx.quadraticCurveTo(x - 70, GROUND - 20, x - 74, GROUND); ctx.closePath(); ctx.fill(); ctx.lineWidth = 3.5; ctx.strokeStyle = '#0a4a80'; ctx.stroke(); ctx.fillStyle = 'rgba(255,255,255,.9)'; for (let i = 0; i < 6; i++) circle(x - 62 + i * 20 + Math.sin(T * 8 + i) * 3, GROUND - 120 + (i % 2) * 8 + Math.sin(T * 6 + i) * 3, 7, '#fff'); break; }
     case 'rollrock': { shadow(x, GROUND + 2, 34, 0.3); ctx.save(); ctx.translate(x, GROUND - 32); ctx.rotate(o.rot || 0); circle(0, 0, 32, th.rock); ctx.beginPath(); ctx.arc(0, 0, 32, 0, 7); rim(); ctx.strokeStyle = 'rgba(0,0,0,.3)'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(-18, -8); ctx.lineTo(0, 4); ctx.lineTo(14, -14); ctx.moveTo(0, 4); ctx.lineTo(6, 22); ctx.stroke(); ctx.restore(); break; }
-    case 'urchin': { shadow(x, GROUND + 2, 26, 0.3); ctx.save(); ctx.translate(x, GROUND - 22); ctx.strokeStyle = '#2a1840'; ctx.lineWidth = 3; ctx.lineCap = 'round'; for (let i = 0; i < 14; i++) { const a = i / 14 * Math.PI * 2; ctx.beginPath(); ctx.moveTo(Math.cos(a) * 12, Math.sin(a) * 12); ctx.lineTo(Math.cos(a) * 24, Math.sin(a) * 24); ctx.stroke(); } circle(0, 0, 14, '#5a2a8a'); ctx.beginPath(); ctx.arc(0, 0, 14, 0, 7); ctx.strokeStyle = '#1a0a30'; ctx.lineWidth = 3; ctx.stroke(); circle(-4, -5, 4, 'rgba(255,255,255,.3)'); ctx.fillStyle = '#c880f0'; for (let i = 0; i < 14; i += 2) { const a = i / 14 * Math.PI * 2; circle(Math.cos(a) * 24, Math.sin(a) * 24, 1.8, '#d9a0f8'); } ctx.restore(); break; }
+    case 'urchin': { const rs = o.scared ? o.rise || 0 : 0; if (o.scared) ctx.globalAlpha = Math.max(0, o.alpha); else shadow(x, GROUND + 2, 26, 0.3); ctx.save(); ctx.translate(x, GROUND - 22 - rs); ctx.strokeStyle = '#2a1840'; ctx.lineWidth = 3; ctx.lineCap = 'round'; for (let i = 0; i < 14; i++) { const a = i / 14 * Math.PI * 2; ctx.beginPath(); ctx.moveTo(Math.cos(a) * 12, Math.sin(a) * 12); ctx.lineTo(Math.cos(a) * 24, Math.sin(a) * 24); ctx.stroke(); } circle(0, 0, 14, '#5a2a8a'); ctx.beginPath(); ctx.arc(0, 0, 14, 0, 7); ctx.strokeStyle = '#1a0a30'; ctx.lineWidth = 3; ctx.stroke(); circle(-4, -5, 4, 'rgba(255,255,255,.3)'); ctx.fillStyle = '#c880f0'; for (let i = 0; i < 14; i += 2) { const a = i / 14 * Math.PI * 2; circle(Math.cos(a) * 24, Math.sin(a) * 24, 1.8, '#d9a0f8'); } if (o.scared) { ctx.fillStyle = 'rgba(200,240,255,.28)'; ctx.beginPath(); ctx.arc(0, 0, 33, 0, 7); ctx.fill(); ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = 3; ctx.stroke(); circle(-12, -13, 5, 'rgba(255,255,255,.8)'); } ctx.restore(); ctx.globalAlpha = 1; break; }
     case 'jelly': { const y = o.y || o.y0, pu = 1 + 0.1 * Math.sin(T * 5 + o.ph); ctx.save(); ctx.translate(x, y); ctx.scale(1 / pu, pu); ctx.fillStyle = 'rgba(255,150,200,.9)'; ctx.beginPath(); ctx.moveTo(-26, 4); ctx.bezierCurveTo(-28, -34, 28, -34, 26, 4); ctx.quadraticCurveTo(14, 10, 0, 4); ctx.quadraticCurveTo(-14, 10, -26, 4); ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = '#8a2a6a'; ctx.stroke(); ctx.strokeStyle = 'rgba(255,190,225,.9)'; ctx.lineWidth = 3; ctx.lineCap = 'round'; for (let i = -2; i <= 2; i++) { ctx.beginPath(); ctx.moveTo(i * 9, 6); ctx.quadraticCurveTo(i * 9 + Math.sin(T * 4 + i) * 6, 22, i * 9 - Math.sin(T * 3 + i) * 5, 38); ctx.stroke(); } circle(-8, -12, 4, 'rgba(255,255,255,.6)'); circle(-9, -6, 2.4, '#222'); circle(9, -6, 2.4, '#222'); ctx.save(); ctx.globalCompositeOperation = 'lighter'; for (const [qx, qy, qp] of [[-14, -18, 0], [4, -24, 1.4], [14, -12, 2.6], [-2, -8, 3.8]]) { ctx.globalAlpha = 0.45 + 0.35 * Math.sin(T * 3 + qp); circle(qx, qy, 3, '#ffe0f4'); } ctx.restore(); ctx.strokeStyle = 'rgba(138,42,106,.4)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(0, -4, 17, Math.PI * 1.1, Math.PI * 1.9); ctx.stroke(); ctx.restore(); break; }
     case 'sword': { const y = o.y, al = o.alpha == null ? 1 : Math.max(0, o.alpha); ctx.globalAlpha = al; ctx.save(); ctx.translate(x, y); ctx.scale(o.scared ? 1 : -1, 1); ctx.fillStyle = vgrad(-14, 14, '#9ab8d8', '#4f78a8'); ctx.beginPath(); ctx.ellipse(0, 0, 34, 13, 0, 0, 7); ctx.fill(); ctx.fillStyle = '#4f78a8'; ctx.beginPath(); ctx.moveTo(-30, 0); ctx.lineTo(-46, -14); ctx.lineTo(-44, 0); ctx.lineTo(-46, 14); ctx.fill(); ctx.beginPath(); ctx.moveTo(-6, -10); ctx.lineTo(0, -26); ctx.lineTo(10, -10); ctx.fill(); ctx.fillStyle = '#dfe8f4'; ctx.beginPath(); ctx.moveTo(32, -2); ctx.lineTo(84, 0); ctx.lineTo(32, 3); ctx.fill(); ctx.lineWidth = 2.5; ctx.strokeStyle = '#1b2a44'; ctx.beginPath(); ctx.ellipse(0, 0, 34, 13, 0, 0, 7); ctx.stroke(); ctx.strokeStyle = 'rgba(27,42,68,.35)'; ctx.lineWidth = 2; for (let i = 0; i < 4; i++) { ctx.beginPath(); ctx.moveTo(-18 + i * 9, -11 + i * 0.8); ctx.quadraticCurveTo(-20 + i * 9, 0, -18 + i * 9, 11 - i * 0.8); ctx.stroke(); } ell(-4, 5, 18, 4, 0, 'rgba(235,245,255,.55)'); circle(20, -3, 5, '#fff'); circle(21.5, -3, 2.6, '#222'); ctx.strokeStyle = '#1b2a44'; ctx.lineWidth = 2.4; ctx.beginPath(); ctx.moveTo(14, -10); ctx.lineTo(27, -6); ctx.stroke(); ctx.restore(); ctx.globalAlpha = 1; break; }
     case 'cgate': { const seg = (y0, y1, up) => { // reef pillar: rocky column with coral ridges, barnacles and a living cap

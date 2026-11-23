@@ -816,3 +816,22 @@ test('followers ride a crumbled platform down, and absent followers make no dust
   expect(r.before).toBeLessThan(360);   // Chili stood up on the step
   expect(r.after).toBeGreaterThan(r.before + 40); // ... and went down with it instead of hovering
 });
+
+test('underwater roar makes bubbles, shoves jellies, bubbles urchins and pulls amber', async ({ game }) => {
+  await game.open({ unlocked: 12 });
+  await game.eval(() => { const d = window.__dino; d.startLevel(9); d.G.startT = 0; d.G.coach = null; d.G.L.coach.forEach(c => (c.done = true)); }); // day 10: the first swimming level
+  const r = await game.eval(() => {
+    const d = window.__dino, G = d.G, L = G.L, p = G.p; p.roarCd = 0; G.startT = 0;
+    const my = p.y - 50, jx = p.wx + 150, ux = p.wx + 250, ax = p.wx + 300;
+    L.obs.push({ type: 'jelly', x: jx, y0: my, amp: 0, ph: 0, y: my }, { type: 'urchin', x: ux });
+    const am = { x: ax, y: 200, got: false }; L.amb.push(am);
+    const jelly = L.obs[L.obs.length - 2], urchin = L.obs[L.obs.length - 1];
+    d.roar();
+    const out = { rings: G.rings.some(x => x.c === '210,245,255'), flagged: jelly.ty != null && urchin.scared === true && am.pull > 0, a0: am.x };
+    for (let i = 0; i < 40; i++) d.updatePlay(1 / 60);
+    out.jellyMoved = Math.abs(jelly.y0 - my) > 60; out.urchinGone = urchin.dead === true || urchin.alpha < 1; out.amberCloser = am.got || am.x < out.a0; out.hearts = p.hearts;
+    return out;
+  });
+  expect(r.rings).toBe(true); expect(r.flagged).toBe(true); expect(r.jellyMoved).toBe(true); expect(r.urchinGone).toBe(true); expect(r.amberCloser).toBe(true);
+  expect(game.errors).toEqual([]);
+});
