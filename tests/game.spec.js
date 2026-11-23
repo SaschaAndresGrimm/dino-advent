@@ -835,3 +835,109 @@ test('underwater roar makes bubbles, shoves jellies, bubbles urchins and pulls a
   expect(r.rings).toBe(true); expect(r.flagged).toBe(true); expect(r.jellyMoved).toBe(true); expect(r.urchinGone).toBe(true); expect(r.amberCloser).toBe(true);
   expect(game.errors).toEqual([]);
 });
+
+// ---- game feel: variable jump, jump buffer, near miss, boss entrance, grade ----
+const FLAT_SRC = `() => { const d = window.__dino, G = d.G, p = G.p; G.L.pits.length = 0; G.L.obs.length = 0; G.L.amb.length = 0; G.L.hearts.length = 0; G.L.plats.length = 0; G.L.coach.forEach(c => (c.done = true)); G.startT = 0; G.coach = null; return { d, G, p }; }`; // clean level for mechanics tests (runs in the page)
+
+test('variable jump: releasing early gives a shorter hop, holding gives the full jump, a double jump is never cut', async ({ game }) => {
+  await game.open();
+  await game.start(0);
+  const r = await game.eval((src) => {
+    const { d, G, p } = new Function('return (' + src + ')')()(); p.inv = 999;
+    const run = (release) => { for (let i = 0; i < 40; i++) d.updatePlay(1 / 60); let peak = 0; d.jump(); G.holdJump = 'key'; for (let i = 0; i < 120; i++) { if (release && i === 1) { G.holdJump = null; d.jumpRelease(); } d.updatePlay(1 / 60); peak = Math.max(peak, 440 - p.y); } return peak; };
+    const full = run(false), short = run(true);
+    for (let i = 0; i < 60; i++) d.updatePlay(1 / 60);
+    d.jump(); d.updatePlay(1 / 60); d.jump(); const v2 = p.vy; G.holdJump = null; d.jumpRelease();
+    return { full, short, cut: p.vy !== v2 };
+  }, FLAT_SRC);
+  expect(r.full).toBeGreaterThan(150);
+  expect(r.short).toBeLessThan(r.full - 30);
+  expect(r.short).toBeGreaterThan(80);                    // even a very short tap is a real hop
+  expect(r.cut).toBe(false);
+});
+
+test('jump buffer: a press just before landing jumps on touchdown, an early press does not', async ({ game }) => {
+  await game.open();
+  await game.start(0);
+  const r = await game.eval((src) => {
+    const { d, G, p } = new Function('return (' + src + ')')()(); p.inv = 999; for (let i = 0; i < 40; i++) d.updatePlay(1 / 60);
+    const trial = (h) => { // press again at h px above the ground, on the way down, with both jumps used up
+      d.jump(); for (let i = 0; i < 4; i++) d.updatePlay(1 / 60); d.jump();
+      let n = 0; while (p.vy < 0 && n++ < 200) d.updatePlay(1 / 60); while (440 - p.y > h && n++ < 400) d.updatePlay(1 / 60);
+      const jumpsBefore = p.jumps; d.jump(); let hopped = false;
+      for (let i = 0; i < 60; i++) { d.updatePlay(1 / 60); if (p.jumps === 1 && p.vy < -500) hopped = true; }
+      for (let i = 0; i < 200; i++) d.updatePlay(1 / 60); return { jumpsBefore, hopped };
+    };
+    return { late: trial(20), early: trial(150) };
+  }, FLAT_SRC);
+  expect(r.late.jumpsBefore).toBe(2); expect(r.early.jumpsBefore).toBe(2);
+  expect(r.late.hopped).toBe(true);                       // pressed ~0.03 s before touchdown: buffered
+  expect(r.early.hopped).toBe(false);                     // pressed ~0.3 s before touchdown: forgotten
+});
+
+test('near miss: passing a rock by a hair pays 2 amber once, a hit pays nothing, and the payout is capped per level', async ({ game }) => {
+  await game.open();
+  await game.start(0);
+  const r = await game.eval((src) => {
+    const { d, G, p } = new Function('return (' + src + ')')()();
+    // try several jump distances: whichever clears the rock tightly must pay exactly 2 once, whichever hits it must pay nothing
+    const res = [];
+    for (let dist = 60; dist <= 160; dist += 4) {
+      const q = { type: 'rock', x: p.wx + 600, w: 60, h: 50 }; G.L.obs.length = 0; G.L.amb.length = 0; G.L.hearts.length = 0; G.L.obs.push(q); p.inv = 0; p.hearts = 4; G.nearN = 0;
+      const a1 = G.amber; let hit = false;
+      for (let i = 0; i < 400; i++) { if (q.x - p.wx < dist && p.onGround && !q.j) { q.j = 1; d.jump(); G.holdJump = 'key'; } d.updatePlay(1 / 60); if (p.hitT > 0) hit = true; }
+      res.push({ dist, gained: G.amber - a1, hit }); p.inv = 0; for (let i = 0; i < 120; i++) d.updatePlay(1 / 60);
+    }
+    // cap: once NEAR_CAP payouts are used up, a tight clear pays nothing
+    const win = res.find(x => !x.hit && x.gained === 2); let capped = null;
+    if (win) { const q = { type: 'rock', x: p.wx + 600, w: 60, h: 50 }; G.L.obs.length = 0; G.L.obs.push(q); G.nearN = 99; p.inv = 0; const a1 = G.amber; for (let i = 0; i < 400; i++) { if (q.x - p.wx < win.dist && p.onGround && !q.j) { q.j = 1; d.jump(); } d.updatePlay(1 / 60); } capped = G.amber - a1; }
+    return { res, capped };
+  }, FLAT_SRC);
+  expect(r.res.some(x => !x.hit && x.gained === 2)).toBe(true);        // at least one tight clear paid out
+  for (const x of r.res) { if (x.hit) expect(x.gained).toBe(0); expect(x.gained === 0 || x.gained === 2).toBe(true); }
+  expect(r.capped).toBe(0);
+});
+
+test('boss entrance: cinematic bars, arrival freeze and zoom, stamped banner; colour grade and far foreground draw in every world', async ({ game }) => {
+  await game.open();
+  const r = await game.eval(() => {
+    const d = window.__dino, out = {};
+    for (let wi = 0; wi < 8; wi++) { d.startLevel(wi, true); const G = d.G; G.startT = 0; G.coach = null; for (let i = 0; i < 30; i++) d.updatePlay(1 / 60); d.drawPlay(); d.lowfx = true; d.drawPlay(); d.lowfx = false; }
+    d.startLevel(5, false); const G = d.G; G.startT = 0; G.coach = null; G.L.coach.forEach(c => (c.done = true)); G.p.inv = 999;
+    G.p.wx = G.L.bossX - 400; let arrived = false, zoom = 0, bars = false;
+    for (let i = 0; i < 1500 && !arrived; i++) { d.updatePlay(1 / 60); if (G.boss && G.boss.state === 'enter') { bars = true; d.drawPlay(); } if (G.boss && G.boss.state !== 'enter') { arrived = true; zoom = G.zoom; } }
+    for (let i = 0; i < 30; i++) { d.updatePlay(1 / 60); d.drawPlay(); }
+    return { arrived, zoom, bars, hit: G.banner ? !!G.banner.hit : 'gone' };
+  });
+  expect(r.arrived).toBe(true); expect(r.bars).toBe(true); expect(r.zoom).toBeGreaterThan(0.5); expect(r.hit).not.toBe(false); // the banner stamp landed (or already faded)
+  expect(game.errors).toEqual([]);
+});
+
+test('juice: amber arcs into the HUD, eggs and treasures slow time and pulse, the boss arena fades in and out', async ({ game }) => {
+  await game.open();
+  await game.start(0);
+  const r = await game.eval((src) => {
+    const { d, G, p } = new Function('return (' + src + ')')()(); p.inv = 999;
+    G.L.amb.push({ x: p.wx + 10, y: p.y - 50, got: false }); d.updatePlay(1 / 60); const spawned = (G.flyAmb || []).length;
+    for (let i = 0; i < 60; i++) { d.updatePlay(1 / 60); d.drawPlay(); } const left = (G.flyAmb || []).length, popped = G.amberPop;
+    G.L.eggs.push({ x: p.wx + 10, y: p.y - 50, k: 0, got: false, hidden: false }); G.slowT = 0; G.zoom = 0; d.updatePlay(1 / 60); const egg = { slow: G.slowT > 0, zoom: G.zoom > 0.5, got: G.eggsGot[0] };
+    G.arena = 0; G.bossStarted = true; for (let i = 0; i < 90; i++) d.updatePlay(1 / 60); const on = G.arena; d.drawPlay();
+    G.bossStarted = false; for (let i = 0; i < 90; i++) d.updatePlay(1 / 60);
+    return { spawned, left, egg, on, off: G.arena };
+  }, FLAT_SRC);
+  expect(r.spawned).toBe(1); expect(r.left).toBe(0);
+  expect(r.egg).toEqual({ slow: true, zoom: true, got: true });
+  expect(r.on).toBeGreaterThan(0.9); expect(r.off).toBe(0);
+  expect(game.errors).toEqual([]);
+});
+
+test('look: rim light, glows, backdrop desaturation and carved buttons render in every world, also in low-power mode', async ({ game }) => {
+  await game.open();
+  const r = await game.eval(() => {
+    const d = window.__dino; let n = 0;
+    for (const low of [false, true]) { d.lowfx = low; for (let wi = 0; wi < 8; wi++) { d.startLevel(wi, true); const G = d.G; G.startT = 0; G.coach = null; G.tip = { text: 'Hinweis', t: 5 }; for (let i = 0; i < 40; i++) d.updatePlay(1 / 60); d.drawPlay(); n++; } }
+    d.lowfx = false; return n;
+  });
+  expect(r).toBe(16);
+  expect(game.errors).toEqual([]);
+});
