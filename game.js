@@ -166,6 +166,7 @@ const SFX = {
   pop() { tone(400, 0.2, 'sine', 0.15, 1200); },
   stamp() { duck(0.4, 0.12); tone(95, 0.3, 'sine', 0.2, 40); noise(0.15, 0.25, 500); },
   rise() { [523, 659, 784, 1047].forEach((q, i) => tone(q, 0.28, 'sine', 0.08, null, i * 0.07, { att: 0.01 })); tone(2093, 0.5, 'sine', 0.03, null, 0.3, { att: 0.02 }); },
+  warn() { tone(660, 0.09, 'square', 0.06); tone(880, 0.12, 'square', 0.06, null, 0.1); },
   bossSting() { duck(0.6, 0.4); tone(65, 0.9, 'sawtooth', 0.12, 46); tone(98, 0.8, 'square', 0.06, 70, 0.02); noise(0.5, 0.25, 220); },
   nearMiss() { tone(880, 0.12, 'triangle', 0.07, 1320); tone(1320, 0.2, 'sine', 0.05, null, 0.06); },
   stomp() { duck(0.55, 0.15); noise(0.3, 0.45, 260); tone(110, 0.25, 'square', 0.13, 45); },
@@ -3111,7 +3112,8 @@ const BOSS_KINDS = {
     { name: 'Vulkanwut', type: 'leap', say: 'Die Lava kocht! Spring, wenn der Boden glüht!' }] },
   crab: { name: 'Krabbenkönig', duel: false, minions: ['crab', 'crab', 'crab', 'crab', 'crab'], phases: [
     { name: 'Kokosnuss-Hagel', type: 'volley', say: 'Kokosnüsse! Spring drüber – und brüll, wenn er erschöpft ist!' },
-    { name: 'Die Krabbenarmee', type: 'summon', say: 'Seine Krabben kommen! Hüpf auf ihre Köpfe – dann greift der König selbst an!' }] },
+    { name: 'Die Krabbenarmee', type: 'summon', say: 'Seine Krabben kommen! Hüpf auf ihre Köpfe – dann greift der König selbst an!' },
+    { name: 'Erdbeben', type: 'quake', say: 'Er stampft auf den Boden! Spring über jede Welle – und brüll, wenn er erschöpft ist!' }] },
   kraken: { name: 'Das Seeungeheuer', duel: false, minions: ['sword', 'jelly', 'jelly', 'sword'], phases: [
     { name: 'Tintenkugeln', type: 'volley', say: 'Tintenkugeln! Schwimm hoch oder runter – und brüll, wenn er erschöpft ist!' },
     { name: 'Tentakel-Angriff', type: 'lane', say: 'Achtung, rote Streifen! Schwimm aus der Bahn, bevor es zuschlägt!' },
@@ -3126,6 +3128,7 @@ function newBoss(phase = 0) {
   const home = G.L.bossX + 620;
   return { kind: G.L.bossKind || 'king', x: phase === 0 ? G.L.bossX + 1000 : home, y: 0, hp: 3, phase, state: phase === 0 ? 'enter' : 'taunt', t: 0, ph: 0, flash: 0, n: 0, rocks: [], hazards: [], volley: null, meter: 0.15, duelT: 0 };
 }
+function bossTele(b, dur = 0.5) { b.tele = { t: dur, max: dur }; SFX.warn(); } // every attack is announced ~0.5 s ahead: flash, '!' badge, wind-up pose and a warning beep
 function bossBanner(text, sub, col = '#ffd34d') { G.banner = { t: 2.0, text, sub, col }; }
 function startBossPhase(b) {
   const ph = bossKind(b).phases[b.phase]; b.hp = 3; b.state = 'taunt'; b.t = 0; b.n = 0; b.rocks = []; b.hazards = []; G.bossCp = b.phase;
@@ -3413,7 +3416,7 @@ function updatePlay(dt) {
 
 function updateBoss(dt) {
   const b = G.boss, p = G.p, home = G.L.bossX + 620, L = G.L, K = bossKind(b), swim = L.swim, ty = (K.phases[Math.min(b.phase, K.phases.length - 1)] || {}).type;
-  b.t += dt; b.ph += dt * 13; b.flash -= dt;
+  b.t += dt; b.ph += dt * 13; b.flash -= dt; if (b.tele) { b.tele.t -= dt; if (b.tele.t <= 0) b.tele = null; }
   const pb = p.duck ? { x: p.wx - 30, y: p.y - 56, w: 80, h: 52 } : { x: p.wx - 25, y: p.y - 92, w: 68, h: 88 };
   const roarHits = () => p.roarT > 0 && b.x - p.wx < 400 && b.state !== 'enter';
   // thrown projectiles (rocks, coconuts, ink, feathers)
@@ -3444,15 +3447,18 @@ function updateBoss(dt) {
   };
   switch (b.state) {
     case 'enter': b.x -= 230 * dt; G.shake = Math.max(G.shake, 0.16); if ((b.dust = (b.dust || 0) - dt) <= 0) { b.dust = 0.14; burst(b.x - 30, GROUND - 6, 5, ['#d8c9a6', '#efe5cc', '#b9a784'], 110, 60, 8, 0.7); } if (b.x <= home) { b.x = home; SFX.roar(); G.shake = 0.5; G.zoom = 1; G.freeze = 0.1; SFX.bossSting(); startBossPhase(b); } break;
-    case 'taunt':
-      if (b.t > (b.phase === 0 ? 1.0 : 0.9)) {
-        b.n++; b.t = 0;
+    case 'taunt': {
+      const lim = b.phase === 0 ? 1.0 : 0.9;
+      if (!b.teled && ty !== 'lane' && ty !== 'leap' && ty !== 'volley' && b.t > lim - 0.5) { b.teled = true; bossTele(b, 0.5); } // leap announces itself with the crouch, lanes with their red stripes, a volley winds up before every shot
+      if (b.t > lim) {
+        b.n++; b.t = 0; b.teled = false;
         if (ty === 'charge') b.state = 'charge';
-        else if (ty === 'volley') { b.state = 'volley'; const len = 3 + (3 - b.hp) + (b.phase > 0 ? 1 : 0); b.volley = { seq: Array.from({ length: Math.min(6, len) }, () => swim ? Math.floor(Math.random() * 4) : (G.sk.duck && Math.random() < 0.5 ? 1 : 0)), i: 0, next: 0.2 }; }
+        else if (ty === 'volley') { b.state = 'volley'; const len = 3 + (3 - b.hp) + (b.phase > 0 ? 1 : 0); b.volley = { seq: Array.from({ length: Math.min(6, len) }, () => swim ? Math.floor(Math.random() * 4) : (G.sk.duck && Math.random() < 0.5 ? 1 : 0)), i: 0, next: 0.5, warned: false }; }
         else if (ty === 'summon') b.state = 'summon';
+        else if (ty === 'quake') { b.state = 'quake'; b.q = { n: 0, next: 1.0, total: 3 + (3 - b.hp), warned: false }; }
         else if (ty === 'lane') { b.state = 'lanes'; b.laneN = 0; b.laneNext = 0.2; }
-        else { b.state = 'crouch'; b.landX = p.wx + 250; }
-      } break;
+        else { b.state = 'crouch'; b.landX = p.wx + 250; bossTele(b, 0.75); }
+      } } break;
     case 'charge': {
       b.x -= (b.phase === 2 && b.kind === 'king' ? 450 : 340 + (3 - b.hp) * 55) * dt;
       const d = b.x - p.wx;
@@ -3461,7 +3467,8 @@ function updateBoss(dt) {
     }
     case 'volley': { // projectiles come in sequence; afterwards the boss is out of breath
       const v = b.volley; v.next -= dt;
-      if (v.i < v.seq.length && v.next <= 0) { const ln = v.seq[v.i]; b.rocks.push({ x: b.x - 60, y: projY(ln), rot: 0 }); panAt(b.x, SFX.smash); v.i++; v.next = 0.85; if (v.i < v.seq.length) toast(swim ? (v.seq[v.i] >= 2 ? 'Weiter oben – RUNTER!' : 'Weiter unten – HOCH!') : (v.seq[v.i] ? 'DUCKEN!' : 'SPRING!'), '#ffe08a'); }
+      if (v.i < v.seq.length && !v.warned && v.next <= 0.5) { v.warned = true; v.warnY = projY(v.seq[v.i]); bossTele(b, 0.5); } // wind-up, and a marker where the next shot will fly
+      if (v.i < v.seq.length && v.next <= 0) { const ln = v.seq[v.i]; b.rocks.push({ x: b.x - 60, y: projY(ln), rot: 0 }); v.warned = false; panAt(b.x, SFX.smash); v.i++; v.next = 0.95; if (v.i < v.seq.length) toast(swim ? (v.seq[v.i] >= 2 ? 'Weiter oben – RUNTER!' : 'Weiter unten – HOCH!') : (v.seq[v.i] ? 'DUCKEN!' : 'SPRING!'), '#ffe08a'); }
       if (v.i >= v.seq.length && v.next < -1.0 && b.rocks.length === 0) { b.state = 'tired'; b.t = 0; b.target = p.wx + 340; toast('Er ist erschöpft – BRÜLL!', '#9cff8a'); }
     } break;
     case 'lanes': { // swimming fight: red stripes warn, then a tentacle sweeps the lane
@@ -3477,8 +3484,18 @@ function updateBoss(dt) {
       }
       if (b.spawnQ && b.spawnQ.length > 1 && !b.spawnSorted) { b.spawnQ.sort((a, c) => a.at - c.at); b.spawnSorted = true; }
       while (b.spawnQ && b.spawnQ.length && b.t >= b.spawnQ[0].at) { const q = b.spawnQ.shift(), m = mkMinion(q.k, q.i); m.x = Math.max(b.x, home) + 20; L.obs.push(m); burst(m.x, GROUND - 14, 6, ['#d8c3a5', '#fff'], 120, 90, 5, 0.4); SFX.pop(); }
-      if (b.t > 2.2 && !(b.spawnQ && b.spawnQ.length) && (b.t > 16 || !L.obs.some(o => o.minion && !o.dead && !o.scared && !o.flat && o.x > G.cam))) { b.summoned = false; b.state = b.kind === 'kraken' ? 'lanes' : 'charge'; b.laneN = 0; b.laneNext = 0.2; b.t = 0; toast('Jetzt kommt der Boss selbst!', '#ffb4a8'); }
+      if (b.t > 2.2 && !(b.spawnQ && b.spawnQ.length) && (b.t > 16 || !L.obs.some(o => o.minion && !o.dead && !o.scared && !o.flat && o.x > G.cam))) { b.summoned = false; b.laneN = 0; b.laneNext = 0.2; b.t = 0; toast('Jetzt kommt der Boss selbst!', '#ffb4a8'); if (b.kind === 'kraken') b.state = 'lanes'; else { b.state = 'windup'; bossTele(b, 0.6); } }
       break;
+    case 'windup': if (b.t > 0.6) { b.state = 'charge'; b.t = 0; } break; // the boss himself charges after his helpers: announced first
+    case 'quake': { // stomping fight: wind-up, then a shock wave rolls along the ground (jump it); afterwards he is out of breath
+      const q = b.q; q.next -= dt;
+      if (q.n < q.total && !q.warned && q.next <= 0.55) { q.warned = true; bossTele(b, 0.55); }
+      if (q.n < q.total && q.next <= 0) {
+        q.n++; q.warned = false; q.next = 1.55 - Math.min(0.25, (3 - b.hp) * 0.1); SFX.stomp(); G.shake = Math.max(G.shake, 0.6); b.y = 0;
+        burst(b.x - 40, GROUND, 24, ['#d8c3a5', '#b39b7a', '#fff'], 380, 500, 8, 0.7); b.hazards.push({ kind: 'wave', x: b.x - 60, vx: -420 - (q.n % 2) * 60, t: 0 });
+      }
+      if (q.n >= q.total && q.next < -0.8 && b.hazards.length === 0) { b.state = 'tired'; b.t = 0; b.target = p.wx + 340; toast('Er ist erschöpft – BRÜLL!', '#9cff8a'); }
+    } break;
     case 'crouch': // leap: a shadow marks the landing spot, then he jumps
       if (b.t > 0.75) { b.state = 'leap'; b.t = 0; b.fromX = b.x; SFX.jump(); }
       break;
@@ -4194,7 +4211,7 @@ function drawPlay() {
     ctx.save(); if (b.flash > 0 && Math.sin(T * 40) > 0) ctx.globalAlpha = 0.4;
     shadow(bx, GROUND + 2, 80 * (1 - clamp(-b.y / 300, 0, 0.6)), 0.3);
     ctx.translate(bx + ({ crab: -40, queen: -110, kraken: -20 }[b.kind] || 0), by); let rot = 0, sy = 1, sx = 0;
-    const lim = b.phase === 0 ? 1.0 : 0.9, ant = st === 'taunt' ? clamp((b.t - (lim - 0.45)) / 0.45, 0, 1) : 0, br = Math.sin(T * 2.4); let bsx = 1;
+    const ant = b.tele ? clamp(1 - b.tele.t / b.tele.max, 0, 1) : 0, br = Math.sin(T * 2.4); let bsx = 1;
     if (st !== 'flee' && st !== 'crouch') { sy = 1 + 0.014 * br - 0.1 * ant; bsx = 1 - 0.01 * br + 0.05 * ant; rot = -0.05 * ant; } // idle breathing, and a crouch-and-lean-back before every attack
     if (st === 'crouch') sy = 0.84 + 0.02 * Math.sin(T * 30); if (st === 'tired') rot = -0.13; if (st === 'stagger' || st === 'duel') sx = Math.sin(T * 60) * (st === 'duel' ? 4 : 2.5);
     if (st === 'leap') rot = -0.25 * Math.sin(clamp(b.t / 0.7, 0, 1) * Math.PI);
@@ -4204,7 +4221,8 @@ function drawPlay() {
     const anim = st === 'taunt' || st === 'tired' ? (b.kind === 'king' ? 0 : b.ph * 0.5) : b.ph, face = st !== 'flee';
     const dmg = bossDmg(b), ko = st === 'flee'; if (b.kind === 'crab') drawCrabKing(0, 0, 1.5, anim, face, { dmg, ko }); else if (b.kind === 'kraken') drawKraken(0, 0, 1.45, anim, face, { dmg, ko }); else if (b.kind === 'queen') drawQueen(0, 0, 1.7, anim, face, { dmg, ko }); else oRaptor(0, 0, 2.3, anim, face, { col: BC[0], dark: BC[1], crown: true, dmg, ko });
     ctx.restore();
-    if (st === 'taunt' && b.phase === 0 && b.kind === 'king') otxt('!', bx - 70, GROUND - 230, 60, '#ff5252', '#000', 8);
+    if (b.tele) { const u = 1 - b.tele.t / b.tele.max, fl = save.calm || Math.sin(T * 40) > -0.2 ? 1 : 0.5; glow(bx - 60, GROUND - 130 + b.y, 240, '255,70,40', 0.55 * fl * (0.4 + 0.6 * u)); ctx.globalAlpha = fl; otxt('!', bx - 70, GROUND - 250 + b.y, 54 + 10 * u, '#ff5252', '#000', 8); ctx.globalAlpha = 1; }
+    if (b.volley && b.volley.warned && b.state === 'volley') { const wy = b.volley.warnY, mx = clamp(bx - 170, 560, W - 130); ctx.globalAlpha = 0.65 + 0.35 * Math.sin(T * 30); circle(mx, wy, 20, '#e53935'); ctx.fillStyle = '#e53935'; ctx.beginPath(); ctx.moveTo(mx - 34, wy); ctx.lineTo(mx - 20, wy - 11); ctx.lineTo(mx - 20, wy + 11); ctx.fill(); ctx.globalAlpha = 1; otxt('!', mx, wy + 1, 26, '#fff', '#7a0000', 4); } // where the next shot will fly
     if (st === 'tired' || st === 'stagger') for (let i = 0; i < 3; i++) { const a = T * 4 + i * 2.1; drawStar(bx - 70 + Math.cos(a) * 52, by - 250 + Math.sin(a) * 14, 9, '#ffd740'); }
     for (const r of b.rocks) { const rx2 = r.x - cam, ry2 = r.y; shadow(rx2, GROUND + 2, 24, 0.3); ctx.save(); ctx.translate(rx2, ry2); ctx.rotate(r.rot); ell(0, 0, 24, 21, 0, b.kind === 'kraken' ? '#2a1a50' : b.kind === 'queen' ? '#e8eefc' : b.kind === 'crab' ? '#7a4a22' : WORLDS[G.wi].rock); ell(-6, -6, 10, 7, 0, 'rgba(255,255,255,.18)'); ctx.strokeStyle = 'rgba(0,0,0,.4)'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.ellipse(0, 0, 24, 21, 0, 0, Math.PI * 2); ctx.stroke(); ctx.restore(); }
     if (st === 'charge') { const lx = G.p.wx + 390 - cam, near = b.x - G.p.wx < 390; ctx.save(); ctx.setLineDash([10, 8]); ctx.lineWidth = 4; ctx.strokeStyle = near ? `rgba(255,82,82,${0.6 + 0.4 * Math.sin(T * 24)})` : 'rgba(255,211,77,.7)'; ctx.beginPath(); ctx.moveTo(lx, GROUND - 230); ctx.lineTo(lx, GROUND); ctx.stroke(); ctx.restore(); }

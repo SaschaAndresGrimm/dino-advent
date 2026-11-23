@@ -239,7 +239,7 @@ test('boss fight: 4 phases and a roar duel can be won, with every attack type ap
 });
 
 for (const [li, kind, phases, states] of [
-  [5, 'crab', [0, 1], ['volley', 'summon', 'charge', 'tired', 'stagger', 'flee']],
+  [5, 'crab', [0, 1, 2], ['volley', 'summon', 'charge', 'quake', 'tired', 'stagger', 'flee']],
   [11, 'kraken', [0, 1, 2], ['volley', 'lanes', 'summon', 'tired', 'stagger', 'flee']],
   [17, 'queen', [0, 1, 2], ['volley', 'crouch', 'leap', 'summon', 'charge', 'tired', 'stagger', 'flee']],
 ]) {
@@ -939,5 +939,31 @@ test('look: rim light, glows, backdrop desaturation and carved buttons render in
     d.lowfx = false; return n;
   });
   expect(r).toBe(16);
+  expect(game.errors).toEqual([]);
+});
+
+test('boss telegraphs: every projectile, shock wave and charge is announced ~0.5 s ahead; the crab gets a third (stomping) phase', async ({ game }) => {
+  await game.open();
+  const r = await game.eval(() => {
+    const d = window.__dino, out = {};
+    for (const [li, name] of [[5, 'crab'], [11, 'kraken'], [17, 'queen'], [23, 'king']]) {
+      d.startLevel(li, false); const G = d.G; G.startT = 0; G.coach = null; G.L.coach.forEach(c => (c.done = true)); G.p.inv = 999; G.p.wx = G.L.bossX - 400;
+      let lastTele = -9, prevRocks = 0, prevWaves = 0, prevState = '', attacks = 0, unannounced = 0, quakes = 0;
+      for (let i = 0; i < 6000; i++) {
+        d.updatePlay(1 / 60); const b = G.boss; if (!b) continue;
+        if (b.tele) lastTele = G.t;
+        const rocks = b.rocks.length, waves = b.hazards.filter(h => h.kind === 'wave').length, st = b.state;
+        const fired = (rocks > prevRocks) + (waves > prevWaves && st === 'quake') + (st === 'charge' && prevState !== 'charge') + (st === 'leap' && prevState !== 'leap');
+        if (fired) { attacks++; if (G.t - lastTele > 0.9) unannounced++; }
+        if (st === 'quake') quakes++; prevRocks = rocks; prevWaves = waves; prevState = st;
+        if (st === 'tired' || (st === 'charge' && b.x - G.p.wx < 380)) d.roar();
+        if (G.overlay) G.overlay = null;
+      }
+      out[name] = { attacks, unannounced, quakes, phases: G.boss.phase, n: G.L.bossKind };
+    }
+    return out;
+  });
+  expect(r.crab.quakes).toBeGreaterThan(0);                     // the new stomping phase ran
+  for (const k of ['crab', 'kraken', 'queen', 'king']) { expect(r[k].attacks).toBeGreaterThan(2); expect(r[k].unannounced).toBe(0); }
   expect(game.errors).toEqual([]);
 });
