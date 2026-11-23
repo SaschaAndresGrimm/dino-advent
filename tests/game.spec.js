@@ -753,3 +753,66 @@ test('the treasure cue sounds play near a hiding place without errors, and Chili
   expect(r.every(x => x.tones > 3 && x.noticed)).toBe(true);
   expect(game.errors).toEqual([]);
 });
+
+test('Chili, the baby and Kiwi hop where Rex hopped, in order, and never sink below the ground', async ({ game }) => {
+  await game.open({ babyName: 'Babs', treasures: [0, 0, 0, 1] });
+  await game.start(0);
+  const r = await game.eval(() => {
+    const d = window.__dino, G = d.G, p = G.p; G.L.pits.length = 0; G.L.obs.length = 0; G.L.plats.length = 0; p.inv = 999; G.L.coach.forEach(c => (c.done = true));
+    const peak = { rex: [0, 0], chili: [0, 0], baby: [0, 0], kiwi: [0, 0] }, low = [];
+    for (let i = 0; i < 400; i++) {
+      if (i === 120) { p.vy = -900; p.onGround = false; p.jumps = 1; } // one jump
+      d.updatePlay(1 / 60);
+      const h = { rex: p.y, chili: G.chili.y, baby: G.fol.baby.y, kiwi: G.fol.kiwi.y };
+      for (const k in h) { low.push(h[k] > 441); if (440 - h[k] > peak[k][0]) peak[k] = [440 - h[k], i]; }
+    }
+    return { peak, sunk: low.some(Boolean), end: [G.chili.y, G.fol.baby.y, G.fol.kiwi.y] };
+  });
+  expect(r.sunk).toBe(false);
+  for (const k of ['chili', 'baby', 'kiwi']) expect(r.peak[k][0]).toBeGreaterThan(60);                // every follower really leaves the ground
+  expect(r.peak.chili[1]).toBeGreaterThan(r.peak.rex[1]);                                              // ... later than Rex
+  expect(r.peak.baby[1]).toBeGreaterThan(r.peak.chili[1]);                                             // ... and in order of distance
+  expect(r.peak.kiwi[1]).toBeGreaterThan(r.peak.baby[1]);
+  for (const y of r.end) expect(y).toBeGreaterThan(420);                                                // all back on the ground
+});
+
+test('followers climb onto a platform with Rex, stay clear of pits, and start fresh after a retry', async ({ game }) => {
+  await game.open({ babyName: 'Babs', treasures: [0, 0, 0, 1] });
+  await game.start(0);
+  const r = await game.eval(() => {
+    const d = window.__dino, G = d.G, p = G.p, L = G.L; L.pits.length = 0; L.obs.length = 0; L.plats.length = 0; p.inv = 999;
+    L.plats.push({ x: p.wx + 400, y: 440 - 125, w: 1400 });
+    const run = (n, fn) => { for (let i = 0; i < n; i++) { if (fn) fn(i); d.updatePlay(1 / 60); } };
+    run(40, i => { if (i === 0) { p.vy = -1000; p.onGround = false; p.jumps = 1; p.wx = L.plats[0].x - 120; } }); // hop onto the platform
+    run(200);
+    const onPlat = { rex: p.y, kiwi: G.fol.kiwi.y, baby: G.fol.baby.y, chili: G.chili.y };
+    L.plats.length = 0; L.pits.push({ x: p.wx + 300, w: 260 }); G.chili.wx = p.wx - 145; p.y = 440; p.vy = 0; p.onGround = true;
+    let over = 0; for (let i = 0; i < 160; i++) { d.updatePlay(1 / 60); const fx = p.wx - 230; if (fx > L.pits[0].x + 20 && fx < L.pits[0].x + 240) over = Math.max(over, 440 - G.fol.kiwi.y); p.y = Math.min(p.y, 440); }
+    d.retry();
+    return { onPlat, over, trail: G.trail.x.length, after: [G.chili.y, G.fol.baby.y, G.fol.kiwi.y] };
+  });
+  for (const k of ['rex', 'kiwi', 'baby', 'chili']) expect(r.onPlat[k]).toBeLessThan(440 - 100);     // all four stand up on the platform (315 or a little higher with the run bounce)
+  expect(r.over).toBeGreaterThan(20);                                                                  // Kiwi is lifted over the pit, not walking into it
+  expect(r.trail).toBe(0);
+  for (const y of r.after) expect(y).toBe(440);
+});
+
+test('followers ride a crumbled platform down, and absent followers make no dust', async ({ game }) => {
+  await game.open({ treasures: [0, 0, 0, 0] }); // no baby, no Kiwi
+  await game.start(0);
+  const r = await game.eval(() => {
+    const d = window.__dino, G = d.G, p = G.p, L = G.L; L.pits.length = 0; L.obs.length = 0; L.plats.length = 0; p.inv = 999;
+    const pl = { x: p.wx + 300, y: 440 - 100, y0: 340, w: 1400, crumble: false, t: null }; L.plats.push(pl);
+    for (let i = 0; i < 30; i++) d.updatePlay(1 / 60);
+    p.wx = pl.x + 20; p.y = pl.y; p.vy = 0; p.onGround = true;
+    for (let i = 0; i < 100; i++) d.updatePlay(1 / 60); // Rex runs along the step, the trail remembers it
+    const before = G.chili.y;
+    pl.gone = true; pl.fv = 0; p.vy = 0; p.y = 440; p.onGround = true; L.plats.length = 0; // it breaks away behind him
+    G.chili.wx = p.wx - 120;
+    let minY = 999; for (let i = 0; i < 20; i++) { pl.fv += 2200 / 60; pl.y += pl.fv / 60; d.updatePlay(1 / 60); minY = Math.min(minY, G.chili.y); }
+    return { before, minY, after: G.chili.y, parts: d.G.fol.baby.pb };
+  });
+  expect(r.parts).toBe(null);          // the absent baby was never updated
+  expect(r.before).toBeLessThan(360);   // Chili stood up on the step
+  expect(r.after).toBeGreaterThan(r.before + 40); // ... and went down with it instead of hovering
+});

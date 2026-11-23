@@ -2809,7 +2809,7 @@ function startLevel(arg, endless) { // endless: arg = theme index. otherwise arg
   G = { L, wi, li: endless ? -1 : arg, sk: skillsFor(endless ? null : arg, wi), cam: 0, t: 0, startT: 1.6, stopped: false, overlay: null, shake: 0, tip: null, eggsGot: [false, false, false], amber: 0,
     p: { wx: 200, y: GROUND, vy: 0, onGround: true, jumps: 0, coyote: 0, inv: 0, roarT: 0, roarCd: 0, hearts: endless ? 3 : MAX_HEARTS, ph: 0, duck: false, stomp: false, spin: 1, fireT: 0, fireCd: 0, breathT: 0, roarMax: 3 },
     duckHeld: null, fireballs: [], flames: [],
-    chili: { wx: 95, y: GROUND, ph: 0, dig: null, digT: 0 }, cp: 200, rings: [],
+    chili: { wx: 95, y: GROUND, ph: 0, dig: null, digT: 0 }, cp: 200, rings: [], trail: { x: [], y: [], pl: [] }, fol: newFollowers(),
     boss: null, bossStarted: false, golden: null, gotGolden: false, atGate: false, gateT: 0, gateStep: 0, gateGlow: 0, nudge: 0, gateOpening: false, gateOpen: 0, finished: false,
     coach: null, flyEggs: [], slotPop: [0, 0, 0], hitFlash: 0, endless: !!endless, maxH: endless ? 3 : MAX_HEARTS, score: 0, heartAt: 500, tier: 1 };
   if (!endless) { G.chiliSay = { text: fmt('Los geht\'s, ihr zwei!'), t: 2.6 }; G.chiliCd = 4; }
@@ -2959,13 +2959,65 @@ function safeSpawn(x) { // never respawn in or right next to a pit: step back un
   const L = G.L, bad = q => L.pits.some(p => q + 450 > p.x && q - 120 < p.x + p.w); let g = 0;
   while (bad(x) && g++ < 120) x -= 40; return Math.max(x, 100);
 }
+// Followers (Chili, baby, Kiwi) replay Rex's path: the trail stores his height by world x, so every follower hops exactly where Rex hopped
+// (obstacles, pits, platforms, swimming) without any per-obstacle rules. Screen offsets stay inside the view (Rex sits at screen x 270; Kiwi at 230 is still fully visible).
+const FOL = { baby: 190, kiwi: 235 };
+function newFollowers() { return { baby: { ph: 0, y: GROUND, pb: null, land: 0, tilt: 0 }, kiwi: { ph: 0, y: GROUND, pb: null, land: 0, tilt: 0 } }; }
+function squashed(x, y, land, tilt, fn) { // landing squash about the feet (land 0..1) and a swim tilt about the body, like Rex
+  if (!land && !tilt) { fn(); return; }
+  ctx.save(); ctx.translate(x, y); ctx.scale(1 + 0.14 * land, 1 - 0.18 * land); ctx.translate(0, -30); ctx.rotate(tilt); ctx.translate(-x, -(y - 30)); fn(); ctx.restore();
+}
+function resetTrail() { G.trail = { x: [], y: [], pl: [] }; G.fol = newFollowers(); Object.assign(G.chili, { pb: null, py: null, sy: null, wasAir: false, land: 0, y: GROUND, joy: 0 }); }
+function trailPush(x, y, pl) { // pl: the platform Rex stands on (or null), so followers can tell when it has crumbled away
+  const t = G.trail;
+  while (t.x.length && t.x[t.x.length - 1] > x + 1.5) { t.x.pop(); t.y.pop(); t.pl.pop(); } // the player moved back (boss lunge, gate clamp): forget the way ahead
+  const m = t.x.length - 1;
+  if (m >= 0 && x - t.x[m] < 1.5) { t.y[m] = y; t.pl[m] = pl; return; } // standing still: keep only the latest height
+  t.x.push(x); t.y.push(y); t.pl.push(pl);
+  while (t.x.length > 2 && t.x[1] < x - 900) { t.x.shift(); t.y.shift(); t.pl.shift(); }
+}
+function trailLo(x) { // index of the last sample at or before x (-1 before the first one)
+  const t = G.trail, n = t.x.length;
+  if (!n || x < t.x[0]) return -1;
+  if (x >= t.x[n - 1]) return n - 1;
+  let lo = 0, hi = n - 1; while (hi - lo > 1) { const m = (lo + hi) >> 1; if (t.x[m] <= x) lo = m; else hi = m; }
+  return lo;
+}
+function trailY(x) {
+  const t = G.trail, lo = trailLo(x);
+  if (lo < 0) return GROUND;
+  if (lo === t.x.length - 1) return t.y[lo];
+  return t.y[lo] + (t.y[lo + 1] - t.y[lo]) * ((x - t.x[lo]) / (t.x[lo + 1] - t.x[lo] || 1));
+}
+function followY(x) { // where a follower stands at world x: Rex's trail (never below the ground), plus a safety hop so nobody ever floats or walks into a pit
+  const lo = trailLo(x), pl = lo >= 0 ? G.trail.pl[lo] : null; let y = trailY(x);
+  if (pl && pl.gone) y = Math.max(y, pl.y); // the crumbling step Rex stood on is falling away: ride it down instead of hovering
+  y = Math.min(y, GROUND);
+  for (const pit of G.L.pits) if (x > pit.x - 30 && x < pit.x + pit.w + 30) { const u = (x - (pit.x - 30)) / (pit.w + 60); y = Math.min(y, GROUND - 4 * 90 * u * (1 - u)); }
+  return y;
+}
+function updateFollowers(dt) { // baby and Kiwi (Chili has his own update because he digs)
+  const p = G.p, moving = !(G.startT > 0 || G.stopped), swim = G.L.swim;
+  trailPush(p.wx, p.y, p.onGround && p.y < GROUND - 1 ? G.L.plats.find(q => !q.gone && p.wx + 25 > q.x && p.wx - 25 < q.x + q.w && Math.abs(q.y - p.y) < 4) || null : null);
+  for (const k of ['baby', 'kiwi']) {
+    if (!(k === 'kiwi' ? save.treasures[3] : save.babyName)) continue; // not part of the family yet: nothing is drawn, so no dust or bubbles either
+    const f = G.fol[k], base = followY(p.wx - FOL[k]), vb = f.pb == null ? 0 : (base - f.pb) / Math.max(dt, 1e-3);
+    f.pb = base; const wasAir = f.air; f.air = Math.abs(vb) > 40;
+    if (wasAir && !f.air && !swim) { f.land = 0.14; burst(p.wx - FOL[k], base, 3, ['#d8c3a5', '#fff'], 90, 200, 4, 0.35); } // a little thump and dust, like Rex
+    f.land = Math.max(0, f.land - dt); f.tilt = swim ? clamp(vb / 900, -0.4, 0.4) : 0;
+    if (swim && Math.random() < 0.03) burst(p.wx - FOL[k] + 10, f.y - 40, 1, ['#dff'], 40, -120, 6, 0.8);
+    if (!f.air && moving) f.ph += dt * 13; // feet only run on the ground: they freeze while hopping
+    const bob = f.air || !moving ? 0 : k === 'kiwi' ? Math.abs(Math.sin(f.ph * 0.7 + 1)) * 12 : Math.abs(Math.sin(f.ph * 0.6)) * 10;
+    f.y = base - bob + (swim ? Math.sin(G.t * 3 + (k === 'kiwi' ? 1 : 0)) * 5 : 0);
+  }
+}
 function pitFall() {
   const p = G.p, L = G.L;
   const pit = L.pits.find(q => p.wx > q.x - 60 && p.wx < q.x + q.w + 60);
   let nx = pit ? pit.x - 480 : p.wx - 480, guard = 0;
   while (!supported(L, nx) && guard++ < 30) nx -= 40;
   nx = safeSpawn(nx);
-  p.wx = nx; p.y = GROUND; p.vy = 0; G.chili.wx = nx - 145; G.startT = 1.4;
+  p.wx = nx; p.y = GROUND; p.vy = 0; G.chili.wx = nx - 145; resetTrail(); G.startT = 1.4;
   resetCrumble(L); resetSecretPepper(L); hurt(true); p.inv = 3;
 }
 function retry() {
@@ -2975,10 +3027,10 @@ function retry() {
   const fk = G.bossStarted ? 'b' + (G.bossCp || 0) : String(G.cp); G.fails = G.fails || {}; G.fails[fk] = (G.fails[fk] || 0) + 1;
   if (G.fails[fk] >= 2 && !G.endless && !G.shield) { G.shield = true; G.fails[fk] = 0; setTimeout(() => { if (G && scene === 'play') toast('Chili schenkt dir einen Schutzschild!', '#9fd3ff'); }, 700); }
   G.overlay = null; p.hearts = G.maxH; p.inv = 2; p.wx = G.bossStarted ? G.cp : safeSpawn(G.cp); p.y = GROUND; p.vy = 0; p.roarCd = 0; p.stomp = false; p.spin = 1; G.duckHeld = null; G.fireballs = []; G.flames = [];
-  G.chili.wx = p.wx - 145; G.chili.dig = null; resetCrumble(L); resetSecretPepper(L);
+  G.chili.wx = p.wx - 145; G.chili.dig = null; resetTrail(); resetCrumble(L); resetSecretPepper(L);
   for (const s of L.spots) if (s.state === 'dig') s.state = 'idle';
   for (const o of L.obs) if ((o.type === 'raptor' || o.type === 'ptero' || o.type === 'compy' || o.type === 'hopper' || o.type === 'seed') && o.x > G.cp - 300 && o.x < G.cp + 700) o.dead = true;
-  if (G.bossStarted && !G.golden && !G.bossDone) { p.wx = L.bossX; G.chili.wx = p.wx - 90; G.boss = newBoss(G.bossCp || 0); G.stopped = true; for (const o of L.obs) if (o.minion) o.dead = true; if (G.boss.phase > 0) startBossPhase(G.boss); }
+  if (G.bossStarted && !G.golden && !G.bossDone) { p.wx = L.bossX; G.chili.wx = p.wx - 90; resetTrail(); G.boss = newBoss(G.bossCp || 0); G.stopped = true; for (const o of L.obs) if (o.minion) o.dead = true; if (G.boss.phase > 0) startBossPhase(G.boss); }
   G.startT = 0.9;
 }
 const BOSS_KINDS = {
@@ -3167,6 +3219,7 @@ function updatePlay(dt) {
     toast(TREASURES[tr.k].name + (save.treasures[tr.k] ? '!' : ' gefunden!'), '#ffd740');
   }
   // chili
+  updateFollowers(dt);
   const c = G.chili; c.ph += dt * 12;
   for (const s of L.spots) if (s.state === 'idle' && c.wx >= s.x - 10) { s.state = 'dig'; c.dig = s; c.digT = 0.7; SFX.dig(); toast('Chili hat etwas erschnüffelt!', '#ffe08a'); }
   let target = p.wx - 145;
@@ -3174,9 +3227,11 @@ function updatePlay(dt) {
   const mv = (L.speed + 260) * dt; c.wx += clamp(target - c.wx, -mv, mv);
   if (L.swim) { c.sy = c.sy == null ? GROUND : c.sy; c.sy += (p.y - 10 + Math.sin(T * 3) * 10 - c.sy) * Math.min(1, dt * 3); }
   c.joy = Math.max(0, (c.joy || 0) - dt);
-  c.y = c.dig ? GROUND : GROUND - Math.abs(Math.sin(c.ph * 0.8)) * 14 - (c.joy > 0 ? Math.abs(Math.sin(c.joy * 11)) * 12 : 0);
+  const cb = c.dig ? GROUND : followY(c.wx), cair = !c.dig && c.pb != null && Math.abs((cb - c.pb) / Math.max(dt, 1e-3)) > 40; c.pb = cb;
+  if (c.wasAir && !cair && !L.swim) { c.land = 0.14; burst(c.wx, cb, 3, ['#d8c3a5', '#fff'], 90, 200, 4, 0.35); } c.wasAir = cair; c.land = Math.max(0, (c.land || 0) - dt);
+  if (L.swim && Math.random() < 0.03) burst(c.wx + 10, c.y - 50, 1, ['#dff'], 40, -120, 6, 0.8);
+  c.y = cb - (c.dig || cair ? 0 : Math.abs(Math.sin(c.ph * 0.8)) * 14) - (c.joy > 0 ? Math.abs(Math.sin(c.joy * 11)) * 12 : 0);
   if (L.swim && c.sy != null) c.y = c.sy;
-  for (const pit of L.pits) if (c.wx > pit.x - 30 && c.wx < pit.x + pit.w + 30) { const u = (c.wx - (pit.x - 30)) / (pit.w + 60); c.y = GROUND - 4 * 90 * u * (1 - u); }
   c.vy = (c.y - (c.py == null ? c.y : c.py)) / Math.max(dt, 1e-3); c.py = c.y;
   // obstacles
   const pb = p.duck ? { x: p.wx - 30, y: p.y - 56, w: 80, h: 52 } : { x: p.wx - 25, y: p.y - 92, w: 68, h: 88 };
@@ -4067,12 +4122,20 @@ function drawPlay() {
   }
   // chili
   if (G.entering) { const u = clamp(G.entering, 0, 1), gx = L.gateX - cam, k = 1 - 0.62 * u; ctx.save(); ctx.translate(gx, GROUND); ctx.scale(k, k); ctx.translate(-gx, -GROUND); ctx.globalAlpha = 1 - 0.7 * u * u; }
-  const c = G.chili; shadow(c.wx - cam + 6, GROUND + 2, 22 * clamp(1 - (GROUND - c.y) / 200, 0.4, 1), 0.25); chiliFx.vy = c.vy || 0; chiliFx.dig = !!c.dig; chiliFx.scared = G.p.hitT > 0 && !G.overlay ? G.p.hitT / 0.45 : 0; chiliFx.joy = c.joy > 0 ? c.joy / 0.9 : 0; oChili(c.wx - cam, c.y, 1.25, c.ph, c.dig ? false : (G.bossStarted && !G.golden));
-  if (G.chiliSay && !G.overlay) { const cs = G.chiliSay, by = c.y - (G.atGate ? 200 : 92), al = clamp(cs.t * 3, 0, 1) * clamp((2.6 - cs.t) * 6, 0, 1); setFont(19); const bw = ctx.measureText(cs.text).width + 30, bx = clamp(c.wx - cam, Math.max(70, bw / 2 - 15), W - 200); ctx.save(); ctx.globalAlpha = al; rr(bx - bw / 2 + 30, by - 19, bw, 38, 17); ctx.fillStyle = '#fffdf6'; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = '#6b4a2b'; ctx.stroke(); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.moveTo(bx - 4, by + 15); ctx.lineTo(bx + 4, by + 28); ctx.lineTo(bx + 16, by + 15); ctx.fill(); txt(cs.text, bx + 30, by, 19, '#3b2410'); ctx.restore(); }
+  const c = G.chili; shadow(c.wx - cam + 6, GROUND, 22 * clamp(1 - (GROUND - c.y) / 200, 0.4, 1), 0.25); chiliFx.vy = c.vy || 0; chiliFx.dig = !!c.dig; chiliFx.scared = G.p.hitT > 0 && !G.overlay ? G.p.hitT / 0.45 : 0; chiliFx.joy = c.joy > 0 ? c.joy / 0.9 : 0; squashed(c.wx - cam, c.y, (c.land || 0) / 0.14, 0, () => oChili(c.wx - cam, c.y, 1.25, c.ph, c.dig ? false : (G.bossStarted && !G.golden)));
+  if (G.chiliSay && !G.overlay) { // speech bubble: wrapped, pinned to the left edge above the followers so it never covers Rex or the riders
+    const cs = G.chiliSay, al = clamp(cs.t * 3, 0, 1) * clamp((2.6 - cs.t) * 6, 0, 1), lines = wrapLines(cs.text, 200, 19), lw = Math.max(...lines.map(l => ctx.measureText(l).width)), bw = lw + 28, bh = 14 + lines.length * 24;
+    const bx0 = 14, bot = Math.max(c.y - (G.atGate ? 200 : 110), bh + 90), tx = clamp(c.wx - cam + 14, bx0 + 26, bx0 + bw - 26);
+    ctx.save(); ctx.globalAlpha = al; rr(bx0, bot - bh, bw, bh, 17); ctx.fillStyle = '#fffdf6'; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = '#6b4a2b'; ctx.stroke();
+    ctx.fillStyle = '#fffdf6'; ctx.beginPath(); ctx.moveTo(tx - 9, bot - 1); ctx.lineTo(tx + 3, bot + 17); ctx.lineTo(tx + 12, bot - 1); ctx.closePath(); ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = '#6b4a2b'; ctx.beginPath(); ctx.moveTo(tx - 9, bot); ctx.lineTo(tx + 3, bot + 17); ctx.lineTo(tx + 12, bot); ctx.stroke(); ctx.fillStyle = '#fffdf6'; ctx.fillRect(tx - 8, bot - 3, 19, 4);
+    lines.forEach((l, k) => txt(l, bx0 + bw / 2, bot - bh + 7 + 12 + k * 24, 19, '#3b2410')); ctx.restore(); }
   if (c.dig) otxt('!', c.wx - cam + 20, c.y - 70 - Math.abs(Math.sin(T * 10)) * 6, 36, '#ffd34d', '#3b1d00', 6);
   // baby + kiwi followers
-  if (save.treasures[3]) oKiwi(p.wx - cam - 225, GROUND - (G.startT > 0 || G.stopped ? 0 : Math.abs(Math.sin(p.ph * 0.7 + 1)) * 12), 1.1, p.ph * 1.3);
-  if (save.babyName) oBaby(p.wx - cam - 168, GROUND - (G.startT > 0 || G.stopped ? 0 : Math.abs(Math.sin(p.ph * 0.6)) * 10), 0.85, p.ph);
+  for (const [k, on, r] of [['kiwi', save.treasures[3], 16], ['baby', save.babyName, 18]]) if (on) { // they hop where Rex hopped (see updateFollowers)
+    const f = G.fol[k], fx = p.wx - FOL[k];
+    if (supported(L, fx)) shadow(fx - cam + 4, GROUND, r * clamp(1 - (GROUND - f.y) / 200, 0.4, 1), 0.25);
+    squashed(fx - cam, f.y, f.land / 0.14, f.tilt, () => { if (k === 'kiwi') oKiwi(fx - cam, f.y, 1.0, f.ph * 1.3); else oBaby(fx - cam, f.y, 0.8, f.ph); });
+  }
   // player
   { let sy = GROUND; for (const pl of L.plats) if (p.wx + 20 > pl.x && p.wx - 20 < pl.x + pl.w && pl.y >= p.y - 2) sy = Math.min(sy, pl.y); if (sy < GROUND || supported(L, p.wx)) shadow(p.wx - cam + 4, sy + 2, 52 * clamp(1 - (sy - p.y) / 260, 0.35, 1), 0.3); }
   if (p.fireT > 0) { const g = ctx.createRadialGradient(p.wx - cam + 10, p.y - 60, 10, p.wx - cam + 10, p.y - 60, 120); g.addColorStop(0, `rgba(${fireOf(save.equip.fire || 0).glow},${0.3 + 0.12 * Math.sin(T * 10)})`); g.addColorStop(1, `rgba(${fireOf(save.equip.fire || 0).b},0)`); ctx.fillStyle = g; ctx.fillRect(p.wx - cam - 110, p.y - 180, 240, 240); }
@@ -4167,7 +4230,9 @@ function actBtn(x, y, r, col, kind, label, fs, held) { // big round touch button
   ctx.save(); ctx.beginPath(); ctx.arc(x, y, r - 3, 0, Math.PI * 2); ctx.clip(); const hg = ctx.createLinearGradient(0, y - r, 0, y); hg.addColorStop(0, 'rgba(255,255,255,.34)'); hg.addColorStop(1, 'rgba(255,255,255,0)'); ctx.fillStyle = hg; ctx.beginPath(); ctx.ellipse(x, y - r * 0.5, r * 0.78, r * 0.5, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore();
   ico(kind, x, y - r * 0.2 + (held ? 2 : 0), r * 0.82); otxt(label, x, y + r * 0.56, fs, '#fff', 'rgba(0,0,0,.65)', 5);
 }
-function dashPos() { return G.sk.duck ? [196, H - 58, 46] : [76, H - 78, 54]; }
+// The touch buttons live in the soil band under the ground line (y > GROUND), so the followers running at the left edge stay visible on the grass.
+function duckPos() { return [72, H - 51, 45]; }
+function dashPos() { return G.sk.duck ? [180, H - 51, 42] : duckPos(); }
 function drawHUD() {
   const p = G.p, th = WORLDS[G.wi];
   const bossBar = !!(G.boss && G.boss.state !== 'enter' && !G.golden && !G.bossDone); // boss health replaces the egg pill
@@ -4196,22 +4261,23 @@ function drawHUD() {
   }
   if (G.banner) { const bn = G.banner, u = clamp(bn.t / 2.0, 0, 1), pop = 1 + 0.22 * clamp((bn.t - 1.7) / 0.3, 0, 1), al = clamp(bn.t * 2, 0, 1) * clamp((2.0 - bn.t) * 6, 0, 1); ctx.save(); ctx.globalAlpha = al; ctx.translate(W / 2, 134); ctx.scale(pop, pop); otxt(bn.text, 0, 0, 38, bn.col, '#000', 8); otxt(bn.sub, 0, 30, 20, '#fff', '#000', 6); ctx.restore(); }
   if (G.boss && G.boss.state === 'duel') { const b = G.boss; ctx.globalAlpha = 0.6 + 0.4 * Math.sin(T * 18); otxt('BRÜLL! BRÜLL! BRÜLL!', W / 2, 330, 40, '#ffe27a', '#7a1000', 9); ctx.globalAlpha = 1; }
-  if (G.tip && !G.overlay) { ctx.globalAlpha = clamp(G.tip.t * 2, 0, 1); const x0 = G.sk.dash && G.sk.duck && !G.L.swim ? 258 : 190, x1 = 790, lines = wrapLines(G.tip.text, x1 - x0 - 92, 17), h = 16 + lines.length * 22, tipY = H - h - 6; rr(x0, tipY, x1 - x0, h, 16); ctx.fillStyle = 'rgba(255,247,224,.95)'; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = '#6b4a2b'; ctx.stroke(); drawPortrait('goetti', x0 + 36, tipY + h / 2, 24); lines.forEach((l, i) => txt(l, (x0 + 68 + x1 - 12) / 2, tipY + 20 + i * 22, 17, '#3b2410')); ctx.globalAlpha = 1; }
+  if (G.tip && !G.overlay) { ctx.globalAlpha = clamp(G.tip.t * 2, 0, 1); const x0 = G.sk.dash && G.sk.duck && !G.L.swim ? 240 : 190, x1 = 790, lines = wrapLines(G.tip.text, x1 - x0 - 92, 17), h = 16 + lines.length * 22, tipY = H - h - 6; rr(x0, tipY, x1 - x0, h, 16); ctx.fillStyle = 'rgba(255,247,224,.95)'; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = '#6b4a2b'; ctx.stroke(); drawPortrait('goetti', x0 + 36, tipY + h / 2, 24); lines.forEach((l, i) => txt(l, (x0 + 68 + x1 - 12) / 2, tipY + 20 + i * 22, 17, '#3b2410')); ctx.globalAlpha = 1; }
   if (G.overlay) return;
   // pause
   circle(W - 44, 43, 26, 'rgba(0,0,0,.3)'); circle(W - 44, 40, 26, 'rgba(18,22,38,.7)'); ctx.lineWidth = 2.5; ctx.strokeStyle = 'rgba(255,255,255,.8)'; ctx.beginPath(); ctx.arc(W - 44, 40, 26, 0, Math.PI * 2); ctx.stroke(); ico('pause', W - 44, 40, 30);
   buttons.push({ x: W - 74, y: 10, w: 60, h: 60, cb: () => { G.overlay = { type: 'pause' }; } });
+  if (G.sk.duck || (G.sk.dash && !G.L.swim)) { const dw = G.sk.duck && G.sk.dash && !G.L.swim ? 262 : 150, dg = ctx.createLinearGradient(0, 0, dw, 0); dg.addColorStop(0, 'rgba(0,0,0,.22)'); dg.addColorStop(0.7, 'rgba(0,0,0,.12)'); dg.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = dg; ctx.fillRect(0, GROUND + 3, dw, H - GROUND - 3); } // a soft dock under the touch buttons
   // duck / stomp button
-  if (G.sk.duck) { const dx = 76, dy = H - 78, held = G.duckHeld != null, air = !p.onGround && G.sk.stomp;
+  if (G.sk.duck) { const [dx, dy] = duckPos(), held = G.duckHeld != null, air = !p.onGround && G.sk.stomp;
     const threat = G.L.obs.some(o => !o.dead && !o.scared && ((o.type === 'low') || (o.type === 'ptero' && o.low)) && o.x - p.wx > 0 && o.x - p.wx < 330) || (air && G.L.obs.some(o => !o.dead && !o.flat && (o.type === 'geode' || o.type === 'compy') && Math.abs(o.x - p.wx - 60) < 120));
-    if (threat && !held) { ctx.globalAlpha = 0.5 + 0.3 * Math.sin(T * 14); circle(dx, dy, 74 + 6 * Math.sin(T * 14), '#9fd3ff'); ctx.globalAlpha = 1; }
-    actBtn(dx, dy, held ? 50 : 54, held ? '#1f5ab8' : '#3a7ee0', air && !G.L.swim ? 'stomp' : 'duck', G.L.swim ? 'TAUCHEN' : air ? 'STAMPF!' : 'DUCKEN', 17, held); }
+    if (threat && !held) { ctx.globalAlpha = 0.5 + 0.3 * Math.sin(T * 14); circle(dx, dy, 62 + 4 * Math.sin(T * 14), '#9fd3ff'); ctx.globalAlpha = 1; }
+    actBtn(dx, dy, held ? 41 : 45, held ? '#1f5ab8' : '#3a7ee0', air && !G.L.swim ? 'stomp' : 'duck', G.L.swim ? 'TAUCHEN' : air ? 'STAMPF!' : 'DUCKEN', 17, held); }
   if (G.sk.dash && !G.L.swim) { const [fx, fy, fr] = dashPos(), cd = p.dashCd > 0, wallAhead = G.L.obs.some(o => !o.dead && o.type === 'wall' && o.x - p.wx > 0 && o.x - p.wx < 420);
-    if (wallAhead && !cd) { ctx.globalAlpha = 0.5 + 0.3 * Math.sin(T * 14); circle(fx, fy, fr + 16 + 5 * Math.sin(T * 14), '#ffd34d'); ctx.globalAlpha = 1; }
+    if (wallAhead && !cd) { ctx.globalAlpha = 0.5 + 0.3 * Math.sin(T * 14); circle(fx, fy, fr + 10 + 4 * Math.sin(T * 14), '#ffd34d'); ctx.globalAlpha = 1; }
     actBtn(fx, fy, fr, cd ? '#6a6a6a' : '#ec8a18', 'dash', 'FLITZ', 17);
     if (cd) { ctx.strokeStyle = '#ffd34d'; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(fx, fy, fr - 5, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * (1 - p.dashCd / 1.7)); ctx.stroke(); } }
   // roar / fire button
-  const rx = W - 92, ry = H - 92, ready = p.roarCd <= 0 || (G.boss && G.boss.state === 'duel');
+  const rx = W - 92, ry = H - 72, ready = p.roarCd <= 0 || (G.boss && G.boss.state === 'duel');
   if (p.fireT > 0 && !G.boss) {
     ctx.globalAlpha = 0.45 + 0.25 * Math.sin(T * 10); circle(rx, ry, 80, '#ffb030'); ctx.globalAlpha = 1;
     actBtn(rx, ry, 66, '#ff6a14', 'fire', 'FEUER!', 24);
@@ -4245,14 +4311,14 @@ function drawCoach() {
     ctx.fillStyle = '#ffd34d'; ctx.beginPath(); ctx.moveTo(bx - 62, dy); ctx.lineTo(bx - 30, dy - 26); ctx.lineTo(bx - 30, dy - 11); ctx.lineTo(bx + 24, dy - 11); ctx.lineTo(bx + 24, dy + 11); ctx.lineTo(bx - 30, dy + 11); ctx.lineTo(bx - 30, dy + 26); ctx.closePath(); ctx.fill();
     ctx.strokeStyle = '#3b1d00'; ctx.lineWidth = 3; ctx.stroke();
   } else if (c.type === 'duck' || c.type === 'stomp') {
-    const dx = 76, dy = H - 78;
+    const [dx, dy] = duckPos();
     ctx.strokeStyle = `rgba(160,210,255,${1 - u})`; ctx.lineWidth = 8; ctx.beginPath(); ctx.arc(dx, dy, 62 + u * 45, 0, Math.PI * 2); ctx.stroke();
-    actBtn(dx, dy, 58, '#3a7ee0', c.type === 'stomp' ? 'stomp' : 'duck', c.type === 'stomp' ? 'STAMPF!' : 'DUCKEN', 17);
+    actBtn(dx, dy, 52, '#3a7ee0', c.type === 'stomp' ? 'stomp' : 'duck', c.type === 'stomp' ? 'STAMPF!' : 'DUCKEN', 17);
     const bx = dx + 150 + Math.abs(Math.sin(T * 6)) * 18;
     ctx.fillStyle = '#ffd34d'; ctx.beginPath(); ctx.moveTo(bx - 62, dy); ctx.lineTo(bx - 30, dy - 26); ctx.lineTo(bx - 30, dy - 11); ctx.lineTo(bx + 24, dy - 11); ctx.lineTo(bx + 24, dy + 11); ctx.lineTo(bx - 30, dy + 11); ctx.lineTo(bx - 30, dy + 26); ctx.closePath(); ctx.fill();
     ctx.strokeStyle = '#3b1d00'; ctx.lineWidth = 3; ctx.stroke();
   } else {
-    const rx = W - 92, ry = H - 92;
+    const rx = W - 92, ry = H - 72;
     ctx.strokeStyle = `rgba(255,220,80,${1 - u})`; ctx.lineWidth = 8; ctx.beginPath(); ctx.arc(rx, ry, 70 + u * 45, 0, Math.PI * 2); ctx.stroke();
     const fire = G.p.fireT > 0; actBtn(rx, ry, 66, fire ? '#ff6a14' : '#d63a28', fire ? 'fire' : 'roar', fire ? 'FEUER!' : 'BRÜLL!', 24);
     const bx = rx - 160 - Math.abs(Math.sin(T * 6)) * 18;
@@ -6050,8 +6116,8 @@ canvas.addEventListener('pointerdown', e => {
   if (nameOpen()) return;
   const { x, y } = toLogical(e);
   if (dialog) { advanceDialog(); return; }
-  if (scene === 'play' && G && !G.overlay && G.sk.duck && Math.hypot(x - 76, y - (H - 78)) < 84) { duckDown(e.pointerId); return; }
   if (scene === 'play' && G && !G.overlay && G.sk.dash && !G.L.swim) { const [dx, dy, dr] = dashPos(); if (Math.hypot(x - dx, y - dy) < dr + 14) { dash(); return; } }
+  if (scene === 'play' && G && !G.overlay && G.sk.duck && Math.hypot(x - duckPos()[0], y - duckPos()[1]) < 84) { duckDown(e.pointerId); return; }
   if (scene === 'map' && !parentMode && !doorOverlay && x < 350 && y < 56) titlePress = T;
   if (scene === 'splash') { startSplash(); return; }
   if (hitButtons(x, y)) return;
