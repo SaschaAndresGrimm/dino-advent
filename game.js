@@ -167,7 +167,35 @@ const SFX = {
   fire() { noise(0.35, 0.3, 1600); tone(200, 0.3, 'sawtooth', 0.06, 90); },
   duck() { tone(420, 0.08, 'triangle', 0.06, 260); },
   power() { [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, 0.18, 'square', 0.05, null, i * 0.06)); },
+  voice(kind) { (VOICES[kind] || VOICES.rex)(); }, // the Dino-Buch: tap a picture and the animal answers in its own voice
 };
+const VOICES = { // every card has its own synthesised voice (or sound for things that are not animals)
+  rex() { duck(0.4, 0.45); noise(0.8, 0.4, 420); tone(95, 0.85, 'sawtooth', 0.15, 48, 0, { lp: 650, lpTo: 150, vib: 1 }); tone(140, 0.6, 'sawtooth', 0.08, 70, 0.05, { lp: 900 }); },
+  spino() { duck(0.5, 0.4); noise(0.7, 0.26, 2200, 0, 'bandpass'); tone(150, 0.7, 'sawtooth', 0.12, 85, 0, { lp: 1500, lpTo: 300 }); tone(210, 0.35, 'sawtooth', 0.07, 120, 0.4, { lp: 1800 }); },
+  trike() { tone(190, 0.55, 'sawtooth', 0.13, 135, 0, { lp: 900, vib: 1 }); tone(95, 0.55, 'triangle', 0.11, 78); tone(175, 0.5, 'sawtooth', 0.12, 120, 0.4, { lp: 800, vib: 1 }); tone(88, 0.5, 'triangle', 0.1, 70, 0.4); },
+  sauro() { tone(70, 1.5, 'sine', 0.1, 112, 0, { vib: 1, att: 0.25 }); tone(140, 1.3, 'triangle', 0.045, 100, 0.1, { vib: 1, lp: 520, att: 0.25 }); tone(210, 1.1, 'sine', 0.02, 150, 0.2, { att: 0.3 }); tone(112, 0.7, 'sine', 0.08, 60, 1.0); },
+  raptor() { for (let i = 0; i < 3; i++) tone(900 + i * 170, 0.1, 'square', 0.055, 1700 + i * 170, i * 0.11, { lp: 3600 }); noise(0.35, 0.12, 4800, 0, 'highpass'); tone(1300, 0.28, 'sawtooth', 0.05, 700, 0.38, { lp: 3000 }); },
+  ptero() { tone(1100, 0.38, 'sawtooth', 0.075, 2500, 0, { lp: 4200, vib: 1 }); tone(1500, 0.3, 'sawtooth', 0.04, 3000, 0.04); tone(1250, 0.26, 'sawtooth', 0.06, 2200, 0.46, { lp: 4000 }); noise(0.15, 0.08, 5000, 0.02, 'highpass'); },
+  quetz() { duck(0.6, 0.3); tone(560, 0.7, 'sawtooth', 0.1, 1500, 0, { lp: 2600, vib: 1 }); tone(280, 0.7, 'sawtooth', 0.06, 700, 0, { lp: 1500 }); noise(0.4, 0.14, 3000, 0.05, 'bandpass'); tone(900, 0.3, 'sawtooth', 0.06, 500, 0.7, { lp: 2400 }); },
+  stego() { tone(85, 0.26, 'square', 0.12, 55, 0, { lp: 320 }); noise(0.2, 0.22, 520); tone(78, 0.28, 'square', 0.11, 50, 0.34, { lp: 300 }); noise(0.22, 0.2, 480, 0.34); },
+  mammoth() { duck(0.55, 0.5); tone(380, 0.95, 'sawtooth', 0.12, 640, 0, { att: 0.07, lp: 2300, vib: 1 }); tone(380, 0.95, 'square', 0.04, 640, 0, { lp: 1500 }); noise(0.5, 0.12, 1300); tone(520, 0.45, 'sawtooth', 0.1, 300, 0.75, { lp: 2000 }); },
+  anky() { noise(0.28, 0.32, 760); tone(100, 0.22, 'sine', 0.15, 58); tone(70, 0.28, 'square', 0.13, 38, 0.4); noise(0.22, 0.3, 320, 0.4); for (let i = 0; i < 4; i++) noise(0.03, 0.12, 3800, 0.62 + i * 0.05, 'highpass'); },
+  ichthyo() { tone(2200, 0.26, 'sine', 0.07, 3300); tone(3100, 0.22, 'sine', 0.06, 2000, 0.28); for (let i = 0; i < 5; i++) noise(0.015, 0.13, 4600, 0.58 + i * 0.05, 'highpass'); },
+  mosa() { duck(0.6, 0.3); tone(75, 0.75, 'sawtooth', 0.12, 52, 0, { lp: 320, vib: 1 }); noise(0.5, 0.2, 420); for (let i = 0; i < 4; i++) { const f = 300 + (i * 190) % 400; tone(f, 0.08, 'sine', 0.07, f * 1.8, 0.35 + i * 0.07); } },
+  plesio() { tone(260, 1.15, 'sine', 0.08, 430, 0, { vib: 1, att: 0.15 }); tone(410, 0.95, 'sine', 0.06, 230, 0.22, { att: 0.1, vib: 1 }); for (let i = 0; i < 3; i++) { const f = 500 + i * 180; tone(f, 0.07, 'sine', 0.06, f * 1.8, 0.9 + i * 0.06); } },
+  archelon() { noise(0.55, 0.2, 950); tone(130, 0.5, 'triangle', 0.1, 95, 0.05, { lp: 520 }); noise(0.4, 0.14, 700, 0.5); tone(110, 0.3, 'triangle', 0.09, 80, 0.55, { lp: 400 }); },
+  ammonite() { for (let i = 0; i < 6; i++) { const f = 450 + (i * 173) % 500; tone(f, 0.07, 'sine', 0.07, f * 1.8, i * 0.07); } tone(300, 0.06, 'square', 0.06, 150, 0.55); tone(260, 0.06, 'square', 0.06, 130, 0.65); },
+  archaeo() { for (let i = 0; i < 4; i++) tone(2300 + i * 120, 0.07, 'sine', 0.075, 3500, i * 0.11); noise(0.2, 0.07, 6000, 0.5, 'highpass'); tone(1900, 0.2, 'sawtooth', 0.04, 1500, 0.5, { lp: 3000 }); },
+  theriz() { tone(150, 0.75, 'triangle', 0.13, 104, 0, { vib: 1, lp: 720 }); tone(110, 0.55, 'sawtooth', 0.07, 78, 0.15, { lp: 420 }); for (let i = 0; i < 3; i++) noise(0.025, 0.2, 4200, 0.75 + i * 0.09, 'highpass'); },
+  chicken() { for (let i = 0; i < 3; i++) { tone(540 - i * 40, 0.09, 'square', 0.07, 380, i * 0.15, { lp: 1900 }); noise(0.04, 0.06, 2000, i * 0.15, 'highpass'); } tone(430, 0.34, 'sawtooth', 0.08, 780, 0.55, { lp: 2300, vib: 1 }); },
+  polar() { tone(540, 0.3, 'sawtooth', 0.09, 300, 0, { lp: 2100 }); tone(800, 0.2, 'triangle', 0.05, 420, 0.04); tone(480, 0.2, 'sawtooth', 0.08, 280, 0.34, { lp: 1900 }); },
+  feather() { for (let i = 0; i < 6; i++) tone(1900 + (i % 2) * 450, 0.05, 'sine', 0.065, 2700, i * 0.065); noise(0.3, 0.09, 6500, 0, 'highpass'); },
+  steps() { for (let i = 0; i < 3; i++) { tone(95, 0.24, 'sine', 0.22, 42, i * 0.34); noise(0.2, 0.32, 270, i * 0.34); } },
+  eggs() { noise(0.05, 0.3, 3600, 0, 'highpass'); tone(900, 0.07, 'triangle', 0.09, 500); noise(0.05, 0.3, 3600, 0.22, 'highpass'); tone(840, 0.07, 'triangle', 0.09, 460, 0.22); tone(1500, 0.14, 'sine', 0.1, 2300, 0.6); tone(1700, 0.12, 'sine', 0.08, 2500, 0.78); },
+  meteor() { noise(0.7, 0.2, 3200); tone(900, 0.6, 'sawtooth', 0.04, 120, 0, { lp: 2600 }); duck(0.4, 0.7); tone(70, 0.7, 'sine', 0.2, 28, 0.58); noise(0.55, 0.26, 300, 0.58); },
+  trees() { noise(1.0, 0.15, 900); noise(1.0, 0.1, 1700, 0.15); tone(160, 0.5, 'triangle', 0.05, 140, 0.1, { lp: 400 }); [1568, 1976, 2349, 1976].forEach((f, i) => tone(f, 0.3, 'sine', 0.05, null, 0.5 + i * 0.1)); },
+};
+const VOICE_OF = ['rex', 'trike', 'sauro', 'ammonite', 'archelon', 'steps', 'raptor', 'ptero', 'stego', 'ichthyo', 'mosa', 'plesio', 'mammoth', 'anky', 'eggs', 'quetz', 'archaeo', 'theriz', 'spino', 'chicken', 'meteor', 'trees', 'polar', 'feather']; // FACTS order
 function fanNotes(root, seq) { // [semitones, start, length = 0.2]: a bright brass-like fanfare
   for (const [n, t, len = 0.2] of seq) { tone(root * 2 * Math.pow(2, n / 12), len, 'square', 0.04, null, t); tone(root * Math.pow(2, n / 12), len, 'triangle', 0.08, null, t); }
 }
@@ -1014,7 +1042,7 @@ function drawRex(x, y, s, ph, jaw, o = {}) {
   // dorsal plates: amber rounded fins that follow the spine
   ctx.fillStyle = plate; ctx.strokeStyle = shade(plate, 0.6); ctx.lineWidth = 1.5;
   const bz = t => { const u = 1 - t; return [u * u * u * -14 + 3 * u * u * t * -60 + 3 * u * t * t * -100 + t * t * t * -132, u * u * u * -90 + 3 * u * u * t * -92 + 3 * u * t * t * -80 + t * t * t * (-58 + tw)]; };
-  [[30, -101, 8], [14, -99, 9.5], [-4, -96, 10.5], [-22, -92, 10], [-40, -87, 9], ...[[0.34, 8], [0.42, 7.4], [0.5, 6.8], [0.58, 6.1], [0.66, 5.4], [0.74, 4.7], [0.82, 4], [0.9, 3.2]].map(([t, z]) => { const [qx, qy] = bz(t); return [qx, qy + 5.5, z, true]; })].forEach(([px, py, sz, tl], i) => { const ty = py + (tl ? 0 : px < -50 ? tw * 0.4 : 0) + Math.sin(ph * 0.5 - 0.5 + i * 0.4) * 0.8; ctx.beginPath(); ctx.moveTo(px - sz * 0.9, ty + 5); ctx.quadraticCurveTo(px - sz * 0.5, ty - sz * 1.2, px + sz * 0.2, ty - sz * 1.45); ctx.quadraticCurveTo(px + sz * 0.8, ty - sz * 0.6, px + sz * 0.9, ty + 5); ctx.closePath(); ctx.fill(); ctx.stroke(); });
+  (o.noPlates ? [] : [[30, -101, 8], [14, -99, 9.5], [-4, -96, 10.5], [-22, -92, 10], [-40, -87, 9], ...[[0.34, 8], [0.42, 7.4], [0.5, 6.8], [0.58, 6.1], [0.66, 5.4], [0.74, 4.7], [0.82, 4], [0.9, 3.2]].map(([t, z]) => { const [qx, qy] = bz(t); return [qx, qy + 5.5, z, true]; })]).forEach(([px, py, sz, tl], i) => { const ty = py + (tl ? 0 : px < -50 ? tw * 0.4 : 0) + Math.sin(ph * 0.5 - 0.5 + i * 0.4) * 0.8; ctx.beginPath(); ctx.moveTo(px - sz * 0.9, ty + 5); ctx.quadraticCurveTo(px - sz * 0.5, ty - sz * 1.2, px + sz * 0.2, ty - sz * 1.45); ctx.quadraticCurveTo(px + sz * 0.8, ty - sz * 0.6, px + sz * 0.9, ty + 5); ctx.closePath(); ctx.fill(); ctx.stroke(); });
   // torso + chest + belly
   ell(4, -66, 46, 29, -0.18, body);
   ell(24, -68, 28, 28, 0, body);
@@ -1154,7 +1182,7 @@ function drawPtero(x, y, s, ph, flip, o = {}) {
   ell(33, 3.4, 8, 3.2, 0.15, '#d98aa8');
   ctx.fillStyle = vgrad(-14, 4, light, mid); ctx.beginPath(); ctx.moveTo(18, -9); ctx.bezierCurveTo(26, -17, 44, -15, 62, -4); ctx.bezierCurveTo(46, -2, 32, 3, 18, 2); ctx.closePath(); ctx.fill();
   ctx.strokeStyle = dark; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.moveTo(30, -1); ctx.quadraticCurveTo(46, -3, 60, -4); ctx.stroke();
-  ctx.fillStyle = '#fff'; for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.moveTo(40 + i * 6, -3); ctx.lineTo(42.4 + i * 6, 1.4); ctx.lineTo(44.8 + i * 6, -3.2); ctx.fill(); }
+  if (!o.noTeeth) { ctx.fillStyle = '#fff'; for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.moveTo(40 + i * 6, -3); ctx.lineTo(42.4 + i * 6, 1.4); ctx.lineTo(44.8 + i * 6, -3.2); ctx.fill(); } }
   circle(28, -6.5, 4.8, '#fff'); circle(29, -6.5, 3.4, '#ffd23a'); circle(29.8, -6.4, 1.8, '#17100a'); circle(30.2, -7.6, 0.8, '#fff');
   ctx.strokeStyle = dark; ctx.lineWidth = 2.4; ctx.beginPath(); ctx.moveTo(22, -13); ctx.lineTo(34, -10); ctx.stroke();
   ctx.strokeStyle = 'rgba(150,50,10,.55)'; ctx.lineWidth = 1.2; ctx.beginPath(); for (let i = 0; i < 3; i++) { ctx.moveTo(20 - i * 5, -15 - i * 3.4); ctx.lineTo(8 - i * 3, -21 - i * 1.4); } ctx.stroke(); circle(55, -6, 0.9, 'rgba(0,0,0,.45)');
@@ -1253,11 +1281,12 @@ function drawChili(x, y, s, ph, flip) {
   ctx.strokeStyle = 'rgba(255,245,235,.85)'; ctx.lineWidth = 0.8; ctx.beginPath(); ctx.moveTo(26, -20); ctx.lineTo(37, -24); ctx.moveTo(26, -20); ctx.lineTo(38, -19); ctx.moveTo(26, -19); ctx.lineTo(36, -14); ctx.stroke();
   ctx.restore();
 }
-function drawLongneck(x, y, s, c0, ph, flip) {
+function drawLongneck(x, y, s, c0, ph, flip, o = {}) {
   ctx.save(); ctx.translate(x, y); ctx.scale(flip ? -s : s, s);
   const col = vgrad(-160, 0, shade(c0, 1.3), c0, shade(c0, 0.68));
   const dark = 'rgba(0,0,0,.22)';
-  for (const lx of [-38, -14, 14, 36]) { rr(lx - 7, -45, 15, 45, 6); ctx.fillStyle = col; ctx.fill(); rr(lx - 7, -45, 15, 45, 6); ctx.fillStyle = (lx === -14 || lx === 36) ? dark : 'rgba(0,0,0,0)'; ctx.fill(); }
+  for (const lx of [-38, -14, 14, 36]) { const ext = o.tall && lx > 0 ? 14 : 0; rr(lx - 7, -45 - ext, 15, 45 + ext, 6); ctx.fillStyle = col; ctx.fill(); rr(lx - 7, -45 - ext, 15, 45 + ext, 6); ctx.fillStyle = (lx === -14 || lx === 36) ? dark : 'rgba(0,0,0,0)'; ctx.fill(); }
+  if (o.tall) { ctx.save(); ctx.translate(-8, -52); ctx.rotate(-0.1); ctx.translate(8, 52); } // front legs longer than the hind legs: the back slopes down to the tail
   ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(-45, -60); ctx.quadraticCurveTo(-90, -50, -115, -28); ctx.quadraticCurveTo(-80, -40, -45, -40); ctx.fill();
   ell(0, -56, 55, 30, 0, col);
   ctx.strokeStyle = col; ctx.lineWidth = 20; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(35, -66); ctx.quadraticCurveTo(58, -110, 62 + Math.sin(ph) * 3, -140); ctx.stroke();
@@ -1269,6 +1298,7 @@ function drawLongneck(x, y, s, c0, ph, flip) {
   circle(79.6 + Math.sin(ph) * 3, -153, 1.5, '#fff'); ell(84 + Math.sin(ph) * 3, -142, 4, 2, 0, 'rgba(255,120,140,.4)');
   circle(90 + Math.sin(ph) * 3, -149, 1.3, 'rgba(0,0,0,.45)'); ctx.strokeStyle = 'rgba(0,0,0,.35)'; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(74 + Math.sin(ph) * 3, -159); ctx.quadraticCurveTo(79 + Math.sin(ph) * 3, -161.5, 83 + Math.sin(ph) * 3, -158.5); ctx.stroke();
   ctx.fillStyle = 'rgba(255,255,255,.3)'; for (let i = 0; i < 6; i++) { const u = i / 5; circle(38 + (62 - 38) * u + Math.sin(u * 3) * 6, -72 - 70 * u, 2.2 - u * 0.5, ctx.fillStyle); }
+  if (o.tall) ctx.restore();
   ctx.fillStyle = '#efe6d2'; for (const lx of [-38, -14, 14, 36]) { ctx.beginPath(); ctx.ellipse(lx, -2, 6, 2.6, 0, Math.PI, 0); ctx.fill(); }
   ctx.restore();
 }
@@ -5238,14 +5268,20 @@ function drawMeteor(x, y, s) {
   for (const [dx, dy] of [[-60, -20], [-76, -34], [-50, -6]]) drawStar(dx, dy, 6, '#ffd34d');
   ctx.restore();
 }
-function drawFeathered(x, y, s) { // a small feathered dinosaur: tail fan, wing feathers on the arm and a crest
-  ctx.save(); ctx.translate(x, y); ctx.scale(s * 1.7, s * 1.7); ctx.translate(-4, 0); ctx.lineCap = 'round';
-  const cols = ['#3fa9f5', '#f2a43a', '#e84a6f', '#f2d03a', '#6bd16b'];
-  const fea = (px, py, an, len, wd, c) => { ctx.save(); ctx.translate(px, py); ctx.rotate(an); ctx.fillStyle = vgrad(-wd, wd, shade(c, 1.25), c); ctx.beginPath(); ctx.moveTo(0, 0); ctx.quadraticCurveTo(len * 0.5, -wd, len, 0); ctx.quadraticCurveTo(len * 0.5, wd, 0, 0); ctx.fill(); ctx.strokeStyle = 'rgba(0,0,0,.3)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(2, 0); ctx.lineTo(len * 0.92, 0); ctx.stroke(); ctx.restore(); };
-  for (let i = 0; i < 5; i++) fea(-38, -31, Math.PI - 0.62 + i * 0.3, 46, 8, cols[i]); // tail fan
-  drawCompy(0, 0, 1, 0.4, false, { tone: ['#8aeed0', '#3fb59a', '#1f7a66', '#0f4a3e'] });
-  for (let i = 0; i < 5; i++) fea(9, -23, Math.PI - 0.05 - i * 0.2, 34 - i * 2, 6, cols[(i + 2) % 5]); // wing feathers
-  for (let i = 0; i < 3; i++) fea(16, -45, -2.15 + i * 0.4, 20, 4.5, cols[(i * 2) % 5]); // crest
+function drawFeathered(x, y, s) { // Sinosauropteryx: ginger fuzz all over, pale belly, very long tail with dark rings, short arms
+  ctx.save(); ctx.translate(x, y); ctx.scale(s * 1.45, s * 1.45); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  const fur = vgrad(-60, 0, '#f0a550', '#d9822b', '#9a5416'), ring = '#fbead0';
+  ctx.strokeStyle = '#7a4412'; ctx.lineWidth = 8; ctx.beginPath(); ctx.moveTo(-6, -22); ctx.lineTo(-8, -4); ctx.moveTo(10, -22); ctx.lineTo(13, -4); ctx.stroke();
+  for (const fx of [-8, 13]) { ell(fx + 4, -2, 8, 3.4, 0, '#6a3a10'); }
+  const tail = new Path2D(); tail.moveTo(-14, -42); tail.bezierCurveTo(-44, -46, -76, -38, -104, -20); tail.bezierCurveTo(-76, -28, -44, -24, -14, -22); tail.closePath(); // long tail
+  ctx.fillStyle = fur; ctx.fill(tail); ctx.save(); ctx.clip(tail); ctx.fillStyle = ring; for (let i = 0; i < 8; i++) { ctx.beginPath(); ctx.moveTo(-26 - i * 10.5, -60); ctx.lineTo(-20 - i * 10.5, -60); ctx.lineTo(-14 - i * 10.5, -10); ctx.lineTo(-20 - i * 10.5, -10); ctx.fill(); } ctx.restore();
+  ell(0, -34, 26, 17, -0.15, fur); ell(7, -28, 18, 8.5, -0.1, '#fbead0');
+  ctx.strokeStyle = '#f3b970'; ctx.lineWidth = 1.8; for (let i = 0; i < 16; i++) { const a = -2.9 + i * 0.2, ex = Math.cos(a) * 25, ey = -34 + Math.sin(a) * 16; ctx.beginPath(); ctx.moveTo(ex, ey); ctx.lineTo(ex + Math.cos(a - 0.3) * 6, ey + Math.sin(a - 0.3) * 6); ctx.stroke(); } // fuzz
+  ctx.strokeStyle = '#d9822b'; ctx.lineWidth = 9; ctx.beginPath(); ctx.moveTo(18, -42); ctx.quadraticCurveTo(26, -52, 30, -60); ctx.stroke();
+  ell(36, -63, 13, 9, 0.18, fur); ctx.fillStyle = '#d9822b'; ctx.beginPath(); ctx.moveTo(44, -69); ctx.quadraticCurveTo(56, -64, 58, -58); ctx.lineTo(44, -56); ctx.fill();
+  ctx.fillStyle = '#fff'; for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.moveTo(47 + i * 3.4, -57.6); ctx.lineTo(48.6 + i * 3.4, -54); ctx.lineTo(50.2 + i * 3.4, -57.4); ctx.fill(); }
+  circle(40, -66, 4.4, '#fff'); circle(41, -66, 2.6, '#222'); circle(41.8, -67, 0.9, '#fff'); ctx.strokeStyle = '#7a4412'; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(35, -72); ctx.quadraticCurveTo(40, -75, 45, -72); ctx.stroke();
+  ctx.strokeStyle = '#a85e1a'; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(18, -34); ctx.lineTo(27, -24); ctx.stroke(); ctx.strokeStyle = '#fbead0'; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(27, -24); ctx.lineTo(31, -21); ctx.moveTo(27, -24); ctx.lineTo(30, -26); ctx.stroke(); // short arm
   ctx.restore();
 }
 function drawAmmonite(x, y, s) {
@@ -5260,20 +5296,23 @@ function drawArchelon(x, y, s) {
   ctx.save(); ctx.translate(x, y); ctx.scale(s, s); ctx.lineJoin = 'round';
   ctx.fillStyle = '#5fa08a'; ctx.beginPath(); ctx.ellipse(-34, -9, 22, 7, -0.45, 0, 7); ctx.fill(); ctx.beginPath(); ctx.ellipse(34, -8, 26, 8, 0.5, 0, 7); ctx.fill(); ctx.beginPath(); ctx.ellipse(-48, -26, 14, 6, 0.9, 0, 7); ctx.fill(); // flippers
   ell(0, -32, 52, 30, 0, vgrad(-62, -2, '#a0d8b8', '#5aa078', '#2f6a4a'));
-  ctx.strokeStyle = 'rgba(20,60,40,.6)'; ctx.lineWidth = 2.4; ctx.fillStyle = 'rgba(255,255,255,.12)';
-  const hex = (cx, cy, r) => { ctx.beginPath(); for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2 + 0.52; ctx.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r * 0.82); } ctx.closePath(); ctx.fill(); ctx.stroke(); };
-  for (const [px, py, r] of [[-26, -42, 11], [-4, -48, 13], [20, -44, 12], [-16, -26, 11], [8, -28, 12], [30, -26, 9]]) hex(px, py, r); // scutes
+  ctx.save(); ctx.beginPath(); ctx.ellipse(0, -32, 51, 29, 0, 0, 7); ctx.clip(); // leathery shell: seven long ridges and fine cross ribs, no hard plates
+  ctx.strokeStyle = 'rgba(20,60,40,.55)'; ctx.lineWidth = 2.6; for (let k = -3; k <= 3; k++) { ctx.beginPath(); ctx.moveTo(-50, -32 + k * 7.5); ctx.quadraticCurveTo(0, -32 + k * 11, 50, -32 + k * 7.5); ctx.stroke(); }
+  ctx.strokeStyle = 'rgba(20,60,40,.28)'; ctx.lineWidth = 1.4; for (let u = -42; u <= 42; u += 9) { ctx.beginPath(); ctx.moveTo(u, -62); ctx.quadraticCurveTo(u + 3, -32, u, -2); ctx.stroke(); }
+  ctx.restore();
   ctx.strokeStyle = 'rgba(30,80,56,.8)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(0, -30, 51, 27, 0, 0.1, Math.PI - 0.1); ctx.stroke(); // rim
   ctx.strokeStyle = '#6fb090'; ctx.lineWidth = 13; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(44, -32); ctx.lineTo(56, -34); ctx.stroke();
   ell(62, -36, 16, 12, 0.05, '#6fb090'); ctx.fillStyle = '#3d7a5c'; ctx.beginPath(); ctx.moveTo(70, -40); ctx.quadraticCurveTo(82, -36, 76, -29); ctx.lineTo(66, -30); ctx.fill();
   circle(64, -41, 5, '#fff'); circle(65, -41, 2.8, '#222'); circle(65.8, -42, 1, '#fff'); ctx.strokeStyle = '#2f6a4a'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(70, -32, 5, 0.2, 1.6); ctx.stroke();
   ctx.restore();
 }
-function drawFootprint(x, y, s) {
+function drawFootprint(x, y, s) { // a sauropod track: big round hind foot with blunt toe pads, small crescent front foot
   ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
   ell(0, -22, 50, 22, 0, vgrad(-44, 0, '#b0a698', '#8a8070', '#5e564a')); ell(0, -26, 44, 17, 0, '#a89e90');
-  ctx.fillStyle = '#4a4238'; for (const [tx, ty, an] of [[-17, -33, -0.5], [0, -38, 0], [17, -33, 0.5]]) { ctx.save(); ctx.translate(tx, ty); ctx.rotate(an); ctx.beginPath(); ctx.ellipse(0, 0, 6.5, 11, 0, 0, 7); ctx.fill(); ctx.beginPath(); ctx.moveTo(-4, -10); ctx.lineTo(0, -19); ctx.lineTo(4, -10); ctx.fill(); ctx.restore(); }
-  ctx.beginPath(); ctx.ellipse(0, -16, 12, 9, 0, 0, 7); ctx.fill(); ctx.strokeStyle = '#5a7a3a'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(-40, -8); ctx.quadraticCurveTo(-46, -22, -38, -32); ctx.moveTo(-40, -8); ctx.quadraticCurveTo(-30, -20, -28, -30); ctx.stroke();
+  ctx.fillStyle = '#4a4238'; ell(8, -24, 20, 12, -0.1, '#4a4238');
+  for (const [tx, ty, an] of [[-12, -38, -0.5], [0, -42, -0.15], [13, -42, 0.2], [25, -36, 0.65]]) { ctx.save(); ctx.translate(tx + 6, ty); ctx.rotate(an); ctx.beginPath(); ctx.ellipse(0, 0, 5.4, 8, 0, 0, 7); ctx.fill(); ctx.fillStyle = '#2e2820'; ctx.beginPath(); ctx.ellipse(0, -6, 2.6, 2.6, 0, 0, 7); ctx.fill(); ctx.fillStyle = '#4a4238'; ctx.restore(); }
+  ctx.beginPath(); ctx.ellipse(-30, -19, 7, 4.6, -0.2, 0.2, Math.PI * 1.2); ctx.fill();
+  ctx.strokeStyle = '#5a7a3a'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(-40, -8); ctx.quadraticCurveTo(-46, -22, -38, -32); ctx.moveTo(-40, -8); ctx.quadraticCurveTo(-30, -20, -28, -30); ctx.stroke();
   ctx.restore();
 }
 function drawIchthyo(x, y, s) {
@@ -5329,27 +5368,49 @@ function drawArchaeo(x, y, s) {
   ctx.fillStyle = '#e8873a'; ctx.beginPath(); ctx.moveTo(22, -72); ctx.lineTo(18, -82); ctx.lineTo(28, -74); ctx.lineTo(28, -84); ctx.lineTo(34, -73); ctx.fill();
   circle(33, -65, 4.8, '#fff'); circle(34.2, -65, 2.8, '#222'); circle(35, -66.4, 1, '#fff'); ctx.restore();
 }
-function drawTheriz(x, y, s) {
-  ctx.save(); ctx.translate(x, y); ctx.scale(s, s); ctx.lineCap = 'round';
-  ctx.strokeStyle = '#8a5a3a'; ctx.lineWidth = 12; ctx.beginPath(); ctx.moveTo(-10, -22); ctx.lineTo(-12, -4); ctx.moveTo(12, -22); ctx.lineTo(14, -4); ctx.stroke(); ctx.lineWidth = 6; for (const fx of [-12, 14]) { ctx.beginPath(); ctx.moveTo(fx - 8, 0); ctx.lineTo(fx + 8, 0); ctx.stroke(); }
-  ctx.fillStyle = '#b07a52'; ctx.beginPath(); ctx.moveTo(-26, -34); ctx.quadraticCurveTo(-58, -30, -66, -14); ctx.quadraticCurveTo(-40, -22, -22, -14); ctx.fill();
-  ell(0, -36, 34, 29, -0.1, vgrad(-62, -10, '#e0a878', '#b07a52', '#7a4a2a')); ctx.fillStyle = '#c99062'; for (let i = 0; i < 8; i++) { const a = -2.9 + i * 0.36; ctx.beginPath(); ctx.ellipse(Math.cos(a) * 34, -36 + Math.sin(a) * 29, 9, 5.5, a + 1.57, 0, 7); ctx.fill(); } ell(2, -26, 22, 12, 0, 'rgba(255,236,210,.28)'); ctx.strokeStyle = '#f0c898'; ctx.lineWidth = 3; for (let i = 0; i < 6; i++) { ctx.beginPath(); ctx.moveTo(-18 + i * 7, -52); ctx.lineTo(-22 + i * 7, -40); ctx.stroke(); }
-  ctx.strokeStyle = '#b07a52'; ctx.lineWidth = 12; ctx.beginPath(); ctx.moveTo(20, -50); ctx.quadraticCurveTo(34, -62, 36, -82); ctx.stroke();
-  ell(40, -88, 11, 9, 0.2, '#b07a52'); ctx.fillStyle = '#f2c13a'; ctx.beginPath(); ctx.moveTo(48, -90); ctx.lineTo(58, -86); ctx.lineTo(48, -83); ctx.fill(); circle(41, -90, 3.6, '#fff'); circle(41.8, -90, 2, '#222');
-  ctx.strokeStyle = '#b07a52'; ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(20, -42); ctx.lineTo(40, -34); ctx.stroke();
-  ctx.strokeStyle = '#f6efe0'; ctx.lineWidth = 4.2; for (const [dx, dy] of [[0, 0], [5, 6], [10, 11]]) { ctx.beginPath(); ctx.moveTo(40 + dx, -34 + dy * 0.2); ctx.quadraticCurveTo(66 + dx, -20 + dy, 78 + dx * 0.5, -2 + dy); ctx.stroke(); }
+function drawTheriz(x, y, s) { // upright pot-bellied biped: long neck, tiny beaked head, feathered body, arms hanging down with three huge claws
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  const claw = (x0, y0, x1, y1, w, col) => { const dx = x1 - x0, dy = y1 - y0, L = Math.hypot(dx, dy), nx = -dy / L, ny = dx / L, cx = (x0 + x1) / 2 + nx * L * 0.1, cy = (y0 + y1) / 2 + ny * L * 0.1;
+    ctx.beginPath(); ctx.moveTo(x0 + nx * w, y0 + ny * w); ctx.quadraticCurveTo(cx + nx * w * 0.45, cy + ny * w * 0.45, x1, y1); ctx.quadraticCurveTo(cx - nx * w * 0.45, cy - ny * w * 0.45, x0 - nx * w, y0 - ny * w); ctx.closePath(); ctx.fillStyle = col; ctx.fill(); ctx.strokeStyle = '#7a6a48'; ctx.lineWidth = 1.8; ctx.stroke(); };
+  const fur = vgrad(-90, -20, '#e3b184', '#b98258', '#8a5836');
+  // far arm, hanging behind the belly
+  ctx.strokeStyle = '#6f4528'; ctx.lineWidth = 8; ctx.beginPath(); ctx.moveTo(8, -66); ctx.quadraticCurveTo(22, -52, 30, -38); ctx.stroke();
+  claw(30, -38, 28, -8, 4.4, '#d8cdb6'); claw(36, -38, 42, -10, 4.2, '#d8cdb6');
+  // short feathered tail with a tuft
+  ctx.fillStyle = '#a8734c'; ctx.beginPath(); ctx.moveTo(-22, -50); ctx.quadraticCurveTo(-50, -48, -62, -32); ctx.quadraticCurveTo(-40, -34, -18, -28); ctx.fill();
+  for (const [a, c] of [[-0.7, '#e8803a'], [-0.2, '#f2a63a'], [0.35, '#e8803a']]) { ctx.save(); ctx.translate(-60, -33); ctx.rotate(Math.PI + a); ctx.fillStyle = c; ctx.beginPath(); ctx.ellipse(11, 0, 12, 4.2, 0, 0, 7); ctx.fill(); ctx.restore(); }
+  // columnar hind legs with feathery trousers and four-toed feet
+  ctx.strokeStyle = '#7a4a2a'; ctx.lineWidth = 13; ctx.beginPath(); ctx.moveTo(-10, -32); ctx.lineTo(-11, -7); ctx.moveTo(13, -32); ctx.lineTo(15, -7); ctx.stroke();
+  ctx.fillStyle = '#c99062'; for (const lx of [-10, 13]) { ctx.beginPath(); ctx.ellipse(lx, -34, 12, 9, 0, 0, 7); ctx.fill(); }
+  for (const fx of [-11, 15]) { ell(fx + 7, -3, 15, 5.5, 0, '#6a3d20'); ctx.strokeStyle = '#4a2a14'; ctx.lineWidth = 1.5; for (const tx of [4, 10, 16, 21]) { ctx.beginPath(); ctx.moveTo(fx + tx, -6); ctx.lineTo(fx + tx + 1, 0); ctx.stroke(); } }
+  // torso leaning forward: heavy belly, scalloped feathers
+  ctx.save(); ctx.translate(2, -54); ctx.rotate(-0.5); ell(0, 0, 33, 26, 0, fur);
+  ctx.fillStyle = '#d29a6a'; for (let i = 0; i < 12; i++) { const a = -3.0 + i * 0.5, ex = Math.cos(a) * 32, ey = Math.sin(a) * 25; ctx.beginPath(); ctx.ellipse(ex, ey, 8, 5, a + 1.57, 0, 7); ctx.fill(); }
+  ctx.restore();
+  ell(12, -46, 20, 17, 0, '#f0d4ae'); ctx.strokeStyle = '#c99a6a'; ctx.lineWidth = 2; for (let i = 0; i < 6; i++) { ctx.beginPath(); ctx.arc(4 + (i % 3) * 12, -52 + Math.floor(i / 3) * 12, 5, 0.3, 2.8); ctx.stroke(); }
+  // neck rising from the chest, small head with a horny beak
+  ctx.strokeStyle = '#b98258'; ctx.lineWidth = 14; ctx.beginPath(); ctx.moveTo(22, -70); ctx.quadraticCurveTo(38, -78, 40, -100); ctx.stroke();
+  ctx.strokeStyle = '#d9a577'; ctx.lineWidth = 4.5; ctx.beginPath(); ctx.moveTo(26, -72); ctx.quadraticCurveTo(39, -80, 41, -98); ctx.stroke();
+  ell(46, -112, 12, 9.5, 0.2, '#b98258');
+  ctx.fillStyle = '#f2c13a'; ctx.strokeStyle = '#a87a10'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(54, -116); ctx.lineTo(66, -110); ctx.lineTo(54, -105); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#e8803a'; for (const [dx, dy, r] of [[-5, -13, -0.5], [0, -14, 0], [5, -12, 0.5]]) { ctx.save(); ctx.translate(44 + dx, -112 + dy); ctx.rotate(r); ctx.beginPath(); ctx.ellipse(0, -3, 2.4, 6.5, 0, 0, 7); ctx.fill(); ctx.restore(); }
+  circle(50, -115, 3.8, '#fff'); circle(51, -115, 2.2, '#222'); circle(51.8, -116, 0.9, '#fff');
+  // near arm: long, hanging down in front of the belly, ending in three huge sickle claws that point at the ground
+  ctx.strokeStyle = '#8f5d3c'; ctx.lineWidth = 10; ctx.beginPath(); ctx.moveTo(24, -68); ctx.quadraticCurveTo(50, -58, 56, -40); ctx.stroke();
+  ctx.strokeStyle = '#b98258'; ctx.lineWidth = 3.6; ctx.beginPath(); ctx.moveTo(26, -67); ctx.quadraticCurveTo(49, -58, 54, -42); ctx.stroke();
+  claw(52, -40, 48, -2, 6, '#fff8e6'); claw(58, -40, 62, -2, 6, '#fff8e6'); claw(64, -38, 76, -8, 5.4, '#fff8e6');
   ctx.restore();
 }
 const CARD_ART = [
   // [draw(x, y, s), width, height, offset x of the visual centre]  (calendar order, one per level)
-  [(x, y, s) => drawRex(x, y, s, 0.4, 0.05, { body: undefined }), 250, 150, -5],
+  [(x, y, s) => drawRex(x, y, s, 0.4, 0.05, { noPlates: true }), 250, 150, -5],
   [(x, y, s) => drawTrike(x, y, s, '#c98f5a', 0.4, false), 120, 70, 2],
-  [(x, y, s) => drawLongneck(x, y, s, '#7fb069', 0.4, false), 220, 168, -6],
+  [(x, y, s) => drawLongneck(x, y, s, '#7fb069', 0.4, false, { tall: true }), 220, 168, -6],
   [drawAmmonite, 90, 70, 2],
   [drawArchelon, 130, 62, 4],
   [drawFootprint, 120, 52, 0],
   [(x, y, s) => drawRaptor(x, y, s, 0.4, false, {}), 205, 105, -14],
-  [(x, y, s) => drawPtero(x, y - 22 * s, s, 1.0, false), 96, 66, 14],
+  [(x, y, s) => drawPtero(x, y - 22 * s, s, 1.0, false, { noTeeth: true }), 96, 66, 14],
   [drawStego, 160, 80, -12],
   [drawIchthyo, 150, 70, 8],
   [drawMosa, 190, 72, -8],
@@ -5723,7 +5784,7 @@ function drawBookDetail() {
     panel(46, 12, 868, 516);
     drawHabitat(wi, HX, HY, HW, HH); drawHeroDino(bookSel, HX, HY, HW, HH, animal); foil(HX, HY, HW, HH, 18, T);
     rr(HX, HY, HW, HH, 18); ctx.lineWidth = 4; ctx.strokeStyle = '#fffaf0'; ctx.stroke(); rr(HX - 2, HY - 2, HW + 4, HH + 4, 20); ctx.lineWidth = 2; ctx.strokeStyle = '#8a6a3a'; ctx.stroke();
-    if (!bookTapped) { ctx.globalAlpha *= 0.65 + 0.35 * Math.sin(T * 4); otxt(animal ? 'Tippe – er brüllt!' : 'Tippe aufs Bild!', HX + HW - 14, HY + HH - 21, 14, '#fff', 'rgba(0,0,0,.6)', 4, 'right'); ctx.globalAlpha = 0.4 + 0.6 * pu; }
+    if (!bookTapped) { ctx.globalAlpha *= 0.65 + 0.35 * Math.sin(T * 4); otxt(animal ? 'Tippe – er meldet sich!' : 'Tippe aufs Bild!', HX + HW - 14, HY + HH - 21, 14, '#fff', 'rgba(0,0,0,.6)', 4, 'right'); ctx.globalAlpha = 0.4 + 0.6 * pu; }
     { const wl = th.name; setFont(13); const pw = ctx.measureText(wl).width + 50; rr(HX + 10, HY + HH - 34, pw, 26, 13); ctx.fillStyle = 'rgba(255,250,235,.93)'; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = '#b8a070'; ctx.stroke(); ctx.save(); rr(HX + 14, HY + HH - 30, 28, 18, 4); ctx.clip(); drawThemeThumb(wi, HX + 14, HY + HH - 30, 28, 18); ctx.restore(); txt(wl, HX + 50, HY + HH - 21, 13, '#3b2410', 'left'); }
     if (BOSS_DAYS[bookSel + 1]) { rr(HX + HW - 112, HY + 10, 102, 24, 12); ctx.fillStyle = '#ffc400'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#7a4a00'; ctx.stroke(); drawStar(HX + HW - 94, HY + 22, 8, '#fff3b0'); txt('Boss-Karte', HX + HW - 52, HY + 22, 12, '#3b1d00'); }
     drawSizeRuler(HX, 240, HW, 152, st, th, bookSel);
@@ -5741,7 +5802,7 @@ function drawBookDetail() {
     button('Schliessen', W / 2 - 110, 464, 220, 44, () => { bookSel = -1; }, { icon: icon('check'), size: 24 });
     ctx.restore();
     buttons.unshift({ x: 0, y: 0, w: W, h: H, cb: () => { bookSel = -1; } });
-    buttons.push({ x: HX, y: HY, w: HW, h: HH, silent: true, cb: () => { bookTapped = true; bookRoar.t = T; bookRoar.i = bookSel; if (animal) SFX.roar(); else SFX.sparkle(); } });
+    buttons.push({ x: HX, y: HY, w: HW, h: HH, silent: true, cb: () => { bookTapped = true; bookRoar.t = T; bookRoar.i = bookSel; SFX.voice(VOICE_OF[bookSel]); } });
     for (const dir of [-1, 1]) { // previous / next found card
       let j = bookSel; do { j = (j + dir + FACTS.length) % FACTS.length; } while (!save.lvDone[j] && j !== bookSel);
       if (j === bookSel) continue;
@@ -5945,5 +6006,5 @@ function frame(now) {
 requestAnimationFrame(frame);
 
 // debug hook for testing in the browser console
-window.__dino = { bookUnread, get mus() { return mus; }, useAudio(ctx) { AC = ctx; noiseBuf = null; buildAudioGraph(); mus.key = null; mus.trans = null; mus.saved = {}; mus.g = 1; mus.vt = 1; amb.wi = null; amb.node = null; amb.lvl = -1; }, musicTick, SFX, ambTick, ambEvent, AMB, SONGS, startSplash, get splash() { return splash; }, bossDmg, medalTotal, worldMedalsDone, chestFull, chestParty, get chestPartyT() { return chestPartyT; }, startDaily, dailyWorld, dayKey, get dialog() { return dialog; }, DAY_STORY, DAY_AFTER, launchLevel, finishLevel, fmt, cleanNick, boardAdd, boardQualifies, boardAll, endRun, get scene() { return scene; }, get doorOverlay() { return doorOverlay; }, get buttons() { return buttons; }, pitFall, get lowfx() { return LOWFX; }, set lowfx(v) { LOWFX = v; }, get G() { return G; }, get E() { return E; }, save, startLevel, startEnding, go, jump, roar, updatePlay, updateEnding, answer, openRiddle, retry, tapEgg, openGate, playTreasure, drawPlay, duckDown, duckUp, shootFire, drawShop, buildSong, dash, LEVELS, adventDay, openDoorGift, giftFor, clickDoor, skillsFor, FACTS, STECK, bookOpen(i) { bookSel = i; }, bookMode(m) { bookMode = m; lineLayout = null; lineScroll = lineTarget = 0; }, lineupScroll(v) { lineTarget = lineScroll = v; }, openBookCard, sheet(p) { sheetPage = p || 'hero'; scene = 'sheet'; } };
+window.__dino = { bookUnread, get mus() { return mus; }, useAudio(ctx) { AC = ctx; noiseBuf = null; buildAudioGraph(); mus.key = null; mus.trans = null; mus.saved = {}; mus.g = 1; mus.vt = 1; amb.wi = null; amb.node = null; amb.lvl = -1; }, musicTick, SFX, ambTick, ambEvent, AMB, SONGS, startSplash, get splash() { return splash; }, bossDmg, medalTotal, worldMedalsDone, chestFull, chestParty, get chestPartyT() { return chestPartyT; }, startDaily, dailyWorld, dayKey, get dialog() { return dialog; }, DAY_STORY, DAY_AFTER, launchLevel, finishLevel, fmt, cleanNick, boardAdd, boardQualifies, boardAll, endRun, get scene() { return scene; }, get doorOverlay() { return doorOverlay; }, get buttons() { return buttons; }, pitFall, get lowfx() { return LOWFX; }, set lowfx(v) { LOWFX = v; }, get G() { return G; }, get E() { return E; }, save, startLevel, startEnding, go, jump, roar, updatePlay, updateEnding, answer, openRiddle, retry, tapEgg, openGate, playTreasure, drawPlay, duckDown, duckUp, shootFire, drawShop, buildSong, dash, LEVELS, adventDay, openDoorGift, giftFor, clickDoor, skillsFor, FACTS, STECK, VOICE_OF, VOICES, cardSprite, bookOpen(i) { bookSel = i; }, bookMode(m) { bookMode = m; lineLayout = null; lineScroll = lineTarget = 0; }, lineupScroll(v) { lineTarget = lineScroll = v; }, openBookCard, sheet(p) { sheetPage = p || 'hero'; scene = 'sheet'; } };
 })();
