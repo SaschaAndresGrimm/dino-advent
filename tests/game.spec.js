@@ -692,3 +692,64 @@ test('book data: every card has headline|detail text and a full STECK entry', as
   const bad = await game.eval(() => { const d = window.__dino, out = []; if (d.FACTS.length !== 24 || d.STECK.length !== 24) out.push('length'); d.FACTS.forEach((f, i) => { const st = d.STECK[i], p = f.text.split('|'); if (p.length !== 2 || p[0].length < 20 || p[1].length < 10) out.push('text ' + i); if (!st || !st.tl || st.tl.length !== 2 || !st.nm || !st.l || !st.e || (st.m === 0 && !st.cmp)) out.push('steck ' + i); if (/ß/.test(f.text + st.nm)) out.push('ss ' + i); }); return out; });
   expect(bad).toEqual([]);
 });
+
+test('Goettis Schätze are hidden: each one needs its own move (Brüll, Flitz, Stampf, Feuer) and can only be grabbed once found', async ({ game }) => {
+  await game.open();
+  for (const [li, kind] of [[2, 'tree'], [8, 'rock'], [14, 'ice'], [20, 'ash']]) {
+    await game.start(li);
+    const r = await game.eval(([kind]) => {
+      const d = window.__dino, G = d.G, p = G.p, L = G.L, sc = L.secret, tr = L.treasure, step = n => { for (let i = 0; i < n; i++) d.updatePlay(1 / 60); };
+      L.obs = L.obs.filter(o => o.sec); L.pits.length = 0; L.plats.length = 0; p.inv = 999; p.hearts = 99;
+      const out = { kind: sc.kind, hiddenAtStart: !tr.shown };
+      p.wx = tr.x - 10; p.y = 440; step(2); out.grabbedWhileHidden = tr.got; // standing right on it does nothing
+      p.wx = sc.x - 300; p.y = 440; p.vy = 0; p.onGround = true;
+      if (kind === 'tree') d.roar();
+      else if (kind === 'rock') { d.dash(); for (let i = 0; i < 150 && sc.state === 'idle'; i++) step(1); }
+      else if (kind === 'ice') { p.wx = sc.x - 20; p.y = 380; p.vy = 600; p.onGround = false; p.stomp = true; p.spin = 0; for (let i = 0; i < 150 && sc.state === 'idle'; i++) step(1); }
+      else { p.fireT = 5; d.shootFire(); for (let i = 0; i < 90 && sc.state === 'idle'; i++) step(1); }
+      out.state = sc.state; out.shown = tr.shown;
+      step(70); p.wx = tr.x - 10; p.y = 440; step(1); out.got = tr.got;
+      return out;
+    }, [kind]);
+    expect(r, kind).toEqual({ kind, hiddenAtStart: true, grabbedWhileHidden: false, state: 'open', shown: true, got: true });
+  }
+});
+
+test('a missed treasure gets clearer hints: tip after one miss, glints after two; a found treasure stops the count', async ({ game }) => {
+  await game.open();
+  const r = await game.eval(() => {
+    const d = window.__dino, out = [];
+    for (const t of [0, 1, 2]) { d.save.tTries[0] = t; d.startLevel(2); out.push([d.G.L.tips.some(x => /klimpern/.test(x.text)), d.G.L.secret.strong]); }
+    d.save.tTries[0] = 0; d.startLevel(2); d.finishLevel(); const miss = d.save.tTries[0]; // finished without the guitar
+    d.startLevel(2); d.G.L.treasure.got = true; d.finishLevel();
+    return { out, miss, found: d.save.treasures[0], tries: d.save.tTries[0] };
+  });
+  expect(r).toEqual({ out: [[false, false], [true, false], [true, true]], miss: 1, found: 1, tries: 1 });
+});
+
+test('the Kiwi pepper is back after a respawn, so the ash can always be burnt', async ({ game }) => {
+  await game.open();
+  await game.start(20);
+  const r = await game.eval(() => {
+    const d = window.__dino, L = d.G.L, pp = L.peppers.find(q => q.sec); pp.got = true; d.retry(); const a = pp.got;
+    pp.got = true; L.secret.state = 'open'; d.retry(); return { a, afterOpen: pp.got };
+  });
+  expect(r).toEqual({ a: false, afterOpen: true });
+});
+
+test('the treasure cue sounds play near a hiding place without errors, and Chili notices it once', async ({ game, page }) => {
+  await page.addInitScript(FAKE_AUDIO);
+  await game.open();
+  await page.mouse.click(10, 10);
+  const r = [];
+  for (const li of [2, 8, 14, 20]) {
+    await game.start(li);
+    r.push(await game.eval(() => {
+      const d = window.__dino, G = d.G, p = G.p, sc = G.L.secret, t0 = window.__tones; G.L.pits.length = 0; p.inv = 999; G.chiliCd = 0;
+      p.wx = sc.x - 700; p.y = 440; for (let i = 0; i < 150; i++) { d.updatePlay(1 / 60); p.wx = Math.min(p.wx, sc.x - 300); }
+      return { tones: window.__tones - t0, noticed: sc.noticed };
+    }));
+  }
+  expect(r.every(x => x.tones > 3 && x.noticed)).toBe(true);
+  expect(game.errors).toEqual([]);
+});

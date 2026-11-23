@@ -48,6 +48,7 @@ Everything is in `game.js` (one IIFE, about 3,800 lines, no modules, no build). 
 - Then `LV.segs` segments are laid out left to right. Each segment is a **pattern**: an entry of `P` (`rock`, `pit`, `raptor`, `hopper`, `crumble`, `meteors`, `wall`, `jellies`…) that pushes obstacles/platforms/amber into `L` and returns its width.
 - `th.patterns` lists which patterns a theme uses (duplicates raise the odds). `NEEDS` hides patterns whose skill is not yet learned. `HARD`/`COMBO` plus the **tier** (`LV.maxTier`, rising with progress) decide how hard the pool is.
 - Eggs, treasure, hearts, checkpoints and the stampede/lava-river specials are placed at fixed segment fractions.
+- **Treasures** (days 3, 9, 15, 21) sit at 45% of the level, hidden: `L.secret = {kind: 'tree'|'rock'|'ice'|'ash', x, state: 'idle'|'open'}` plus `L.treasure` (`shown` false until found). `openSecret` reveals it and flies it to where Rex can grab it. Triggers: `roar()` (tree), the `o.dead` check in `updatePlay` (cracked rock: dash/fire/stomp), `stompLand` (ice), the fireball loop (ash). `secretCue` plays the proximity sound, `drawSecret` draws the hiding places.
 - `firstTip(type, x, text)` adds the first-time hint for an enemy. Hints must appear early (about 1200 px before the obstacle).
 
 ### Obstacles
@@ -74,6 +75,7 @@ Enemies that walk toward the player only move when `o.x - p.wx < ~760` (or `o.mi
 | `learned` | Skills whose tutorial coach was completed |
 | `riddleSeen[8]`, `best[8]` | Riddle rotation per theme, endless best score per theme |
 | `treasures[4]`, `finished`, `tutorialDone`, `muted` | Misc progress |
+| `tTries[4]` | Per treasure: finished runs without finding it (1 = tip text, 2 = brighter glint) |
 Old 4-world saves keep names, amber and shop items but start the calendar fresh.
 
 ## Rendering notes

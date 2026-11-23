@@ -25,7 +25,7 @@ window.addEventListener('resize', resize); resize();
 // =====================================================================
 const SAVE_KEY = 'olisDinoRettung.v1';
 let save = { rexName: '', babyName: '', fabioName: '', unlocked: 0, eggs: [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], amber: 0, finished: false, muted: false, tutorialDone: false, learned: { duck: 0, stomp: 0, fire: 0, dash: 0, swim: 0, glide: 0 }, riddleSeen: [[], [], [], []],
-  medals: [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], treasures: [0,0,0,0], treasureNew: -1 };
+  medals: [[0,0,0],[0,0,0],[0,0,0],[0,0,0]], treasures: [0,0,0,0], treasureNew: -1, tTries: [0,0,0,0] };
 try { const s = JSON.parse(localStorage.getItem(SAVE_KEY)); if (s) save = Object.assign(save, s); } catch (e) {}
 // calendar progress: one entry per level (24 days). Old 4-world saves keep names, amber and shop items but start the calendar fresh.
 if (!save.lvE) save.lvE = []; if (!save.lvM) save.lvM = []; if (!save.lvDone) save.lvDone = [];
@@ -33,6 +33,7 @@ while (save.lvE.length < 24) { save.lvE.push([0, 0, 0]); save.lvM.push([0, 0, 0]
 if (!save.gifts) save.gifts = []; if (!save.newGifts) save.newGifts = []; if (save.dayOverride === undefined) save.dayOverride = null;
 save.learned = Object.assign({ duck: 0, stomp: 0, fire: 0, dash: 0, swim: 0, glide: 0 }, save.learned);
 while (save.riddleSeen.length < 8) save.riddleSeen.push([]);
+while (save.tTries.length < 4) save.tTries.push(0); // per treasure: how often its level was finished without finding it (drives the hints)
 if (!save.owned) save.owned = { skin: [0], hat: [0], fire: [0] };
 if (!save.equip) save.equip = { skin: 0, hat: 0, fire: 0 };
 // shop extras: jackets for both boys, Fabio's own hat, Chili's accessories, Goetti's vouchers
@@ -749,10 +750,10 @@ const FACTS_NEW = [
 // one card per level (24 days). Order follows the calendar: jungle, beach, canyon, underwater, ice age, mountains, volcano, Christmas.
 const FACTS = [...FACTS_OLD.slice(0, 3), ...FACTS_NEW.slice(0, 3), ...FACTS_OLD.slice(3, 6), ...FACTS_NEW.slice(3, 6), ...FACTS_OLD.slice(6, 9), ...FACTS_NEW.slice(6, 9), ...FACTS_OLD.slice(9, 12), ...FACTS_OLD.slice(12, 15)];
 const TREASURES = [
-  { name: 'Goettis Gitarre', line: 'Meine Gitarre! Danke, ihr zwei! Tippt sie in der Schatzkiste an – dann spiele ich euch was vor.', tap: 'Goetti spielt ein Lied!' },
-  { name: 'Goettis Velo', line: 'Mein Velo! Das hat der Vulkan bis in den Canyon geschleudert. Damit machen wir drei mal eine grosse Tour!', tap: 'Kling, kling!' },
-  { name: 'Goettis Angel', line: 'Meine Angelrute! Weisst du was? Im Winter kann man sogar durch ein Loch im Eis fischen. Das machen wir mal zusammen!', tap: 'Platsch! Ein Fisch!' },
-  { name: 'Kiwi', line: 'Kiwi! Mein kleiner Freund ist wieder da! Kiwis sind das Wahrzeichen von Neuseeland und können nicht fliegen – darum läuft Kiwi ab jetzt mit euch mit.', tap: 'Kiwi! Kiwi!' },
+  { name: 'Goettis Gitarre', line: 'Meine Gitarre! Danke, ihr zwei! Tippt sie in der Schatzkiste an – dann spiele ich euch was vor.', tap: 'Goetti spielt ein Lied!', hint: 'Goetti vermisst etwas … Im grossen Baum klimpert es!', tip: 'Hörst du es klimpern? Im grossen Baum steckt etwas – BRÜLL ihn an!', notice: 'Meine Löffel zucken! Im Baum klimpert es!' },
+  { name: 'Goettis Velo', line: 'Mein Velo! Das hat der Vulkan bis in den Canyon geschleudert. Damit machen wir drei mal eine grosse Tour!', tap: 'Kling, kling!', hint: 'Goetti vermisst etwas … Ein Fels mit Riss klingelt!', tip: 'Hörst du es klingeln? Dieser Fels hat einen Riss – FLITZ hinein!', notice: 'Meine Löffel zucken! Der Fels da klingelt!' },
+  { name: 'Goettis Angel', line: 'Meine Angelrute! Weisst du was? Im Winter kann man sogar durch ein Loch im Eis fischen. Das machen wir mal zusammen!', tap: 'Platsch! Ein Fisch!', hint: 'Goetti vermisst etwas … Im Eis steckt etwas fest!', tip: 'Da ragt etwas aus dem Eis! Spring hoch und STAMPF aufs Eis!', notice: 'Schnüff, schnüff! Da steckt etwas im Eis!' },
+  { name: 'Kiwi', line: 'Kiwi! Mein kleiner Freund ist wieder da! Kiwis sind das Wahrzeichen von Neuseeland und können nicht fliegen – darum läuft Kiwi ab jetzt mit euch mit.', tap: 'Kiwi! Kiwi!', hint: 'Goetti vermisst etwas … Unter der Asche piepst es!', tip: 'Hörst du es piepsen? Unter der Asche steckt etwas – spuck FEUER!', notice: 'Meine Löffel zucken! Unter der Asche piepst es!' },
 ];
 // =====================================================================
 // Story: the Krallenkönig stole the dino family's golden egg. Three bosses each hold a piece of his map.
@@ -1397,6 +1398,91 @@ function drawTreasure(k, x, y, s, ph = T * 4) {
   else if (k === 1) drawBike(x, y + 30 * s, s);
   else if (k === 2) drawRod(x, y + 10 * s, s, ph);
   else drawKiwi(x - 8 * s, y + 18 * s, s * 1.4, ph);
+}
+// ---- Goetti's hidden treasures: the hiding places (tree, cracked rock, iced rod, ash heap) ----
+function glint(x, y, r, a) { // a four-point twinkle
+  ctx.save(); ctx.translate(x, y); ctx.globalAlpha = a; ctx.fillStyle = '#fff8c4'; ctx.beginPath(); ctx.moveTo(0, -r);
+  ctx.quadraticCurveTo(r * 0.12, -r * 0.12, r, 0); ctx.quadraticCurveTo(r * 0.12, r * 0.12, 0, r); ctx.quadraticCurveTo(-r * 0.12, r * 0.12, -r, 0); ctx.quadraticCurveTo(-r * 0.12, -r * 0.12, 0, -r); ctx.fill(); ctx.restore();
+}
+function twinkles(sc, x, y, spread) { // a faint glint now and then; after two misses it is brighter and has a soft halo
+  const n = sc.strong ? 3 : 1;
+  if (sc.strong) { const a = 0.18 + 0.1 * Math.sin(T * 4); ctx.save(); ctx.globalAlpha = a; ctx.strokeStyle = '#fff3a0'; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(x, y, spread + 18 + Math.sin(T * 4) * 4, 0, Math.PI * 2); ctx.stroke(); ctx.restore(); }
+  for (let i = 0; i < n; i++) {
+    const ph = (T * 0.7 + i / n + sc.x * 0.013) % 1, a = Math.pow(Math.max(0, Math.sin(ph * Math.PI)), 2);
+    if (a > 0.03) glint(x + Math.sin(i * 2.4 + sc.x) * spread, y + Math.cos(i * 1.7 + sc.x) * spread * 0.6, (sc.strong ? 12 : 8) * (0.5 + a * 0.5), a);
+  }
+}
+function drawBruellBaum(x, sc) { // the big sleepy tree: it hides Goetti's guitar and wakes up when Rex roars
+  const awake = sc.state === 'open', sk = sc.shake > 0 ? Math.min(1, sc.shake) : 0, sw = sk > 0 ? Math.sin(T * 40) * 7 * sk : Math.sin(T * 1.1) * 1.5, b = GROUND;
+  shadow(x, b + 2, 130, 0.3);
+  ctx.save(); ctx.translate(x, b); ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(-50, 4); ctx.bezierCurveTo(-30, -60, -26, -150, -24, -235); ctx.lineTo(26, -235); ctx.bezierCurveTo(28, -150, 34, -60, 56, 4); ctx.quadraticCurveTo(0, -10, -50, 4);
+  ctx.fillStyle = vgrad(-235, 0, '#7b5634', '#5e3f24', '#3c2815'); ctx.fill(); ctx.strokeStyle = 'rgba(30,16,4,.55)'; ctx.lineWidth = 3; ctx.stroke();
+  ctx.strokeStyle = 'rgba(30,16,4,.3)'; ctx.lineWidth = 2; for (const [a, c, d] of [[-14, -40, -170], [12, -30, -150], [22, -120, -200], [-18, -190, -225]]) { ctx.beginPath(); ctx.moveTo(a, c); ctx.quadraticCurveTo(a + 5, (c + d) / 2, a - 2, d); ctx.stroke(); }
+  // the face on the trunk: asleep, then wide awake
+  if (!awake) {
+    ctx.strokeStyle = '#2a1608'; ctx.lineWidth = 3.5; for (const ex of [-12, 14]) { ctx.beginPath(); ctx.arc(ex, -126, 7, 0.2, Math.PI - 0.2); ctx.stroke(); }
+    ell(1, -100, 7, 5 + Math.sin(T * 2) * 1.5, 0, '#2a1608');
+    const zy = Math.sin(T * 1.6) * 5; txt('z', 44, -152 + zy, 20, 'rgba(255,255,255,.85)'); txt('Z', 60, -176 + zy * 1.3, 26, 'rgba(255,255,255,.7)');
+  } else {
+    for (const ex of [-13, 15]) { circle(ex, -126, 9, '#fff'); circle(ex + 1, -125, 4, '#2a1608'); }
+    ell(1, -97, 9, 11, 0, '#2a1608'); ell(1, -91, 6, 5, 0, '#a8442c');
+  }
+  // canopy sways; the guitar sticks out of the leaves (neck and head only, the body is hidden)
+  ctx.translate(sw, 0);
+  const blob = (list, c0, c1) => { for (const [dx, dy, r] of list) { circle(dx, dy, r, c0); ell(dx - r * 0.2, dy - r * 0.25, r * 0.65, r * 0.55, 0, c1); } };
+  blob([[-92, -262, 62], [-30, -304, 68], [42, -296, 70], [98, -258, 58], [0, -250, 68]], '#2c6f2a', '#3a8a34');
+  if (!awake) drawGuitar(54, -262, 0.8, 0.55);
+  blob([[-58, -232, 48], [62, -224, 50], [100, -240, 34], [20, -218, 44]], '#3c9a38', '#63bd52');
+  ctx.strokeStyle = '#2c6f2a'; ctx.lineWidth = 3; for (const vx of [-100, -40, 70, 112]) { ctx.beginPath(); ctx.moveTo(vx, -215); ctx.quadraticCurveTo(vx + 6, -190, vx - 2, -168 + Math.sin(T * 2 + vx) * 3); ctx.stroke(); }
+  ctx.restore();
+  if (!awake) twinkles(sc, x + 72, b - 290, 28);
+}
+function drawIceHole(x, sc) { // a frozen fishing hole with a rod stuck in it: STAMPF breaks the ice
+  const b = GROUND, open = sc.state === 'open';
+  ctx.save(); ctx.lineCap = 'round';
+  if (!open) {
+    ell(x, b + 7, 96, 12, 0, 'rgba(0,0,0,.25)');
+    ell(x, b + 5, 92, 11, 0, vgrad(b - 6, b + 16, '#e4f6ff', '#b6dcf2', '#8fc2e2')); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(x, b + 5, 92, 11, 0, Math.PI, Math.PI * 2); ctx.stroke();
+    ctx.strokeStyle = 'rgba(70,130,180,.65)'; ctx.lineWidth = 1.8; for (const [a, c] of [[-70, 4], [-40, 12], [-8, 14], [30, 12], [64, 5], [80, 9]]) { ctx.beginPath(); ctx.moveTo(x + 4, b + 4); ctx.lineTo(x + (a + 4) * 0.5, b + 5 + (c - 5) * 0.4); ctx.lineTo(x + a, b + c * 0.7); ctx.stroke(); }
+    ctx.strokeStyle = '#5b3a1e'; ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(x - 20, b + 4); ctx.lineTo(x + 2, b - 50); ctx.stroke();
+    ctx.strokeStyle = '#2b2b2b'; ctx.lineWidth = 3.5; ctx.beginPath(); ctx.moveTo(x + 2, b - 50); ctx.lineTo(x + 44, b - 116); ctx.stroke();
+    circle(x - 9, b - 22, 7, '#9aa4ad'); circle(x - 9, b - 22, 3, '#555');
+    ctx.strokeStyle = 'rgba(255,255,255,.9)'; ctx.lineWidth = 1.3; ctx.beginPath(); ctx.moveTo(x + 44, b - 116); ctx.lineTo(x + 52 + Math.sin(T * 2) * 1.5, b + 2); ctx.stroke();
+    circle(x + 52, b - 3, 5, '#e8453c'); ell(x + 52, b - 6, 5, 2.6, 0, '#fff');
+    ctx.fillStyle = 'rgba(255,255,255,.9)'; for (const [fx, fy] of [[x - 12, b - 34], [x + 20, b - 82], [x - 2, b - 6]]) { ctx.beginPath(); ctx.arc(fx, fy, 2.2, 0, 7); ctx.fill(); }
+    twinkles(sc, x + 22, b - 60, 40);
+  } else {
+    ell(x, b + 6, 70, 9, 0, '#173a55'); ell(x, b + 5, 56, 5, 0, '#245a80');
+    ctx.fillStyle = '#d8f0ff'; for (const [a, c, r] of [[-84, 6, 14], [-64, 14, 9], [66, 12, 12], [84, 4, 10]]) { ctx.beginPath(); ctx.moveTo(x + a - r, b + c + 3); ctx.lineTo(x + a, b + c - r * 0.5); ctx.lineTo(x + a + r, b + c + 3); ctx.closePath(); ctx.fill(); }
+  }
+  ctx.restore();
+}
+function drawAshHeap(x, sc) { // a smoking heap of ash with a long beak poking out: FEUER blows it away
+  const b = GROUND, open = sc.state === 'open';
+  ctx.save(); ctx.lineCap = 'round';
+  if (!open) {
+    shadow(x, b + 2, 110, 0.35);
+    ctx.beginPath(); ctx.moveTo(x - 108, b); ctx.bezierCurveTo(x - 92, b - 70, x - 52, b - 106, x, b - 106); ctx.bezierCurveTo(x + 52, b - 106, x + 94, b - 66, x + 112, b); ctx.closePath();
+    ctx.fillStyle = vgrad(b - 106, b, '#7a7475', '#514b4c', '#2e2a2b'); ctx.fill(); ctx.strokeStyle = 'rgba(0,0,0,.45)'; ctx.lineWidth = 3; ctx.stroke();
+    for (const [a, c, r] of [[-50, -70, 16], [-8, -88, 12], [34, -66, 18], [60, -34, 12], [-76, -30, 11]]) ell(x + a, b + c, r, r * 0.55, -0.3, 'rgba(255,255,255,.12)');
+    for (const [a, c, k] of [[-62, -52, 0], [-20, -36, 1.7], [22, -78, 3.1], [56, -52, 4.4], [8, -20, 5.6], [-38, -90, 2.3]]) { ctx.globalAlpha = 0.45 + 0.4 * Math.sin(T * 3.4 + k); circle(x + a, b + c, 3.4, '#ff8a2a'); ctx.globalAlpha = 1; }
+    const bob = Math.sin(T * 3) * 2;
+    ctx.strokeStyle = '#e8cf9a'; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(x - 94, b - 26 + bob); ctx.quadraticCurveTo(x - 118, b - 24 + bob, x - 134, b - 12 + bob); ctx.stroke();
+    circle(x - 135, b - 12 + bob, 3, '#6b4a2b');
+    for (let i = 0; i < 3; i++) { const u = (T * 0.35 + i / 3) % 1; ctx.globalAlpha = 0.35 * (1 - u); circle(x + 10 + Math.sin(u * 5 + i) * 14, b - 108 - u * 90, 12 + u * 16, '#8a8485'); ctx.globalAlpha = 1; }
+    twinkles(sc, x - 124, b - 34, 22);
+  } else {
+    ell(x, b + 1, 78, 9, 0, '#4a4546'); ell(x - 10, b - 2, 46, 5, 0, '#6a6465');
+  }
+  ctx.restore();
+}
+function drawSecret(L, cam) {
+  const sc = L.secret; if (!sc) return; const x = sc.x - cam; if (x < -300 || x > W + 300) return;
+  if (sc.kind === 'tree') drawBruellBaum(x, sc);
+  else if (sc.kind === 'ice') drawIceHole(x, sc);
+  else if (sc.kind === 'ash') drawAshHeap(x, sc);
+  else if (sc.state === 'idle') twinkles(sc, x + 6, GROUND - 52, 26); // the cracked rock is drawn as an obstacle
 }
 function drawMedal(x, y, r, kind, on) {
   ctx.save(); if (!on) ctx.globalAlpha = 0.35;
@@ -2662,9 +2748,15 @@ function buildLevel(wi, endless, LV) { // LV = the calendar level spec (or undef
     } else if (i === eggAt[1]) {
       L.spots.push({ x: x + 40, k: 1, state: 'idle' });
       L.eggs.push({ k: 1, x: x + 340, y: GROUND - 150, hidden: true }); w = 440;
-    } else if (i === tAt) {
-      L.tips.push({ x: x - 1200, text: (LV ? LV.treasure === 3 : wi === 3) ? 'Da oben piepst etwas! Doppelsprung – zweimal schnell tippen!' : 'Da oben liegt etwas von Goetti! Doppelsprung – zweimal schnell tippen!' });
-      L.plats.push({ x, y: GROUND - 250, w: 220 }); L.treasure = { k: LV ? LV.treasure : wi, x: x + 110, y: GROUND - 300, got: false }; w = 220;
+    } else if (i === tAt) { // Goetti's treasure: never on show, each one hides behind a different move (see openSecret)
+      const tk = LV ? LV.treasure : Math.min(wi, 3), miss = save.tTries[tk] || 0, kind = ['tree', 'rock', 'ice', 'ash'][tk];
+      if (miss >= 1) L.tips.push({ x: x - 700, text: TREASURES[tk].tip }); // after one miss the hint says what to do
+      L.treasure = { k: tk, x: x + 600, y: GROUND - 100, got: false, shown: false };
+      L.secret = { kind, x: x + 600, state: 'idle', cue: 0.4, noticed: false, strong: miss >= 2 };
+      if (kind === 'tree') { L.secret.x = x + 760; w = 1100; }
+      else if (kind === 'rock') { L.secret.x = x + 560; L.obs.push({ type: 'rock', x: x + 560, w: 70, h: 56, sec: true }); w = 900; }
+      else if (kind === 'ice') { L.secret.x = x + 560; w = 900; }
+      else { L.peppers.push({ x: x + 80, y: GROUND - 60, got: false, sec: true }); L.secret.x = x + 760; w = 1100; }
     } else if (i === eggAt[2]) {
       L.pits.push({ x, w: 150 }); L.eggs.push({ k: 2, x: x + 75, y: GROUND - 195 }); w = 150;
     } else if (!endless && (wi === 2 || wi === 4) && i === Math.floor(n * 0.62)) { // stampede
@@ -2766,6 +2858,7 @@ function stompLand() {
   SFX.stomp(); G.shake = Math.max(G.shake, 0.45); G.freeze = 0.08;
   burst(p.wx, p.y, 26, ['#d8c3a5', '#b39b7a', '#fff'], 380, 900, 7, 0.6);
   G.rings.push({ x: p.wx + 10, y: p.y - 10, r: 20, a: 1, c: '255,240,200' });
+  const sc = G.L.secret; if (sc && sc.kind === 'ice' && sc.state === 'idle' && Math.abs(sc.x - (p.wx + 10)) < 130) openSecret(sc);
   for (const o of G.L.obs) {
     if (o.dead || o.scared || o.flat) continue;
     const d = o.x - p.wx; if (d < -110 || d > 190) continue;
@@ -2800,6 +2893,7 @@ function roar() {
   if (G.boss && G.boss.state === 'duel') { G.boss.meter = Math.min(1, G.boss.meter + 0.2); SFX.roar(); G.shake = Math.max(G.shake, 0.35); G.rings.push({ x: p.wx + 80, y: p.y - 100, r: 20, a: 1, c: '255,220,120' }); p.roarT = 0.3; return; }
   if (p.roarCd > 0 || G.startT > 0.3) return;
   p.roarT = 0.55; p.roarMax = G.boss ? 1.0 : 3.0; p.roarCd = p.roarMax; SFX.roar(); G.shake = Math.max(G.shake, 0.3);
+  const sc = G.L.secret; if (sc && sc.kind === 'tree' && sc.state === 'idle' && sc.x - p.wx > -80 && sc.x - p.wx < 640) openSecret(sc); // the roar shakes the big tree
   G.rings.push({ x: p.wx + 80, y: p.y - 100, r: 20, a: 1, c: '255,220,120' });
   for (const o of G.L.obs) {
     if (o.dead || o.scared) continue;
@@ -2835,6 +2929,31 @@ function endRun() {
     askName('In der Bestenliste! Wie heisst du?', save.nick || save.oliName || 'Oli', name => { const r = boardAdd(wi, cleanNick(name).name, sc); if (G && G.overlay && G.overlay.type === 'endover') G.overlay.rank = r; SFX.right(); }, v => { const c = cleanNick(v); return c.ok ? '' : c.msg; });
   }, 1300);
 }
+function resetSecretPepper(L) { for (const pp of L.peppers) if (pp.sec && L.secret && L.secret.state === 'idle') pp.got = false; } // the Kiwi pepper must be there again after a respawn
+function openSecret(sc) { // a treasure's hiding place was found: it pops out and flies to where Rex can grab it
+  const gs = G, L = gs.L, p = gs.p, tr = L.treasure; if (!sc || sc.state !== 'idle' || !tr) return;
+  sc.state = 'open'; sc.shake = 0.9;
+  const ahead = Math.max(sc.x + 50, p.wx + 250); let f;
+  if (sc.kind === 'tree') { f = { x0: sc.x + 50, y0: GROUND - 255, x1: ahead, y1: GROUND - 100, h: 40 }; burst(sc.x, GROUND - 230, 44, ['#5fbf4a', '#2f7a2c', '#9be26a', '#fff'], 360, 500, 9, 1.3); gs.shake = Math.max(gs.shake, 0.5); panAt(sc.x, SFX.smash); }
+  else if (sc.kind === 'rock') { f = { x0: sc.x, y0: GROUND - 50, x1: Math.max(sc.x + 120, p.wx + 260), y1: GROUND - 100, h: 150 }; burst(sc.x, GROUND - 30, 30, [WORLDS[gs.wi].rock, '#5a4a3a', '#ffe08a', '#fff'], 460, 1200, 9, 0.9); }
+  else if (sc.kind === 'ice') { f = { x0: sc.x, y0: GROUND - 20, x1: Math.max(sc.x + 60, p.wx + 250), y1: GROUND - 105, h: 190 }; burst(sc.x, GROUND, 34, ['#e0f4ff', '#9fd3ff', '#fff'], 420, 900, 8, 1); panAt(sc.x, SFX.crack); }
+  else { f = { x0: sc.x, y0: GROUND - 40, x1: Math.max(sc.x + 70, p.wx + 260), y1: GROUND - 90, h: 130 }; burst(sc.x, GROUND - 40, 40, ['#8a8484', '#4a4546', '#ffb030', '#fff'], 380, 500, 9, 1.2); }
+  tr.shown = true; tr.fly = { t: 0, d: 0.85, ...f }; tr.x = f.x0; tr.y = f.y0;
+  SFX.power(); setTimeout(() => { if (G === gs && scene === 'play') SFX.sparkle(); }, 300);
+  toast(['Hui! Da fällt etwas heraus!', 'Der Fels ist kaputt – da war etwas drin!', 'Das Eis bricht – da war etwas drin!', 'Die Asche fliegt weg – da war etwas drin!'][tr.k], '#ffd740');
+}
+function secretCue(sc, dt) { // a sound that grows louder as Rex gets close, and Chili notices it once
+  const d = sc.x - G.p.wx; if (d < -60 || d > 1100) return;
+  if (!sc.noticed && d < 700 && d > 150) { sc.noticed = true; chiliSay(TREASURES[G.L.treasure.k].notice, true); } // once per level, so it may cut in on the rate limit
+  sc.cue -= dt; if (sc.cue > 0) return;
+  sc.cue = 1.2 + Math.max(0, d) / 1100 * 1.3; const v = clamp(1.1 - Math.max(0, d) / 1100, 0.2, 1) * 0.11, n = (sc.n = (sc.n || 0) + 1);
+  panAt(sc.x, () => {
+    if (sc.kind === 'tree') { const f = [392, 523, 659, 523][n % 4]; tone(f, 0.55, 'triangle', v); tone(f * 2, 0.3, 'sine', v * 0.35); }
+    else if (sc.kind === 'rock') { tone(1568, 0.3, 'sine', v); tone(2093, 0.4, 'sine', v * 0.8, null, 0.14); }
+    else if (sc.kind === 'ice') { tone(2637, 0.22, 'sine', v * 0.8); tone(3520, 0.3, 'sine', v * 0.55, null, 0.09); tone(1200, 0.12, 'sine', v * 0.6, 1900, 0.2); }
+    else { tone(1900, 0.08, 'triangle', v, 2500); tone(2100, 0.08, 'triangle', v * 0.9, 2700, 0.14); tone(2000, 0.07, 'triangle', v * 0.7, 2500, 0.26); }
+  });
+}
 function resetCrumble(L) { for (const pl of L.plats) if (pl.crumble) { pl.gone = false; pl.t = null; pl.y = pl.y0; pl.fv = 0; } }
 function safeSpawn(x) { // never respawn in or right next to a pit: step back until there is room to run
   const L = G.L, bad = q => L.pits.some(p => q + 450 > p.x && q - 120 < p.x + p.w); let g = 0;
@@ -2847,7 +2966,7 @@ function pitFall() {
   while (!supported(L, nx) && guard++ < 30) nx -= 40;
   nx = safeSpawn(nx);
   p.wx = nx; p.y = GROUND; p.vy = 0; G.chili.wx = nx - 145; G.startT = 1.4;
-  resetCrumble(L); hurt(true); p.inv = 3;
+  resetCrumble(L); resetSecretPepper(L); hurt(true); p.inv = 3;
 }
 function retry() {
   for (const k in mus.saved) if (isBossKey(k)) delete mus.saved[k]; // every boss attempt starts the theme from the top
@@ -2856,7 +2975,7 @@ function retry() {
   const fk = G.bossStarted ? 'b' + (G.bossCp || 0) : String(G.cp); G.fails = G.fails || {}; G.fails[fk] = (G.fails[fk] || 0) + 1;
   if (G.fails[fk] >= 2 && !G.endless && !G.shield) { G.shield = true; G.fails[fk] = 0; setTimeout(() => { if (G && scene === 'play') toast('Chili schenkt dir einen Schutzschild!', '#9fd3ff'); }, 700); }
   G.overlay = null; p.hearts = G.maxH; p.inv = 2; p.wx = G.bossStarted ? G.cp : safeSpawn(G.cp); p.y = GROUND; p.vy = 0; p.roarCd = 0; p.stomp = false; p.spin = 1; G.duckHeld = null; G.fireballs = []; G.flames = [];
-  G.chili.wx = p.wx - 145; G.chili.dig = null; resetCrumble(L);
+  G.chili.wx = p.wx - 145; G.chili.dig = null; resetCrumble(L); resetSecretPepper(L);
   for (const s of L.spots) if (s.state === 'dig') s.state = 'idle';
   for (const o of L.obs) if ((o.type === 'raptor' || o.type === 'ptero' || o.type === 'compy' || o.type === 'hopper' || o.type === 'seed') && o.x > G.cp - 300 && o.x < G.cp + 700) o.dead = true;
   if (G.bossStarted && !G.golden && !G.bossDone) { p.wx = L.bossX; G.chili.wx = p.wx - 90; G.boss = newBoss(G.bossCp || 0); G.stopped = true; for (const o of L.obs) if (o.minion) o.dead = true; if (G.boss.phase > 0) startBossPhase(G.boss); }
@@ -2948,6 +3067,7 @@ function finishLevel() {
   const tk = G.L.treasure ? G.L.treasure.k : -1;
   G.newTreasure = tk >= 0 && G.L.treasure.got && !save.treasures[tk];
   if (G.newTreasure) { save.treasures[tk] = 1; save.treasureNew = tk; }
+  else if (tk >= 0 && !save.treasures[tk]) save.tTries[tk] = (save.tTries[tk] || 0) + 1; // missed again: the next try gets a clearer hint
   if (DAY_AFTER[lv.day] && !wasDone) save.afterNew = lv.day;
   if (!save.master && medalTotal() >= 72) { save.master = 1; save.masterNew = 1; const si = SKINS.findIndex(x => x.gift === 25), hi = HATS.findIndex(x => x.gift === 25); if (!save.owned.skin.includes(si)) save.owned.skin.push(si); if (!save.owned.hat.includes(hi)) save.owned.hat.push(hi); save.equip.skin = si; save.equip.hat = hi; save.newGifts.push('skin:' + si, 'hat:' + hi); }
   save.amber += G.amber; writeSave();
@@ -3000,6 +3120,7 @@ function updatePlay(dt) {
   for (const f of G.fireballs) {
     f.x += f.vx * dt; f.y = Math.min(GROUND - 38, f.y + f.vy * dt); f.life -= dt;
     for (let k = 0; k < 2; k++) { const l = 0.2 + Math.random() * 0.2; G.flames.push({ x: f.x - 8, y: f.y + (Math.random() - 0.5) * 14, vx: 120 + Math.random() * 120, vy: -60 - Math.random() * 60, life: l, max: l, r: 6 + Math.random() * 6 }); }
+    const sc = L.secret; if (sc && sc.kind === 'ash' && sc.state === 'idle' && Math.abs(sc.x - f.x) < 70 && f.y > GROUND - 150) { f.life = 0; burst(f.x, f.y, 18, ['#ffb030', '#ff5a1f', '#fff3a0', '#555'], 300, 400, 8, 0.7); openSecret(sc); }
     for (const o of L.obs) {
       if (o.dead || o.scared || o.flat || f.life <= 0) continue;
       const dx = o.x - f.x; let hit = false;
@@ -3037,8 +3158,11 @@ function updatePlay(dt) {
       toast('Ei gefunden! (' + (G.eggsGot.filter(Boolean).length) + ' von 3)', '#ffe08a');
     }
   }
-  const tr = L.treasure;
-  if (tr && !tr.got && Math.hypot(tr.x - (p.wx + 10), tr.y - (p.y - 50)) < 78) {
+  const tr = L.treasure, sc = L.secret;
+  if (sc && sc.state === 'idle') secretCue(sc, dt);
+  if (tr && tr.fly) { const f = tr.fly; f.t += dt; const u = Math.min(1, f.t / f.d); tr.x = f.x0 + (f.x1 - f.x0) * u; tr.y = f.y0 + (f.y1 - f.y0) * u - f.h * Math.sin(Math.PI * u); if (u >= 1) tr.fly = null; }
+  if (sc && sc.shake > 0) sc.shake -= dt;
+  if (tr && tr.shown && !tr.got && Math.hypot(tr.x - (p.wx + 10), tr.y - (p.y - 50)) < 78) {
     tr.got = true; SFX.egg(); setTimeout(SFX.right, 250); burst(tr.x, tr.y, 40, ['#ffd740', '#fff', '#69f0ae'], 400, 500, 7, 1.2);
     toast(TREASURES[tr.k].name + (save.treasures[tr.k] ? '!' : ' gefunden!'), '#ffd740');
   }
@@ -3057,7 +3181,7 @@ function updatePlay(dt) {
   // obstacles
   const pb = p.duck ? { x: p.wx - 30, y: p.y - 56, w: 80, h: 52 } : { x: p.wx - 25, y: p.y - 92, w: 68, h: 88 };
   for (const o of L.obs) {
-    if (o.dead) continue;
+    if (o.dead) { if (o.sec && !o.secDone) { o.secDone = true; openSecret(L.secret); } continue; } // the cracked rock was smashed (dash, stomp or fire)
     const d = o.x - p.wx;
     if (d > 1200) continue;
     let hb = null;
@@ -3471,6 +3595,7 @@ function drawObstacle(o, cam, th) {
       ctx.strokeStyle = 'rgba(0,0,0,.35)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x + 4, GROUND - o.h * 0.8); ctx.lineTo(x + 10, GROUND - o.h * 0.4); ctx.lineTo(x + 2, GROUND - 6); ctx.stroke();
       if (ART(G.wi) === 2) { ell(x - 4, GROUND - o.h + 3, o.w * 0.28, 5, 0, '#fff'); }
       rockTheme(x, o);
+      if (o.sec) { const pu = 0.7 + 0.3 * Math.sin(T * 3); ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round'; for (const [w, a, c] of [[7, 0.35, '#ffb030'], [3, 1, '#fff3a0']]) { ctx.globalAlpha = pu * a; ctx.strokeStyle = c; ctx.lineWidth = w; ctx.beginPath(); ctx.moveTo(x - 5, GROUND - o.h + 5); ctx.lineTo(x + 4, GROUND - o.h * 0.72); ctx.lineTo(x - 7, GROUND - o.h * 0.5); ctx.lineTo(x + 3, GROUND - o.h * 0.28); ctx.lineTo(x - 3, GROUND - 5); ctx.stroke(); } ctx.restore(); }
       break;
     }
     case 'boulder': { // a lumpy rock in the colours of its world (not an egg shape)
@@ -3906,9 +4031,10 @@ function drawPlay() {
   for (const a of L.amb) if (!a.got) { const x = a.x - cam; if (x > -20 && x < W + 20) drawAmber(x, a.y + Math.sin(T * 4 + a.x) * 3, 10); }
   for (const e of L.eggs) if (!e.hidden && !e.got) { const x = e.x - cam; if (x > -60 && x < W + 60) drawEgg(x, e.y + Math.sin(T * 3 + e.k) * 5, 24, th.egg, th.eggSpot, 0.8 + 0.2 * Math.sin(T * 5), Math.sin(T * 2) * 0.1); }
   for (const o of L.obs) if (!o.dead && o.type !== 'low') drawObstacle(o, cam, th);
+  drawSecret(L, cam);
   for (const h of L.hearts) if (!h.got) { const x = h.x - cam; if (x > -60 && x < W + 60) { const y = h.y + Math.sin(T * 3 + h.x) * 6, pu = 1 + 0.08 * Math.sin(T * 6); const g = ctx.createRadialGradient(x, y, 4, x, y, 52); g.addColorStop(0, 'rgba(255,120,150,.6)'); g.addColorStop(1, 'rgba(255,120,150,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, 52, 0, Math.PI * 2); ctx.fill(); drawHeart(x, y, 1.9 * pu, true); for (let k = 0; k < 3; k++) { const a = T * 2 + k * 2.1; ctx.globalAlpha = 0.5 + 0.5 * Math.sin(T * 6 + k); drawStar(x + Math.cos(a) * 30, y + Math.sin(a) * 22, 4, '#fff6b0'); } ctx.globalAlpha = 1; } }
   for (const pp of L.peppers) if (!pp.got) { const x = pp.x - cam; if (x > -40 && x < W + 40) { const y = pp.y + Math.sin(T * 4 + pp.x) * 5; const g = ctx.createRadialGradient(x, y, 4, x, y, 44); g.addColorStop(0, 'rgba(255,150,40,.65)'); g.addColorStop(1, 'rgba(255,90,20,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, 44, 0, Math.PI * 2); ctx.fill(); drawPepper(x, y, 1.1, 0.4 + Math.sin(T * 3) * 0.2); } }
-  if (L.treasure && !L.treasure.got) { const tr = L.treasure, x = tr.x - cam, y = tr.y + Math.sin(T * 3) * 6; if (x > -80 && x < W + 80) { const g = ctx.createRadialGradient(x, y, 5, x, y, 70); g.addColorStop(0, 'rgba(255,240,150,.7)'); g.addColorStop(1, 'rgba(255,240,150,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, 70, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = save.treasures[tr.k] ? 0.6 : 1; drawTreasure(tr.k, x, y, 0.9); ctx.globalAlpha = 1; for (let i = 0; i < 4; i++) { const a = T * 2 + i * 1.57; ctx.globalAlpha = 0.5 + 0.5 * Math.sin(T * 6 + i); circle(x + Math.cos(a) * 44, y + Math.sin(a) * 30, 3, '#fff6b0'); } ctx.globalAlpha = 1; } }
+  if (L.treasure && L.treasure.shown && !L.treasure.got) { const tr = L.treasure, x = tr.x - cam, y = tr.y + Math.sin(T * 3) * 6; if (x > -80 && x < W + 80) { const g = ctx.createRadialGradient(x, y, 5, x, y, 70); g.addColorStop(0, 'rgba(255,240,150,.7)'); g.addColorStop(1, 'rgba(255,240,150,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, 70, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = save.treasures[tr.k] ? 0.6 : 1; drawTreasure(tr.k, x, y, 0.9); ctx.globalAlpha = 1; for (let i = 0; i < 4; i++) { const a = T * 2 + i * 1.57; ctx.globalAlpha = 0.5 + 0.5 * Math.sin(T * 6 + i); circle(x + Math.cos(a) * 44, y + Math.sin(a) * 30, 3, '#fff6b0'); } ctx.globalAlpha = 1; } }
   if (G.golden && !G.gotGolden) drawEgg(G.golden.x - cam, G.golden.y + (G.golden.landed ? Math.sin(T * 3) * 5 : 0), 32, '#ffd700', '#e0a800', 1.2, Math.sin(T * 2) * 0.1);
   if (G.boss && G.boss.x - cam < W + 260) {
     const b = G.boss, K = bossKind(b), bx = b.x - cam, hover = b.kind === 'queen' ? (b.state === 'tired' || b.state === 'stagger' ? 0 : b.state === 'leap' ? -150 * (1 - clamp(b.t / 0.7, 0, 1)) : -150 + Math.sin(T * 2) * 12) : 0, by = GROUND + b.y + hover, st = b.state, rage = b.kind === 'king' && b.phase === 3 && st !== 'flee';
@@ -4250,7 +4376,7 @@ function drawOverlay() {
     }
     if (G.newTreasure) { drawTreasure(G.L.treasure.k, W / 2 - 200, 380, 0.8); txt(TREASURES[G.L.treasure.k].name + ' gefunden!', W / 2 + 20, 384, 26, '#2e7d32'); }
     else { const tk = lv.treasure; const nextOpen = lv.day < 24 && lv.day === adventDay(); const missing = 3 - save.lvE[G.li].filter(Boolean).length;
-      txt(nextOpen && TEASERS[lv.day] ? TEASERS[lv.day] : nextOpen ? `Morgen öffnet sich Tür ${lv.day + 1} – bis dann!` : tk >= 0 && !save.treasures[tk] ? 'Goetti vermisst hier noch etwas … Schau mal ganz weit oben!' : missing ? 'Chili schnuppert: Hier sind noch Eier versteckt!' : 'Super gemacht!', W / 2, 384, 19, '#6b4a2b', 'center', 'normal'); }
+      txt(nextOpen && TEASERS[lv.day] ? TEASERS[lv.day] : nextOpen ? `Morgen öffnet sich Tür ${lv.day + 1} – bis dann!` : tk >= 0 && !save.treasures[tk] ? TREASURES[tk].hint : missing ? 'Chili schnuppert: Hier sind noch Eier versteckt!' : 'Super gemacht!', W / 2, 384, 19, '#6b4a2b', 'center', 'normal'); }
     { const hop = Math.abs(Math.sin(T * 7)) * 16, hop2 = Math.abs(Math.sin(T * 7 + 1.2)) * 14; shadow(240, 506, 52 - hop * 0.6, 0.25); shadow(752, 506, 22, 0.25);
       oRex(240, 502 - hop, 0.55, T * 8, 0.85, Object.assign(rexLook(G.wi), { rider: true, vy: -200 }));
       chiliFx.joy = 1; oChili(752, 504 - hop2, 1.0, T * 12, true); chiliFx.joy = 0;
@@ -6006,5 +6132,5 @@ function frame(now) {
 requestAnimationFrame(frame);
 
 // debug hook for testing in the browser console
-window.__dino = { bookUnread, get mus() { return mus; }, useAudio(ctx) { AC = ctx; noiseBuf = null; buildAudioGraph(); mus.key = null; mus.trans = null; mus.saved = {}; mus.g = 1; mus.vt = 1; amb.wi = null; amb.node = null; amb.lvl = -1; }, musicTick, SFX, ambTick, ambEvent, AMB, SONGS, startSplash, get splash() { return splash; }, bossDmg, medalTotal, worldMedalsDone, chestFull, chestParty, get chestPartyT() { return chestPartyT; }, startDaily, dailyWorld, dayKey, get dialog() { return dialog; }, DAY_STORY, DAY_AFTER, launchLevel, finishLevel, fmt, cleanNick, boardAdd, boardQualifies, boardAll, endRun, get scene() { return scene; }, get doorOverlay() { return doorOverlay; }, get buttons() { return buttons; }, pitFall, get lowfx() { return LOWFX; }, set lowfx(v) { LOWFX = v; }, get G() { return G; }, get E() { return E; }, save, startLevel, startEnding, go, jump, roar, updatePlay, updateEnding, answer, openRiddle, retry, tapEgg, openGate, playTreasure, drawPlay, duckDown, duckUp, shootFire, drawShop, buildSong, dash, LEVELS, adventDay, openDoorGift, giftFor, clickDoor, skillsFor, FACTS, STECK, VOICE_OF, VOICES, cardSprite, bookOpen(i) { bookSel = i; }, bookMode(m) { bookMode = m; lineLayout = null; lineScroll = lineTarget = 0; }, lineupScroll(v) { lineTarget = lineScroll = v; }, openBookCard, sheet(p) { sheetPage = p || 'hero'; scene = 'sheet'; } };
+window.__dino = { openSecret, bookUnread, get mus() { return mus; }, useAudio(ctx) { AC = ctx; noiseBuf = null; buildAudioGraph(); mus.key = null; mus.trans = null; mus.saved = {}; mus.g = 1; mus.vt = 1; amb.wi = null; amb.node = null; amb.lvl = -1; }, musicTick, SFX, ambTick, ambEvent, AMB, SONGS, startSplash, get splash() { return splash; }, bossDmg, medalTotal, worldMedalsDone, chestFull, chestParty, get chestPartyT() { return chestPartyT; }, startDaily, dailyWorld, dayKey, get dialog() { return dialog; }, DAY_STORY, DAY_AFTER, launchLevel, finishLevel, fmt, cleanNick, boardAdd, boardQualifies, boardAll, endRun, get scene() { return scene; }, get doorOverlay() { return doorOverlay; }, get buttons() { return buttons; }, pitFall, get lowfx() { return LOWFX; }, set lowfx(v) { LOWFX = v; }, get G() { return G; }, get E() { return E; }, save, startLevel, startEnding, go, jump, roar, updatePlay, updateEnding, answer, openRiddle, retry, tapEgg, openGate, playTreasure, drawPlay, duckDown, duckUp, shootFire, drawShop, buildSong, dash, LEVELS, adventDay, openDoorGift, giftFor, clickDoor, skillsFor, FACTS, STECK, VOICE_OF, VOICES, cardSprite, bookOpen(i) { bookSel = i; }, bookMode(m) { bookMode = m; lineLayout = null; lineScroll = lineTarget = 0; }, lineupScroll(v) { lineTarget = lineScroll = v; }, openBookCard, sheet(p) { sheetPage = p || 'hero'; scene = 'sheet'; } };
 })();
