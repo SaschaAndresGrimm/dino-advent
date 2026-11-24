@@ -474,11 +474,17 @@ function ambientNew(wi) {
   }
 }
 
+const sunCache = {};
 function drawSun(gx) {
   if (!gx.sun) return;
-  const sx = gx.sun[0], sy = gx.sun[1] + TOD * 70, c0 = gx.sunCol.split(',').map(Number), c = [0, 1, 2].map(i => Math.round(c0[i] + ([255, 120, 60][i] - c0[i]) * TOD * 0.8)).join(',');
-  const g = ctx.createRadialGradient(sx, sy, 10, sx, sy, 230); g.addColorStop(0, `rgba(${c},.55)`); g.addColorStop(0.3, `rgba(${c},.18)`); g.addColorStop(1, `rgba(${c},0)`);
-  ctx.fillStyle = g; ctx.fillRect(sx - 230, sy - 230, 460, 460);
+  const tq = Math.round(TOD * 20) / 20, sx = gx.sun[0], sy = gx.sun[1] + TOD * 70, c0 = gx.sunCol.split(',').map(Number), c = [0, 1, 2].map(i => Math.round(c0[i] + ([255, 120, 60][i] - c0[i]) * tq * 0.8)).join(',');
+  let sp = sunCache[c]; // the soft halo is a cached half-size sprite: a 460px radial gradient every frame was the single costliest backdrop item
+  if (!sp) {
+    if (Object.keys(sunCache).length > 60) for (const k in sunCache) delete sunCache[k];
+    sp = sunCache[c] = document.createElement('canvas'); sp.width = sp.height = 230;
+    const g = sp.getContext('2d'), gr = g.createRadialGradient(115, 115, 5, 115, 115, 115); gr.addColorStop(0, `rgba(${c},.55)`); gr.addColorStop(0.3, `rgba(${c},.18)`); gr.addColorStop(1, `rgba(${c},0)`); g.fillStyle = gr; g.fillRect(0, 0, 230, 230);
+  }
+  ctx.drawImage(sp, sx - 230, sy - 230, 460, 460);
   circle(sx, sy, 42, `rgba(${c},.95)`); circle(sx, sy, 50, `rgba(${c},.25)`);
 }
 function godRays(gx) {
@@ -515,7 +521,7 @@ function drawVolcano(cx, base, s, col, erupt) {
       const x0 = cx + i * wid * 0.05, y0 = top + 6 * s, qx = cx + i * wid * 0.16, qy = base - hgt * 0.45, x1 = cx + i * wid * 0.3, y1 = base, len = hgt * (1.05 + 0.1 * Math.abs(i)) * (0.55 + 0.4 * hash(i + 11)) * (0.6 + 0.4 * Math.min(1, erupt + 0.4));
       const path = () => { ctx.beginPath(); ctx.moveTo(x0, y0); ctx.quadraticCurveTo(qx, qy, x1, y1); };
       ctx.setLineDash([len, 9999]);
-      if (!LOWFX && s > 0.5) { ctx.shadowColor = '#ff5a00'; ctx.shadowBlur = 16 * s; }
+      if (!LOWFX && s > 0.5) { ctx.shadowColor = '#ff5a00'; ctx.shadowBlur = LOWFX ? 0 : (16 * s); }
       path(); ctx.strokeStyle = 'rgba(110,18,0,.95)'; ctx.lineWidth = (11 - Math.abs(i)) * s; ctx.stroke();
       ctx.shadowBlur = 0; path(); ctx.strokeStyle = '#ff5a14'; ctx.lineWidth = (7 - Math.abs(i) * 0.6) * s; ctx.stroke();
       path(); ctx.strokeStyle = '#ffb030'; ctx.lineWidth = 3.4 * s; ctx.stroke();
@@ -651,7 +657,7 @@ function landmark(t, wi, x, b) {
     ctx.fillStyle = vgrad(b - 230, b, lava ? '#3a2622' : '#6f8a7a', lava ? '#150c0a' : '#3f5a50'); ctx.beginPath(); ctx.moveTo(x - 90, b); ctx.lineTo(x - 72, b - 190); ctx.quadraticCurveTo(x - 40, b - 240, x, b - 232); ctx.quadraticCurveTo(x + 50, b - 236, x + 82, b - 200); ctx.lineTo(x + 100, b); ctx.closePath(); ctx.fill();
     ell(x, b - 230, 62, 10, 0, lava ? '#2a1a16' : '#4a9a4a');
     const wg = ctx.createLinearGradient(0, b - 226, 0, b); if (lava) { wg.addColorStop(0, '#fff3a0'); wg.addColorStop(0.4, '#ffa020'); wg.addColorStop(1, '#ff4a00'); } else { wg.addColorStop(0, 'rgba(210,244,255,.95)'); wg.addColorStop(1, 'rgba(120,200,232,.75)'); }
-    ctx.save(); if (lava) { ctx.shadowColor = '#ff5a00'; ctx.shadowBlur = 18; } ctx.fillStyle = wg; ctx.fillRect(x - 16, b - 226, 32, 226); ctx.restore();
+    ctx.save(); if (lava) { ctx.shadowColor = '#ff5a00'; ctx.shadowBlur = LOWFX ? 0 : (18); } ctx.fillStyle = wg; ctx.fillRect(x - 16, b - 226, 32, 226); ctx.restore();
     ctx.strokeStyle = lava ? 'rgba(255,255,200,.7)' : 'rgba(255,255,255,.85)'; ctx.lineWidth = 2.5; for (let i = 0; i < 5; i++) { const q = (T * 0.7 + i / 5) % 1, x2 = x - 11 + i * 5.5, y2 = b - 226 + q * 190; ctx.beginPath(); ctx.moveTo(x2, y2); ctx.lineTo(x2, y2 + 30); ctx.stroke(); }
     ell(x, b + 1, 64, 8, 0, lava ? 'rgba(255,100,20,.7)' : 'rgba(130,205,235,.7)'); for (let i = 0; i < 4; i++) circle(x - 32 + i * 21 + Math.sin(T * 2 + i) * 4, b - 6 - Math.abs(Math.sin(T * 3 + i)) * 4, 12 - (i % 2) * 4, lava ? 'rgba(255,170,80,.4)' : 'rgba(255,255,255,.5)');
   } else if (t === 'ribs') {
@@ -718,9 +724,20 @@ function landmark(t, wi, x, b) {
     ctx.fillStyle = '#c0392b'; ctx.beginPath(); ctx.moveTo(x - 36, b - 182); ctx.lineTo(x, b - 214); ctx.lineTo(x + 36, b - 182); ctx.fill(); ctx.strokeStyle = '#6b1d14'; ctx.stroke(); ctx.fillStyle = '#ffd34d'; ctx.fillRect(x - 1.5, b - 236, 3, 24); ctx.beginPath(); ctx.moveTo(x + 1, b - 236); ctx.lineTo(x + 20 + Math.sin(T * 5) * 3, b - 230); ctx.lineTo(x + 1, b - 222); ctx.fill();
   }
 }
+let skyCache = { wi: -1, rs: 0, c: null };
+function drawSky(wi, gx) { // the full-screen sky gradient never changes: paint it once per world and screen scale, then blit
+  const rs = Math.min(2, Math.max(0.75, DPR * SC));
+  if (skyCache.wi !== wi || Math.abs(skyCache.rs - rs) > 0.01) {
+    const c = skyCache.c || document.createElement('canvas'); c.width = Math.ceil(W * rs); c.height = Math.ceil(H * rs);
+    const old = ctx; ctx = c.getContext('2d'); ctx.setTransform(rs, 0, 0, rs, 0, 0);
+    try { ctx.fillStyle = vgrad(0, 445, gx.sky[0], gx.sky[1], gx.sky[2]); ctx.fillRect(0, 0, W, H); } finally { ctx = old; }
+    skyCache = { wi, rs, c };
+  }
+  ctx.drawImage(skyCache.c, 0, 0, W, H);
+}
 function drawBackground(wi, cam) {
   const th = WORLDS[wi], gx = GFX[wi];
-  ctx.fillStyle = vgrad(0, 445, gx.sky[0], gx.sky[1], gx.sky[2]); ctx.fillRect(0, 0, W, H);
+  drawSky(wi, gx);
   if (th.stars || wi === 3) { for (let i = 0; i < 80; i++) { ctx.globalAlpha = (wi === 3 ? 0.25 : 0.4) + 0.6 * Math.abs(Math.sin(T * 1.5 + i)); circle(hash(i) * W, hash(i + 99) * 240, hash(i + 5) < 0.15 ? 1.8 : 1.1, '#fff'); } ctx.globalAlpha = 1; }
   if (wi === 2) {
     const g = ctx.createRadialGradient(150, 90, 20, 150, 90, 120); g.addColorStop(0, 'rgba(240,240,220,.35)'); g.addColorStop(1, 'rgba(240,240,220,0)'); ctx.fillStyle = g; ctx.fillRect(30, 0, 240, 210);
@@ -807,8 +824,8 @@ function drawGround(wi, L, cam) {
     for (let x = -10; x <= W + 10; x += 16) { const wx = x + cam; ctx.lineTo(x, GROUND + 9 + Math.sin(wx * 0.09) * 2); } ctx.stroke();
     for (let k = Math.floor(cam / 131) - 1; k < (cam + W) / 131 + 1; k++) { // embers and tiny flames
       const q = hash(k + 61), x = k * 131 - cam + hash(k + 62) * 70, fl = 0.6 + 0.4 * Math.sin(T * 7 + k * 2);
-      if (q < 0.4) { ell(x, GROUND - 1, 8, 5, 0, '#2a1612'); ctx.save(); ctx.shadowColor = '#ff6a10'; ctx.shadowBlur = 8; ctx.strokeStyle = `rgba(255,${120 + 60 * fl | 0},30,.9)`; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(x - 5, GROUND - 2); ctx.lineTo(x - 1, GROUND - 5); ctx.lineTo(x + 2, GROUND - 2); ctx.lineTo(x + 6, GROUND - 4); ctx.stroke(); ctx.restore(); }
-      else if (q < 0.6) { ctx.save(); ctx.shadowColor = '#ff8a20'; ctx.shadowBlur = 10; ctx.fillStyle = `rgba(255,${150 + 60 * fl | 0},40,.9)`; ctx.beginPath(); ctx.moveTo(x - 4, GROUND); ctx.quadraticCurveTo(x - 5, GROUND - 8 * fl - 4, x, GROUND - 12 * fl - 6); ctx.quadraticCurveTo(x + 5, GROUND - 8, x + 4, GROUND); ctx.fill(); ctx.fillStyle = '#fff0a0'; ctx.beginPath(); ctx.ellipse(x, GROUND - 3, 1.6, 3.4 * fl, 0, 0, 7); ctx.fill(); ctx.restore(); }
+      if (q < 0.4) { ell(x, GROUND - 1, 8, 5, 0, '#2a1612'); ctx.save(); ctx.shadowColor = '#ff6a10'; ctx.shadowBlur = LOWFX ? 0 : (8); ctx.strokeStyle = `rgba(255,${120 + 60 * fl | 0},30,.9)`; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(x - 5, GROUND - 2); ctx.lineTo(x - 1, GROUND - 5); ctx.lineTo(x + 2, GROUND - 2); ctx.lineTo(x + 6, GROUND - 4); ctx.stroke(); ctx.restore(); }
+      else if (q < 0.6) { ctx.save(); ctx.shadowColor = '#ff8a20'; ctx.shadowBlur = LOWFX ? 0 : (10); ctx.fillStyle = `rgba(255,${150 + 60 * fl | 0},40,.9)`; ctx.beginPath(); ctx.moveTo(x - 4, GROUND); ctx.quadraticCurveTo(x - 5, GROUND - 8 * fl - 4, x, GROUND - 12 * fl - 6); ctx.quadraticCurveTo(x + 5, GROUND - 8, x + 4, GROUND); ctx.fill(); ctx.fillStyle = '#fff0a0'; ctx.beginPath(); ctx.ellipse(x, GROUND - 3, 1.6, 3.4 * fl, 0, 0, 7); ctx.fill(); ctx.restore(); }
     }
     for (let k = Math.floor(cam / 50) - 1; k < (cam + W) / 50 + 1; k++) { const x = k * 50 - cam + hash(k) * 20; ctx.fillStyle = '#1a0e0b'; ctx.beginPath(); ctx.moveTo(x - 8, GROUND); ctx.lineTo(x - 2, GROUND - 6 - hash(k + 1) * 6); ctx.lineTo(x + 6, GROUND); ctx.fill(); }
   }
@@ -868,7 +885,7 @@ function meteorRock(x, y, s, glow) { // a lumpy space rock: dark crust, lit face
   for (const [cx, cy, r] of [[-12, 4, 6], [10, -10, 4.5], [14, 10, 5]]) { circle(cx, cy, r, 'rgba(0,0,0,.35)'); circle(cx - 1, cy - 1.2, r * 0.7, '#4a3c36'); } // craters
   ctx.fillStyle = vgrad(4, 26, 'rgba(255,90,20,0)', `rgba(255,110,30,${0.55 * glow})`); ctx.fillRect(-34, 4, 68, 24); // molten underside
   ctx.restore();
-  ctx.save(); if (!LOWFX) { ctx.shadowColor = '#ff6a10'; ctx.shadowBlur = 8 * glow; }
+  ctx.save(); if (!LOWFX) { ctx.shadowColor = '#ff6a10'; ctx.shadowBlur = LOWFX ? 0 : (8 * glow); }
   ctx.strokeStyle = `rgba(255,${130 + 80 * glow | 0},40,${0.4 + 0.6 * glow})`; ctx.lineWidth = 2.4; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
   ctx.beginPath(); ctx.moveTo(-18, -14); ctx.lineTo(-6, -4); ctx.lineTo(-12, 8); ctx.moveTo(-6, -4); ctx.lineTo(6, 0); ctx.lineTo(16, -8); ctx.moveTo(6, 0); ctx.lineTo(4, 14); ctx.stroke();
   ctx.restore(); ctx.restore();
@@ -922,7 +939,7 @@ function drawPlatform(pl, cam, wi) {
   } else { // basalt with glowing seam
     rr(x, y, w, 26, 6); ctx.fillStyle = vgrad(y, y + 26, '#4a3530', '#2a1c18', '#140c0a'); ctx.fill();
     ctx.strokeStyle = 'rgba(0,0,0,.45)'; ctx.lineWidth = 1.5; for (let i = 1; i < w / 26; i++) { ctx.beginPath(); ctx.moveTo(x + i * 26, y + 4); ctx.lineTo(x + i * 26 + 3, y + 24); ctx.stroke(); }
-    ctx.save(); ctx.shadowColor = '#ff5a00'; ctx.shadowBlur = 12; rr(x + 2, y - 3, w - 4, 6, 3); ctx.fillStyle = `rgb(255,${110 + 40 * Math.sin(T * 3) | 0},40)`; ctx.fill(); ctx.restore();
+    ctx.save(); ctx.shadowColor = '#ff5a00'; ctx.shadowBlur = LOWFX ? 0 : (12); rr(x + 2, y - 3, w - 4, 6, 3); ctx.fillStyle = `rgb(255,${110 + 40 * Math.sin(T * 3) | 0},40)`; ctx.fill(); ctx.restore();
   }
 }
 
@@ -995,12 +1012,26 @@ function colorGrade(wi, u) {
   const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, c(gr[0])); g.addColorStop(1, c(gr[1])); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
 }
 let vignetteG = null;
-function vignette(wi) {
+function vignette(wi, bandOnly) {
   if (!vignetteG) { vignetteG = ctx.createRadialGradient(W / 2, H * 0.55, H * 0.45, W / 2, H * 0.55, H * 1.05); vignetteG.addColorStop(0, 'rgba(0,0,0,0)'); vignetteG.addColorStop(1, 'rgba(0,0,0,.42)'); }
-  ctx.fillStyle = vignetteG; ctx.fillRect(0, 0, W, H);
+  if (!bandOnly) { ctx.fillStyle = vignetteG; ctx.fillRect(0, 0, W, H); }
   if (wi === 3) { const g = ctx.createLinearGradient(0, H - 120, 0, H); g.addColorStop(0, 'rgba(255,80,0,0)'); g.addColorStop(1, `rgba(255,80,0,${0.12 + 0.05 * Math.sin(T * 2)})`); ctx.fillStyle = g; ctx.fillRect(0, H - 120, W, 120); }
 }
 
+// Colour grade + vignette are two full-screen gradient fills; in play they are baked into one overlay that is rebuilt only when
+// the world, the level progress (quantised to 1/24) or the screen scale changes.
+let gradeCache = { key: '', rs: 0, c: null };
+function gradeVignette(wi, art, u) {
+  const rs = Math.min(2, Math.max(0.75, DPR * SC)), q = Math.round(u * 24), key = wi + '|' + q;
+  if (gradeCache.key !== key || Math.abs(gradeCache.rs - rs) > 0.01) {
+    const c = gradeCache.c || document.createElement('canvas'); c.width = Math.ceil(W * rs); c.height = Math.ceil(H * rs);
+    const old = ctx; ctx = c.getContext('2d'); ctx.setTransform(rs, 0, 0, rs, 0, 0);
+    try { colorGrade(wi, q / 24); vignette(-1); } finally { ctx = old; }
+    gradeCache = { key, rs, c };
+  }
+  ctx.drawImage(gradeCache.c, 0, 0, W, H);
+  if (art === 3) vignette(3, true); // the pulsing lava glow stays live
+}
 // ---------- cartoon outlines via offscreen silhouette ----------
 let LOWFX = false; const perf = { avg: 1 / 60, bad: 0, good: 0, drops: 0 };
 function perfWatch() {
@@ -1031,7 +1062,7 @@ function outlined(key, x, y, bx, by, bw, bh, fn, alpha = 1, lw = 2.6, rim = null
   cb.setTransform(1, 0, 0, 1, 0, 0); cb.globalCompositeOperation = 'source-over'; cb.clearRect(0, 0, cw + 2, ch + 2);
   cb.drawImage(P.a, 0, 0); cb.globalCompositeOperation = 'source-in'; cb.fillStyle = '#1b120c'; cb.fillRect(0, 0, cw, ch); cb.globalCompositeOperation = 'source-over';
   ctx.save(); ctx.globalAlpha = alpha;
-  const nO = bw * bh * k * k > 60000 ? 4 : 8, rO = nO === 4 ? lw * 1.2 : lw; // big sprites (the bosses) use fewer outline stamps: it is the costliest draw in a fight
+  const nO = bw * bh * k * k > 60000 ? 4 : 6, rO = nO === 4 ? lw * 1.2 : lw; // big sprites (the bosses) use fewer outline stamps: it is the costliest draw in a fight
   for (let i = 0; i < nO; i++) { const a = i / nO * Math.PI * 2 + (nO === 4 ? Math.PI / 4 : 0); ctx.drawImage(P.b, 0, 0, cw, ch, X + Math.cos(a) * rO, Y + Math.sin(a) * rO, cw / k, ch / k); }
   ctx.drawImage(P.a, 0, 0, cw, ch, X, Y, cw / k, ch / k);
   if (rim) { // sprite minus itself shifted down-right = a lit edge strip, tinted and laid over the sprite

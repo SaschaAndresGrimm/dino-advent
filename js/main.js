@@ -73,8 +73,17 @@ function frameFailed(e, goodT) {
     if (n < 2) location.reload();
   }
 }
+// High-refresh screens (120 Hz iPads and tablets) would double the drawing work for no visible gain, because physics already runs in
+// fixed 1/60 steps. After a short measurement, a display at ~100 Hz or more draws every second frame (about 60 fps).
+let rafPrev = 0, rafDeltas = [], rafSkip = 0, rafParity = 0;
 function frame(now) {
   requestAnimationFrame(frame);
+  if (rafPrev && rafSkip === 0) {
+    const d = now - rafPrev; if (d > 0 && d < 100) rafDeltas.push(d);
+    if (rafDeltas.length >= 40) { rafDeltas.sort((a, b) => a - b); rafSkip = rafDeltas[20] < 10 ? 2 : 1; rafDeltas = []; }
+  }
+  rafPrev = now;
+  if (rafSkip === 2 && (rafParity ^= 1)) return;
   const goodT = T;
   try { frameBody(now); } catch (e) { frameFailed(e, goodT); }
 }
