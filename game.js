@@ -1,5 +1,5 @@
 'use strict';
-/* Oli & Fabios Dino-Advent – ein Weihnachtsgeschenk von Goetti */
+/* Oli & Fabios Dino-Advent – ein Weihnachtsgeschenk von Götti */
 (() => {
 // =====================================================================
 // Setup
@@ -36,7 +36,7 @@ while (save.riddleSeen.length < 8) save.riddleSeen.push([]);
 while (save.tTries.length < 4) save.tTries.push(0); // per treasure: how often its level was finished without finding it (drives the hints)
 if (!save.owned) save.owned = { skin: [0], hat: [0], fire: [0] };
 if (!save.equip) save.equip = { skin: 0, hat: 0, fire: 0 };
-// shop extras: jackets for both boys, Fabio's own hat, Chili's accessories, Goetti's vouchers
+// shop extras: jackets for both boys, Fabio's own hat, Chili's accessories, Götti's vouchers
 for (const [k, v] of [['jacket', [0, 1]], ['chili', [0]], ['wish', []]]) if (!save.owned[k]) save.owned[k] = v;
 if (save.equip.jacket == null) save.equip.jacket = 0;
 if (save.equip.fabioJacket == null) save.equip.fabioJacket = 1;
@@ -756,10 +756,10 @@ const FACTS_NEW = [
 // one card per level (24 days). Order follows the calendar: jungle, beach, canyon, underwater, ice age, mountains, volcano, Christmas.
 const FACTS = [...FACTS_OLD.slice(0, 3), ...FACTS_NEW.slice(0, 3), ...FACTS_OLD.slice(3, 6), ...FACTS_NEW.slice(3, 6), ...FACTS_OLD.slice(6, 9), ...FACTS_NEW.slice(6, 9), ...FACTS_OLD.slice(9, 12), ...FACTS_OLD.slice(12, 15)];
 const TREASURES = [
-  { name: 'Goettis Gitarre', line: 'Meine Gitarre! Danke, ihr zwei! Tippt sie in der Schatzkiste an – dann spiele ich euch was vor.', tap: 'Goetti spielt ein Lied!', hint: 'Goetti vermisst etwas … Im grossen Baum klimpert es!', tip: 'Hörst du es klimpern? Im grossen Baum steckt etwas – BRÜLL ihn an!', notice: 'Meine Löffel zucken! Im Baum klimpert es!' },
-  { name: 'Goettis Velo', line: 'Mein Velo! Das hat der Vulkan bis in den Canyon geschleudert. Damit machen wir drei mal eine grosse Tour!', tap: 'Kling, kling!', hint: 'Goetti vermisst etwas … Ein Fels mit Riss klingelt!', tip: 'Hörst du es klingeln? Dieser Fels hat einen Riss – FLITZ hinein!', notice: 'Meine Löffel zucken! Der Fels da klingelt!' },
-  { name: 'Goettis Angel', line: 'Meine Angelrute! Weisst du was? Im Winter kann man sogar durch ein Loch im Eis fischen. Das machen wir mal zusammen!', tap: 'Platsch! Ein Fisch!', hint: 'Goetti vermisst etwas … Im Eis steckt etwas fest!', tip: 'Da ragt etwas aus dem Eis! Spring hoch und STAMPF aufs Eis!', notice: 'Schnüff, schnüff! Da steckt etwas im Eis!' },
-  { name: 'Kiwi', line: 'Kiwi! Mein kleiner Freund ist wieder da! Kiwis sind das Wahrzeichen von Neuseeland und können nicht fliegen – darum läuft Kiwi ab jetzt mit euch mit.', tap: 'Kiwi! Kiwi!', hint: 'Goetti vermisst etwas … Unter der Asche piepst es!', tip: 'Hörst du es piepsen? Unter der Asche steckt etwas – spuck FEUER!', notice: 'Meine Löffel zucken! Unter der Asche piepst es!' },
+  { name: 'Göttis Gitarre', line: 'Meine Gitarre! Danke, ihr zwei! Tippt sie in der Schatzkiste an – dann spiele ich euch was vor.', tap: 'Götti spielt ein Lied!', hint: 'Götti vermisst etwas … Im grossen Baum klimpert es!', tip: 'Hörst du es klimpern? Im grossen Baum steckt etwas – BRÜLL ihn an!', notice: 'Meine Löffel zucken! Im Baum klimpert es!' },
+  { name: 'Göttis Velo', line: 'Mein Velo! Das hat der Vulkan bis in den Canyon geschleudert. Damit machen wir drei mal eine grosse Tour!', tap: 'Kling, kling!', hint: 'Götti vermisst etwas … Ein Fels mit Riss klingelt!', tip: 'Hörst du es klingeln? Dieser Fels hat einen Riss – FLITZ hinein!', notice: 'Meine Löffel zucken! Der Fels da klingelt!' },
+  { name: 'Göttis Angel', line: 'Meine Angelrute! Weisst du was? Im Winter kann man sogar durch ein Loch im Eis fischen. Das machen wir mal zusammen!', tap: 'Platsch! Ein Fisch!', hint: 'Götti vermisst etwas … Im Eis steckt etwas fest!', tip: 'Da ragt etwas aus dem Eis! Spring hoch und STAMPF aufs Eis!', notice: 'Schnüff, schnüff! Da steckt etwas im Eis!' },
+  { name: 'Kiwi', line: 'Kiwi! Mein kleiner Freund ist wieder da! Kiwis sind das Wahrzeichen von Neuseeland und können nicht fliegen – darum läuft Kiwi ab jetzt mit euch mit.', tap: 'Kiwi! Kiwi!', hint: 'Götti vermisst etwas … Unter der Asche piepst es!', tip: 'Hörst du es piepsen? Unter der Asche steckt etwas – spuck FEUER!', notice: 'Meine Löffel zucken! Unter der Asche piepst es!' },
 ];
 // =====================================================================
 // Story: the Krallenkönig stole the dino family's golden egg. Three bosses each hold a piece of his map.
@@ -799,7 +799,7 @@ const DAY_AFTER = {
 const TEASERS = { 5: 'Morgen wartet der Krabbenkönig mit dem ersten Kartenstück!', 11: 'Morgen taucht das Seeungeheuer auf …', 17: 'Morgen: die Adlerkönigin! Sie hütet das letzte Kartenstück.', 23: 'Morgen ist der grosse Tag – der Krallenkönig wartet!' };
 const medalTotal = () => save.lvM.flat().reduce((a, b) => a + b, 0);
 const worldMedalsDone = wi => LEVELS.filter(l => l.wi === wi).every(l => save.lvM[l.li].every(Boolean));
-function launchLevel(i) { // first time a day starts, Goetti briefs the player (a short dialog on the map)
+function launchLevel(i) { // first time a day starts, Götti briefs the player (a short dialog on the map)
   const day = i + 1, lines = DAY_STORY[day];
   if (lines && !save.storySeen[day]) { save.storySeen[day] = 1; writeSave(); startDialog(lines, () => startLevel(i)); } else startLevel(i);
 }
@@ -816,7 +816,7 @@ function adventDay() { // how many doors are open today (0 before 1 Dec, 24 from
 const LEVEL_THEMES = [0, 0, 0, 5, 5, 5, 1, 1, 1, 6, 6, 6, 2, 2, 2, 7, 7, 7, 3, 3, 3, 4, 4, 4];
 const LEVEL_TITLES = ['Erste Schritte', 'Hoch hinaus', 'Brüll-Training', 'Sandburgen-Rennen', 'Krabbenstrand', 'Der Krabbenkönig', 'Raptor-Rudel', 'Duck dich!', 'Heisse Schlucht', 'Tauchgang', 'Korallenlabyrinth', 'Das Seeungeheuer', 'Mammut-Pfad', 'Stampf-Meister', 'Eiskalte Ebene', 'Gipfelweg', 'Wolkensprung', 'Die Adlerkönigin', 'Vulkan-Aufstieg', 'Lavafluss', 'Feuer-Chili', 'Verschneite Nacht', 'Sternenwald', 'Der Krallenkönig'];
 const BOSS_DAYS = { 6: 'crab', 12: 'kraken', 18: 'queen', 24: 'king' };
-const TREASURE_DAY = { 3: 0, 9: 1, 15: 2, 21: 3 }; // Goetti's guitar, bike, rod and Kiwi
+const TREASURE_DAY = { 3: 0, 9: 1, 15: 2, 21: 3 }; // Götti's guitar, bike, rod and Kiwi
 const MAX_HEARTS = 4; // story levels; endless and daily runs keep 3 (score challenge)
 const LEVELS = LEVEL_THEMES.map((wi, li) => { const sub = li % 3, day = li + 1, boss = BOSS_DAYS[day] || null; return { li, day, wi, sub, title: LEVEL_TITLES[li], boss, treasure: TREASURE_DAY[day] != null ? TREASURE_DAY[day] : -1, segs: Math.round(46 + li * 0.9 - (boss ? 14 : 0)), speedMul: [0.98, 1.04, 1.1][sub], maxTier: [2, 3, 3][sub] }; });
 // skills arrive with the calendar: dash on day 4, duck on 7, swim on 10, stomp on 13, glide on 16, fire on 19
@@ -871,17 +871,17 @@ const JACKETS = [
   { n: 'Gold', cost: 600, jac: ['#ffe680', '#f0c030', '#b08010'], scarf: '#c62828', scarfD: 'rgba(100,10,10,.5)', zip: '#fff8d0', pocket: 'rgba(120,80,0,.55)' },
 ];
 const CHILI_ITEMS = [{ n: 'Ohne', cost: 0 }, { n: 'Schleife', cost: 80, k: 'bow' }, { n: 'Halstuch', cost: 120, k: 'scarf' }, { n: 'Mini-Mütze', cost: 150, k: 'santa' }, { n: 'Sonnenbrille', cost: 200, k: 'glasses' }, { n: 'Rucksack', cost: 250, k: 'pack' }, { n: 'Blumenkranz', cost: 300, k: 'flowers' }];
-// Goetti's vouchers: real outings, bought once with the shared amber and redeemed with Goetti
+// Götti's vouchers: real outings, bought once with the shared amber and redeemed with Götti
 const WISHES = [
-  { n: 'Velotour', cost: 600, text: 'eine grosse Velotour mit Goetti', icon: (x, y, k) => drawBike(x, y + 30 * k, 0.62 * k) },
-  { n: 'Fischen', cost: 900, text: 'einen Tag Fischen mit Goetti', icon: (x, y, k) => drawRod(x, y + 8 * k, 0.8 * k, T * 3) },
-  { n: 'Dino-Museum', cost: 1200, text: 'einen Ausflug ins Dino-Museum mit Goetti', icon: (x, y, k) => drawTrike(x - 2 * k, y + 22 * k, 0.62 * k, '#c98f5a', 0, false) },
-  { n: 'Europa-Park', cost: 2500, text: 'eine Reise in den Europa-Park mit Goetti', icon: (x, y, k) => drawCoaster(x, y + 4 * k, 0.9 * k) },
+  { n: 'Velotour', cost: 600, text: 'eine grosse Velotour mit Götti', icon: (x, y, k) => drawBike(x, y + 30 * k, 0.62 * k) },
+  { n: 'Fischen', cost: 900, text: 'einen Tag Fischen mit Götti', icon: (x, y, k) => drawRod(x, y + 8 * k, 0.8 * k, T * 3) },
+  { n: 'Dino-Museum', cost: 1200, text: 'einen Ausflug ins Dino-Museum mit Götti', icon: (x, y, k) => drawTrike(x - 2 * k, y + 22 * k, 0.62 * k, '#c98f5a', 0, false) },
+  { n: 'Europa-Park', cost: 2500, text: 'eine Reise in den Europa-Park mit Götti', icon: (x, y, k) => drawCoaster(x, y + 4 * k, 0.9 * k) },
 ];
 function rgbStr(hex) { return `${parseInt(hex.slice(1, 3), 16)},${parseInt(hex.slice(3, 5), 16)},${parseInt(hex.slice(5, 7), 16)}`; }
 function fireOf(i) { const f = FIRES[i] || FIRES[0]; if (!f.rainbow) return f; const h = (T * 90) % 360, a = hslHex(h, 100, 78), b = hslHex(h, 100, 56), c = hslHex(h, 100, 36); return Object.assign({}, f, { a: rgbStr(a), b: rgbStr(b), c: rgbStr(c), fl: [hslHex(h, 100, 94), a, b], ball: b, glow: rgbStr(b) }); }
 function rexLook(wi) { const sk = SKINS[save.equip.skin] || SKINS[0], h = HATS[save.equip.hat] || HATS[0], h2 = HATS[save.equip.fabioHat] || HATS[0], auto = wi === 2 || wi === 4 || wi === 7 ? 'santa' : null, jungle = wi === 0 && !sk.body; return { hat2: h2.k || auto, dive: wi === 6, rainbow: sk.rainbow, body: jungle ? '#22a98c' : sk.body, dark: jungle ? '#167a68' : sk.dark, belly: sk.belly, hat: h.k || (wi === 2 || wi === 4 || wi === 7 ? 'santa' : null) }; }
-const WHO = { goetti: 'Goetti', chili: 'Chili', rex: () => save.rexName || 'T-Rex', mami: 'Mamasaurus', papi: 'Papasaurus', fabio: () => save.fabioName || 'Fabio', kiwi: 'Kiwi' };
+const WHO = { goetti: 'Götti', chili: 'Chili', rex: () => save.rexName || 'T-Rex', mami: 'Mamasaurus', papi: 'Papasaurus', fabio: () => save.fabioName || 'Fabio', kiwi: 'Kiwi' };
 
 // =====================================================================
 // Character drawing
@@ -1405,7 +1405,7 @@ function drawTreasure(k, x, y, s, ph = T * 4) {
   else if (k === 2) drawRod(x, y + 10 * s, s, ph);
   else drawKiwi(x - 8 * s, y + 18 * s, s * 1.4, ph);
 }
-// ---- Goetti's hidden treasures: the hiding places (tree, cracked rock, iced rod, ash heap) ----
+// ---- Götti's hidden treasures: the hiding places (tree, cracked rock, iced rod, ash heap) ----
 function glint(x, y, r, a) { // a four-point twinkle
   ctx.save(); ctx.translate(x, y); ctx.globalAlpha = a; ctx.fillStyle = '#fff8c4'; ctx.beginPath(); ctx.moveTo(0, -r);
   ctx.quadraticCurveTo(r * 0.12, -r * 0.12, r, 0); ctx.quadraticCurveTo(r * 0.12, r * 0.12, 0, r); ctx.quadraticCurveTo(-r * 0.12, r * 0.12, -r, 0); ctx.quadraticCurveTo(-r * 0.12, -r * 0.12, 0, -r); ctx.fill(); ctx.restore();
@@ -1418,7 +1418,7 @@ function twinkles(sc, x, y, spread) { // a faint glint now and then; after two m
     if (a > 0.03) glint(x + Math.sin(i * 2.4 + sc.x) * spread, y + Math.cos(i * 1.7 + sc.x) * spread * 0.6, (sc.strong ? 12 : 8) * (0.5 + a * 0.5), a);
   }
 }
-function drawBruellBaum(x, sc) { // the big sleepy tree: it hides Goetti's guitar and wakes up when Rex roars
+function drawBruellBaum(x, sc) { // the big sleepy tree: it hides Götti's guitar and wakes up when Rex roars
   const awake = sc.state === 'open', sk = sc.shake > 0 ? Math.min(1, sc.shake) : 0, sw = sk > 0 ? Math.sin(T * 40) * 7 * sk : Math.sin(T * 1.1) * 1.5, b = GROUND;
   shadow(x, b + 2, 130, 0.3);
   ctx.save(); ctx.translate(x, b); ctx.lineJoin = 'round'; ctx.lineCap = 'round';
@@ -1592,7 +1592,7 @@ function drawPortrait(who, cx, cy, r, still) {
   ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2);
   const bg = { kiwi: '#e8f5d0', goetti: '#cfe3b0', chili: '#ffe0c2', rex: '#bfe6cf', mami: '#ead7f5', papi: '#d3e6fb', fabio: '#ffe6c4' }[who] || '#eee';
   ctx.fillStyle = bg; ctx.fill(); ctx.clip();
-  if (who === 'goetti') { drawGoettiHead(cx, cy + r * 0.25, r * 0.55); }
+  if (who === 'goetti') { drawGoettiHead(cx, cy + r * 0.03, r * 0.58); }
   else if (who === 'chili') { const s = r / 26; drawChili(cx - 10 * s, cy + 30 * s, s, still ? 0 : T * 3); }
   else if (who === 'rex') { const s = r / 42; drawRex(cx - 88 * s, cy + 104 * s, s * 0.95, 0, 0.3 + 0.2 * Math.sin(T * 8)); }
   else if (who === 'mami' || who === 'papi') { const s = r / 34; drawLongneck(cx - 72 * s, cy + 146 * s, s, who === 'mami' ? '#b07cc6' : '#4f8fd6', T * 2); }
@@ -2800,7 +2800,7 @@ function buildLevel(wi, endless, LV) { // LV = the calendar level spec (or undef
     } else if (i === eggAt[1]) {
       L.spots.push({ x: x + 40, k: 1, state: 'idle' });
       L.eggs.push({ k: 1, x: x + 340, y: GROUND - 150, hidden: true }); w = 440;
-    } else if (i === tAt) { // Goetti's treasure: never on show, each one hides behind a different move (see openSecret)
+    } else if (i === tAt) { // Götti's treasure: never on show, each one hides behind a different move (see openSecret)
       const tk = LV ? LV.treasure : Math.min(wi, 3), miss = save.tTries[tk] || 0, kind = ['tree', 'rock', 'ice', 'ash'][tk];
       if (miss >= 1) L.tips.push({ x: x - 700, text: TREASURES[tk].tip }); // after one miss the hint says what to do
       L.treasure = { k: tk, x: x + 600, y: GROUND - 100, got: false, shown: false };
@@ -4498,14 +4498,14 @@ function drawOverlay() {
     button('Nochmal!', 290, 340, 200, 62, retry); button('Karte', 510, 340, 160, 62, () => go('map'), { color: '#e0d2b0' });
   } else if (o.type === 'riddle') {
     const r = o.r, b0 = buttons.length; o.shake = Math.max(0, o.shake - DT); o.solvedT = o.solved ? (o.solvedT || 0) + DT : 0; o.t += DT;
-    // entrance: the tablet drops in from above and bounces once on landing, Goetti and Chili hop in from the left
+    // entrance: the tablet drops in from above and bounces once on landing, Götti and Chili hop in from the left
     const u = clamp(o.t / 0.6, 0, 1), bn = u < 0.55 ? (u / 0.55) ** 2 : u < 0.8 ? 1 - 0.07 * Math.sin((u - 0.55) / 0.25 * Math.PI) : 1 - 0.015 * Math.sin((u - 0.8) / 0.2 * Math.PI), ty = -(1 - bn) * 560;
     ctx.fillStyle = `rgba(8,10,24,${0.55 * clamp(o.t / 0.35, 0, 1)})`; ctx.fillRect(0, 0, W, H);
-    // Goetti stands beside the tablet and points at it, Chili cheers next to him
+    // Götti stands beside the tablet and points at it, Chili cheers next to him
     const hop = Math.abs(Math.sin(o.t * 9)) * 26 * (1 - u), gx0 = -(1 - u) * 220;
     shadow(130 + gx0, 508, 60, 0.35); oGoetti(130 + gx0, 504 - hop, 1.25, !o.solved || (o.solvedT || 0) < 1.5);
     { const cj = o.solved || (o.say && o.say.who === 'chili' && o.t - o.say.at < o.say.t) ? Math.abs(Math.sin(T * 9)) * 14 : 0; shadow(52 + gx0, 510, 24, 0.3); chiliFx.joy = cj > 0 ? 1 : 0; oChili(52 + gx0, 506 - cj - hop, 0.85, T * 12, false); chiliFx.joy = 0; }
-    if (o.say) { // speech bubble above Goetti / Chili
+    if (o.say) { // speech bubble above Götti / Chili
       const sy = o.t - o.say.at; if (sy > 0 && sy < o.say.t) {
         const al = clamp(sy * 5, 0, 1) * clamp((o.say.t - sy) * 5, 0, 1), tx = o.say.who === 'chili' ? 56 : 120; setFont(20); const bw = Math.min(ctx.measureText(o.say.text).width + 30, 200), bx = clamp(tx, bw / 2 + 8, 226 - bw / 2), by = 262 - (o.say.who === 'chili' ? 0 : 0);
         ctx.save(); ctx.globalAlpha = al; rr(bx - bw / 2, by - 19, bw, 38, 17); ctx.fillStyle = '#fffdf6'; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = '#6b4a2b'; ctx.stroke(); ctx.fillStyle = '#fffdf6'; ctx.beginPath(); ctx.moveTo(tx - 10, by + 17); ctx.lineTo(tx, by + 34); ctx.lineTo(tx + 10, by + 17); ctx.fill(); txt(o.say.text, bx, by + 1, 20, '#3b2410'); ctx.restore();
@@ -4518,7 +4518,7 @@ function drawOverlay() {
     if (glow > 0) { const g = ctx.createRadialGradient(rx, ry, 10, rx, ry, 70); g.addColorStop(0, `rgba(255,224,120,${0.8 * glow})`); g.addColorStop(1, 'rgba(255,224,120,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(rx, ry, 70, 0, Math.PI * 2); ctx.fill(); }
     circle(rx, ry, 34, '#4a525e'); circle(rx, ry, 29, glow > 0 ? '#ffd34d' : '#6a7380'); ctx.strokeStyle = glow > 0 ? '#7a5400' : '#2f353e'; ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(rx, ry - 17); ctx.lineTo(rx, ry + 17); ctx.moveTo(rx - 14, ry - 8); ctx.lineTo(rx, ry + 2); ctx.lineTo(rx + 14, ry - 8); ctx.moveTo(rx - 11, ry + 12); ctx.lineTo(rx + 11, ry + 12); ctx.stroke();
     const carve = (t, x, y, sz, al = 'left', col = '#f4ecd4') => { txt(t, x + 1.5, y + 2, sz, 'rgba(0,0,0,.55)', al); txt(t, x, y, sz, col, al); };
-    carve('Goettis Rätsel-Tor', 350, 80, 22, 'left', '#d9c58a');
+    carve('Göttis Rätsel-Tor', 350, 80, 22, 'left', '#d9c58a');
     const qs = wrapLines(r.q, 600, 28).length > 3 ? 24 : 28, ql = wrapLines(r.q, 600, qs), by = Math.max(236, 150 + ql.length * (qs + 6) + 14);
     ql.forEach((l, i) => carve(l, 276, 150 + i * (qs + 6), qs, 'left'));
     if (!o.solved) {
@@ -4705,7 +4705,7 @@ function drawTitle() {
   logo(W / 2, 96);
   otxt(save.rexName ? `Ein Abenteuer mit ${save.rexName} und Chili` : 'Ein Abenteuer mit Chili und einem T-Rex', W / 2, 178, 26, '#fff', 'rgba(0,0,0,.7)', 6);
   { const pu = 1 + 0.04 * Math.sin(T * 4); ctx.save(); ctx.translate(722, 312); ctx.scale(pu, pu); rr(-170, -34, 340, 68, 34); ctx.fillStyle = 'rgba(20,40,20,.35)'; ctx.fill(); rr(-174, -38, 340, 68, 34); ctx.fillStyle = vgrad(-38, 30, '#ffe27a', '#ff9a2a'); ctx.fill(); ctx.lineWidth = 5; ctx.strokeStyle = '#2a1200'; ctx.stroke(); ctx.fillStyle = '#3b1d00'; ctx.beginPath(); ctx.moveTo(-146, -13); ctx.lineTo(-146, 13); ctx.lineTo(-124, 0); ctx.fill(); txt('Tippe zum Starten', 20, -2, 26, '#3b1d00'); ctx.restore(); }
-  txt('Ein Weihnachtsgeschenk von Goetti für Oli und Fabio · 2026', W / 2, 515, 17, 'rgba(255,255,255,.75)');
+  txt('Ein Weihnachtsgeschenk von Götti für Oli und Fabio · 2026', W / 2, 515, 17, 'rgba(255,255,255,.75)');
 }
 function logo(cx, cy) {
   ctx.save(); ctx.translate(cx, cy); ctx.rotate(-0.03);
@@ -4753,7 +4753,7 @@ function startStory() {
   const fabioPart = () => askName('Und wie soll Fabios Forschername sein?', 'Fabio', name => { save.fabioName = name; writeSave(); missionPart(); }, null, true);
   if (save.oliName) { if (!save.fabioName) fabioPart(); else if (save.rexName) go('map'); else missionPart(); return; }
   startDialog([
-    { who: 'goetti', text: 'Hallo Oli, hallo Fabio! Hier ist Goetti, aus meiner Dino-Forschungsstation in Neuseeland – direkt am grossen Vulkan.' },
+    { who: 'goetti', text: 'Hallo Oli, hallo Fabio! Hier ist Götti, aus meiner Dino-Forschungsstation in Neuseeland – direkt am grossen Vulkan.' },
     { who: 'goetti', text: 'Bei uns am anderen Ende der Welt ist alles etwas anders – sogar die Vögel: Unsere Kiwis können nicht fliegen!' },
     { who: 'goetti', text: 'Ihr zwei werdet ab heute richtige Dino-Forscher! Dafür darf sich jeder einen Forschernamen aussuchen – ihr könnt Oli und Fabio bleiben oder euch etwas ganz Neues ausdenken.' },
   ], () => askName('Wie soll Olis Forschername sein?', 'Oli', name => { save.oliName = name; writeSave(); fabioPart(); }, null, true), true);
@@ -4788,7 +4788,7 @@ function treeFern(x, b, h) { // New Zealand tree fern: slim trunk with a crown o
     ctx.lineWidth = 1.6; for (let k = 1; k <= 6; k++) { const u = k / 7, qx = (1 - u) * (1 - u) * x + 2 * (1 - u) * u * cxp + u * u * tx, qy = (1 - u) * (1 - u) * (b - h) + 2 * (1 - u) * u * cyp + u * u * ty; ctx.beginPath(); ctx.moveTo(qx, qy); ctx.lineTo(qx - 5, qy + 9 * (1 - u * 0.5)); ctx.moveTo(qx, qy); ctx.lineTo(qx + 5, qy + 9 * (1 - u * 0.5)); ctx.stroke(); }
   }
 }
-function drawStation(cx, base, k) { // Goetti's dino station: stone foundation, log walls, shingle roof, radio mast, flag, glowing window
+function drawStation(cx, base, k) { // Götti's dino station: stone foundation, log walls, shingle roof, radio mast, flag, glowing window
   ctx.save(); ctx.translate(cx, base); ctx.scale(k, k); ctx.lineJoin = 'round'; ctx.lineCap = 'round';
   const INK = '#2b1a0c';
   ell(6, 4, 168, 12, 0, 'rgba(0,0,0,.28)');
@@ -4886,14 +4886,14 @@ function drawStory() {
 const chestPop = [0, 0, 0, 0];
 const chestFull = () => save.treasures.every(Boolean);
 let chestPartyT = 0, mapFW = 0;
-function chestParty() { // all four treasures are back: the chest glows, the treasures dance and Goetti's song plays
+function chestParty() { // all four treasures are back: the chest glows, the treasures dance and Götti's song plays
   chestPartyT = 7; SFX.right();
   [[0, 523], [0.18, 659], [0.36, 784], [0.54, 1047], [0.9, 988], [1.08, 784], [1.26, 659], [1.44, 784], [1.8, 1047], [2.0, 1319], [2.2, 1047], [2.4, 784]].forEach(([d, f]) => tone(f, 0.28, 'triangle', 0.09, null, d));
   [[0, 262], [0.9, 196], [1.8, 262], [2.4, 330]].forEach(([d, f]) => tone(f, 0.7, 'sine', 0.06, null, d));
   for (const [d, f] of [[2.9, 2100], [3.1, 2650]]) { tone(f, 0.3, 'sine', 0.1, null, d); }
 }
 function playTreasure(i) {
-  if (!save.treasures[i]) { SFX.wrong(); toast(i === 3 ? 'Wo ist Kiwi nur? Vielleicht am Vulkan …' : 'Das hat Goetti noch verloren – hinter Tür ' + ([3, 9, 15, 21][i]) + '!', '#ffb4a8'); return; }
+  if (!save.treasures[i]) { SFX.wrong(); toast(i === 3 ? 'Wo ist Kiwi nur? Vielleicht am Vulkan …' : 'Das hat Götti noch verloren – hinter Tür ' + ([3, 9, 15, 21][i]) + '!', '#ffb4a8'); return; }
   chestPop[i] = 1; toast(TREASURES[i].tap, '#ffd34d');
   if (i === 0) { [[196, 247, 294, 392, 494], [262, 330, 392, 523, 659], [220, 262, 330, 440, 523], [196, 247, 294, 392, 494]].forEach((ch, c) => ch.forEach((f, j) => tone(f, 0.9, 'triangle', 0.07, null, c * 0.45 + j * 0.03))); }
   else if (i === 1) { for (const d of [0, 0.28]) { tone(2100, 0.35, 'sine', 0.12, null, d); tone(2650, 0.3, 'sine', 0.07, null, d + 0.02); } }
@@ -4901,7 +4901,7 @@ function playTreasure(i) {
   else { tone(1700, 0.2, 'square', 0.05, 2700); tone(1700, 0.2, 'square', 0.05, 2700, 0.28); }
 }
 function drawChest() {
-  // Goetti's treasure chest: open lid, gold hoard, the four lost treasures sitting inside
+  // Götti's treasure chest: open lid, gold hoard, the four lost treasures sitting inside
   { const cx0 = 300, cw = 360, cy0 = H - 122, rim = cy0 + 56;
     if (chestFull()) buttons.push({ x: cx0, y: cy0 - 10, w: cw, h: 130, silent: true, cb: () => chestParty() }); // tap the full chest to celebrate again
     shadow(cx0 + cw / 2, H - 8, cw * 0.55, 0.35);
@@ -4915,7 +4915,7 @@ function drawChest() {
     ctx.fillStyle = vgrad(cy0, rim, '#9b2a3a', '#6f1626', '#4a0e1a'); ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#d4a017'; ctx.stroke();
     { ctx.save(); ctx.beginPath(); ctx.moveTo(cx0 + 30, rim - 2); ctx.lineTo(cx0 + 24, cy0 + 26); ctx.quadraticCurveTo(cx0 + cw / 2, cy0 - 6, cx0 + cw - 24, cy0 + 26); ctx.lineTo(cx0 + cw - 30, rim - 2); ctx.closePath(); ctx.clip(); const sh = ctx.createRadialGradient(cx0 + cw / 2, cy0 + 40, 10, cx0 + cw / 2, cy0 + 40, cw * 0.5); sh.addColorStop(0, 'rgba(255,170,150,.28)'); sh.addColorStop(1, 'rgba(255,170,150,0)'); ctx.fillStyle = sh; ctx.fillRect(cx0, cy0 - 20, cw, 90); ctx.restore(); }
     ctx.strokeStyle = 'rgba(0,0,0,.18)'; ctx.lineWidth = 2; for (let i = 1; i < 9; i++) { ctx.beginPath(); ctx.moveTo(cx0 + 24 + i * (cw - 48) / 9, cy0 + 24 - Math.sin(i / 9 * Math.PI) * 18); ctx.lineTo(cx0 + 30 + i * (cw - 60) / 9, rim - 2); ctx.stroke(); }
-    otxt(`Goettis Schatzkiste  ${save.treasures.filter(Boolean).length}/4`, cx0 + cw / 2, cy0 - 12, 17, chestFull() ? '#fff6b0' : '#ffd34d', 'rgba(40,16,0,.85)', 5);
+    otxt(`Göttis Schatzkiste  ${save.treasures.filter(Boolean).length}/4`, cx0 + cw / 2, cy0 - 12, 17, chestFull() ? '#fff6b0' : '#ffd34d', 'rgba(40,16,0,.85)', 5);
     // gold hoard filling the chest
     ctx.beginPath(); ctx.moveTo(cx0 + 12, rim + 6); ctx.quadraticCurveTo(cx0 + 40, rim - 14, cx0 + 90, rim - 6); ctx.quadraticCurveTo(cx0 + cw / 2, rim - 22, cx0 + cw - 90, rim - 6); ctx.quadraticCurveTo(cx0 + cw - 40, rim - 14, cx0 + cw - 12, rim + 6); ctx.closePath(); ctx.fillStyle = vgrad(rim - 18, rim + 6, '#ffe27a', '#e8a317'); ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#8a5a00'; ctx.stroke();
     for (let i = 0; i < 22; i++) { const gx = cx0 + 24 + hash(i + 70) * (cw - 48), gy = rim - 10 + hash(i + 80) * 12 - Math.abs(gx - cx0 - cw / 2) * 0.02; circle(gx, gy, 5, '#ffd34d'); circle(gx - 1, gy - 1, 3.2, '#fff0a0'); }
@@ -5370,19 +5370,19 @@ function drawFlameIcon(it, cx, cy, k) {
   for (const [sc, col] of [[1, `rgb(${it.b})`], [0.72, `rgb(${it.a})`], [0.4, '#fff']]) { ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(0, -30 * sc); ctx.bezierCurveTo(14 * sc, -12 * sc, 20 * sc, 4 * sc, 12 * sc, 16 * sc); ctx.bezierCurveTo(6 * sc, 26 * sc, -6 * sc, 26 * sc, -12 * sc, 16 * sc); ctx.bezierCurveTo(-20 * sc, 2 * sc, -8 * sc, -10 * sc, 0, -30 * sc); ctx.fill(); if (sc === 1) { ctx.lineWidth = 2.5; ctx.strokeStyle = 'rgba(0,0,0,.35)'; ctx.stroke(); } }
   ctx.restore();
 }
-// each tab: label, owned key, item list, equip slots (hats and jackets have one slot per boy, vouchers none), Goetti's line
+// each tab: label, owned key, item list, equip slots (hats and jackets have one slot per boy, vouchers none), Götti's line
 const SHOP_TABS = [
   { lb: 'Rex', key: 'skin', list: SKINS, eq: ['skin'], say: 'Welche Farbe darf es sein?' },
   { lb: 'Feuer', key: 'fire', list: FIRES, eq: ['fire'], say: 'Feuer in allen Farben!' },
   { lb: 'Hüte', key: 'hat', list: HATS, eq: ['hat', 'fabioHat'], say: 'Hüte für {oli} und {fabio}!' },
   { lb: 'Jacken', key: 'jacket', list: JACKETS, eq: ['jacket', 'fabioJacket'], say: 'Neue Jacken für euch zwei!' },
   { lb: 'Chili', key: 'chili', list: CHILI_ITEMS, eq: ['chili'], say: 'Etwas Schönes für Chili?' },
-  { lb: 'Goetti', key: 'wish', list: WISHES, eq: [], say: 'Meine Gutscheine! Die lösen wir zusammen ein – in echt!' },
+  { lb: 'Götti', key: 'wish', list: WISHES, eq: [], say: 'Meine Gutscheine! Die lösen wir zusammen ein – in echt!' },
 ];
 const kidShort = n => n.length > 7 ? n.slice(0, 6) + '.' : n;
 const kidNames = () => [kidShort(save.oliName || 'Oli'), kidShort(save.fabioName || 'Fabio')];
 let wishShow = -1; // voucher card on screen (index into WISHES)
-function drawVoucher(i) { // Goetti's voucher: a ticket with a dashed border, the outing, both names and Goetti's signature
+function drawVoucher(i) { // Götti's voucher: a ticket with a dashed border, the outing, both names and Götti's signature
   const wv = WISHES[i], x = 230, y = 34, w = 500, h = 330;
   ctx.fillStyle = 'rgba(8,10,24,.8)'; ctx.fillRect(0, 0, W, H);
   ctx.save(); ctx.translate(W / 2, y + h / 2); ctx.rotate(-0.02); ctx.translate(-W / 2, -(y + h / 2));
@@ -5393,8 +5393,8 @@ function drawVoucher(i) { // Goetti's voucher: a ticket with a dashed border, th
   ctx.save(); ctx.beginPath(); ctx.arc(x + 110, y + 160, 62, 0, Math.PI * 2); ctx.fillStyle = '#fff3d6'; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = '#d9a23a'; ctx.stroke(); ctx.clip(); wv.icon(x + 110, y + 150, 1.5); ctx.restore();
   const lines = wrapLines(fmt('Für {oli} und {fabio}: ' + wv.text + '!'), 270, 22);
   lines.forEach((l, k) => txt(l, x + 330, y + 120 + k * 30, 22, '#3b2410'));
-  txt('Einzulösen bei Goetti', x + 330, y + 130 + lines.length * 30, 17, '#8a6a3a', 'center', 'normal');
-  ctx.save(); ctx.translate(x + 390, y + 270); ctx.rotate(-0.08); txt('Goetti', 0, 0, 30, '#1f4fa0'); ctx.strokeStyle = '#1f4fa0'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-54, 18); ctx.quadraticCurveTo(0, 26, 60, 12); ctx.stroke(); ctx.restore();
+  txt('Einzulösen bei Götti', x + 330, y + 130 + lines.length * 30, 17, '#8a6a3a', 'center', 'normal');
+  ctx.save(); ctx.translate(x + 390, y + 270); ctx.rotate(-0.08); txt('Götti', 0, 0, 30, '#1f4fa0'); ctx.strokeStyle = '#1f4fa0'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-54, 18); ctx.quadraticCurveTo(0, 26, 60, 12); ctx.stroke(); ctx.restore();
   ctx.save(); ctx.translate(x + 120, y + 268); ctx.rotate(-0.25); ctx.strokeStyle = 'rgba(198,40,40,.7)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, 30, 0, Math.PI * 2); ctx.stroke(); txt('2027', 0, 1, 16, 'rgba(198,40,40,.8)'); ctx.restore();
   ctx.restore();
   buttons.length = 0; button('Super!', W / 2 - 90, y + h + 16, 180, 50, () => { wishShow = -1; SFX.click(); }, { color: '#9be38a', size: 24 });
@@ -5435,7 +5435,7 @@ function shopScene() {
   ell(262, 436, 108, 15, 0, '#5a3a1c'); rr(154, 420, 216, 16, 8); ctx.fillStyle = vgrad(420, 436, '#c99a62', '#8a5a2e'); ctx.fill(); ctx.lineWidth = 2.5; ctx.strokeStyle = '#3a2410'; ctx.stroke(); ell(262, 420, 108, 14, 0, '#d9aa72'); ctx.strokeStyle = '#8a5a2e'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(262, 420, 100, 11, 0, 0, Math.PI * 2); ctx.stroke();
   shopBounce = Math.max(0, shopBounce - DT * 2.2);
 }
-function shopCounter() { // the counter Goetti stands behind
+function shopCounter() { // the counter Götti stands behind
   rr(0, 394, 142, 58, 6); ctx.fillStyle = vgrad(394, 452, '#b98250', '#8a5a2e', '#5e3a1c'); ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = '#2b1a0c'; ctx.stroke();
   ctx.fillStyle = '#d9aa72'; ctx.fillRect(-4, 386, 152, 12); ctx.strokeStyle = '#2b1a0c'; ctx.lineWidth = 2.5; ctx.strokeRect(-4, 386, 152, 12);
   ctx.strokeStyle = 'rgba(0,0,0,.22)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(48, 400); ctx.lineTo(48, 450); ctx.moveTo(96, 400); ctx.lineTo(96, 450); ctx.stroke();
@@ -5444,7 +5444,7 @@ function shopCounter() { // the counter Goetti stands behind
 function drawShop() {
   // wall, awning, counter
   shopScene();
-  woodFrame(300, 54, 360, 54, 14); txt('Goettis Laden', 480, 83, 30, '#3b2410');
+  woodFrame(300, 54, 360, 54, 14); txt('Göttis Laden', 480, 83, 30, '#3b2410');
   rr(756, 70, 176, 44, 22); ctx.fillStyle = 'rgba(40,24,10,.85)'; ctx.fill(); drawAmber(782, 92, 14); otxt(String(save.amber), 806, 93, 26, '#ffe08a', 'rgba(0,0,0,.7)', 5, 'left');
   const tab = SHOP_TABS[shopTab], { key, list } = tab;
   // live preview: equip the selection temporarily (on both boys for hats and jackets)
@@ -6193,7 +6193,7 @@ function drawEnding() {
   drawVolcano(700, 448, 0.82, '#2a3c5c', 0);
   drawHills(0, '#c9dcf0', 420, 30, 3);
   endingSnow();
-  // Goetti's station, the same hut as in the story, in its winter dress
+  // Götti's station, the same hut as in the story, in its winter dress
   drawStation(120, 452, 0.6); stationWinter(120, 452, 0.6);
   pine(268, 452, 210, '#1f6b42', true);
   if (save.treasures[1]) drawBike(95, 452, 0.95);
@@ -6230,7 +6230,7 @@ function drawEnding() {
   if (E.phase === 'party') {
     ctx.save(); ctx.translate(W / 2, 82); ctx.rotate(Math.sin(T * 2) * 0.02);
     otxt('Frohe Weihnachten,', 0, 0, 56, '#ffd34d', '#7a1010', 13); otxt(fmt('{oli} und {fabio}!'), 0, 58, 50, '#ffd34d', '#7a1010', 12); ctx.restore();
-    otxt('Alles Liebe – euer Goetti', W / 2, 190, 28, '#fff', 'rgba(0,0,0,.7)', 6);
+    otxt('Alles Liebe – euer Götti', W / 2, 190, 28, '#fff', 'rgba(0,0,0,.7)', 6);
     button('Lied nochmal', 24, 20, 180, 50, () => jingle(), { size: 20, color: '#e0d2b0' });
     button('Zur Karte', W - 204, 20, 180, 50, () => go('map'), { size: 22 });
   }

@@ -19,7 +19,7 @@ Open the link in any modern browser (tablet, phone or computer). There is nothin
 - **Every door hides a gift:** a hat, a new colour for your T-Rex or a fire colour, plus a new card for the Dino-Buch.
 - **New skills as you go:** double jump, dash (day 4), duck (7), swim (10), ground pound (13), glide (16) and fire breath (19).
 - **Four boss fights** on days 6, 12, 18 and 24. The last door holds the Krallenkönig, the golden egg and the Christmas ending.
-- Goetti's shop, a collectible Dino-Buch, riddles, an endless run and a daily run keep it fun after the story is done.
+- Götti's shop, a collectible Dino-Buch, riddles, an endless run and a daily run keep it fun after the story is done.
 
 | | |
 |---|---|
@@ -27,8 +27,8 @@ Open the link in any modern browser (tablet, phone or computer). There is nothin
 | **The calendar:** a new door opens every day | **Jungle:** jump, roar and collect amber |
 | ![Swimming underwater](docs/screenshots/underwater.png) | ![Boss fight against the Crab King](docs/screenshots/boss.png) |
 | **Underwater:** days 10 to 12 | **Boss fights:** each one has several phases |
-| ![Goetti's shop](docs/screenshots/shop.png) | ![The Dino-Buch sticker album](docs/screenshots/dino-book.png) |
-| **Goettis Laden:** hats, colours and real-life vouchers | **Dino-Buch:** 24 cards with real dino facts |
+| ![Götti's shop](docs/screenshots/shop.png) | ![The Dino-Buch sticker album](docs/screenshots/dino-book.png) |
+| **Göttis Laden:** hats, colours and real-life vouchers | **Dino-Buch:** 24 cards with real dino facts |
 
 ## Controls
 
