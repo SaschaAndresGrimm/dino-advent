@@ -3,7 +3,7 @@
 For people who want to run, test or change the game. How the code is laid out is in [ARCHITECTURE.md](ARCHITECTURE.md); how releases work is in [MAINTENANCE.md](MAINTENANCE.md).
 
 ## Principles
-- **No build step, no bundler, no runtime dependencies, no external assets.** The game is `index.html` + `game.js` (one IIFE) + a service worker. Art is vector drawing on a canvas, sound is synthesised with Web Audio.
+- **No build step, no bundler, no runtime dependencies, no external assets.** The game is `index.html` + `js/*.js` (classic scripts sharing one global scope, see ARCHITECTURE.md) + a service worker. Art is vector drawing on a canvas, sound is synthesised with Web Audio.
 - **Player-facing text is German**, short and kid-friendly, Swiss spelling (`ss`, no `ß`). Code, comments, docs and commit messages are English.
 - **Deterministic levels:** a level is generated from a seed, so a level is the same every time.
 - **Never break saves** (see [Save compatibility](#save-compatibility)).
@@ -22,7 +22,7 @@ Open `http://localhost:8765/?day=12` to pretend it is 12 December without touchi
 | Command | What it does |
 |---|---|
 | `npm run serve` | Static server on port 8765 for manual play |
-| `npm run check` | Syntax check of `game.js`, `sw.js` and scripts |
+| `npm run check` | Syntax check of `js/*.js`, `sw.js` and scripts |
 | `npm test` | Playwright suite (about 30 s). Starts its own server on port 8790 |
 | `npm run screenshots` | Regenerates `docs/screenshots/*.png` for the README |
 
@@ -31,7 +31,7 @@ Run `check` and `test` before every commit. CI runs the same two commands on eve
 ## Project layout
 ```
 index.html               canvas, name-entry box, PWA and social meta tags
-game.js                  the entire game (sections marked with // ==== banners)
+js/*.js                  the game, split by section (load order in index.html)
 sw.js                    service worker: network first, cache fallback
 manifest.webmanifest     installable-app metadata
 icon-*.png              app icons (incl. maskable);  og-image.png = link preview image
@@ -68,7 +68,7 @@ Tests live in `tests/` and run in headless Chromium with service workers blocked
 
 ## Save compatibility
 The save lives in `localStorage['olisDinoRettung.v1']`. The key keeps its old name on purpose: renaming it would wipe every player's progress.
-- Never rename or remove save fields. Add new ones with defaults near the top of `game.js`; the save is merged over the defaults at load.
+- Never rename or remove save fields. Add new ones with defaults in `buildSave` in `js/core.js`; the save is merged over the defaults at load.
 - Field reference: [ARCHITECTURE.md](ARCHITECTURE.md#save-format).
 
 ## Making a change

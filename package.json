@@ -8,7 +8,7 @@
   "engines": { "node": ">=20" },
   "scripts": {
     "serve": "python3 -m http.server 8765",
-    "check": "node --check game.js && node --check sw.js && node --check scripts/screenshots.js",
+    "check": "for f in js/*.js; do node --check $f || exit 1; done && node --check sw.js && node --check scripts/screenshots.js",
     "test": "playwright test",
     "screenshots": "node scripts/screenshots.js"
   },

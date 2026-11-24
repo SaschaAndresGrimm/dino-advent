@@ -49,11 +49,11 @@ test('parent mode: a long press on the title lets a parent set the day', async (
   expect(await game.eval(() => window.__dino.adventDay())).toBe(0);
   await page.mouse.move(100, 30); await page.mouse.down(); await page.waitForTimeout(1700); await page.mouse.up();
   await page.waitForTimeout(200);
-  await click(page, 605, 272); await click(page, 605, 272); await click(page, 605, 272);   // "+" three times
+  await click(page, 605, 196); await click(page, 605, 196); await click(page, 605, 196);   // "+" three times
   expect(await game.eval(() => window.__dino.adventDay())).toBe(3);
-  await click(page, 480, 338);                                                              // open all doors
+  await click(page, 480, 252);                                                              // open all doors
   expect(await game.eval(() => window.__dino.adventDay())).toBe(24);
-  await click(page, 480, 394);                                                              // back to the device date
+  await click(page, 480, 298);                                                              // back to the device date
   expect(await game.eval(() => window.__dino.adventDay())).toBe(0);
 });
 

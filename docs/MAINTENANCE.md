@@ -6,7 +6,7 @@ Everything needed to keep the game running: how it is deployed, what to do each 
 `.github/workflows/ci.yml` runs on every push and pull request:
 
 1. **test:** `npm ci`, `npm run check`, install Chromium, `npm test`.
-2. **deploy** (only on `main`, only if `test` passed): copies the shipped files (`index.html`, `game.js`, `sw.js`, `manifest.webmanifest`, icons, `og-image.png`) into `_site/` and publishes it to GitHub Pages. Docs, tests and scripts are not published.
+2. **deploy** (only on `main`, only if `test` passed): copies the shipped files (`index.html`, `js/`, `sw.js`, `manifest.webmanifest`, icons, `og-image.png`) into `_site/` and publishes it to GitHub Pages. Docs, tests and scripts are not published.
 
 Live URL: <https://saschaandresgrimm.github.io/dino-advent/>
 
@@ -23,7 +23,7 @@ Merge to `main`. That is all. To redeploy without a change, run the workflow man
 If a release is broken, revert the commit on `main`; the pipeline redeploys the previous state.
 
 ## Yearly rollover
-The calendar start is a constant, `ADVENT_START` in `game.js` (1 December 2026). For a new year:
+The calendar start is a constant, `ADVENT_START` in `js/data.js` (1 December 2026). For a new year:
 1. Change `ADVENT_START` and any visible year (title screen footer "· 2026", voucher texts mentioning 2027).
 2. Tests that mock the clock (`tests/calendar.spec.js`) use the date: update them.
 3. Decide about saves: they hold `lvDone`, `gifts`, medals. Players keep progress by default; reset only if you want a fresh calendar.

@@ -51,7 +51,8 @@ jobs:
       - name: Assemble site (shipped files only)
         run: |
           mkdir _site
-          cp index.html game.js sw.js manifest.webmanifest icon-180.png icon-192.png icon-512.png icon-maskable-512.png og-image.png _site/
+          cp -r js _site/
+          cp index.html sw.js manifest.webmanifest icon-180.png icon-192.png icon-512.png icon-maskable-512.png og-image.png _site/
           # Every deploy gets its own service-worker cache, so installed copies pick up the new game.
           sed -i "s/dino-advent-dev/dino-advent-${GITHUB_SHA::7}/" _site/sw.js
           grep -n "const CACHE" _site/sw.js

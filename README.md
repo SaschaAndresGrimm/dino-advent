@@ -66,7 +66,7 @@ Turn the device to landscape. Progress is saved on the device.
 | Document | For |
 |---|---|
 | [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) | Run, test and change the game |
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | How `game.js` is organised |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | How the code in `js/` is organised |
 | [docs/MAINTENANCE.md](docs/MAINTENANCE.md) | Releases, deployment, yearly rollover, dependencies |
 | [CLAUDE.md](CLAUDE.md) | Project rules for AI coding agents |
 

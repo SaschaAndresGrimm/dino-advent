@@ -1,10 +1,10 @@
 # CLAUDE.md
 
-Oli & Fabios Dino-Advent (repo `dino-advent`): a German-language canvas runner, built as an advent calendar (24 daily levels from 1 Dec 2026) for two brothers, Oli (10) and Fabio (4). Both are heroes: Oli steers Rex, Fabio rides in front of him and is the "Brüll-Chef" (roar). Single file `game.js`, no build, no dependencies at runtime. Read `docs/ARCHITECTURE.md` before larger changes; `docs/DEVELOPMENT.md` and `docs/MAINTENANCE.md` cover workflow and releases.
+Oli & Fabios Dino-Advent (repo `dino-advent`): a German-language canvas runner, built as an advent calendar (24 daily levels from 1 Dec 2026) for two brothers, Oli (10) and Fabio (4). Both are heroes: Oli steers Rex, Fabio rides in front of him and is the "Brüll-Chef" (roar). Plain scripts in `js/` (no modules, no build), no dependencies at runtime. Read `docs/ARCHITECTURE.md` before larger changes; `docs/DEVELOPMENT.md` and `docs/MAINTENANCE.md` cover workflow and releases.
 
 ## Commands
 ```bash
-npm run check     # node --check game.js sw.js
+npm run check     # node --check js/*.js sw.js
 npm test          # Playwright, about 30 s, starts its own server on port 8790
 npm run serve     # manual play on http://localhost:8765 (add ?day=12 to open day 12)
 npm run screenshots  # regenerate docs/screenshots after visual changes
@@ -13,10 +13,11 @@ Run both check and test before every commit. Playwright needs `npx playwright in
 
 ## Rules of this project
 - **Language:** all text the player sees is German, short and kid-friendly. Code, comments, docs and commits are English.
+- **New source file:** add it to `index.html` (load order matters: top-level code runs in that order), to `FILES` in `sw.js` and, outside `js/`, to the copy step in `ci.yml`. No top-level function or `var` may share a name with a browser built-in; `tests/files.spec.js` checks both.
 - **No build step, no external assets, no new runtime dependencies.** Art is vector drawing in canvas; sound is synthesised.
 - **Release:** merging to `main` deploys via GitHub Actions (tests first). The deploy job stamps the service-worker cache name (`dino-advent-dev` in `sw.js`) with the commit; never hand-edit it and keep the literal `dino-advent-dev` so the stamping works. New shipped files must be added to the copy step in `.github/workflows/ci.yml`.
 - **Commits:** end the message with `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>`. Commit and push only when the user asks. Remote: `origin` (GitHub, branch `main`).
-- **Save compatibility:** never rename or remove fields of the save (`olisDinoRettung.v1`). Add new ones with defaults near the top of `game.js`.
+- **Save compatibility:** never rename or remove fields of the save (`olisDinoRettung.v1`). Add new ones with defaults in `buildSave` (`js/core.js`) and add the field to `SAVE_TYPES`.
 
 ## Conventions
 - Logical size 960×540; ground at `GROUND = 440`. Use `G.p.wx` for the world x of the player; screen x = world x − `cam`.
