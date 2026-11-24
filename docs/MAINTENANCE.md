@@ -10,7 +10,7 @@ Everything needed to keep the game running: how it is deployed, what to do each 
 
 Live URL: <https://saschaandresgrimm.github.io/dino-advent/>
 
-**You do not need to bump the service-worker cache by hand.** The deploy job replaces `dino-advent-dev` in `sw.js` with `dino-advent-<commit>`, so every release gets a fresh cache and installed copies update on next launch (the service worker is network-first, falling back to the cache after 2.5 s).
+**You do not need to bump the service-worker cache by hand.** The deploy job replaces `dino-advent-dev` in `sw.js` with `dino-advent-<commit>`, so every release gets a fresh cache. The service worker is cache-first and precaches all files as one snapshot (all or nothing), so a launch never mixes old and new files. A new release installs in the background and the game reloads itself at the splash, title or map once it is ready.
 
 ### One-time repository settings
 - **Settings → Pages → Source: GitHub Actions** (not "Deploy from a branch").
@@ -52,7 +52,7 @@ There is no backend, analytics or network call. Progress and nicknames stay in t
 ## Troubleshooting
 | Symptom | Likely cause and fix |
 |---|---|
-| Players see an old version | Normal for one launch (network-first with cache fallback). Reload once. If it persists, check the deploy job ran and the `_site` `sw.js` has a commit-based cache name |
+| Players see an old version | Normal for one launch: the new release installs in the background and the game reloads itself at the next quiet moment (splash, title, map). Reload once. If it persists, check the deploy job ran and the `_site` `sw.js` has a commit-based cache name |
 | Deploy job fails with "Pages not enabled" | Settings → Pages → Source must be GitHub Actions |
 | Progress vanished | Different browser or cleared site data; saves are per browser and per origin. Never rename `olisDinoRettung.v1` |
 | Autoplayer test hangs at `steps:60000` | A level change made it unbeatable for the bot; see [DEVELOPMENT.md](DEVELOPMENT.md#testing) |

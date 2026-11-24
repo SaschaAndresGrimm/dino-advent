@@ -147,11 +147,11 @@ function swimRoar() { // bubbles instead of sound rings: a burst from the mouth,
 function hurt(force) {
   const p = G.p; if (!force && (p.inv > 0 || p.dashT > 0)) return;
   if (!force && G.shield) { G.shield = false; p.inv = 1.2; SFX.smash(); G.rings.push({ x: p.wx, y: p.y - 70, r: 30, a: 1, c: '150,220,255' }); burst(p.wx, p.y - 70, 24, ['#bfe9ff', '#fff', '#7fd0ff'], 320, 200, 6, 0.8); toast('Der Schutzschild hat dich gerettet!', '#9fd3ff'); return; }
-  p.hearts--; p.hitT = 0.45; G.hits = (G.hits || 0) + 1; p.inv = 1.8; SFX.hurt(); if (p.hearts === 1) setTimeout(SFX.lowHeart, 350); G.shake = p.hearts <= 0 ? 0 : 0.35; G.hitFlash = 0.45;
-  try { if (navigator.vibrate) navigator.vibrate(180); } catch (e) {}
+  p.hearts--; p.hitT = 0.45; G.hits = (G.hits || 0) + 1; p.inv = 1.8; SFX.hurt(); if (p.hearts === 1) setTimeout(() => { if (scene === 'play' && G && !G.overlay) SFX.lowHeart(); }, 350); G.shake = p.hearts <= 0 ? 0 : 0.35; G.hitFlash = 0.45;
+  try { if (!save.calm && navigator.vibrate) navigator.vibrate(180); } catch (e) {}
   if (!force) p.vy = Math.min(p.vy, -450);
   chiliSay(pick(['Aua! Nicht aufgeben!', 'Weiter geht\'s, ihr zwei!', 'Du schaffst das!']), true, 'worried');
-  if (p.hearts <= 0) { if (G.endless) endRun(); else { G.overlay = { type: 'retry' }; setTimeout(SFX.lose, 250); } }
+  if (p.hearts <= 0) { if (G.endless) endRun(); else { G.overlay = { type: 'retry' }; setTimeout(() => { if (scene === 'play') SFX.lose(); }, 250); } }
 }
 function endRun() {
   G.score = Math.max(G.score, Math.floor((G.p.wx - 200) / 25) + G.amber * 3);

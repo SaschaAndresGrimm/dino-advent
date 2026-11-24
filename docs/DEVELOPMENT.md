@@ -32,7 +32,7 @@ Run `check` and `test` before every commit. CI runs the same two commands on eve
 ```
 index.html               canvas, name-entry box, PWA and social meta tags
 js/*.js                  the game, split by section (load order in index.html)
-sw.js                    service worker: network first, cache fallback
+sw.js                    service worker: cache first, one atomic snapshot per release
 manifest.webmanifest     installable-app metadata
 icon-*.png              app icons (incl. maskable);  og-image.png = link preview image
 tests/                   Playwright specs and helpers
@@ -42,7 +42,7 @@ docs/                    architecture, development and maintenance docs, screens
 ```
 
 ## Debugging tools
-- **`?day=N`** in the URL sets the calendar day (save untouched).
+- **`?day=N`** in the URL sets the calendar day (save untouched). Debug aids (`?day=`, `window.__dino`) only work on localhost or `file:` (`DEBUG` in `js/core.js`), not on the published site.
 - **Parent mode:** hold the "Adventskalender" title for 1.5 s: set the day, open all doors, clear the high-score list.
 - **`window.__dino`** in the browser console exposes the internals: `startLevel(i)` (0 to 23), `go('shop')`, `save`, `G` (current play state), `sheet('rex' | 'hero' | 'cast' | 'react' | 'faces' | 'wounds')` for character sheets.
 - **Reset progress:** `localStorage.removeItem('olisDinoRettung.v1')`.

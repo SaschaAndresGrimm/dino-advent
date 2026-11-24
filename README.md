@@ -57,7 +57,7 @@ Turn the device to landscape. Progress is saved on the device.
 ## Good to know (parents)
 
 - **Progress is saved in the browser on that device.** Clearing the site data or switching browsers starts a new save. There are no accounts and no network traffic: nothing leaves the device, and names stay local.
-- **Try other days:** press and hold the title "Adventskalender" on the calendar for 1.5 seconds to open parent mode. There you can set the day, open all doors or clear the high-score list. Adding `?day=12` to the address pretends it is 12 December without touching the save.
+- **Try other days:** press and hold the title "Adventskalender" on the calendar for 1.5 seconds to open parent mode. There you can set the day, open all doors or clear the high-score list. On a local server, adding `?day=12` to the address pretends it is 12 December without touching the save (it is ignored on the published site).
 - **Calm mode** in the settings turns off screen shake and red flashes.
 - **Updates:** the game updates itself when you open it with an internet connection.
 

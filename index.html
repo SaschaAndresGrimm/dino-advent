@@ -69,7 +69,10 @@
 <script src="js/main.js"></script>
 <script>
   if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
+    // A new release installs in the background; when it takes over, the game reloads itself at a quiet moment (see maybeReloadForUpdate).
+    const hadController = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener('controllerchange', () => { if (hadController) window.updateReady = true; });
+    navigator.serviceWorker.register('sw.js').then(reg => reg.update()).catch(() => {});
   }
 </script>
 </body>

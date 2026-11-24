@@ -22,6 +22,8 @@ window.addEventListener('resize', resize); resize();
 // =====================================================================
 // Save game
 // =====================================================================
+// Debug aids (?day=N, window.__dino) exist only on a local server or file, never on the published site.
+const DEBUG = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol === 'file:';
 const SAVE_KEY = 'olisDinoRettung.v1';
 // Expected JSON type of each save field (s string, n number, f flag = boolean or 0/1, a array, o object).
 // A stored field of the wrong type is dropped so it falls back to its default: a damaged, hand-edited or
@@ -75,15 +77,29 @@ function buildSave(raw) { // defaults + stored fields + migrations
   return s;
 }
 let save;
+const BAK_KEY = SAVE_KEY + '.bak'; // yesterday's save, kept as a fallback: { day, text } (rewritten before the first write of each day)
+let bakDay = '';
 {
-  let raw = null, text = null;
+  let raw = null, text = null, bad = false;
   try { text = localStorage.getItem(SAVE_KEY); raw = text ? JSON.parse(text) : null; }
-  catch (e) { try { if (text && !localStorage.getItem(SAVE_KEY + '.broken')) localStorage.setItem(SAVE_KEY + '.broken', text); } catch (e2) {} } // unreadable save: keep a copy before it gets overwritten
+  catch (e) { bad = true; try { if (text && !localStorage.getItem(SAVE_KEY + '.broken')) localStorage.setItem(SAVE_KEY + '.broken', text); } catch (e2) {} } // unreadable save: keep a copy before it gets overwritten
+  try {
+    const bak = JSON.parse(localStorage.getItem(BAK_KEY));
+    if (bak && typeof bak.day === 'string') bakDay = bak.day;
+    if ((bad || !text) && bak && typeof bak.text === 'string') raw = JSON.parse(bak.text); // main save lost or unreadable: fall back to yesterday's
+  } catch (e) {}
   save = buildSave(raw);
 }
 let saveFail = 0, saveFailToast = 0; // saveFail: how many writes in a row failed (private mode, full quota, blocked storage)
 function writeSave() {
-  try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); saveFail = 0; }
+  try {
+    const day = new Date().toDateString();
+    if (day !== bakDay) { // first write of the day: keep what was stored before as the fallback copy (a failing copy must not block the real save)
+      bakDay = day;
+      try { const prev = localStorage.getItem(SAVE_KEY); if (prev) localStorage.setItem(BAK_KEY, JSON.stringify({ day, text: prev })); } catch (e) {}
+    }
+    localStorage.setItem(SAVE_KEY, JSON.stringify(save)); saveFail = 0;
+  }
   catch (e) {
     saveFail++;
     if (Date.now() - saveFailToast > 60000) { saveFailToast = Date.now(); try { toast('Speichern klappt gerade nicht. Bitte Mami oder Papi fragen!', '#ff9d9d'); } catch (e2) {} }

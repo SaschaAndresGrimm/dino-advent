@@ -185,7 +185,7 @@ const FACTS_OLD = [
   { name: 'Stegosaurus', text: 'Der T-Rex lebte zeitlich näher an uns als am Stegosaurus!|Zwischen den beiden liegen etwa 80 Mio. Jahre. Und sein Gehirn war nur so gross wie eine Walnuss.' },
   { name: 'Wollhaarmammut', text: 'Die letzten Mammuts lebten noch vor rund 4000 Jahren – da standen die Pyramiden von Gizeh schon!|Sie überlebten auf der Wrangelinsel. Ihre Stosszähne wurden bis zu 4 Meter lang.' },
   { name: 'Ankylosaurus', text: 'Der Ankylosaurus war ein wandelnder Panzer.|Knochenplatten schützten Rücken, Kopf und sogar die Augenlider. Mit der Schwanzkeule konnte er einem Angreifer die Knochen brechen.' },
-  { name: 'Dino-Eier', text: 'Selbst die riesigsten Dinos legten nur Eier von der Grösse eines Fussballs.|Dickere Schalen hätten das Küken ersticken lassen. Das längste bekannte Dino-Ei misst über 40 cm.' },
+  { name: 'Dino-Eier', text: 'Selbst die riesigsten Dinos legten Eier, die nur etwa so gross wie ein Fussball waren.|Dickere Schalen hätten das Küken ersticken lassen. Die längsten Dino-Eier waren über 40 cm lang, aber schmal.' },
   { name: 'Spinosaurus', text: 'Der Spinosaurus war länger als der T-Rex – und jagte wohl im Wasser.|Krokodilartige Schnauze, hoch sitzende Nasenlöcher und ein paddelförmiger Schwanz: perfekt für Fische.' },
   { name: 'Huhn', text: 'Im Knochen eines T-Rex fand man Eiweiss-Reste – sie ähnelten denen eines Huhns am meisten!|Alle Vögel sind lebende Dinosaurier.' },
   { name: 'Meteorit', text: 'Der Meteorit schlug bei Chicxulub in Mexiko ein und riss einen Krater von rund 180 km.|Staub verdunkelte den Himmel, Pflanzen starben. Nur kleine Tiere überlebten – auch die ersten Vögel.' },
@@ -261,9 +261,9 @@ function launchLevel(i) { // first time a day starts, Götti briefs the player (
 const ADVENT_START = new Date(2026, 11, 1);
 function adventDay() { // how many doors are open today (0 before 1 Dec, 24 from 24 Dec on)
   if (save.dayOverride != null) return clamp(save.dayOverride, 0, 24);
-  let q = null; try { q = new URLSearchParams(location.search).get('day'); } catch (e) {}
+  let q = null; if (DEBUG) try { q = new URLSearchParams(location.search).get('day'); } catch (e) {}
   if (q != null && q !== '') return clamp(parseInt(q) || 0, 0, 24);
-  const n = new Date(); return clamp(Math.floor((new Date(n.getFullYear(), n.getMonth(), n.getDate()) - ADVENT_START) / 86400000) + 1, 0, 24);
+  const n = new Date(); return clamp(Math.round((new Date(n.getFullYear(), n.getMonth(), n.getDate()) - ADVENT_START) / 86400000) + 1, 0, 24);
 }
 const LEVEL_THEMES = [0, 0, 0, 5, 5, 5, 1, 1, 1, 6, 6, 6, 2, 2, 2, 7, 7, 7, 3, 3, 3, 4, 4, 4];
 const LEVEL_TITLES = ['Erste Schritte', 'Hoch hinaus', 'Brüll-Training', 'Sandburgen-Rennen', 'Krabbenstrand', 'Der Krabbenkönig', 'Raptor-Rudel', 'Duck dich!', 'Heisse Schlucht', 'Tauchgang', 'Korallenlabyrinth', 'Das Seeungeheuer', 'Mammut-Pfad', 'Stampf-Meister', 'Eiskalte Ebene', 'Gipfelweg', 'Wolkensprung', 'Die Adlerkönigin', 'Vulkan-Aufstieg', 'Lavafluss', 'Feuer-Chili', 'Verschneite Nacht', 'Sternenwald', 'Der Krallenkönig'];

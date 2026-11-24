@@ -51,3 +51,26 @@ test('an exception in a frame does not stop the game loop', async ({ game, page 
   await page.waitForTimeout(500);
   expect(await game.eval(() => window.__dino.scene)).toBe('play');
 });
+
+test('yesterday\'s save is kept as a fallback and used when the main save is lost', async ({ game, page }) => {
+  await game.open({ amber: 77 });
+  await game.eval(() => { window.__dino.writeSave(); }); // first write of the day: stores the previous value as the .bak copy
+  const bak = await page.evaluate(() => JSON.parse(localStorage.getItem('olisDinoRettung.v1.bak')));
+  expect(JSON.parse(bak.text).amber).toBe(77);
+  await page.evaluate(() => localStorage.setItem('olisDinoRettung.v1', '{broken'));
+  await page.reload(); await page.waitForFunction(() => window.__dino);
+  expect(await game.eval(() => window.__dino.save.amber)).toBe(77);
+});
+
+test('a freshly installed release reloads the game only at a quiet moment', async ({ game, page }) => {
+  await game.open();
+  await game.eval(() => { window.__marker = 1; window.__dino.go('map'); });
+  await game.start(0); // in a level: must not reload
+  await page.evaluate(() => { window.updateReady = true; });
+  await page.waitForTimeout(500);
+  expect(await page.evaluate(() => window.__marker)).toBe(1);
+  await game.eval(() => window.__dino.go('map')); // map, no overlay: reloads
+  await page.waitForEvent('load', { timeout: 4000 });
+  await page.waitForFunction(() => window.__dino);
+  expect(await page.evaluate(() => window.__marker)).toBeUndefined();
+});
