@@ -59,7 +59,7 @@ Tests live in `tests/` and run in headless Chromium with service workers blocked
 ## Conventions
 - Logical canvas 960×540, ground at `GROUND = 440`. Use `G.p.wx` for the player's world x; screen x = world x − `cam`.
 - In `buildLevel` use the seeded `R()`, never `Math.random()`. Runtime effects may use `Math.random()`.
-- **New obstacle type:** add it in three places (the `switch (o.type)` in `updatePlay`, `drawObstacle`, and the interactions `roar`, the fireball loop, `dashBreak`), then add a pattern to `P` in `buildLevel`, list it in `WORLDS[...].patterns`, classify it in `HARD`/`COMBO` if needed, and teach the bot.
+- **New obstacle type:** add it in three places (the `switch (o.type)` in `updatePlay`, `drawObstacle`, and the interactions `roar`, the fireball loop, `dashBreak`; ceiling hazards listed in `CEILING_HAZARDS` are skipped by fire and dash), then add a pattern to `P` in `buildLevel`, list it in `WORLDS[...].patterns`, classify it in `HARD`/`COMBO` if needed, and teach the bot.
 - State a respawn can break (crumbling platforms, fallen meteors) must be reset in `retry()` and `pitFall()`.
 - **Hints and tutorials** must come early (`firstTip` uses `x - 1200`) and must never mention a skill the player has not learned yet (`SKILL_DAYS`: dash 4, duck 7, swim 10, stomp 13, glide 16, fire 19).
 - **Names in story text:** use `{oli}`, `{fabio}`, `{rex}`, `{baby}`, never hard-coded names.

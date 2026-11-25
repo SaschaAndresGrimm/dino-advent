@@ -111,6 +111,7 @@ function shootFire() {
   G.fireballs.push({ x: ox + 14, y: oy, vx: 950, vy: 200, life: 1.1 });
   for (let i = 0; i < 22; i++) { const l = 0.25 + Math.random() * 0.25; G.flames.push({ x: ox, y: oy, vx: 350 + Math.random() * 600, vy: (Math.random() - 0.5) * 200 - 30, life: l, max: l, r: 5 + Math.random() * 7 }); }
 }
+const CEILING_HAZARDS = ['low']; // overhangs: fireballs and the dash pass underneath instead of destroying them
 const ROAR_BREAKS = ['boulder', 'rollrock', 'plant'], ROAR_REACH = 420, ROAR_GRACE = 0.22, ROAR_WHIFF = 0.7, ROAR_TARGETS = ['raptor', 'ptero', 'sword', 'hopper', 'jelly', 'urchin']; // what a roar smashes, how far ahead it reaches, how long a touching rock waits for a late roar, the short cooldown after a roar that hit nothing
 function roarSmash(o) {
   o.dead = true; SFX.smash();
@@ -437,14 +438,14 @@ function updatePlay(dt) {
     for (const o of L.obs) {
       if (o.dead || o.scared || o.flat || f.life <= 0) continue;
       const dx = o.x - f.x; let hit = false;
-      if (o.type === 'low') hit = Math.abs(dx) < o.w / 2 + 20;
-      else if (o.type === 'ptero') hit = Math.abs(dx) < 40 && Math.abs(o.y - f.y) < 60;
+      if (CEILING_HAZARDS.includes(o.type)) { if (f.under !== o && Math.abs(dx) < o.w / 2) { f.under = o; noise(0.18, 0.07, 1800); for (let k = 0; k < 6; k++) { const l = 0.25 + Math.random() * 0.2; G.flames.push({ x: f.x, y: f.y + (Math.random() - 0.5) * 16, vx: 150 + Math.random() * 150, vy: 20 + Math.random() * 60, life: l, max: l, r: 3 + Math.random() * 3 }); } } continue; } // the fireball flies under the overhang
+      if (o.type === 'ptero') hit = Math.abs(dx) < 40 && Math.abs(o.y - f.y) < 60;
       else if (o.type !== 'geyser' && o.type !== 'pad' && !(o.type === 'icicle' && o.state === 'hang')) hit = Math.abs(dx) < 40;
       if (!hit) continue;
       f.life = 0; burst(f.x, f.y, 18, ['#ffb030', '#ff5a1f', '#fff3a0', '#555'], 300, 400, 8, 0.7);
       if (o.type === 'raptor' || o.type === 'ptero' || o.type === 'compy' || o.type === 'hopper') { o.scared = true; o.vx = 420; o.vy = -360; }
       else if (o.type === 'geode') breakGeode(o);
-      else { o.dead = true; SFX.smash(); for (let i = 0; i < 2; i++) L.amb.push({ x: o.x + 40 + i * 40, y: GROUND - 60 - i * 20, got: false }); if (o.type === 'low') burst(o.x, GROUND - 160, 30, ART(G.wi) === 2 ? ['#e0f4ff', '#fff'] : ['#ff9a3c', '#ffd166', '#555'], 400, 600, 9, 1); }
+      else { o.dead = true; SFX.smash(); for (let i = 0; i < 2; i++) L.amb.push({ x: o.x + 40 + i * 40, y: GROUND - 60 - i * 20, got: false }); }
     }
   }
   G.fireballs = G.fireballs.filter(f => f.life > 0);
@@ -565,7 +566,7 @@ function updatePlay(dt) {
         else hb = { x: o.x - 36, y: GROUND - 8, w: 72, h: 10 };
         break;
     }
-    if (hb && p.dashT > 0 && overlap({ x: p.wx - 30, y: p.y - 100, w: 170, h: 100 }, hb)) { dashBreak(o); continue; }
+    if (hb && p.dashT > 0 && overlap({ x: p.wx - 30, y: p.y - 100, w: 170, h: 100 }, hb)) { if (!CEILING_HAZARDS.includes(o.type)) dashBreak(o); continue; } // the dash is a safe pass under an overhang, it does not smash it
     if (hb && p.inv <= 0 && overlap(pb, hb)) {
       if (ROAR_BREAKS.includes(o.type) && p.roarCd <= 0 && !(p.fireT > 0) && !G.coach && G.startT <= 0.3 && (o.grace = (o.grace || 0) + dt) < ROAR_GRACE) continue; // a late roar still saves Rex: the rock waits a moment before it hurts
       o.nm = true; hurt();

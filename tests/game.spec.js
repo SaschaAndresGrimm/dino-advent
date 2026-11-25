@@ -741,6 +741,26 @@ test('Goettis Schätze are hidden: each one needs its own move (Brüll, Flitz, S
   }
 });
 
+test('fireballs and the dash pass under a ceiling overhang without destroying it', async ({ game }) => {
+  await game.open({ learned: { duck: 1, stomp: 1, fire: 1, dash: 1, swim: 1, glide: 1 } });
+  await game.start(20);
+  const r = await game.eval(() => {
+    const d = window.__dino, G = d.G, p = G.p, L = G.L, step = n => { for (let i = 0; i < n; i++) d.updatePlay(1 / 60); };
+    G.startT = 0; G.coach = null; L.obs = []; L.pits.length = 0; L.plats.length = 0; p.hearts = 99;
+    const low = { type: 'low', x: 0, w: 150 }; L.obs.push(low);
+    const rock = { type: 'rock', x: 300, w: 56, h: 44 }; L.obs.push(rock); // control: fire still smashes a ground obstacle behind the overhang
+    p.wx = -400; p.y = 440; p.vy = 0; p.onGround = true; p.inv = 0; p.fireT = 5; p.fireCd = 0; d.shootFire();
+    const fb = G.fireballs[0];
+    for (let i = 0; i < 60 && G.fireballs.length; i++) { p.wx = -400; step(1); }
+    const out = { flewUnder: fb.under === low, afterFire: !low.dead, fireHurt: p.hearts < 99, rockSmashed: !!rock.dead };
+    p.wx = -200; p.y = 440; p.fireT = 0; p.dashT = 0; p.dashCd = 0; d.dash();
+    for (let i = 0; i < 20; i++) { p.wx = Math.min(p.wx + 12, 40); step(1); } // stays inside the 0.4 s dash
+    out.afterDash = !low.dead; out.dashHurt = p.hearts < 99;
+    return out;
+  });
+  expect(r).toEqual({ flewUnder: true, afterFire: true, fireHurt: false, rockSmashed: true, afterDash: true, dashHurt: false });
+});
+
 test('a missed treasure gets clearer hints: tip after one miss, glints after two; a found treasure stops the count', async ({ game }) => {
   await game.open();
   const r = await game.eval(() => {

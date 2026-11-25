@@ -79,7 +79,7 @@ Section notes (what the pieces do):
 Each obstacle is `{ type, x, … }` in `L.obs`. Three places must know a type:
 1. `updatePlay`, `switch (o.type)`: movement, state and hitbox `hb`.
 2. `drawObstacle`: how it looks.
-3. Interactions: `roar()` (what scares or smashes it), the fireball loop, `dashBreak()`.
+3. Interactions: `roar()` (what scares or smashes it), the fireball loop, `dashBreak()` (overhangs in `CEILING_HAZARDS` are only passed under by fire and dash, never destroyed).
 Enemies that walk toward the player only move when `o.x - p.wx < ~760` (or `o.minion` in boss fights).
 
 ### Bosses
