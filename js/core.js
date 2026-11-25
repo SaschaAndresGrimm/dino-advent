@@ -5,6 +5,9 @@
 // =====================================================================
 const W = 960, H = 540, GROUND = 440, GRAV = 2300;
 const FONT = '"Trebuchet MS","Segoe UI",system-ui,sans-serif';
+// Shown on the title screen. The deploy workflow replaces the literal with '<commit> · <date>'; locally it reads 'dev'.
+const BUILD = 'dino-advent-build';
+const BUILD_LABEL = BUILD === 'dino-advent' + '-build' ? 'dev' : BUILD;
 const canvas = document.getElementById('game');
 let ctx = canvas.getContext('2d');
 let DPR = 1, SC = 1, OX = 0, OY = 0, T = 0, DT = 0;

@@ -12,6 +12,8 @@ Live URL: <https://saschaandresgrimm.github.io/dino-advent/>
 
 **You do not need to bump the service-worker cache by hand.** The deploy job replaces `dino-advent-dev` in `sw.js` with `dino-advent-<commit>`, so every release gets a fresh cache. The service worker is cache-first and precaches all files as one snapshot (all or nothing), so a launch never mixes old and new files. A new release installs in the background and the game reloads itself at the splash, title or map once it is ready.
 
+The title screen shows the running build (short commit and UTC date, bottom right; `dev` on a local server). The deploy job stamps it by replacing the literal `dino-advent-build` in `js/core.js` and fails if that literal survives. Keep the literal as it is.
+
 ### One-time repository settings
 - **Settings → Pages → Source: GitHub Actions** (not "Deploy from a branch").
 - Optionally protect `main`: require the `test` check and a pull request.

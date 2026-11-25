@@ -11,6 +11,11 @@ test('splash waits for a tap, unlocks sound, and leads to the title', async ({ p
   expect(errors).toEqual([]);
 });
 
+test('title screen shows a build label ("dev" locally)', async ({ game }) => {
+  await game.open({});
+  expect(await game.eval(() => BUILD_LABEL)).toBe('dev');
+});
+
 test('title screen loads without errors', async ({ game, page }) => {
   await game.open({});
   expect(await game.eval(() => window.__dino.scene)).toBe('title');

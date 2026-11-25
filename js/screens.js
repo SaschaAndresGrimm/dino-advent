@@ -121,6 +121,7 @@ function drawTitle() {
   otxt(save.rexName ? `Ein Abenteuer mit ${save.rexName} und Chili` : 'Ein Abenteuer mit Chili und einem T-Rex', W / 2, 178, 26, '#fff', 'rgba(0,0,0,.7)', 6);
   { const pu = 1 + 0.04 * Math.sin(T * 4); ctx.save(); ctx.translate(722, 312); ctx.scale(pu, pu); rr(-170, -34, 340, 68, 34); ctx.fillStyle = 'rgba(20,40,20,.35)'; ctx.fill(); rr(-174, -38, 340, 68, 34); ctx.fillStyle = vgrad(-38, 30, '#ffe27a', '#ff9a2a'); ctx.fill(); ctx.lineWidth = 5; ctx.strokeStyle = '#2a1200'; ctx.stroke(); ctx.fillStyle = '#3b1d00'; ctx.beginPath(); ctx.moveTo(-146, -13); ctx.lineTo(-146, 13); ctx.lineTo(-124, 0); ctx.fill(); txt('Tippe zum Starten', 20, -2, 26, '#3b1d00'); ctx.restore(); }
   txt('Ein Weihnachtsgeschenk von Götti für Oli und Fabio · 2026', W / 2, 515, 17, 'rgba(255,255,255,.75)');
+  otxt(BUILD_LABEL, W - 12, 14, 13, 'rgba(255,255,255,.8)', 'rgba(0,0,0,.55)', 4, 'right'); // deployed build: commit and date, outlined to stay readable on any backdrop
 }
 function logo(cx, cy) {
   ctx.save(); ctx.translate(cx, cy); ctx.rotate(-0.03);

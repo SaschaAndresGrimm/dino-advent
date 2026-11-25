@@ -56,6 +56,11 @@ jobs:
           # Every deploy gets its own service-worker cache, so installed copies pick up the new game.
           sed -i "s/dino-advent-dev/dino-advent-${GITHUB_SHA::7}/" _site/sw.js
           grep -n "const CACHE" _site/sw.js
+          # The title screen shows which build is running: commit and date.
+          sed -i "s/dino-advent-build/${GITHUB_SHA::7} · $(date -u +%d.%m.%Y)/" _site/js/core.js
+          grep -n "const BUILD " _site/js/core.js
+          # Fail the deploy if the placeholder survived (the game would show "dev" in production).
+          if grep -q "dino-advent-build" _site/js/core.js; then echo "build stamp missing"; exit 1; fi
       - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v5
         with:
