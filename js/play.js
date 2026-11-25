@@ -414,6 +414,7 @@ function updatePlay(dt) {
   }
   if (p.onGround && !wasGround && vy0 > 250) { p.land = 0.16; SFX.land(vy0); if (vy0 > 400 && !p.stomp) burst(p.wx, p.y, 9, ['#d8c3a5', '#b39b7a', '#fff'], 150, 260, 5, 0.45); }
   p.anti = Math.max(0, (p.anti || 0) - dt); p.hitT = Math.max(0, (p.hitT || 0) - dt); p.land = Math.max(0, (p.land || 0) - dt);
+  if (!p.onGround) p.lastAir = G.t; // bounce pads only launch Rex when he comes down on them
   if (p.onGround) { p.coyote = 0.1; p.jumps = 0; if (p.stomp) { p.stomp = false; p.spin = 1; stompLand(); } if (G.jbuf > 0 && !wasGround) { G.jbuf = 0; jump(); } } else p.coyote -= dt;
   const wasDuck = p.duck; p.duck = G.duckHeld != null && p.onGround;
   if (p.duck && !wasDuck && wasGround) burst(p.wx + 20, GROUND, 4, ['#d8c3a5', '#b39b7a'], 120, 300, 4, 0.3);
@@ -539,7 +540,9 @@ function updatePlay(dt) {
         break;
       case 'pad':
         o.sq = Math.max(0, (o.sq || 0) - dt);
-        if (Math.abs(p.wx + 10 - o.x) < 46 && p.vy >= 0 && p.y >= GROUND - 22 && o.sq <= 0) { o.sq = 0.35; p.vy = -1250; p.y = GROUND - 4; p.onGround = false; p.jumps = 1; p.coyote = 0; SFX.boing(); burst(o.x, GROUND - 20, 16, ['#ff6a6a', '#fff', '#ffd34d'], 260, 500, 7, 0.6); }
+        if (Math.abs(p.wx + 10 - o.x) < 70 && p.vy >= 0 && p.y >= GROUND - 22 && o.sq <= 0) {
+          if (G.t - (p.lastAir ?? -9) > 0.1) { if (Math.abs(p.wx + 10 - o.x) < 46) { o.sq = 0.5; p.vy = -450; p.y = GROUND - 4; p.onGround = false; SFX.boing(); } break; } // just running over it: only a small hop
+          o.sq = 0.35; p.vy = -1250; p.y = GROUND - 4; p.onGround = false; p.jumps = 1; p.coyote = 0; SFX.boing(); burst(o.x, GROUND - 20, 16, ['#ff6a6a', '#fff', '#ffd34d'], 260, 500, 7, 0.6); }
         break;
       case 'wall': hb = { x: o.x - o.w / 2, y: GROUND - o.h, w: o.w, h: o.h }; break;
       case 'tide': if (d < 720) o.moving = true; if (o.moving) o.x -= 210 * dt; hb = { x: o.x - 70, y: GROUND - 118, w: 110, h: 118 }; break;

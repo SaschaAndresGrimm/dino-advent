@@ -480,15 +480,17 @@ test('new enemies and hazards: crumbling steps, bounce mushroom, meteor, hopper 
     L.pits.push({ x: 4900, w: 400 }); const st = { x: 4960, y: 370, y0: 370, w: 200, crumble: true, t: null }; L.plats.push(st); p.y = 360; p.vy = 100; G.stopped = true;
     for (let i = 0; i < 5; i++) d.updatePlay(1 / 60); const landed = p.onGround || st.t != null; let fell = false; for (let i = 0; i < 60; i++) { d.updatePlay(1 / 60); if (st.gone) fell = true; }
     // bounce mushroom launches Rex
-    G.stopped = false; L.pits.length = 0; L.plats.length = 0; p.wx = 6000; p.y = 440; p.vy = 0; p.onGround = true; L.obs.push({ type: 'pad', x: 6040, sq: 0 }); let top = 440; for (let i = 0; i < 40; i++) { d.updatePlay(1 / 60); top = Math.min(top, p.y); }
+    G.stopped = false; L.pits.length = 0; L.plats.length = 0; p.wx = 6000; p.y = 440; p.vy = 0; p.onGround = true; for (let i = 0; i < 10; i++) d.updatePlay(1 / 60); L.obs.push({ type: 'pad', x: 6040, sq: 0 }); let walkTop = 440; for (let i = 0; i < 40; i++) { d.updatePlay(1 / 60); walkTop = Math.min(walkTop, p.y); }
+    // ...but only when Rex comes down on it from a jump; just running over it gives a small hop
+    L.obs.length = 0; for (let i = 0; i < 90; i++) d.updatePlay(1 / 60); p.wx = 6000; p.y = 300; p.vy = 300; p.onGround = false; L.obs.push({ type: 'pad', x: 6040, sq: 0 }); let top = 440; for (let i = 0; i < 40; i++) { d.updatePlay(1 / 60); top = Math.min(top, p.y); }
     // meteor falls when close and then stays as a rock
     L.obs.length = 0; p.wx = 7000; p.y = 440; p.vy = 0; const m = { type: 'meteor', x: 7300, state: 'wait', y: -80, vy: 0 }; L.obs.push(m); d.updatePlay(1 / 60); const falling = m.state === 'fall'; for (let i = 0; i < 90; i++) d.updatePlay(1 / 60);
     // spitting plant makes seeds; hopper hops
     L.obs.length = 0; p.wx = 9000; const pl = { type: 'plant', x: 9400, shoot: 0.05, pop: 0 }, hp = { type: 'hopper', x: 9300, hp: 0 }; L.obs.push(pl, hp); let maxHy = 0; for (let i = 0; i < 40; i++) { d.updatePlay(1 / 60); maxHy = Math.max(maxHy, hp.hy || 0); }
-    return { landed, fell, top, falling, metState: m.state, seeds: L.obs.filter(o => o.type === 'seed').length, maxHy };
+    return { landed, fell, top, walkTop, falling, metState: m.state, seeds: L.obs.filter(o => o.type === 'seed').length, maxHy };
   });
   expect(r.landed).toBe(true); expect(r.fell).toBe(true);
-  expect(r.top).toBeLessThan(150);
+  expect(r.top).toBeLessThan(150); expect(r.walkTop).toBeGreaterThan(300);
   expect(r.falling).toBe(true); expect(r.metState).toBe('stuck');
   expect(r.seeds).toBeGreaterThan(0); expect(r.maxHy).toBeGreaterThan(40);
 });
