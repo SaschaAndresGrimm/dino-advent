@@ -78,3 +78,17 @@ test('finishing day 24 leads to the ending, which marks the game as finished', a
   await click(page, 480, 453);   // "Weiter!"
   expect(await game.eval(() => window.__dino.scene)).toBe('ending');
 });
+
+test('parent mode: "Alles löschen" needs two taps and then starts from scratch', async ({ game, page }) => {
+  await game.open({ amber: 123 });
+  await game.eval(() => window.__dino.go('map')); await page.waitForTimeout(300);
+  await page.mouse.move(100, 30); await page.mouse.down(); await page.waitForTimeout(1700); await page.mouse.up();
+  await page.waitForTimeout(200);
+  await click(page, 400, 470);                                                              // first tap only arms it
+  expect(await game.eval(() => window.__dino.save.amber)).toBe(123);
+  await page.evaluate(() => window.addEventListener('beforeunload', () => sessionStorage.setItem('keysAtReload', JSON.stringify(Object.keys(localStorage)))));
+  await Promise.all([page.waitForNavigation(), click(page, 400, 470)]);                     // second tap wipes and reloads
+  await page.waitForFunction(() => window.__dino);
+  // (the test helper re-seeds the save after the reload, so check what was left in storage at the moment of the reload)
+  expect(JSON.parse(await page.evaluate(() => sessionStorage.getItem('keysAtReload'))).filter(k => k.indexOf('olisDinoRettung') === 0)).toEqual([]);
+});

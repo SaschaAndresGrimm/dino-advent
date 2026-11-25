@@ -91,8 +91,10 @@ let bakDay = '';
   } catch (e) {}
   save = buildSave(raw);
 }
+let saveLocked = false; // set while the parent panel wipes everything: no write may bring the old save back before the reload
 let saveFail = 0, saveFailToast = 0; // saveFail: how many writes in a row failed (private mode, full quota, blocked storage)
 function writeSave() {
+  if (saveLocked) return;
   try {
     const day = new Date().toDateString();
     if (day !== bakDay) { // first write of the day: keep what was stored before as the fallback copy (a failing copy must not block the real save)

@@ -43,7 +43,7 @@ docs/                    architecture, development and maintenance docs, screens
 
 ## Debugging tools
 - **`?day=N`** in the URL sets the calendar day (save untouched). Debug aids (`?day=`, `window.__dino`) only work on localhost or `file:` (`DEBUG` in `js/core.js`), not on the published site.
-- **Parent mode:** hold the "Adventskalender" title for 1.5 s: set the day, open all doors, clear the high-score list.
+- **Parent mode:** hold the "Adventskalender" title for 1.5 s: set the day, open all doors, clear the high-score list, wipe everything (`wipeEverything`: removes all `olisDinoRettung*` keys and reloads, like a new install).
 - **`window.__dino`** in the browser console exposes the internals: `startLevel(i)` (0 to 23), `go('shop')`, `save`, `G` (current play state), `sheet('rex' | 'hero' | 'cast' | 'react' | 'faces' | 'wounds')` for character sheets.
 - **Reset progress:** `localStorage.removeItem('olisDinoRettung.v1')`.
 - **Hold a frame still** for screenshots: set `G.freeze = 9`.

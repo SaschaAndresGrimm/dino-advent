@@ -171,8 +171,14 @@ function restoreSave() {
   if (saveFail) { toast('Speichern klappt gerade nicht.', '#ff9d9d'); return; }
   location.reload(); // simplest way to reset every cached screen and thumbnail
 }
+let parentWipeT = -99;
+function wipeEverything() { // like a fresh install: drop the save, its fallback copies and every other stored key of the game, then reload
+  saveLocked = true;
+  try { for (const k of Object.keys(localStorage)) if (k.indexOf('olisDinoRettung') === 0) localStorage.removeItem(k); } catch (e) {}
+  location.reload();
+}
 function drawParentPanel() {
-  panel(240, 40, 480, 460); txt('Elternmodus', W / 2, 88, 34, '#3b2410'); txt(`Heute offen: ${adventDay()} von 24 Türen`, W / 2, 128, 22, '#6b4a2b', 'center', 'normal');
+  panel(240, 40, 480, 480); txt('Elternmodus', W / 2, 88, 34, '#3b2410'); txt(`Heute offen: ${adventDay()} von 24 Türen`, W / 2, 128, 22, '#6b4a2b', 'center', 'normal');
   txt(save.dayOverride == null ? 'Es gilt das Datum des Geräts.' : 'Das Datum ist manuell eingestellt.', W / 2, 154, 16, '#8a6a3a', 'center', 'normal');
   button('−', 300, 170, 110, 52, () => { save.dayOverride = clamp(adventDay() - 1, 0, 24); writeSave(); }, { size: 34 });
   button('+', 550, 170, 110, 52, () => { save.dayOverride = clamp(adventDay() + 1, 0, 24); writeSave(); }, { size: 34 });
@@ -183,7 +189,9 @@ function drawParentPanel() {
   if (saveFail) txt('Achtung: Dieses Gerät kann nicht speichern!', W / 2, 386, 17, '#c0392b', 'center'); else txt('Spielstand sichern', W / 2, 386, 17, '#6b4a2b', 'center', 'normal');
   button('Code kopieren', 300, 398, 175, 40, backupSave, { size: 18, color: '#d4f2bd' });
   button('Code einfügen', 485, 398, 175, 40, restoreSave, { size: 18, color: '#e0d2b0' });
-  button('Schliessen', W / 2 - 80, 450, 160, 40, () => { parentMode = false; }, { size: 20 });
+  const wipeArmed = T - parentWipeT < 4;
+  button(wipeArmed ? 'Ja, alles löschen!' : 'Alles löschen', 300, 450, 200, 40, () => { if (wipeArmed) wipeEverything(); else parentWipeT = T; }, { size: 18, color: wipeArmed ? '#e57373' : '#e0d2b0', textColor: wipeArmed ? '#fff' : undefined });
+  button('Schliessen', 510, 450, 150, 40, () => { parentMode = false; }, { size: 20 });
   buttons.unshift({ x: 0, y: 0, w: W, h: H, cb: () => {}, silent: true });
 }
 // ---------- local Bestenliste (per device) ----------
