@@ -22,6 +22,7 @@ The game is plain JavaScript in `js/*.js`, loaded by `index.html` (no modules, n
 | `js/mapshop.js` | Schatzkarte, calendar map (`drawMap`), shop |
 | `js/book.js` | Dino-Buch: card art, Steckbrief, size lineup |
 | `js/ending.js` | `startEnding` cutscene |
+| `js/candles.js` | Advent candle ceremony (scene `'candles'`), `drawWreath` |
 | `js/main.js` | Input, main loop `frame(now)`, `window.__dino` test hook |
 
 The files are classic scripts (no modules, no IIFE) that share one global scope; `index.html` loads them in the order above, and top-level code runs in that order. A new file must be added to `index.html`, to `FILES` in `sw.js` and (if outside `js/`) to the copy step in `ci.yml`; `tests/files.spec.js` checks this and also that no top-level name overwrites a browser built-in (`open`, `stop`, `print`, ...).
@@ -56,7 +57,7 @@ Section notes (what the pieces do):
 - `startLevel(arg, endless)`: `arg` is a level index, or a theme index when `endless` is true.
 
 ## Frame loop
-`frame(now)` advances time in fixed 1/60 s steps (`DT`, global time `T`), calls the scene's update and then `draw*`. The current scene is `scene` (`'title' | 'story' | 'map' | 'play' | 'shop' | 'book' | 'ending' | 'sheet'`); `go(scene)` switches with a fade. Buttons are re-registered in `buttons[]` every frame by `button(...)` during drawing; input hit-tests that list.
+`frame(now)` advances time in fixed 1/60 s steps (`DT`, global time `T`), calls the scene's update and then `draw*`. The current scene is `scene` (`'title' | 'story' | 'map' | 'play' | 'shop' | 'book' | 'ending' | 'candles' | 'sheet'`); `go(scene)` switches with a fade. Buttons are re-registered in `buttons[]` every frame by `button(...)` during drawing; input hit-tests that list.
 
 ## Playing a level
 1. `startLevel` calls `buildLevel`, which returns `L` (the level) and creates the play state `G`.
@@ -97,6 +98,7 @@ Enemies that walk toward the player only move when `o.x - p.wx < ~760` (or `o.mi
 | `owned`, `equip` | `{skin, hat, fire}` indexes into `SKINS`/`HATS`/`FIRES` |
 | `learned` | Skills whose tutorial coach was completed |
 | `riddleSeen[8]`, `best[8]` | Riddle rotation per theme, endless best score per theme |
+| `candles` | Advent candles lit so far (0 to 4) |
 | `treasures[4]`, `finished`, `tutorialDone`, `muted` | Misc progress |
 | `tTries[4]` | Per treasure: finished runs without finding it (1 = tip text, 2 = brighter glint) |
 Old 4-world saves keep names, amber and shop items but start the calendar fresh.

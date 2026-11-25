@@ -15,7 +15,7 @@ test('the installed copy starts offline, entirely from one cache', async ({ page
   });
   expect(cached.names).toHaveLength(1);
   for (const f of ['/index.html', '/js/core.js', '/js/main.js', '/manifest.webmanifest']) expect(cached.files).toContain(f);
-  expect(cached.files.filter(f => f.startsWith('/js/'))).toHaveLength(16);
+  expect(cached.files.filter(f => f.startsWith('/js/'))).toHaveLength(17);
 
   await context.setOffline(true);
   await page.reload();

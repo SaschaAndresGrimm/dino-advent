@@ -29,7 +29,7 @@ const SAVE_KEY = 'olisDinoRettung.v1';
 // A stored field of the wrong type is dropped so it falls back to its default: a damaged, hand-edited or
 // imported save must not be able to crash the game later.
 const SAVE_TYPES = { rexName: 's', babyName: 's', fabioName: 's', oliName: 's', nick: 's',
-  unlocked: 'n', amber: 'n', treasureNew: 'n', volMusic: 'n', volSfx: 'n', dailyLast: 'n', dailyStreak: 'n', dailyBoardDay: 'n', dailyBest: 'n', master: 'n', masterNew: 'n', chestSeen: 'n', afterNew: 'n', riddleVer: 'n',
+  unlocked: 'n', amber: 'n', treasureNew: 'n', volMusic: 'n', volSfx: 'n', dailyLast: 'n', dailyStreak: 'n', dailyBoardDay: 'n', dailyBest: 'n', master: 'n', masterNew: 'n', chestSeen: 'n', afterNew: 'n', riddleVer: 'n', candles: 'n',
   finished: 'f', muted: 'f', tutorialDone: 'f', calm: 'f', installHint: 'f',
   eggs: 'a', medals: 'a', treasures: 'a', tTries: 'a', riddleSeen: 'a', lvE: 'a', lvM: 'a', lvDone: 'a', gifts: 'a', newGifts: 'a', best: 'a', board: 'a', bookSeen: 'a',
   learned: 'o', owned: 'o', equip: 'o', storySeen: 'o' };
@@ -67,6 +67,7 @@ function buildSave(raw) { // defaults + stored fields + migrations
   if (!s.best) s.best = []; while (s.best.length < 8) s.best.push(0);
   if (s.volMusic == null) s.volMusic = 4; if (s.volSfx == null) s.volSfx = 4; if (!s.calm) s.calm = false;
   if (!s.dailyLast) s.dailyLast = 0; if (!s.dailyStreak) s.dailyStreak = 0; if (!s.dailyBoardDay) s.dailyBoardDay = 0; if (!s.installHint) s.installHint = false;
+  s.candles = Number.isFinite(s.candles) ? Math.min(4, Math.max(0, Math.floor(s.candles))) : 0; // Advent candles lit so far (0 to 4)
   if (!s.master) s.master = 0; if (!s.masterNew) s.masterNew = 0; if (!s.chestSeen) s.chestSeen = 0;
   if (!s.storySeen) s.storySeen = {}; if (!s.afterNew) s.afterNew = 0; if (!s.oliName) s.oliName = '';
   if (!s.board) s.board = []; while (s.board.length < 9) s.board.push([]); if (!s.nick) s.nick = '';

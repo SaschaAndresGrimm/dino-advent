@@ -129,6 +129,8 @@ const SFX = {
   nearMiss() { tone(880, 0.12, 'triangle', 0.07, 1320); tone(1320, 0.2, 'sine', 0.05, null, 0.06); },
   stomp() { duck(0.55, 0.15); noise(0.3, 0.45, 260); tone(110, 0.25, 'square', 0.13, 45); },
   boing() { tone(260, 0.18, 'triangle', 0.13, 780); },
+  spark() { noise(0.4, 0.12, 2600, 0, 'bandpass'); tone(900, 0.4, 'sine', 0.05, 1800); },
+  candle() { noise(0.3, 0.14, 1400); tone(180, 0.3, 'sine', 0.12, 90); [784, 988, 1175, 1568].forEach((f, i) => tone(f, 0.5, 'sine', 0.08, null, 0.12 + i * 0.09, { att: 0.01 })); tone(2349, 0.7, 'sine', 0.03, null, 0.5, { att: 0.02 }); },
   fire() { noise(0.35, 0.3, 1600); tone(200, 0.3, 'sawtooth', 0.06, 90); },
   duck() { tone(420, 0.08, 'triangle', 0.06, 260); },
   power() { [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, 0.18, 'square', 0.05, null, i * 0.06)); },
@@ -260,6 +262,7 @@ function musicKey(portrait) { // which song should be playing right now (null = 
 function musicOpts() { // vol: fade target (pause and results duck the song, death and run end fade it out); lift: key change before the gate; danger: heartbeat at one heart
   const o = { vol: 1, lift: 0, danger: false };
   if (scene === 'ending') { if (E && E.phase === 'party') o.vol = 0.55; return o; } // the jingle plays on top
+  if (scene === 'candles') { o.vol = 0.5; return o; } // the song steps back for the candle chimes
   if (scene !== 'play' || !G) return o;
   const ov = G.overlay;
   if (ov && ov.type !== 'riddle') { o.vol = ov.type === 'pause' || ov.type === 'complete' ? 0.25 : 0; return o; }

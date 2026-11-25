@@ -182,6 +182,7 @@ function drawMap() { // the advent calendar
   drawAmber(W - 210, 36, 14); otxt(String(save.amber), W - 188, 37, 24, '#ffe08a', 'rgba(0,0,0,.7)', 5, 'left');
   drawMedal(W - 318, 44, 12, 1, true); otxt(`${medalTotal()}/72`, W - 298, 37, 24, save.master ? '#fff6b0' : '#ffe08a', save.master ? '#8a5a00' : 'rgba(0,0,0,.7)', 5, 'left'); if (save.master) { drawStar(W - 336, 22, 9 + 1.5 * Math.sin(T * 5), '#ffd34d'); drawStar(W - 226 + 0, 20, 5 + Math.sin(T * 6 + 1), '#fff'); }
   drawChest();
+  if (save.candles > 0) { drawWreath(570, 62, 0.26, save.candles, -1); buttons.push({ x: 520, y: 14, w: 100, h: 72, silent: true, cb: () => { SFX.click(); startCandle(true); } }); } // the Adventskranz fills up with the Sundays; tap it and Rex lights the last candle again
   button(save.muted ? 'Aus' : 'Ton', W - 130, 16, 112, 42, () => { settingsOpen = true; }, { size: 20, color: '#e0d2b0', icon: icon(save.muted ? 'mute' : 'sound') });
   button('Dino-Buch', 24, H - 82, 210, 60, () => { bookSel = -1; go('book'); }, { icon: icon('book') });
   { const unread = bookUnread(); if (unread) { ctx.save(); ctx.translate(204, H - 80 + Math.sin(T * 6 + 1) * 2); ctx.rotate(0.22); rr(-32, -11, 64, 22, 6); ctx.fillStyle = '#e53935'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#fff'; ctx.stroke(); txt(unread > 9 ? '9+ NEU' : unread > 1 ? `${unread} NEU` : 'NEU', 0, 1, 14, '#fff'); ctx.restore(); } }

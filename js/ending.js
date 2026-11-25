@@ -90,6 +90,7 @@ function drawEnding() {
     drawBaby(0, -Math.abs(Math.sin(T * 5)) * (E.phase === 'party' ? 14 : 4), 1.5, T * 5);
     ctx.restore();
   }
+  if (save.candles > 0) drawWreath(150, 497, 0.5, save.candles, -1); // the Adventskranz in the snow, with every candle the boys lit
   drawParts(0);
   drawSnow(1);
   if (E.phase === 'party') {

@@ -33,9 +33,11 @@ window.addEventListener('keydown', e => {
     else if (scene === 'title') pressTitle();
     else if (scene === 'play' && !G.overlay) { jump(); G.holdJump = 'key'; }
     else if (scene === 'ending' && E.phase === 'tap') tapEgg();
+    else if (scene === 'candles') candleSpark();
   } else if (k === 'r' || k === 'R' || k === 'x' || k === 'X' || k === 'ArrowRight' || k === 'Enter') {
     if (dialog) advanceDialog();
     else if (scene === 'splash') startSplash();
+    else if (scene === 'candles') candleSpark();
     else if (scene === 'play' && !G.overlay) roar();
   } else if (k === 'f' || k === 'F' || k === 'Shift' || k === 'ArrowLeft') {
     if (scene === 'play' && !G.overlay) dash();
@@ -104,6 +106,7 @@ function frameBody(now) {
       const st = Math.min(rem, 1 / 60); rem -= st;
       if (scene === 'play') updatePlay(st);
       else if (scene === 'ending') updateEnding(st);
+      else if (scene === 'candles') updateCandles(st);
       updateParts(st);
     }
   }
@@ -123,6 +126,7 @@ function frameBody(now) {
   else if (scene === 'sheet') drawSheet();
   else if (scene === 'play') drawPlay();
   else if (scene === 'ending') drawEnding();
+  else if (scene === 'candles') drawCandles();
   drawDialog();
   if (!(scene === 'play' && G.overlay)) drawToasts();
   if (flashT > 0) { flashT = Math.max(0, flashT - DT * 1.8); ctx.fillStyle = `rgba(255,248,215,${flashT})`; ctx.fillRect(0, 0, W, H); }
@@ -133,4 +137,4 @@ function frameBody(now) {
 requestAnimationFrame(frame);
 
 // debug hook for testing in the browser console
-if (DEBUG) window.__dino = { writeSave, saveToCode, codeToSave, buildSave, get saveFail() { return saveFail; }, openSecret, bookUnread, get mus() { return mus; }, useAudio(ctx) { AC = ctx; noiseBuf = null; buildAudioGraph(); mus.key = null; mus.trans = null; mus.saved = {}; mus.g = 1; mus.vt = 1; amb.wi = null; amb.node = null; amb.lvl = -1; }, musicTick, SFX, ambTick, ambEvent, AMB, SONGS, startSplash, get splash() { return splash; }, bossDmg, medalTotal, worldMedalsDone, chestFull, chestParty, get chestPartyT() { return chestPartyT; }, startDaily, dailyWorld, dayKey, get dialog() { return dialog; }, DAY_STORY, DAY_AFTER, launchLevel, finishLevel, fmt, cleanNick, boardAdd, boardQualifies, boardAll, endRun, get scene() { return scene; }, get doorOverlay() { return doorOverlay; }, get buttons() { return buttons; }, pitFall, get lowfx() { return LOWFX; }, set lowfx(v) { LOWFX = v; }, get G() { return G; }, get E() { return E; }, save, startLevel, startEnding, go, jump, jumpRelease, roar, updatePlay, updateEnding, answer, openRiddle, retry, tapEgg, openGate, playTreasure, drawPlay, duckDown, duckUp, shootFire, drawShop, buildSong, dash, LEVELS, adventDay, openDoorGift, giftFor, clickDoor, skillsFor, FACTS, STECK, VOICE_OF, VOICES, cardSprite, bookOpen(i) { bookSel = i; }, bookMode(m) { bookMode = m; lineLayout = null; lineScroll = lineTarget = 0; }, lineupScroll(v) { lineTarget = lineScroll = v; }, openBookCard, sheet(p) { sheetPage = p || 'hero'; scene = 'sheet'; } };
+if (DEBUG) window.__dino = { writeSave, saveToCode, codeToSave, buildSave, get saveFail() { return saveFail; }, openSecret, bookUnread, get mus() { return mus; }, useAudio(ctx) { AC = ctx; noiseBuf = null; buildAudioGraph(); mus.key = null; mus.trans = null; mus.saved = {}; mus.g = 1; mus.vt = 1; amb.wi = null; amb.node = null; amb.lvl = -1; }, musicTick, SFX, ambTick, ambEvent, AMB, SONGS, startSplash, get splash() { return splash; }, bossDmg, medalTotal, worldMedalsDone, chestFull, chestParty, get chestPartyT() { return chestPartyT; }, startDaily, dailyWorld, dayKey, get dialog() { return dialog; }, DAY_STORY, DAY_AFTER, launchLevel, finishLevel, fmt, cleanNick, boardAdd, boardQualifies, boardAll, endRun, get scene() { return scene; }, get doorOverlay() { return doorOverlay; }, get buttons() { return buttons; }, pitFall, get lowfx() { return LOWFX; }, set lowfx(v) { LOWFX = v; }, get G() { return G; }, get E() { return E; }, save, startLevel, startEnding, go, jump, jumpRelease, roar, updatePlay, updateEnding, answer, openRiddle, retry, tapEgg, openGate, playTreasure, drawPlay, duckDown, duckUp, shootFire, drawShop, buildSong, dash, LEVELS, adventDay, openDoorGift, giftFor, clickDoor, skillsFor, FACTS, STECK, VOICE_OF, VOICES, cardSprite, bookOpen(i) { bookSel = i; }, bookMode(m) { bookMode = m; lineLayout = null; lineScroll = lineTarget = 0; }, lineupScroll(v) { lineTarget = lineScroll = v; }, openBookCard, sheet(p) { sheetPage = p || 'hero'; scene = 'sheet'; }, candlesDue, startCandle, candleSpark, updateCandles, get C() { return C; }, CANDLE_DAYS, drawWreath };

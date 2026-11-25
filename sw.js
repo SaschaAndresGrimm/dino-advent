@@ -3,7 +3,7 @@
 // (stamped by the deploy workflow); its service worker precaches everything (all or nothing), then takes over, and
 // the page reloads itself at a quiet moment (splash, title or map).
 const CACHE = 'dino-advent-dev'; // the deploy workflow replaces this with 'dino-advent-<commit>'
-const FILES = ['./', 'index.html', 'js/core.js', 'js/audio.js', 'js/helpers.js', 'js/data.js', 'js/characters.js', 'js/scenery.js', 'js/levelgen.js', 'js/play.js', 'js/bossart.js', 'js/playdraw.js', 'js/screens.js', 'js/menus.js', 'js/mapshop.js', 'js/book.js', 'js/ending.js', 'js/main.js', 'manifest.webmanifest', 'icon-180.png', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png'];
+const FILES = ['./', 'index.html', 'js/core.js', 'js/audio.js', 'js/helpers.js', 'js/data.js', 'js/characters.js', 'js/scenery.js', 'js/levelgen.js', 'js/play.js', 'js/bossart.js', 'js/playdraw.js', 'js/screens.js', 'js/menus.js', 'js/mapshop.js', 'js/book.js', 'js/ending.js', 'js/candles.js', 'js/main.js', 'manifest.webmanifest', 'icon-180.png', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png'];
 self.addEventListener('install', e => {
   // 'reload' skips the browser's HTTP cache, so the snapshot is really this release; addAll fails as a whole if any file fails,
   // which keeps the previous (complete) release in charge.

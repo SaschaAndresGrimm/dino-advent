@@ -2,7 +2,7 @@ const { test: base, expect } = require('@playwright/test');
 
 const KEY = 'olisDinoRettung.v1';
 // Everything learned, so the tutorial coach never freezes the game.
-const BASE_SAVE = { rexName: 'Rexi', unlocked: 3, tutorialDone: true, learned: { duck: 1, stomp: 1, fire: 1 }, finished: true, storySeen: Object.fromEntries(Array.from({ length: 24 }, (_, i) => [i + 1, 1])), oliName: 'Oli', fabioName: 'Fabio' };
+const BASE_SAVE = { rexName: 'Rexi', unlocked: 3, tutorialDone: true, learned: { duck: 1, stomp: 1, fire: 1 }, finished: true, candles: 4, storySeen: Object.fromEntries(Array.from({ length: 24 }, (_, i) => [i + 1, 1])), oliName: 'Oli', fabioName: 'Fabio' };
 
 const test = base.extend({
   // opens the game with a given save and collects page errors
