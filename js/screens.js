@@ -140,7 +140,11 @@ function logo(cx, cy) {
 function pressTitle() {
   tryFullscreen();
   if (!save.rexName) startStory();
-  else if (!save.fabioName) { go('story'); startDialog([{ who: 'goetti', text: 'Neu im Team: Fabio! Ab jetzt reitet ihr zu zweit auf {rex}.' }], () => askName('Wie soll Fabios Forschername sein?', 'Fabio', name => { save.fabioName = name; writeSave(); go('map'); }, null, true), true); }
+  else if (!save.oliName || !save.fabioName) { // older save: ask whichever researcher names are still missing
+    const fabioAsk = () => save.fabioName ? go('map') : askName('Wie soll Fabios Forschername sein?', 'Fabio', name => { save.fabioName = name; writeSave(); go('map'); }, null, true);
+    const oliAsk = () => save.oliName ? fabioAsk() : askName('Wie soll Olis Forschername sein?', 'Oli', name => { save.oliName = name; writeSave(); fabioAsk(); }, null, true);
+    go('story'); startDialog([{ who: 'goetti', text: save.fabioName ? 'Ihr dürft euch einen neuen Forschernamen aussuchen!' : 'Neu im Team: Fabio! Ab jetzt reitet ihr zu zweit auf {rex}.' }], oliAsk, true);
+  }
   else go('map');
 }
 
