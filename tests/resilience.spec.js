@@ -44,8 +44,8 @@ test('an exception in a frame does not stop the game loop', async ({ game, page 
   await game.eval(() => { window.__dino.G.L = null; }); // every update and draw now throws
   await expect.poll(() => game.eval(() => window.__dino.scene), { timeout: 3000 }).toBe('map');
   const f1 = await page.evaluate(() => window.__frames);
-  await page.waitForTimeout(500);
-  expect(await page.evaluate(() => window.__frames)).toBeGreaterThan(f1 + 10);
+  // liveness, not speed: under parallel load the software-rendered map can run well below 20 fps, so wait for the frames instead of counting them in a fixed window
+  await expect.poll(() => page.evaluate(() => window.__frames), { timeout: 5000 }).toBeGreaterThan(f1 + 10);
   // the map is playable again
   await game.start(0);
   await page.waitForTimeout(500);
