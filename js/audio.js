@@ -39,7 +39,7 @@ function duck(depth = 0.5, hold = 0.12) { // sidechain-style: the music dips for
   if (!duckIn || save.muted || !AC) return; const t = AC.currentTime, g = duckIn.gain, cur = typeof g.value === 'number' ? g.value : 1;
   g.cancelScheduledValues(t); g.setValueAtTime(cur, t); g.linearRampToValueAtTime(depth, t + 0.015); g.setValueAtTime(depth, t + hold); g.linearRampToValueAtTime(1, t + hold + 0.3);
 }
-// tone options o: att (attack s), hold (sustain then release: pads), det (chorus detune in cents), lp/lpTo (lowpass sweep Hz), vib (vibrato on long notes)
+// tone options o: att (attack s), hold (sustain then release: pads), det (chorus detune in cents), lp/lpTo (lowpass sweep Hz), vib (vibrato on long notes), path ([[time s, Hz], ...] extra pitch glide points), am ([Hz, depth 0-1] amplitude flutter: the rasp of a growl)
 function tone(freq, dur, type = 'sine', vol = 0.2, slideTo = null, delay = 0, o = null) {
   if (save.muted || !AC) return; vol *= busGain(); if (vol <= 0.0005) return;
   const t = AC.currentTime + delay, g = AC.createGain(), att = o && o.att != null ? o.att : Math.min(0.006, dur * 0.25), dets = o && o.det ? [-o.det, o.det] : [0];
@@ -51,20 +51,24 @@ function tone(freq, dur, type = 'sine', vol = 0.2, slideTo = null, delay = 0, o 
   out.connect(busOut());
   for (const det of dets) {
     const osc = AC.createOscillator(); osc.type = type; osc.frequency.setValueAtTime(freq, t);
-    if (slideTo) osc.frequency.exponentialRampToValueAtTime(slideTo, t + dur);
+    if (o && o.path) for (const [pt, pf] of o.path) osc.frequency.exponentialRampToValueAtTime(pf, t + pt); else if (slideTo) osc.frequency.exponentialRampToValueAtTime(slideTo, t + dur);
     if (det && osc.detune) osc.detune.value = det;
     if (o && o.vib && dur > 0.25 && osc.detune) { const lfo = AC.createOscillator(), lg = AC.createGain(); lfo.frequency.value = 5.5; lg.gain.value = 7; lfo.connect(lg); lg.connect(osc.detune); lfo.start(t); lfo.stop(t + dur + 0.05); }
-    osc.connect(g); osc.start(t); osc.stop(t + dur + 0.05);
+    if (o && o.am) { // growl: the voice is chopped by a fast low oscillator
+      const ag = AC.createGain(), lfo = AC.createOscillator(), lg = AC.createGain(); ag.gain.value = 1 - o.am[1] / 2; lfo.type = 'sine'; lfo.frequency.setValueAtTime(o.am[0], t); lfo.frequency.linearRampToValueAtTime(o.am[0] * 0.6, t + dur); lg.gain.value = o.am[1] / 2;
+      lfo.connect(lg); lg.connect(ag.gain); osc.connect(ag); ag.connect(g); lfo.start(t); lfo.stop(t + dur + 0.05);
+    } else osc.connect(g);
+    osc.start(t); osc.stop(t + dur + 0.05);
   }
 }
 let noiseBuf = null;
-function noise(dur, vol = 0.3, freq = 800, delay = 0, ftype = 'lowpass') {
+function noise(dur, vol = 0.3, freq = 800, delay = 0, ftype = 'lowpass', att = 0) {
   if (save.muted || !AC) return; vol *= busGain(); if (vol <= 0.0005) return;
   const t = AC.currentTime + delay;
   if (!noiseBuf) { const n = Math.floor(AC.sampleRate * 2), d = (noiseBuf = AC.createBuffer(1, n, AC.sampleRate)).getChannelData(0); for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1; }
   const src = AC.createBufferSource(); src.buffer = noiseBuf;
   const f = AC.createBiquadFilter(); f.type = ftype; f.frequency.value = freq;
-  const g = AC.createGain(); g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  const g = AC.createGain(); if (att > 0) { g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(vol, t + att); } else g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
   src.connect(f); f.connect(g); g.connect(busOut()); src.start(t, Math.random() * 1.5, dur + 0.02);
 }
 // drum kit (all synthesised): kick with a click, snare = tone + bright noise, hats = high-passed noise
@@ -74,7 +78,11 @@ const hat = (d, v = 0.035, open = false) => noise(open ? 0.09 : 0.03, v, 7500, d
 const SFX = {
   jump() { tone(330, 0.16, 'square', 0.07, 660); },
   jump2() { tone(500, 0.16, 'square', 0.07, 950); },
-  roar() { duck(0.4, 0.28); noise(0.7, 0.45, 450); tone(120, 0.65, 'sawtooth', 0.16, 50); tone(180, 0.5, 'sawtooth', 0.09, 70); },
+  roar() { // a real roar: a sharp breath, a chopped (growling) throat that swells up and falls away, a bright rasp, a sub boom and a rumbling tail
+    duck(0.25, 0.9); noise(0.16, 0.55, 2600, 0, 'bandpass'); noise(1.2, 0.5, 1100, 0.03, 'lowpass', 0.12); noise(0.9, 0.22, 2400, 0.1, 'bandpass', 0.15);
+    tone(85, 1.3, 'sawtooth', 0.3, null, 0, { att: 0.07, hold: 1, det: 14, lp: 1100, lpTo: 260, path: [[0.22, 190], [0.7, 150], [1.3, 52]], am: [34, 0.65] });
+    tone(170, 1.2, 'square', 0.1, null, 0.02, { att: 0.07, hold: 1, lp: 3000, lpTo: 600, path: [[0.22, 380], [0.7, 300], [1.2, 105]], am: [58, 0.8] });
+    tone(58, 1.15, 'sine', 0.32, 36, 0, { att: 0.04 }); noise(0.6, 0.2, 260, 0.85); },
   roarWater() { duck(0.4, 0.28); noise(0.8, 0.4, 240); tone(90, 0.7, 'sawtooth', 0.14, 42, 0, { lp: 520, lpTo: 140 }); tone(140, 0.55, 'sawtooth', 0.08, 60, 0, { lp: 420, lpTo: 130 }); for (let i = 0; i < 6; i++) { const f = 420 + Math.random() * 520; tone(f, 0.08, 'sine', 0.05, f * 1.8, 0.06 + i * 0.07); } }, // the roar muffled by water, with a gurgle of bubbles on top
   dash() { noise(0.28, 0.35, 2600); tone(300, 0.25, 'sawtooth', 0.07, 900); },
   amber() { tone(1250, 0.07, 'sine', 0.08); tone(1680, 0.1, 'sine', 0.07, null, 0.05); },

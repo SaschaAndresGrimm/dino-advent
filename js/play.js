@@ -110,6 +110,17 @@ function shootFire() {
   G.fireballs.push({ x: ox + 14, y: oy, vx: 950, vy: 200, life: 1.1 });
   for (let i = 0; i < 22; i++) { const l = 0.25 + Math.random() * 0.25; G.flames.push({ x: ox, y: oy, vx: 350 + Math.random() * 600, vy: (Math.random() - 0.5) * 200 - 30, life: l, max: l, r: 5 + Math.random() * 7 }); }
 }
+const ROAR_BREAKS = ['boulder', 'rollrock', 'plant'], ROAR_REACH = 420, ROAR_GRACE = 0.22, ROAR_WHIFF = 0.7, ROAR_TARGETS = ['raptor', 'ptero', 'sword', 'hopper', 'jelly', 'urchin']; // what a roar smashes, how far ahead it reaches, how long a touching rock waits for a late roar, the short cooldown after a roar that hit nothing
+function roarSmash(o) {
+  o.dead = true; SFX.smash();
+  if (o.type === 'plant') { burst(o.x, GROUND - 30, 20, ['#5fbf4a', '#2f7a2c', '#fff'], 360, 700, 8, 0.8); return; }
+  const th = WORLDS[G.wi];
+  burst(o.x, GROUND - (o.h || 40) / 2, 22, [th.rock, '#5a4a3a', '#a89888'], 420, 1300, 10, 0.9);
+  for (let i = 0; i < 3; i++) G.L.amb.push({ x: o.x + 40 + i * 40, y: GROUND - 60 - i * 20, got: false });
+}
+function roarWave() { // the roar is a shock wave, not a single instant: while it lasts it also smashes rocks that come into reach (an early press is not wasted)
+  const p = G.p; for (const o of G.L.obs) if (!o.dead && ROAR_BREAKS.includes(o.type)) { const d = o.x - p.wx; if (d > -40 && d < ROAR_REACH) roarSmash(o); }
+}
 function roar() {
   const p = G.p;
   if (G.coach) { if (G.coach.type !== 'roar') return; G.coach = null; p.roarCd = 0; }
@@ -117,22 +128,19 @@ function roar() {
   if (G.boss && G.boss.state === 'duel') { G.boss.meter = Math.min(1, G.boss.meter + 0.2); SFX.roar(); G.shake = Math.max(G.shake, 0.35); G.rings.push({ x: p.wx + 80, y: p.y - 100, r: 20, a: 1, c: '255,220,120' }); p.roarT = 0.3; return; }
   if (p.roarCd > 0 || G.startT > 0.3) return;
   const sw = G.L.swim;
-  p.roarT = 0.55; p.roarMax = G.boss ? 1.0 : 3.0; p.roarCd = p.roarMax; if (sw) SFX.roarWater(); else SFX.roar(); G.shake = Math.max(G.shake, sw ? 0.1 : 0.3); // water dampens the shake
+  const sc0 = G.L.secret, ahead = Math.max(...[-1e9, ...G.L.obs.filter(o => !o.dead && !o.scared).map(o => { const d = o.x - p.wx; return d < -40 ? -1e9 : ROAR_BREAKS.includes(o.type) ? (d < ROAR_REACH + G.L.speed * 0.55 ? 1 : -1e9) : ROAR_TARGETS.includes(o.type) && d < ROAR_REACH ? 1 : -1e9; })]) > 0 || (sc0 && sc0.kind === 'tree' && sc0.state === 'idle' && sc0.x - p.wx > -80 && sc0.x - p.wx < 640);
+  p.roarT = 0.55; p.roarMax = G.boss ? 1.0 : ahead ? 3.0 : ROAR_WHIFF; p.roarCd = p.roarMax; // a roar that hit nothing (pressed far too early) only cools down briefly, so it can be repeated in time if (sw) SFX.roarWater(); else SFX.roar(); G.shake = Math.max(G.shake, sw ? 0.1 : 0.3); // water dampens the shake
   const sc = G.L.secret; if (sc && sc.kind === 'tree' && sc.state === 'idle' && sc.x - p.wx > -80 && sc.x - p.wx < 640) openSecret(sc); // the roar shakes the big tree
   if (sw) swimRoar(); else G.rings.push({ x: p.wx + 80, y: p.y - 100, r: 20, a: 1, c: '255,220,120' });
   for (const o of G.L.obs) {
     if (o.dead || o.scared) continue;
-    const d = o.x - p.wx; if (d < -40 || d > 360) continue;
+    const d = o.x - p.wx; if (d < -40 || d > ROAR_REACH) continue;
     if (sw && o.type === 'jelly') { // the bubble wave shoves jellies out of Rex's lane (they float up or down, never pop)
       const my = p.y - 50; o.ty = my < 270 ? 350 : 150; burst(o.x, o.y || o.y0, 7, ['#ffd6ec', '#fff', '#e8ffff'], 130, -90, 5, 0.8);
     } else if (sw && o.type === 'urchin') { // an urchin gets wrapped in a bubble and drifts up, harmless; it leaves a little amber
       o.scared = true; o.rise = 0; o.alpha = 1; SFX.bubble(); if (!o.minion) for (let i = 0; i < 3; i++) G.L.amb.push({ x: o.x - 30 + i * 30, y: GROUND - 85 - i * 25, got: false });
-    } else if (o.type === 'boulder' || o.type === 'rollrock') {
-      o.dead = true; SFX.smash(); const th = WORLDS[G.wi];
-      burst(o.x, GROUND - (o.h || 40) / 2, 22, o.type === 'icicle' ? ['#e0f4ff', '#9fd3ff', '#fff'] : [th.rock, '#5a4a3a', '#a89888'], 420, 1300, 10, 0.9);
-      for (let i = 0; i < 3; i++) G.L.amb.push({ x: o.x + 40 + i * 40, y: GROUND - 60 - i * 20, got: false });
-    } else if (o.type === 'raptor' || o.type === 'ptero' || o.type === 'sword' || o.type === 'hopper') { o.scared = true; o.vx = 380; o.vy = -320; }
-    else if (o.type === 'plant') { o.dead = true; SFX.smash(); burst(o.x, GROUND - 30, 20, ['#5fbf4a', '#2f7a2c', '#fff'], 360, 700, 8, 0.8); }
+    } else if (ROAR_BREAKS.includes(o.type)) roarSmash(o);
+    else if (o.type === 'raptor' || o.type === 'ptero' || o.type === 'sword' || o.type === 'hopper') { o.scared = true; o.vx = 380; o.vy = -320; }
     else if (o.type === 'compy' && d < 300 && !G.compyHint) { G.compyHint = true; toast('Kompsis sind zu frech – spring drauf!', '#ffe08a'); }
   }
   if (sw) for (const a of G.L.amb) { const d = a.x - p.wx; if (!a.got && d > -40 && d < 360) a.pull = 0.9; } // the bubble wave carries nearby amber to Rex
@@ -443,6 +451,7 @@ function updatePlay(dt) {
   G.flames = G.flames.filter(f => f.life > 0);
   if (p.y > H + 120) pitFall();
   p.inv -= dt; p.roarT -= dt; p.roarCd -= dt;
+  if (p.roarT > 0 && !G.boss && !L.swim) roarWave();
   if (p.bubT > 0) { p.bubT -= dt; const wx = p.wx + 80 + (1 - p.bubT / 0.5) * 280; burst(wx, p.y - 100 + (Math.random() - 0.5) * 170, 2, ['#e8ffff', '#bfeaff', '#fff'], 60, -170, 6, 0.9); } // the wave front travels about 280 px ahead
   G.cam = p.wx - (p.lungeOff || 0) - 270 + G.nudge;
   if (G.endless) { let tr = 1; for (const tx of L.tierX) if (p.wx >= tx) tr++; if (tr > G.tier) { G.tier = tr; SFX.power(); G.shake = Math.max(G.shake, 0.3); toast(['', '', 'Stufe 2 – mehr Gegner!', 'Stufe 3 – neue Gefahren!', 'Stufe 4 – doppelte Gefahren!'][tr] || `Stufe ${tr} – nur für Profis!`, '#ff9a5a'); }
@@ -553,8 +562,10 @@ function updatePlay(dt) {
         break;
     }
     if (hb && p.dashT > 0 && overlap({ x: p.wx - 30, y: p.y - 100, w: 170, h: 100 }, hb)) { dashBreak(o); continue; }
-    if (hb && p.inv <= 0 && overlap(pb, hb)) { o.nm = true; hurt(); }
-    else if (hb && !o.nm && !G.stopped && p.inv <= 0 && !(p.dashT > 0)) nearMiss(o, hb, pb, p);
+    if (hb && p.inv <= 0 && overlap(pb, hb)) {
+      if (ROAR_BREAKS.includes(o.type) && p.roarCd <= 0 && !(p.fireT > 0) && !G.coach && G.startT <= 0.3 && (o.grace = (o.grace || 0) + dt) < ROAR_GRACE) continue; // a late roar still saves Rex: the rock waits a moment before it hurts
+      o.nm = true; hurt();
+    } else if (hb && !o.nm && !G.stopped && p.inv <= 0 && !(p.dashT > 0)) nearMiss(o, hb, pb, p);
     if (o.x < G.cam - 300 && o.type !== 'icicle') o.dead = o.dead || (o.type === 'raptor' || o.type === 'ptero' || o.type === 'compy');
   }
   // boss

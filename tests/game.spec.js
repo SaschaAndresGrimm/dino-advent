@@ -193,6 +193,30 @@ test('roar: 3 s cooldown, smashes boulders but not small rocks', async ({ game }
   expect(r).toEqual({ cd: 3, rock: false, boulder: true });
 });
 
+test('roar: forgiving timing (early press, late press, reach)', async ({ game }) => {
+  await game.open();
+  await game.start(6);
+  const r = await game.eval(() => {
+    const d = window.__dino, G = d.G, p = G.p, out = {};
+    const setup = dx => { G.L.obs.length = 0; G.L.obs.push({ type: 'boulder', x: p.wx + dx, w: 110, h: 160 }); p.hearts = 4; p.inv = 0; p.roarCd = 0; p.roarT = 0; G.startT = 0; G.shield = false; };
+    const run = n => { for (let i = 0; i < n; i++) d.updatePlay(1 / 60); return { dead: !!G.L.obs[0].dead, hearts: p.hearts }; };
+    setup(500); d.roar(); out.early = run(40);        // pressed too early: the shock wave still catches the rock as it comes into reach
+    setup(400); d.roar(); out.reach = G.L.obs[0].dead; // 400 px ahead is inside the longer reach
+    setup(120); p.vy = 0; out.touch = run(4);           // touching the rock but not roaring yet: the hit is held back a moment
+    setup(100); run(3); d.roar(); out.late = run(2);    // a roar just after touching still saves Rex
+    setup(100); out.noRoar = run(30);                   // without a roar the rock still hurts
+    setup(900); d.roar(); out.whiffCd = p.roarCd;       // nothing ahead: short cooldown, not 3 s
+    setup(300); d.roar(); out.hitCd = p.roarCd;
+    return out;
+  });
+  expect(r.whiffCd).toBeLessThan(1); expect(r.hitCd).toBe(3);
+  expect(r.early.dead).toBe(true); expect(r.early.hearts).toBe(4);
+  expect(r.reach).toBe(true);
+  expect(r.touch.hearts).toBe(4);
+  expect(r.late).toEqual({ dead: true, hearts: 4 });
+  expect(r.noRoar.hearts).toBeLessThan(4);
+});
+
 test('combo patterns exist in worlds 2-4 and levels build', async ({ game }) => {
   await game.open();
   const r = await game.eval(() => [6, 12, 18, 21].map(li => { window.__dino.startLevel(li); const L = window.__dino.G.L; return L.obs.length > 10 && L.pits.length > 0; }));
