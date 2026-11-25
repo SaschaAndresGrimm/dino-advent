@@ -463,6 +463,12 @@ function drawBaby(x, y, s, ph, flip) {
   ctx.fillStyle = '#d63a3a'; ctx.beginPath(); ctx.moveTo(2, -48); ctx.quadraticCurveTo(10, -72, -8, -70); ctx.lineTo(26, -48); ctx.closePath(); ctx.fill();
   rr(0, -52, 28, 7, 3.5); ctx.fillStyle = '#fff'; ctx.fill();
   circle(-8, -70, 5, '#fff');
+  if (chiliFx.dive) { // diving mask with a strap round the head, and a snorkel with a red mouthpiece
+    ctx.strokeStyle = '#1f5f9a'; ctx.lineWidth = 2.2; ctx.beginPath(); ctx.moveTo(14, -42); ctx.quadraticCurveTo(2, -45, -1, -36); ctx.stroke();
+    ctx.strokeStyle = '#ffd34d'; ctx.lineWidth = 3.2; ctx.beginPath(); ctx.moveTo(25, -43); ctx.quadraticCurveTo(36, -48, 32, -64); ctx.stroke(); ctx.strokeStyle = '#e8a010'; ctx.lineWidth = 1; ctx.stroke(); rr(28.5, -68, 6, 5, 2); ctx.fillStyle = '#e53935'; ctx.fill();
+    ctx.beginPath(); ctx.ellipse(21, -40.5, 8.2, 6.6, 0.05, 0, 7); ctx.fillStyle = 'rgba(150,222,255,.5)'; ctx.fill(); ctx.lineWidth = 2.4; ctx.strokeStyle = '#2a8ad0'; ctx.stroke(); ctx.lineWidth = 0.9; ctx.strokeStyle = '#0f4a80'; ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,255,255,.75)'; ctx.lineWidth = 1.3; ctx.beginPath(); ctx.arc(19, -41.5, 3.8, Math.PI * 1.1, Math.PI * 1.55); ctx.stroke();
+  }
   ctx.restore();
 }
 
@@ -515,6 +521,22 @@ function drawKiwi(x, y, s, ph = 0, flip = false) {
   ctx.strokeStyle = '#e8cf9a'; ctx.lineWidth = 2.6; ctx.beginPath(); ctx.moveTo(20, -21); ctx.quadraticCurveTo(32, -16, 40, -6); ctx.stroke();
   circle(16, -24, 1.6, '#111');
   ctx.restore();
+}
+function kiwiBubble(x, y, s, flip) { // soap-bubble helmet round the kiwi's head and beak (drawn after the outlined sprite so the glass stays see-through)
+  ctx.save(); ctx.translate(x, y); ctx.scale(flip ? -s : s, s);
+  const wob = 1 + Math.sin(T * 4 + 1) * 0.035; ctx.save(); ctx.translate(23, -18); ctx.rotate(0.3); ctx.scale(wob, 2 - wob);
+  const g = ctx.createRadialGradient(-8, -6, 2, 0, 0, 24); g.addColorStop(0, 'rgba(255,255,255,.3)'); g.addColorStop(0.75, 'rgba(200,238,255,.1)'); g.addColorStop(1, 'rgba(255,175,230,.28)');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(0, 0, 24, 16, 0, 0, Math.PI * 2); ctx.fill();
+  const rim = ctx.createLinearGradient(-24, -16, 24, 16); rim.addColorStop(0, 'rgba(255,150,220,.95)'); rim.addColorStop(0.35, 'rgba(150,230,255,.95)'); rim.addColorStop(0.7, 'rgba(255,240,150,.95)'); rim.addColorStop(1, 'rgba(190,160,255,.95)');
+  ctx.lineWidth = 1.8; ctx.strokeStyle = rim; ctx.stroke();
+  ctx.strokeStyle = 'rgba(255,255,255,.9)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(0, 0, 19.5, 12, 0, Math.PI * 1.1, Math.PI * 1.45); ctx.stroke();
+  circle(13, 6, 1.3, 'rgba(255,255,255,.8)'); ctx.restore();
+  for (let i = 0; i < 2; i++) { const u = (T * 0.7 + i * 0.5) % 1; ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = 0.9; ctx.beginPath(); ctx.arc(16 + i * 8 + Math.sin(T * 3 + i) * 2, -38 - u * 16, 1.6 + i * 0.8, 0, 7); ctx.stroke(); }
+  ctx.restore();
+}
+function babyBubble(x, y, s, flip) { // a bubble now and then from the snorkel
+  ctx.save(); ctx.translate(x, y); ctx.scale(flip ? -s : s, s); const u = (T * 0.8) % 1;
+  ctx.strokeStyle = 'rgba(255,255,255,.75)'; ctx.lineWidth = 0.9; ctx.beginPath(); ctx.arc(33 + Math.sin(T * 4) * 2, -72 - u * 14, 1.8, 0, 7); ctx.stroke(); ctx.restore();
 }
 function drawTreasure(k, x, y, s, ph = T * 4) {
   if (k === 0) drawGuitar(x, y + 4 * s, s * 0.85, -0.35);

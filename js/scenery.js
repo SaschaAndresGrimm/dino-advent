@@ -1081,8 +1081,8 @@ function oRaptor(x, y, s, ph, flip, o = {}) { const [bx, by, bw, bh] = obox(s, f
 function oPtero(x, y, s, ph, flip, o = {}) { const [bx, by, bw, bh] = obox(s, flip, -52, 68, -64, 56); const a = o.alpha == null ? 1 : Math.max(0, o.alpha); outlined('ptero', x, y, bx, by, bw, bh, () => drawPtero(x, y, s, ph, flip, {}), a, 2.6, '#ff7a4a'); }
 function oCompy(x, y, s, ph, flip, o = {}) { const [bx, by, bw, bh] = obox(s, flip, -46, 38, -56, 4); const a = o.alpha == null ? 1 : Math.max(0, o.alpha); outlined('compy', x, y, bx, by, bw, bh, () => drawCompy(x, y, s, ph, flip, { flat: o.flat, tone: o.tone }), a, 2.6, '#ff7a4a'); }
 function oChili(x, y, s, ph, flip) { const [bx, by, bw, bh] = chiliFx.dive ? obox(s, flip, -34, 50, -78, 10) : obox(s, flip, -32, 46, -72, 10); outlined('chili', x, y, bx, by, bw, bh, () => drawChili(x, y, s, ph, flip)); }
-function oBaby(x, y, s, ph, flip) { const [bx, by, bw, bh] = obox(s, flip, -38, 32, -78, 4); outlined('baby', x, y, bx, by, bw, bh, () => drawBaby(x, y, s, ph, flip)); }
-function oKiwi(x, y, s, ph, flip) { const [bx, by, bw, bh] = obox(s, flip, -22, 44, -34, 4); outlined('kiwi', x, y, bx, by, bw, bh, () => drawKiwi(x, y, s, ph, flip)); }
+function oBaby(x, y, s, ph, flip) { const [bx, by, bw, bh] = obox(s, flip, -38, 40, -78, 4); outlined('baby', x, y, bx, by, bw, bh, () => drawBaby(x, y, s, ph, flip)); if (chiliFx.dive) babyBubble(x, y, s, flip); }
+function oKiwi(x, y, s, ph, flip) { const [bx, by, bw, bh] = obox(s, flip, -22, 44, -34, 4); outlined('kiwi', x, y, bx, by, bw, bh, () => drawKiwi(x, y, s, ph, flip)); if (chiliFx.dive) kiwiBubble(x, y, s, flip); }
 function oLong(x, y, s, col, ph, flip) { const [bx, by, bw, bh] = obox(s, flip, -120, 100, -165, 4); outlined('long', x, y, bx, by, bw, bh, () => drawLongneck(x, y, s, col, ph, flip)); }
 function oTrike(x, y, s, col, ph, flip) { const [bx, by, bw, bh] = obox(s, flip, -60, 62, -64, 4); outlined('trike', x, y, bx, by, bw, bh, () => drawTrike(x, y, s, col, ph, flip)); }
 function oGoetti(x, y, s, wave) { const [bx, by, bw, bh] = obox(s, false, -36, 64, -166, 4); outlined('goetti', x, y, bx, by, bw, bh, () => drawGoetti(x, y, s, wave)); }
