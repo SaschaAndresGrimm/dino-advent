@@ -772,7 +772,7 @@ function drawOverlay() {
     panel(280, 100, 400, 350); txt('Pause', W / 2, 155, 44, '#3b2410');
     button('Weiter spielen', 330, 200, 300, 64, () => { G.overlay = null; });
     button('Einstellungen', 330, 284, 300, 56, () => { settingsOpen = true; }, { color: '#e0d2b0', size: 24, icon: icon('gear') });
-    button('Zur Karte', 330, 360, 300, 64, () => go('map'), { color: '#e0d2b0' });
+    button('Zum Kalender', 330, 360, 300, 64, () => go('map'), { color: '#e0d2b0' });
   } else if (o.type === 'endover') {
     o.t += DT; panel(220, 90, 520, 360); drawPortrait('chili', W / 2, 160, 46);
     txt('Endlos-Lauf zu Ende!', W / 2, 232, 32, '#3b2410');
@@ -780,12 +780,12 @@ function drawOverlay() {
     txt(o.isNew ? 'Neuer Rekord!' : `Rekord: ${o.prev}`, W / 2, 322, 24, o.isNew ? '#2e7d32' : '#6b4a2b');
     if (o.bonus) txt(`Tages-Bonus: +${o.bonus} Bernstein · Serie: ${o.streak} ${o.streak === 1 ? 'Tag' : 'Tage'}`, W / 2, 346, 16, '#8a5a00');
     txt(`Bernstein: +${G.amber}` + (o.rank ? `  ·  Bestenliste: Platz ${o.rank}` : ''), W / 2, 368, 20, o.rank ? '#2e7d32' : '#6b4a2b', 'center', o.rank ? 'bold' : 'normal');
-    button('Nochmal!', 236, 392, 150, 54, () => { if (G.daily) startDaily(); else startLevel(G.wi, true); }, { size: 24 }); button('Bestenliste', 394, 392, 190, 54, () => { boardTab = G.daily ? 8 : G.wi; go('board'); }, { size: 22, color: '#ffe08a', icon: icon('trophy') }); button('Karte', 592, 392, 124, 54, () => go('map'), { color: '#e0d2b0', size: 24 });
+    button('Nochmal!', 236, 384, 150, 54, () => { if (G.daily) startDaily(); else startLevel(G.wi, true); }, { size: 24 }); button('Bestenliste', 394, 384, 190, 54, () => { boardTab = G.daily ? 8 : G.wi; go('board'); }, { size: 22, color: '#ffe08a', icon: icon('trophy') }); button('Kalender', 592, 384, 124, 54, () => go('map'), { color: '#e0d2b0', size: 24 });
   } else if (o.type === 'retry') {
     panel(220, 110, 520, 320); drawPortrait('chili', W / 2, 180, 50, true);
     txt('Oh nein! Nicht aufgeben!', W / 2, 262, 32, '#3b2410');
     txt('Chili meint: Nochmal ab dem letzten Fähnchen!', W / 2, 300, 22, '#6b4a2b', 'center', 'normal');
-    button('Nochmal!', 290, 340, 200, 62, retry); button('Karte', 510, 340, 160, 62, () => go('map'), { color: '#e0d2b0' });
+    button('Nochmal!', 290, 340, 200, 62, retry); button('Kalender', 510, 340, 160, 62, () => go('map'), { color: '#e0d2b0' });
   } else if (o.type === 'riddle') {
     const r = o.r, b0 = buttons.length; o.shake = Math.max(0, o.shake - DT); o.solvedT = o.solved ? (o.solvedT || 0) + DT : 0; o.t += DT;
     // entrance: the tablet drops in from above and bounces once on landing, Götti and Chili hop in from the left
@@ -871,6 +871,6 @@ function drawOverlay() {
       if (kk === 'crab') drawCrabKing(668, 506, 0.45, T * 2, true, bo); else if (kk === 'kraken') drawKraken(668, 506, 0.3, T * 2, true, bo); else if (kk === 'queen') drawQueen(668, 506, 0.45, T * 2, true, bo); else oRaptor(668, 506, 0.6, T * 2, true, { col: '#b01c10', dark: '#4a0a0a', crown: true, dmg: 1, ko: true, wid: 'res' });
     }
     if (lv.day === 24) button('Weiter!', W / 2 - 120, 422, 240, 62, () => startEnding(), { color: '#e57373', textColor: '#fff' });
-    else button('Zur Karte', W / 2 - 120, 422, 240, 62, () => go('map'));
+    else button('Zum Kalender', W / 2 - 120, 422, 240, 62, () => go('map'));
   }
 }

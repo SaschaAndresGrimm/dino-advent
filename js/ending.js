@@ -97,6 +97,6 @@ function drawEnding() {
     otxt('Frohe Weihnachten,', 0, 0, 56, '#ffd34d', '#7a1010', 13); otxt(fmt('{oli} und {fabio}!'), 0, 58, 50, '#ffd34d', '#7a1010', 12); ctx.restore();
     otxt('Alles Liebe – euer Götti', W / 2, 190, 28, '#fff', 'rgba(0,0,0,.7)', 6);
     button('Lied nochmal', 24, 20, 180, 50, () => jingle(), { size: 20, color: '#e0d2b0' });
-    button('Zur Karte', W - 204, 20, 180, 50, () => go('map'), { size: 22 });
+    button('Zum Kalender', W - 204, 20, 180, 50, () => go('map'), { size: 22 });
   }
 }
