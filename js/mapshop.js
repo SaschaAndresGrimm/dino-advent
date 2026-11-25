@@ -245,6 +245,7 @@ function drawVoucher(i) { // Götti's voucher: a ticket with a dashed border, th
   ctx.restore();
   buttons.length = 0; button('Super!', W / 2 - 90, y + h + 16, 180, 50, () => { wishShow = -1; SFX.click(); }, { color: '#9be38a', size: 24 });
 }
+let shopWho = 0; // which boy the preview dresses on the hats/jackets tabs (0 Oli, 1 Fabio); the other keeps what he really wears
 let shopConfirm = null, shopTab = 0, shopPage = 0, shopSel = 0, shopTalk = { t: 0, text: 'Willkommen! Such dir etwas aus.' };
 function shopSay(text) { shopTalk = { t: 4, text }; }
 let shopBounce = 0;
@@ -294,7 +295,7 @@ function drawShop() {
   rr(756, 70, 176, 44, 22); ctx.fillStyle = 'rgba(40,24,10,.85)'; ctx.fill(); drawAmber(782, 92, 14); otxt(String(save.amber), 806, 93, 26, '#ffe08a', 'rgba(0,0,0,.7)', 5, 'left');
   const tab = SHOP_TABS[shopTab], { key, list } = tab;
   // live preview: equip the selection temporarily (on both boys for hats and jackets)
-  const bak = Object.assign({}, save.equip); for (const k of tab.eq) save.equip[k] = shopSel;
+  const bak = Object.assign({}, save.equip); for (const k of (tab.eq.length > 1 ? [tab.eq[shopWho]] : tab.eq)) save.equip[k] = shopSel;
   const hopY = shopBounce > 0 ? -26 * Math.sin(Math.PI * (1 - shopBounce)) : 0;
   if (key === 'chili') { shadow(262, 422, 60, 0.3); oChili(250, 420 + hopY, 2.1, T * 3, false); }
   else if (key !== 'wish') oRex(262, 418 + hopY, 0.85, T * 3, 0.1, Object.assign(rexLook(2), { rider: true, hat: rexLook(2).hat || null, hat2: rexLook(2).hat2 || null, fire: key === 'fire' }));
@@ -307,10 +308,11 @@ function drawShop() {
     if (cyc > 0.06 && cyc < 0.85) { const q = (cyc - 0.06) / 0.79, bx = mx + 14 + q * 150, by = my + 6 + q * 26, fa = 1 - q * q, fl = 1 + 0.12 * Math.sin(T * 45); ctx.globalAlpha = fa; const g = ctx.createRadialGradient(bx, by, 2, bx, by, 34 * fl); g.addColorStop(0, 'rgba(255,255,235,1)'); g.addColorStop(0.3, `rgba(${f.a},1)`); g.addColorStop(0.65, `rgba(${f.b},.85)`); g.addColorStop(1, `rgba(${f.c},0)`); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(bx, by, 34 * fl, 0, Math.PI * 2); ctx.fill(); for (let k = 1; k <= 3; k++) { ctx.globalAlpha = fa * 0.5 / k; circle(bx - k * 14, by - k * 3 + Math.sin(T * 30 + k) * 3, 13 - k * 2.5, f.ball); } ctx.globalAlpha = 1; }
     ctx.restore();
   }
+  if (tab.eq.length > 1) kidNames().forEach((nm, n) => button(nm, 152 + n * 112, 494, 104, 34, () => { shopWho = n; SFX.click(); }, { size: 17, color: shopWho === n ? '#ffd34d' : '#d9c9a0' })); // whose outfit the preview tries on
   oGoetti(62, 420, 0.95, shopTalk.t > 0); shopCounter();
   if (shopTalk.t > 0 || true) { shopTalk.t = Math.max(0, shopTalk.t - DT); const lines = wrapLines(shopTalk.text, 230, 18); const bh = 20 + lines.length * 22; rr(20, 215 - bh + 10, 262, bh, 14); ctx.fillStyle = '#fffaf0'; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = '#6b4a2b'; ctx.stroke(); ctx.fillStyle = '#fffaf0'; ctx.beginPath(); ctx.moveTo(52, 225); ctx.lineTo(76, 225); ctx.lineTo(70, 252); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.fillRect(54, 223, 20, 4); lines.forEach((l, i) => txt(l, 151, 215 - bh + 32 + i * 22, 18, '#3b2410', 'center', 'normal')); }
   // tabs
-  SHOP_TABS.forEach((tb, i) => button(tb.lb, 440 + i * 84, 118, 80, 44, () => { shopTab = i; shopPage = 0; shopSel = tb.eq.length ? save.equip[tb.eq[0]] : 0; shopSay(fmt(tb.say)); }, { size: 18, color: i === shopTab ? '#ffd34d' : '#d9c9a0' }));
+  SHOP_TABS.forEach((tb, i) => button(tb.lb, 440 + i * 84, 118, 80, 44, () => { shopTab = i; shopWho = 0; shopSel = tb.eq.length ? save.equip[tb.eq[0]] : 0; shopPage = Math.floor(shopSel / 8); shopSay(fmt(tb.say)); }, { size: 18, color: i === shopTab ? '#ffd34d' : '#d9c9a0' }));
   // item cards: 8 per page (4 x 2), gifts from the calendar show the door they come from
   const PER = 8, pages = Math.ceil(list.length / PER); shopPage = clamp(shopPage, 0, pages - 1);
   list.forEach((it, i) => {
@@ -344,7 +346,7 @@ function drawShop() {
   // buy / equip bar
   const it = list[shopSel], owned = save.owned[key].includes(shopSel), eq = tab.eq.length > 0 && save.equip[tab.eq[0]] === shopSel, cost = it.cost || 0, can = !it.gift && save.amber >= cost, BY = 412;
   if (owned && key === 'wish') button('Gutschein ansehen', 440, BY, 496, 52, () => { wishShow = shopSel; SFX.click(); }, { color: '#ffe08a', size: 24 });
-  else if (owned && tab.eq.length > 1) tab.eq.forEach((k, n) => { const on = save.equip[k] === shopSel, nm = kidNames()[n]; button(on ? nm + ' ✓' : nm + ' anziehen', 440 + n * 252, BY, 244, 52, () => { if (on) return; save.equip[k] = shopSel; writeSave(); SFX.right(); shopSay(fmt(n ? 'Sieht super aus, {fabio}!' : 'Sieht super aus, {oli}!')); shopBounce = 1; burst(262, 330, 26, ['#fff', '#ffe08a', '#ffd34d'], 280, 300, 5, 0.9); }, on ? { disabled: true, size: 20 } : { color: '#9be38a', size: 20 }); });
+  else if (owned && tab.eq.length > 1) tab.eq.forEach((k, n) => { const on = save.equip[k] === shopSel, nm = kidNames()[n]; button(on ? nm + ' ✓' : nm + ' anziehen', 440 + n * 252, BY, 244, 52, () => { if (on) return; save.equip[k] = shopSel; shopWho = n; writeSave(); SFX.right(); shopSay(fmt(n ? 'Sieht super aus, {fabio}!' : 'Sieht super aus, {oli}!')); shopBounce = 1; burst(262, 330, 26, ['#fff', '#ffe08a', '#ffd34d'], 280, 300, 5, 0.9); }, on ? { disabled: true, size: 20 } : { color: '#9be38a', size: 20 }); });
   else if (eq) button('Angelegt', 440, BY, 496, 52, () => {}, { disabled: true, icon: icon('check'), size: 26 });
   else if (owned) button('Anlegen', 440, BY, 496, 52, () => { save.equip[tab.eq[0]] = shopSel; writeSave(); SFX.right(); shopSay('Sieht super aus!'); shopBounce = 1; burst(262, 330, 26, ['#fff', '#ffe08a', '#ffd34d'], 280, 300, 5, 0.9); }, { color: '#9be38a', size: 26 });
   else if (it.gift) button(it.gift === 25 ? 'Mit allen 72 Medaillen' : `Aus Tür ${it.gift} im Kalender`, 440, BY, 496, 52, () => { SFX.wrong(); shopSay(it.gift === 25 ? `Du hast ${medalTotal()} von 72 Medaillen.` : `Öffne am ${it.gift}. Dezember die Tür ${it.gift}!`); }, { disabled: true, size: 22 });
