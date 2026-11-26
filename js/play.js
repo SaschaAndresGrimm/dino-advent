@@ -123,15 +123,18 @@ function roarSmash(o) {
 function roarWave() { // the roar is a shock wave, not a single instant: while it lasts it also smashes rocks that come into reach (an early press is not wasted)
   const p = G.p; for (const o of G.L.obs) if (!o.dead && ROAR_BREAKS.includes(o.type)) { const d = o.x - p.wx; if (d > -40 && d < ROAR_REACH) roarSmash(o); }
 }
+let roarSndAt = 0; // when the last roar sound started (ms): a press during the cooldown still roars, but not more often than this
+function roarSound(water) { audio(); roarSndAt = performance.now(); if (water) SFX.roarWater(); else SFX.roar(); } // audio() wakes a context the browser suspended, so the roar can never be mute
 function roar() {
   const p = G.p;
   if (G.coach) { if (G.coach.type !== 'roar') return; G.coach = null; p.roarCd = 0; }
   if (p.fireT > 0 && !G.boss) { shootFire(); return; }
-  if (G.boss && G.boss.state === 'duel') { G.boss.meter = Math.min(1, G.boss.meter + 0.2); SFX.roar(); G.shake = Math.max(G.shake, 0.35); G.rings.push({ x: p.wx + 80, y: p.y - 100, r: 20, a: 1, c: '255,220,120' }); p.roarT = 0.3; return; }
-  if (p.roarCd > 0 || G.startT > 0.3) return;
+  if (G.boss && G.boss.state === 'duel') { G.boss.meter = Math.min(1, G.boss.meter + 0.2); roarSound(); G.shake = Math.max(G.shake, 0.35); G.rings.push({ x: p.wx + 80, y: p.y - 100, r: 20, a: 1, c: '255,220,120' }); p.roarT = 0.3; return; }
+  if (p.roarCd > 0 || G.startT > 0.3) { if (p.roarCd > 0 && performance.now() - roarSndAt > 600) roarSound(G.L.swim); return; } // cooling down: no shock wave, but Fabio's BRÜLL always gets a roar
   const sw = G.L.swim;
   const sc0 = G.L.secret, ahead = Math.max(...[-1e9, ...G.L.obs.filter(o => !o.dead && !o.scared).map(o => { const d = o.x - p.wx; return d < -40 ? -1e9 : ROAR_BREAKS.includes(o.type) ? (d < ROAR_REACH + G.L.speed * 0.55 ? 1 : -1e9) : ROAR_TARGETS.includes(o.type) && d < ROAR_REACH ? 1 : -1e9; })]) > 0 || (sc0 && sc0.kind === 'tree' && sc0.state === 'idle' && sc0.x - p.wx > -80 && sc0.x - p.wx < 640);
-  p.roarT = 0.55; p.roarMax = G.boss ? 1.0 : ahead ? 3.0 : ROAR_WHIFF; p.roarCd = p.roarMax; // a roar that hit nothing (pressed far too early) only cools down briefly, so it can be repeated in time if (sw) SFX.roarWater(); else SFX.roar(); G.shake = Math.max(G.shake, sw ? 0.1 : 0.3); // water dampens the shake
+  p.roarT = 0.55; p.roarMax = G.boss ? 1.0 : ahead ? 3.0 : ROAR_WHIFF; p.roarCd = p.roarMax; // a roar that hit nothing (pressed far too early) only cools down briefly, so it can be repeated in time
+  roarSound(sw); G.shake = Math.max(G.shake, sw ? 0.15 : 0.3); // water dampens the shake
   const sc = G.L.secret; if (sc && sc.kind === 'tree' && sc.state === 'idle' && sc.x - p.wx > -80 && sc.x - p.wx < 640) openSecret(sc); // the roar shakes the big tree
   if (sw) swimRoar(); else G.rings.push({ x: p.wx + 80, y: p.y - 100, r: 20, a: 1, c: '255,220,120' });
   for (const o of G.L.obs) {
