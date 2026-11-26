@@ -100,7 +100,9 @@ const SFX = {
   hurt() { duck(0.6, 0.15); tone(320, 0.35, 'sawtooth', 0.14, 90); noise(0.15, 0.22, 700); },
   lose() { [392, 349, 311, 262].forEach((f, i) => tone(f, 0.28, 'triangle', 0.13, f * 0.96, i * 0.22)); tone(131, 0.9, 'sawtooth', 0.05, 98, 0.66); }, // sad "wah-wah" when the hearts are gone
   lowHeart() { tone(150, 0.14, 'sine', 0.2, 80); tone(150, 0.14, 'sine', 0.2, 80, 0.2); }, // only one heart left
-  land(v) { const k = clamp((v - 250) / 900, 0, 1); noise(0.07 + 0.06 * k, 0.08 + 0.2 * k, 500); tone(95, 0.1, 'sine', 0.06 + 0.1 * k, 55); },
+  land(v) { // touchdown after a jump: a crisp click for the instant of contact (so it is heard on the frame Rex lands, even on small speakers), a mid thud and a punchy low thump; light landings are softer but never faint
+    const k = clamp((v - 250) / 900, 0, 1), a = 0.6 + 0.4 * k; bus = 'sfx'; duck(0.75, 0.08);
+    noise(0.025, 0.3 * a, 2800, 0, 'highpass'); noise(0.08 + 0.06 * k, 0.4 * a, 900); tone(190, 0.12, 'sine', 0.22 * a, 55); tone(75, 0.2, 'sine', 0.16 * a, 40); },
   heart() { [659, 784, 988, 1319].forEach((f, i) => tone(f, 0.35, 'sine', 0.1, null, i * 0.08)); tone(330, 0.5, 'triangle', 0.08); },
   bubble() { for (let i = 0; i < 3; i++) { const f = 500 + Math.random() * 500; tone(f, 0.07, 'sine', 0.06, f * 1.8, i * 0.045); } },
   whoosh() { noise(0.5, 0.18, 1400); tone(500, 0.4, 'sine', 0.03, 900); },
