@@ -469,11 +469,18 @@ test('falling into a pit respawns far back, on the ground, with a pause and prot
   expect(r.inv).toBeGreaterThan(2.5);
 });
 
-test('skill hints appear well before the obstacle', async ({ game }) => {
+test('dash tutorial: the coach starts the dash close enough to smash the first wall, also after an early dash', async ({ game }) => {
   await game.open({});
-  const r = await game.eval(() => { const d = window.__dino; d.startLevel(3); const L = d.G.L, w = L.obs.find(o => o.type === 'wall'); return { coach: L.coach.length ? L.coach[0].x : null, gap: w ? w.x - L.coach[0].x : 0 }; });
-  expect(r.coach).not.toBeNull();
-  expect(r.gap).toBeGreaterThanOrEqual(450);
+  const r = await game.eval(() => {
+    const d = window.__dino; const step = n => { for (let i = 0; i < n; i++) d.updatePlay(1 / 60); };
+    const run = early => { d.startLevel(3); const G = d.G, p = G.p, L = G.L; G.startT = 0; G.coach = null; p.inv = 999; L.obs = L.obs.filter(o => o.type === 'wall'); const w = L.obs[0];
+      L.coach.forEach(c => { if (c.type !== 'dash') c.done = true; });
+      p.wx = early ? 1500 : 1650; p.y = 440; p.onGround = true; if (early) { d.dash(); step(30); }
+      for (let i = 0; i < 400 && !w.dead; i++) { step(1); if (G.coach) d.dash(); }
+      return { dead: !!w.dead, gap: w.x - L.coach.find(c => c.type === 'dash').x, hearts: p.hearts, max: G.p.hearts }; };
+    return { normal: run(false), early: run(true) };
+  });
+  for (const k of ['normal', 'early']) { expect(r[k].dead).toBe(true); expect(r[k].gap).toBeGreaterThanOrEqual(150); expect(r[k].gap).toBeLessThanOrEqual(300); }
 });
 
 test('new enemies and hazards: crumbling steps, bounce mushroom, meteor, hopper and spitting plant', async ({ game }) => {
@@ -1017,4 +1024,20 @@ test('boss telegraphs: every projectile, shock wave and charge is announced ~0.5
   expect(r.crab.quakes).toBeGreaterThan(0);                     // the new stomping phase ran
   for (const k of ['crab', 'kraken', 'queen', 'king']) { expect(r[k].attacks).toBeGreaterThan(2); expect(r[k].unannounced).toBe(0); }
   expect(game.errors).toEqual([]);
+});
+
+test('day 1 teaches the double jump: the high ledge needs two taps and the coach waits for the second one in the air', async ({ game }) => {
+  await game.open({ tutorialDone: false });
+  const r = await game.eval(() => {
+    const d = window.__dino; const step = n => { for (let i = 0; i < n; i++) d.updatePlay(1 / 60); };
+    const fresh = () => { d.startLevel(0); const G = d.G, p = G.p; G.startT = 0; G.coach = null; p.inv = 999; G.L.obs.length = 0; return { G, p, L: G.L }; };
+    const reach = dbl => { const { G, p, L } = fresh(); L.coach.forEach(c => (c.done = true)); p.wx = 2080; p.y = L.plats[0].y; p.onGround = true; step(5); d.jump(); let did = false;
+      for (let i = 0; i < 200; i++) { if (dbl && !did && p.vy > -50) { d.jump(); did = true; } step(1); if (p.onGround && p.y < 200 && p.wx > 2300) return true; } return false; };
+    const { G, p, L } = fresh(); L.coach.forEach(c => { if (c.x < 2000) c.done = true; }); p.wx = 2000; p.y = L.plats[0].y; p.onGround = true; step(5);
+    const seq = []; for (let i = 0; i < 300; i++) { const before = G.coach; step(1); if (G.coach && G.coach !== before) seq.push(G.coach.type); if (G.coach) d.jump(); }
+    return { single: reach(false), dbl: reach(true), seq };
+  });
+  expect(r.single).toBe(false);
+  expect(r.dbl).toBe(true);
+  expect(r.seq.slice(0, 2)).toEqual(['jump', 'djump']);
 });

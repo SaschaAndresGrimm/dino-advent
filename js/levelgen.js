@@ -62,8 +62,8 @@ function buildLevel(wi, endless, LV) { // LV = the calendar level spec (or undef
     L.tips.push({ x: 260, text: 'Tippe auf den Bildschirm, um zu springen!' });
     L.obs.push({ type: 'rock', x: 1000, w: 56, h: 44 }); amberArc(940, 180, 110);
     amberRow(1300, 5);
-    L.tips.push({ x: 1450, text: 'Zweimal schnell tippen = Doppelsprung!' });
-    L.plats.push({ x: 2000, y: GROUND - 125, w: 240 }); L.plats.push({ x: 2300, y: GROUND - 230, w: 200 }); amberRow(2030, 4, GROUND - 165); amberRow(2330, 4, GROUND - 270);
+    L.tips.push({ x: 1750, text: 'Zweimal schnell tippen = Doppelsprung! So kommst du auf die hohe Plattform.' });
+    L.plats.push({ x: 2000, y: GROUND - 100, w: 240 }); L.plats.push({ x: 2300, y: GROUND - 305, w: 200 }); amberRow(2030, 4, GROUND - 140); amberRow(2330, 4, GROUND - 345); // the high ledge is 205 px above the low one: one jump reaches 176 px, only a double jump gets up
     L.tips.push({ x: 2650, text: 'Drück auf BRÜLL, um den dicken Felsbrocken zu zerschmettern! (Kleine Steine überspringst du.)' });
     L.obs.push({ type: 'boulder', x: 3250, w: 110, h: 160 });
     L.tips.push({ x: 3500, text: 'Ein Raptor! Brüllen verjagt ihn!' });
@@ -71,7 +71,8 @@ function buildLevel(wi, endless, LV) { // LV = the calendar level spec (or undef
     if (!save.tutorialDone) L.coach.push(
       { x: 870, type: 'jump', text: 'Jetzt tippen – springen!' },
       { x: 1930, type: 'jump', text: 'Tippen – rauf auf die Plattform!' },
-      { x: 2200, type: 'jump', text: 'Nochmal tippen – ganz nach oben!' },
+      { x: 2180, type: 'jump', text: 'Tippen – spring hoch!' },
+      { x: 2180, type: 'djump', air: true, text: 'Nochmal tippen – Doppelsprung!' },
       { x: 3000, type: 'roar', text: 'Drück BRÜLL!' },
       { x: 3840, type: 'roar', text: 'Ein Raptor! Drück BRÜLL!' });
     x = 4600;
@@ -96,7 +97,8 @@ function buildLevel(wi, endless, LV) { // LV = the calendar level spec (or undef
       L.seen.wall = 1; L.obs.push({ type: 'rock', x: 1100, w: 56, h: 44 }); amberArc(1040, 180, 110);
       L.tips.push({ x: 1000, text: 'Eine hohe Sandmauer! Drück FLITZ und renn mitten durch!' });
       L.obs.push({ type: 'wall', x: 1950, w: 60, h: 250 }); amberRow(2030, 4, GROUND - 90, 40);
-      if (!save.learned.dash) L.coach.push({ x: 1450, type: 'dash', text: 'Drück FLITZ!' });
+      L.dashWall = 1950; // the first wall: FLITZ is always ready in the 450 px before it
+      if (!save.learned.dash) L.coach.push({ x: 1700, type: 'dash', text: 'Drück FLITZ!' }); // a dash lasts ~290 px, so it must start 150-300 px before the wall
       x = 2600;
     } else if (wi === 6) { // new: swim
       L.seen.sword = L.seen.jelly = L.seen.urchin = 1;

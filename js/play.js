@@ -47,7 +47,7 @@ function cheer() { // the first time a new move works: a small celebration
 const JUMP_V = 900, HOP_V = 640, JUMP_BUF = 0.12, NEAR_PX = 30, NEAR_CAP = 12; // HOP_V: speed an early release cuts the jump to; NEAR_CAP: paid near misses per level (shop economy)
 function jump() {
   const p = G.p; if (G.startT > 0.3) return;
-  let learned = false; if (G.coach) { if (G.coach.type !== 'jump' && G.coach.type !== 'glide') return; learned = true; G.coach = null; }
+  let learned = false; if (G.coach) { if (G.coach.type !== 'jump' && G.coach.type !== 'glide' && G.coach.type !== 'djump') return; learned = true; G.coach = null; }
   if (learned) setTimeout(() => { if (G && scene === 'play') cheer(); }, 260);
   if (G.L.swim) { p.vy = -380; p.jumps = 0; p.onGround = false; p.anti = 0.05; SFX.jump2(); SFX.bubble(); burst(p.wx + 10, p.y - 40, 5, ['#e8ffff', '#fff'], 90, -60, 5, 0.6); return; }
   if (p.onGround || p.coyote > 0) { p.anti = 0.09; p.vy = -JUMP_V; p.jumps = 1; p.jh = true; p.coyote = 0; p.onGround = false; SFX.jump(); burst(p.wx, GROUND, 6, ['#d8c3a5', '#b39b7a'], 120, 300, 5, 0.4); }
@@ -67,7 +67,7 @@ function duckDown(id) {
   else if (p.onGround) SFX.duck();
 }
 function dash() {
-  const p = G.p; if (!G || scene !== 'play' || G.overlay || !G.sk.dash || G.L.swim || p.dashCd > 0 || G.startT > 0.3) return;
+  const p = G.p; if (!G || scene !== 'play' || G.overlay || !G.sk.dash || G.L.swim || (p.dashCd > 0 && !(G.coach && G.coach.type === 'dash')) || G.startT > 0.3) return; // the coach frame is frozen, so its cooldown could never run out
   if (G.coach) { if (G.coach.type !== 'dash') return; G.coach = null; setTimeout(() => { if (G && scene === 'play') cheer(); }, 260); }
   p.dashT = 0.4; p.dashCd = 1.7; SFX.dash(); G.rings.push({ x: p.wx + 20, y: p.y - 60, r: 12, a: 0.9, c: '255,255,255' });
 }
@@ -395,7 +395,7 @@ function updatePlay(dt) {
   if (G.zoom > 0) G.zoom = Math.max(0, G.zoom - dt * 2.4); G.jbuf = Math.max(0, (G.jbuf || 0) - dt); if (p.vy >= 0) p.jh = false;
   G.shake = Math.max(0, G.shake - dt * (G.overlay ? 4 : 1));
   if (G.overlay) return;
-  for (const c of L.coach) if (!c.done && p.wx >= c.x) { c.done = true; G.coach = c; }
+  for (const c of L.coach) if (!c.done && p.wx >= c.x && (!c.air || (!p.onGround && p.jumps === 1 && p.vy > -200))) { c.done = true; G.coach = c; break; } // air coaches wait for the top of the first jump
   if (G.coach) return; // freeze-frame until Oli does the move
   if (G.freeze > 0) { G.freeze -= dt; return; }
   if (G.chiliSay) { G.chiliSay.t -= dt; if (G.chiliSay.t <= 0) G.chiliSay = null; } if (G.chiliCd > 0) G.chiliCd -= dt;
@@ -404,7 +404,8 @@ function updatePlay(dt) {
   if (G.startT > 0) G.startT -= dt;
   let spd = (G.startT > 0 || G.stopped) ? 0 : L.speed * (L.endless ? 1 + clamp((p.wx - 200) / 50000, 0, 0.7) : 1 + 0.1 * clamp(p.wx / L.gateX, 0, 1));
   if (p.y > GROUND + 5) spd = 0;
-  p.dashCd = Math.max(0, (p.dashCd || 0) - dt); if (p.dashT > 0) { p.dashT -= dt; spd *= 2.4; if (Math.random() < 0.7) burst(p.wx - 20, p.y - 20 - Math.random() * 60, 1, ['#fff', '#ffe08a'], 80, -40, 5, 0.35); }
+  p.dashCd = Math.max(0, (p.dashCd || 0) - dt); if (L.dashWall && p.dashCd > 0 && !(p.dashT > 0) && p.wx > L.dashWall - 450 && p.wx < L.dashWall) p.dashCd = 0; // tutorial wall: an early or wasted dash never leaves the boy without FLITZ
+  if (p.dashT > 0) { p.dashT -= dt; spd *= 2.4; if (Math.random() < 0.7) burst(p.wx - 20, p.y - 20 - Math.random() * 60, 1, ['#fff', '#ffe08a'], 80, -40, 5, 0.35); }
   if (G.stopped && G.bossStarted) { const off = p.dashT > 0 ? Math.sin(Math.PI * (1 - p.dashT / 0.4)) * 240 : 0; p.wx += off - (p.lungeOff || 0); p.lungeOff = off; } else p.lungeOff = 0; // in a boss fight FLITZ lunges forward and back
   const wasGliding = p.gliding; p.gliding = !!(G.sk.glide && !L.swim && G.holdJump != null && !p.onGround && !p.stomp && p.vy > 40); if (p.gliding && !wasGliding) SFX.whoosh();
   p.wx += spd * dt; p.ph += dt * (spd > 0 ? 13 : 2);

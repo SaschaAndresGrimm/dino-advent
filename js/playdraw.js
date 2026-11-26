@@ -715,8 +715,9 @@ function drawCoach() {
   ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.fillRect(0, 0, W, H);
   ctx.save(); ctx.translate(W / 2, 210); const s = 1 + 0.06 * Math.sin(T * 8); ctx.scale(s, s); otxt(c.text, 0, 0, 46, '#ffd34d', '#3b1d00', 10); ctx.restore();
   const u = (T * 1.4) % 1;
-  if (c.type === 'jump') {
+  if (c.type === 'jump' || c.type === 'djump') {
     ctx.strokeStyle = `rgba(255,255,255,${1 - u})`; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(W / 2, 300, 18 + u * 55, 0, Math.PI * 2); ctx.stroke();
+    if (c.type === 'djump') { ctx.strokeStyle = `rgba(255,211,77,${u})`; ctx.beginPath(); ctx.arc(W / 2, 300, 18 + (1 - u) * 55, 0, Math.PI * 2); ctx.stroke(); } // second ring: a second tap
     setFont(70, 'normal'); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#fff'; ctx.fillText('👆', W / 2 + 8, 340 - Math.abs(Math.sin(T * 6)) * 16);
   } else if (c.type === 'glide') { // hold the finger down in the air
     const gy = 290; ctx.fillStyle = `rgba(255,255,255,${0.18 + 0.1 * Math.sin(T * 6)})`; ctx.beginPath(); ctx.arc(W / 2, gy, 44, 0, Math.PI * 2); ctx.fill(); ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(W / 2, gy, 44, 0, Math.PI * 2); ctx.stroke();
