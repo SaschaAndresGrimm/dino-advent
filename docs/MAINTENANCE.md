@@ -35,7 +35,7 @@ The calendar start is a constant, `ADVENT_START` in `js/data.js` (1 December 202
 | What | Where |
 |---|---|
 | Story and dialog text | `DAY_STORY`, `DAY_AFTER`, `TEASERS`, `startStory`, `startEnding` |
-| Riddles | `WORLDS[i].riddles` (15 per theme, each with a difficulty `d` 1-3 that the level picks by day; append new ones at the end so `save.riddleSeen` indices stay valid; set `trick: true` only for real trick questions) |
+| Riddles | `WORLDS[i].riddles` (25 per theme, each with a difficulty `d` 1-3: levels pick by day, the Götti-Quiz asks one easy, two medium and two hard per round; append new ones at the end so `save.riddleSeen`/`save.quizSeen` indices stay valid; set `trick: true` only for real trick questions). Fact-check every answer (recompute numbers, make sure the two wrong options really are wrong) and keep Swiss spelling. The question must fit 4 lines, the explanation 3 lines, an answer one button: `tests/quiz.spec.js` checks the layout, tiers and duplicates |
 | Dino cards and facts | `FACTS` (`text` = `headline|Wusstest-du detail`), `STECK` (same index; see CLAUDE.md for its fields) |
 | Shop items, gifts | `SKINS`, `HATS`, `FIRES`, `JACKETS`, `WISHES` (real-life vouchers and prices) |
 | Blocked nicknames | `BAD_WORDS` |

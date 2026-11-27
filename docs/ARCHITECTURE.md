@@ -23,6 +23,7 @@ The game is plain JavaScript in `js/*.js`, loaded by `index.html` (no modules, n
 | `js/book.js` | Dino-Buch: card art, Steckbrief, size lineup |
 | `js/ending.js` | `startEnding` cutscene |
 | `js/candles.js` | Advent candle ceremony (scene `'candles'`), `drawWreath` |
+| `js/quiz.js` | Götti-Quiz (scene `'quiz'`): picker, five-riddle round, result screen; plays the riddle pools through `drawRiddleTablet` |
 | `js/main.js` | Input, main loop `frame(now)`, `window.__dino` test hook |
 
 The files are classic scripts (no modules, no IIFE) that share one global scope; `index.html` loads them in the order above, and top-level code runs in that order. A new file must be added to `index.html`, to `FILES` in `sw.js` and (if outside `js/`) to the copy step in `ci.yml`; `tests/files.spec.js` checks this and also that no top-level name overwrites a browser built-in (`open`, `stop`, `print`, ...).
@@ -98,6 +99,7 @@ Enemies that walk toward the player only move when `o.x - p.wx < ~760` (or `o.mi
 | `owned`, `equip` | `{skin, hat, fire}` indexes into `SKINS`/`HATS`/`FIRES` |
 | `learned` | Skills whose tutorial coach was completed |
 | `riddleSeen[8]`, `best[8]` | Riddle rotation per theme, endless best score per theme |
+| `quizSeen[8]`, `quizBest[9]`, `quizDay`, `quizAmber` | Götti-Quiz: riddle rotation per theme, best right-first-time count (0-5) per theme (9 = mixed round), amber the quiz paid on day `quizDay` (daily cap) |
 | `candles` | Advent candles lit so far (0 to 4) |
 | `treasures[4]`, `finished`, `tutorialDone`, `muted` | Misc progress |
 | `tTries[4]` | Per treasure: finished runs without finding it (1 = tip text, 2 = brighter glint) |
@@ -119,4 +121,5 @@ Old 4-world saves keep names, amber and shop items but start the calendar fresh.
 - `tests/levels.spec.js`: the autoplayer (`PLAY`) plays all 24 levels with 99 hearts and must reach the end; also checks the duration (60 to 330 s). Boss bots live in `tests/game.spec.js`.
 - `tests/calendar.spec.js`: mocked `Date` for door logic, gifts, parent mode, ending, endless.
 - `tests/game.spec.js`: shop, riddles, save migration, music, hazards, UI.
+- `tests/quiz.spec.js`: riddle data integrity (layout, tiers, duplicates), Götti-Quiz flow, rewards and daily cap.
 **When you add an obstacle or pattern, teach the bot in `PLAY` how to pass it**, otherwise the all-levels test fails (usually "stuck at x"). Debug stuck levels by stepping `PLAY` in small chunks and printing `p.wx`.

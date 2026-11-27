@@ -19,7 +19,7 @@ Open the link in any modern browser (tablet, phone or computer). There is nothin
 - **Every door hides a gift:** a hat, a new colour for your T-Rex or a fire colour, plus a new card for the Dino-Buch.
 - **New skills as you go:** double jump, dash (day 4), duck (7), swim (10), ground pound (13), glide (16) and fire breath (19).
 - **Four boss fights** on days 6, 12, 18 and 24. The last door holds the Krallenkönig, the golden egg and the Christmas ending.
-- Götti's shop, a collectible Dino-Buch, riddles, an endless run and a daily run keep it fun after the story is done.
+- Götti's shop, a collectible Dino-Buch, riddles (also as a stand-alone quiz), an endless run and a daily run keep it fun after the story is done.
 
 | | |
 |---|---|

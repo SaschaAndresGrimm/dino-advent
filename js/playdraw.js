@@ -756,15 +756,207 @@ function woodFrame(x, y, w, h, r = 26, paper = '#fff3d6') {
   for (const [cx, cy] of [[x + 14, y + 14], [x + w - 14, y + 14], [x + 14, y + h - 14], [x + w - 14, y + h - 14]]) { circle(cx, cy, 4, '#d6b36a'); circle(cx - 1, cy - 1, 1.6, '#fff3c0'); }
 }
 function panel(x, y, w, h) { ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.fillRect(0, 0, W, H); woodFrame(x, y, w, h); }
-function stoneTablet(x, y, w, h) {
-  ctx.save(); rr(x, y + 10, w, h, 30); ctx.fillStyle = 'rgba(0,0,0,.4)'; ctx.fill(); ctx.restore();
-  rr(x, y, w, h, 30); ctx.fillStyle = vgrad(y, y + h, '#a9b0b8', '#7f8791', '#5c636d'); ctx.fill(); ctx.lineWidth = 4; ctx.strokeStyle = '#262b33'; ctx.stroke();
-  ctx.save(); rr(x, y, w, h, 30); ctx.clip();
-  for (let i = 0; i < 160; i++) { ctx.globalAlpha = 0.05 + hash(i + 40) * 0.1; circle(x + hash(i) * w, y + hash(i + 9) * h, 1 + hash(i + 3) * 3, hash(i + 5) > 0.5 ? '#fff' : '#000'); } ctx.globalAlpha = 1;
-  ctx.strokeStyle = 'rgba(30,34,40,.45)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x + w - 90, y); ctx.lineTo(x + w - 104, y + 40); ctx.lineTo(x + w - 84, y + 70); ctx.moveTo(x, y + h - 120); ctx.lineTo(x + 40, y + h - 108); ctx.lineTo(x + 52, y + h - 70); ctx.stroke();
-  for (const [mx, my, mr] of [[x + 20, y + h - 18, 46], [x + w - 30, y + h - 12, 38], [x + 60, y + 6, 30]]) { ctx.globalAlpha = 0.5; ell(mx, my, mr, mr * 0.45, 0, '#5f8f46'); ell(mx + 8, my - 4, mr * 0.6, mr * 0.25, 0, '#86b85c'); ctx.globalAlpha = 1; }
+// ---------- the stone tablet (level gate and Götti-Quiz) ----------
+// The slab itself (sediment layers, mottling, grain, pits, cracks, bevel, carved border, studs) never changes, so it is painted once into a cached canvas.
+// Only the theme decoration on top (moss and vines, frost and icicles, glowing lava cracks, snow and holly, sand and shells, seaweed, ...) is drawn live.
+const TABLET_M = 18, tabletCache = { c: null, rs: 0, w: 0, h: 0 }, crackMemo = {};
+const TABLET_TINT = ['rgba(60,120,60,.10)', 'rgba(200,110,50,.16)', 'rgba(150,200,255,.14)', 'rgba(110,40,20,.2)', 'rgba(170,60,60,.08)', 'rgba(230,200,130,.14)', 'rgba(40,120,160,.18)', 'rgba(160,180,210,.12)'];
+function crackLines(x, y, ang, len, seed, depth) { // a seeded, wandering crack with side branches: a list of polylines (memoised, the shapes never change)
+  const key = [x, y, ang, len, seed, depth].join(); if (crackMemo[key]) return crackMemo[key];
+  const pts = [[x, y]], out = [pts]; let k = 0;
+  for (let d = 0; d < len; d += 9) {
+    ang += (hash(seed + k++) - 0.5) * 0.9; x += Math.cos(ang) * 9; y += Math.sin(ang) * 9; pts.push([x, y]);
+    if (depth > 0 && k % 3 === 0 && hash(seed + k * 7) > 0.35) out.push(...crackLines(x, y, ang + (hash(seed + k) > 0.5 ? 0.9 : -0.9), len * 0.4 - d * 0.3, seed + k * 13, depth - 1));
+  }
+  return crackMemo[key] = out.filter(l => l.length > 1);
+}
+function strokeLines(lines, dx = 0, dy = 0) { ctx.beginPath(); for (const l of lines) { ctx.moveTo(l[0][0] + dx, l[0][1] + dy); for (let i = 1; i < l.length; i++) ctx.lineTo(l[i][0] + dx, l[i][1] + dy); } ctx.stroke(); }
+function paintStone(w, h) { // the slab in its own coordinates: 0,0 is its top left corner
+  ctx.save(); rr(0, 10, w, h, 30); ctx.fillStyle = 'rgba(0,0,0,.4)'; ctx.fill(); ctx.restore();
+  rr(0, 0, w, h, 30); ctx.fillStyle = vgrad(0, h, '#a4abb4', '#7b838d', '#555c66'); ctx.fill();
+  ctx.save(); rr(0, 0, w, h, 30); ctx.clip();
+  for (let i = 0; i < 16; i++) { // sediment layers: wavy bands, some lighter, some darker
+    const y0 = hash(i * 3 + 1) * h, th = 6 + hash(i * 3 + 2) * 26;
+    ctx.fillStyle = hash(i * 3 + 3) > 0.5 ? 'rgba(255,255,255,.05)' : 'rgba(0,0,0,.06)'; ctx.beginPath(); ctx.moveTo(0, y0);
+    for (let x = 0; x <= w; x += 25) ctx.lineTo(x, y0 + Math.sin(x * 0.013 + i * 2.1) * 7 + Math.sin(x * 0.041 + i) * 2.5);
+    for (let x = w; x >= 0; x -= 25) ctx.lineTo(x, y0 + th + Math.sin(x * 0.011 + i * 1.3) * 7);
+    ctx.closePath(); ctx.fill();
+  }
+  for (let i = 0; i < 46; i++) { // soft mottling
+    const bx = hash(i + 100) * w, by = hash(i + 200) * h, br = 30 + hash(i + 300) * 70, g = ctx.createRadialGradient(bx, by, 0, bx, by, br);
+    g.addColorStop(0, hash(i + 400) > 0.5 ? 'rgba(20,24,32,.10)' : 'rgba(255,255,255,.08)'); g.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = g; ctx.fillRect(bx - br, by - br, br * 2, br * 2);
+  }
+  for (let i = 0; i < 1500; i++) { ctx.globalAlpha = 0.04 + hash(i + 500) * 0.1; ctx.fillStyle = hash(i + 600) > 0.5 ? '#fff' : '#000'; const s = 0.6 + hash(i + 700) * 1.6; ctx.fillRect(hash(i) * w, hash(i + 9) * h, s, s); } ctx.globalAlpha = 1; // grain
+  for (let i = 0; i < 36; i++) { const px = hash(i + 800) * w, py = hash(i + 900) * h, pr = 1.5 + hash(i + 1000) * 3.5; ell(px, py + 1, pr, pr * 0.75, 0, 'rgba(255,255,255,.22)'); ell(px, py, pr, pr * 0.75, 0, 'rgba(25,30,38,.45)'); } // pits
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  for (const [cx, cy, ca, cl, cs] of [[w - 92, 0, 1.9, 120, 3], [0, h - 124, 0.25, 110, 11], [w * 0.62, h, -1.7, 70, 21], [w, h * 0.58, 3.0, 60, 31], [34, 0, 1.3, 60, 41]]) { // cracks: a dark line with a light edge beside it
+    const ls = crackLines(cx, cy, ca, cl, cs, 2);
+    ctx.strokeStyle = 'rgba(255,255,255,.25)'; ctx.lineWidth = 1.2; strokeLines(ls, 1, 1.6);
+    ctx.strokeStyle = 'rgba(18,22,28,.6)'; ctx.lineWidth = 2.2; strokeLines(ls);
+  }
+  let g = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.35, w / 2, h / 2, Math.max(w, h) * 0.65); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(10,14,20,.4)'); ctx.fillStyle = g; ctx.fillRect(0, 0, w, h); // worn, darker edges
+  g = ctx.createLinearGradient(0, 0, w * 0.55, h * 0.55); g.addColorStop(0, 'rgba(255,255,255,.18)'); g.addColorStop(1, 'rgba(255,255,255,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, w, h); // light from the top left
   ctx.restore();
-  rr(x + 14, y + 14, w - 28, h - 28, 22); ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(20,24,30,.55)'; ctx.stroke(); rr(x + 17, y + 17, w - 34, h - 34, 20); ctx.lineWidth = 1.5; ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.stroke();
+  // bevel: lit top and left edge, shaded bottom and right edge
+  ctx.save(); rr(0, 0, w, h, 30); ctx.clip(); g = ctx.createLinearGradient(0, 0, w, h); g.addColorStop(0, 'rgba(255,255,255,.6)'); g.addColorStop(0.45, 'rgba(255,255,255,0)'); g.addColorStop(0.55, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,.55)');
+  rr(2.5, 2.5, w - 5, h - 5, 28); ctx.lineWidth = 6; ctx.strokeStyle = g; ctx.stroke(); ctx.restore();
+  rr(0, 0, w, h, 30); ctx.lineWidth = 4; ctx.strokeStyle = '#262b33'; ctx.stroke();
+  // carved border: a row of small diamonds, then a double groove
+  const dia = (px, py) => { ctx.beginPath(); ctx.moveTo(px, py - 4.5); ctx.lineTo(px + 3.5, py); ctx.lineTo(px, py + 4.5); ctx.lineTo(px - 3.5, py); ctx.closePath(); };
+  for (const [px, py] of (() => { const o = []; for (let x = 50; x <= w - 50; x += 26) o.push([x, 7], [x, h - 7]); for (let y = 50; y <= h - 50; y += 26) o.push([7, y], [w - 7, y]); return o; })()) {
+    dia(px, py + 1); ctx.fillStyle = 'rgba(255,255,255,.3)'; ctx.fill(); dia(px, py); ctx.fillStyle = 'rgba(25,30,38,.55)'; ctx.fill();
+  }
+  rr(14, 15.5, w - 28, h - 28, 22); ctx.lineWidth = 1.6; ctx.strokeStyle = 'rgba(255,255,255,.32)'; ctx.stroke(); // groove: dark line, light edge below it
+  rr(14, 14, w - 28, h - 28, 22); ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(20,24,30,.6)'; ctx.stroke();
+  rr(18, 18, w - 36, h - 36, 19); ctx.lineWidth = 1.4; ctx.strokeStyle = 'rgba(255,255,255,.28)'; ctx.stroke();
+  for (const [sx, sy] of [[w - 26, 26], [26, h - 26], [w - 26, h - 26]]) { // carved studs in three corners (the rune medallion sits in the fourth)
+    circle(sx, sy + 1.5, 10, 'rgba(255,255,255,.3)'); circle(sx, sy, 10, '#2a3038'); const sg = ctx.createRadialGradient(sx - 3, sy - 3, 1, sx, sy, 8); sg.addColorStop(0, '#c4cad2'); sg.addColorStop(1, '#6a727d'); ctx.fillStyle = sg; ctx.beginPath(); ctx.arc(sx, sy, 7.5, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = 'rgba(20,24,30,.55)'; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(sx - 4, sy); ctx.lineTo(sx + 4, sy); ctx.moveTo(sx, sy - 4); ctx.lineTo(sx, sy + 4); ctx.stroke();
+  }
+}
+function tabletAccent(wi, w, h) { // live theme decoration on the slab, in slab coordinates. The answers fill x 54..644, so the decoration lives in the side margins.
+  const sway = k => Math.sin(T * 1.6 + k) * 3, moss = (mx, my, mr, a = 0.55) => { ctx.globalAlpha = a; ell(mx, my, mr, mr * 0.45, 0, '#5f8f46'); ell(mx + 8, my - 4, mr * 0.6, mr * 0.25, 0, '#86b85c'); ctx.globalAlpha = 1; };
+  const snow = (n, hh) => { ctx.fillStyle = '#f4f8ff'; ctx.beginPath(); ctx.moveTo(0, 0); for (let x = 0; x <= w; x += 14) ctx.lineTo(x, hh * (0.55 + 0.45 * hash(x * 0.37 + n))); ctx.lineTo(w, 0); ctx.closePath(); ctx.fill(); ctx.fillStyle = 'rgba(150,175,215,.35)'; ctx.fillRect(0, hh * 0.9, w, 2); };
+  const sand = () => { for (const [sx, sy, sr] of [[22, h - 10, 74], [w - 26, h - 8, 70], [w * 0.5, h + 6, 100]]) { ctx.globalAlpha = 0.9; ell(sx, sy, sr, sr * 0.34, 0, '#e3cf9a'); ell(sx + 6, sy - 5, sr * 0.6, sr * 0.16, 0, '#f2e2b6'); ctx.globalAlpha = 1; } };
+  const vine = (vx, dir) => { ctx.strokeStyle = '#2f6a2a'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(vx, 112); for (let y = 112; y <= 380; y += 12) ctx.lineTo(vx + dir * 6 * Math.sin(y * 0.09), y); ctx.stroke();
+    for (let y = 124, i = 0; y <= 372; y += 19, i++) { const lx = vx + dir * 6 * Math.sin(y * 0.09), sd = i % 2 ? 1 : -1; ell(lx + sd * 10, y, 10, 4, sd * 0.5, '#4f9a45'); ell(lx + sd * 10, y - 1, 6, 1.8, sd * 0.5, '#7cc46a'); if (i % 4 === 1) { circle(lx - sd * 5, y + 7, 5, '#e8506a'); circle(lx - sd * 5, y + 7, 2.2, '#ffd34d'); } } };
+  const sideFrost = () => { for (let y = 120; y < h - 30; y += 26) { ctx.globalAlpha = 0.4 + 0.2 * hash(y); ell(0, y, 12 + hash(y + 1) * 10, 11, 0, '#eef6ff'); ell(w, y + 13, 12 + hash(y + 2) * 10, 11, 0, '#eef6ff'); } ctx.globalAlpha = 1; };
+  switch (wi) {
+    case 0: // Dschungel: moss and flowering vines along both sides
+      moss(22, h - 18, 50); moss(w - 30, h - 12, 42); moss(60, 6, 30); vine(12, 1); vine(w - 12, -1); break;
+    case 1: // Canyon: red dust, rust lichen, a small cactus
+      sand(); for (let i = 0; i < 18; i++) { ctx.globalAlpha = 0.5; circle(hash(i + 60) * w, hash(i + 70) < 0.5 ? 8 + hash(i + 80) * 30 : h - 10 - hash(i + 90) * 40, 3 + hash(i + 50) * 5, i % 2 ? '#d9802e' : '#e8a24a'); } ctx.globalAlpha = 1;
+      ctx.fillStyle = '#4f9a55'; ctx.strokeStyle = '#2b5f33'; ctx.lineWidth = 2; for (const [ax, ay, aw, ah] of [[w - 36, h - 96, 14, 86], [w - 58, h - 70, 10, 30], [w - 22, h - 58, 10, 26]]) { rr(ax, ay, aw, ah, 6); ctx.fill(); ctx.stroke(); }
+      ctx.fillStyle = '#f08a4a'; circle(w - 29, h - 98, 4, '#f08a4a'); break;
+    case 2: // Eiszeit: snow cap, icicles, frost banks climbing the sides
+      snow(2, 14); sideFrost();
+      for (const [ix, il] of [[10, 52], [28, 30], [316, 30], [336, 18], [354, 38], [668, 28], [684, 54]]) { const g = ctx.createLinearGradient(0, 0, 0, il); g.addColorStop(0, 'rgba(240,250,255,.97)'); g.addColorStop(1, 'rgba(150,205,240,.6)'); ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(ix - 7, 8); ctx.lineTo(ix + 7, 8); ctx.lineTo(ix, 8 + il); ctx.closePath(); ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.fillRect(ix - 3.5, 9, 2, il * 0.55); }
+      for (const [fx, fy] of [[24, h - 14], [w - 26, h - 12]]) { ctx.globalAlpha = 0.75; ell(fx, fy, 64, 26, 0, '#eef6ff'); ctx.globalAlpha = 1; } break;
+    case 3: { // Vulkan: soot and glowing lava cracks running down the sides
+      ctx.globalAlpha = 0.4; ell(w / 2, h + 6, w * 0.45, 30, 0, '#1b1212'); ctx.globalAlpha = 1;
+      const pulse = 0.65 + 0.35 * Math.sin(T * 2.4); ctx.save(); ctx.beginPath(); ctx.rect(0, 0, 36, h); ctx.rect(w - 56, 0, 56, h); ctx.clip(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      for (const [cx, cy, ca, cl, cs] of [[0, h - 30, -1.2, 230, 71], [w, 110, 1.75, 240, 81], [18, 124, 1.5, 150, 101], [w - 20, h, -1.7, 150, 91]]) { const ls = crackLines(cx, cy, ca, cl, cs, 2); if (!LOWFX) { ctx.shadowColor = '#ff6a10'; ctx.shadowBlur = 14 * pulse; } ctx.strokeStyle = `rgba(255,${110 + 70 * pulse | 0},30,${0.6 + 0.4 * pulse})`; ctx.lineWidth = 4; strokeLines(ls); ctx.shadowBlur = 0; ctx.strokeStyle = 'rgba(255,235,160,.95)'; ctx.lineWidth = 1.6; strokeLines(ls); }
+      ctx.restore(); break; }
+    case 4: // Weihnacht: snow cap, snow banks and big holly sprigs
+      snow(4, 16); for (const [fx, fy] of [[22, h - 12], [w - 24, h - 10]]) { ctx.globalAlpha = 0.9; ell(fx, fy, 66, 24, 0, '#f4f8ff'); ctx.globalAlpha = 1; }
+      for (const [hx, hy, hs] of [[30, h - 70, 1], [w - 30, h - 84, -1], [w - 28, 150, -1]]) { for (const a of [-0.9, 0, 0.9]) { ctx.save(); ctx.translate(hx, hy); ctx.rotate(a * hs - 1.2 * hs); ell(15 * hs, 0, 17, 7, 0, '#2f7a3a'); ell(15 * hs, 0, 11, 2.4, 0, '#58b060'); ctx.restore(); } for (const [bx, by] of [[0, 0], [9 * hs, 4], [-4 * hs, 8]]) { circle(hx + bx, hy + by, 5.4, '#d8283a'); circle(hx + bx - 1.4, hy + by - 1.6, 1.8, '#ff9aa4'); } }
+      break;
+    case 5: // Strand: sand drifts, a scallop shell and a starfish, and a bit of rope
+      sand(); ctx.save(); ctx.translate(w - 28, h - 62); ctx.scale(1.3, 1.3); ctx.fillStyle = '#f6c9b8'; ctx.strokeStyle = '#c98a78'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(0, 8); ctx.arc(0, 8, 19, Math.PI, 0); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.beginPath(); for (let i = -2; i <= 2; i++) { ctx.moveTo(0, 8); ctx.lineTo(i * 8, -9 + Math.abs(i) * 2); } ctx.stroke(); ctx.restore();
+      ctx.save(); ctx.translate(30, h - 64); ctx.rotate(-0.2); ctx.scale(1.4, 1.4); ctx.fillStyle = '#f0884a'; ctx.beginPath(); for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, r = i % 2 ? 5 : 14; ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r); } ctx.closePath(); ctx.fill(); ctx.strokeStyle = '#b3501c'; ctx.lineWidth = 1.2; ctx.stroke(); ctx.restore();
+      for (const rx of [14, w - 14]) { ctx.strokeStyle = '#c9a56a'; ctx.lineWidth = 4; ctx.beginPath(); for (let y = 110; y < 320; y += 7) { ctx.moveTo(rx - 3, y); ctx.lineTo(rx + 3, y + 5); } ctx.stroke(); } break;
+    case 6: // Unterwasser: tall swaying seaweed in the side margins, barnacles and rising bubbles
+      ctx.lineCap = 'round'; for (const [sx, n, col] of [[20, 4, '#2f9a5a'], [44, 3, '#3fb870'], [w - 22, 4, '#2f9a5a'], [w - 46, 3, '#3fb870']]) for (let k = 0; k < n; k++) { const bx = sx + (k - 1) * 8, hh = 90 + 38 * k; ctx.strokeStyle = col; ctx.lineWidth = 6 - k; ctx.beginPath(); ctx.moveTo(bx, h - 6); ctx.bezierCurveTo(bx + sway(sx + k) * 2, h - 6 - hh * 0.35, bx + sway(sx + k + 2) * 3, h - 6 - hh * 0.7, bx + sway(sx + k + 4) * 3, h - 6 - hh); ctx.stroke(); }
+      for (let i = 0; i < 12; i++) circle(w - 40 + hash(i + 3) * 30, 120 + hash(i + 4) * 70, 1.8 + hash(i) * 1.8, i % 3 ? '#d8d2c2' : '#bfb8a6'); // barnacles
+      for (let i = 0; i < 5; i++) { const u = (T * 0.1 + i * 0.2) % 1; ctx.globalAlpha = 0.7 * Math.sin(u * Math.PI); ctx.strokeStyle = '#e8fbff'; ctx.lineWidth = 1.8; ctx.beginPath(); ctx.arc(12 + i * 3 + sway(i * 2) * 1.5, h - 20 - u * (h - 60), 4 + i, 0, Math.PI * 2); ctx.stroke(); } ctx.globalAlpha = 1; break;
+    case 7: // Berge: a snow cap, lichen, edelweiss
+      snow(7, 12); for (const [lx, ly, lr] of [[24, h - 16, 38], [w - 28, h - 14, 34], [w - 38, 44, 20], [26, 150, 16]]) { ctx.globalAlpha = 0.65; ell(lx, ly, lr, lr * 0.5, 0, '#8aa070'); ell(lx + 5, ly - 3, lr * 0.55, lr * 0.25, 0, '#c4cf95'); ctx.globalAlpha = 1; }
+      for (const [ex, ey] of [[26, h - 70], [w - 28, h - 100], [w - 30, 200]]) { ctx.strokeStyle = '#4f7a45'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(ex, ey + 30); ctx.lineTo(ex, ey + 4); ctx.stroke(); for (let i = 0; i < 8; i++) ell(ex + Math.cos(i * 0.785) * 9, ey + Math.sin(i * 0.785) * 9, 7, 3, i * 0.785, '#fbfbf2'); circle(ex, ey, 4.4, '#f0d050'); }
+      break;
+  }
+}
+function stoneTablet(x, y, w, h, wi = 0) {
+  const M = TABLET_M, rs = Math.min(2, Math.max(1, DPR * SC)), t = tabletCache;
+  if (!t.c || t.rs !== rs || t.w !== w || t.h !== h) { // (re)paint the slab when the screen scale changes
+    const c = t.c || document.createElement('canvas'); c.width = Math.ceil((w + 2 * M) * rs); c.height = Math.ceil((h + 2 * M) * rs);
+    const old = ctx; ctx = c.getContext('2d'); ctx.setTransform(rs, 0, 0, rs, M * rs, M * rs);
+    try { paintStone(w, h); } finally { ctx = old; }
+    t.c = c; t.rs = rs; t.w = w; t.h = h;
+  }
+  ctx.drawImage(t.c, x - M, y - M, w + 2 * M, h + 2 * M);
+  ctx.save(); ctx.translate(x, y); rr(0, 0, w, h, 30); ctx.clip();
+  ctx.fillStyle = TABLET_TINT[wi] || TABLET_TINT[0]; ctx.fillRect(0, 0, w, h); // each theme tints the stone a little
+  tabletAccent(wi, w, h);
+  ctx.restore();
+}
+// Parchment-and-gold plate (answers, theme cards). state: 0 normal, 1 locked/dimmed, 2 wrong
+function plateBody(x, y, w, h, r, state) {
+  ctx.save(); ctx.fillStyle = 'rgba(0,0,0,.34)'; rr(x, y + 5, w, h, r); ctx.fill(); ctx.restore();
+  const c = state === 2 ? ['#dcb8b0', '#c4908a', '#9c6a64'] : state === 1 ? ['#e6dec8', '#d2c8aa', '#b3a780'] : ['#fcecb8', '#edcb6c', '#c99834'];
+  rr(x, y, w, h, r); ctx.fillStyle = vgrad(y, y + h, c[0], c[1], c[2]); ctx.fill();
+  ctx.save(); rr(x, y, w, h, r); ctx.clip(); ctx.fillStyle = 'rgba(255,255,255,.3)'; ctx.fillRect(x, y, w, h * 0.42);
+  for (let i = 0; i < 46; i++) { ctx.globalAlpha = 0.06 + hash(i + 7) * 0.07; ctx.fillStyle = hash(i + 200) > 0.5 ? '#fff' : '#5a3a10'; ctx.fillRect(x + hash(i) * w, y + hash(i + 9) * h, 1.6, 1.6); } ctx.globalAlpha = 1; // parchment grain
+  ctx.restore();
+  rr(x, y, w, h, r); ctx.lineWidth = 3; ctx.strokeStyle = state === 2 ? '#6a3a36' : '#5b3b14'; ctx.stroke(); rr(x + 4, y + 4, w - 8, h - 8, Math.max(4, r - 4)); ctx.lineWidth = 1.4; ctx.strokeStyle = 'rgba(255,255,255,.45)'; ctx.stroke();
+}
+const GEMS = [['#ff9aa6', '#c8203c', '#6e0c1e'], ['#9ad0ff', '#2a70d4', '#10407e'], ['#a4f4bc', '#2aae64', '#0e5c32']]; // ruby, sapphire, emerald for A, B and C
+function answerPlate(x, y, w, h, label, j, state) {
+  plateBody(x, y, w, h, 24, state);
+  const gx = x + 38, gy = y + h / 2 + 1, gc = state === 2 ? ['#e2e2e2', '#8c8c8c', '#4a4a4a'] : GEMS[j]; // a cut gem on a gold bezel
+  circle(gx, gy + 2.5, 23, 'rgba(0,0,0,.25)'); circle(gx, gy, 23, '#5b3b14'); circle(gx, gy, 20.5, state === 2 ? '#b8a89a' : '#f2cb62');
+  const gg = ctx.createRadialGradient(gx - 6, gy - 7, 2, gx, gy, 17); gg.addColorStop(0, gc[0]); gg.addColorStop(0.55, gc[1]); gg.addColorStop(1, gc[2]); ctx.fillStyle = gg; ctx.beginPath(); ctx.arc(gx, gy, 16.5, 0, Math.PI * 2); ctx.fill();
+  ell(gx - 5.5, gy - 8, 6.5, 3, -0.6, 'rgba(255,255,255,.65)'); ctx.strokeStyle = 'rgba(255,255,255,.22)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(gx, gy, 11, 0.3, 2.6); ctx.stroke();
+  const gl = state === 2 ? '✗' : 'ABC'[j]; txt(gl, gx + 1, gy + 2.5, 22, 'rgba(0,0,0,.45)'); txt(gl, gx, gy + 1, 22, '#fff');
+  txt(label, x + w / 2 + 16, y + h / 2 + 1, 30, state === 2 ? '#6a4a46' : '#2b1a00');
+}
+// The stone riddle tablet: Götti and Chili, the question, three answers, the hint and the solved panel. Used by the level gate (drawOverlay) and the quiz scene.
+// ui: { title, wi (theme: tints the stone and picks its decoration), emblem? (theme emblem instead of the rune coin), dim? (backdrop darkening, default .55), doneLabel, onDone, pips?: ['gold'|'help'|'', ...], at?: index of the current question }
+function drawRiddleTablet(o, ui) {
+  const r = o.r, b0 = buttons.length; o.shake = Math.max(0, o.shake - DT); o.solvedT = o.solved ? (o.solvedT || 0) + DT : 0; o.t += DT;
+  // entrance: the tablet drops in from above and bounces once on landing, Götti and Chili hop in from the left
+  const u = clamp(o.t / 0.6, 0, 1), bn = u < 0.55 ? (u / 0.55) ** 2 : u < 0.8 ? 1 - 0.07 * Math.sin((u - 0.55) / 0.25 * Math.PI) : 1 - 0.015 * Math.sin((u - 0.8) / 0.2 * Math.PI), ty = -(1 - bn) * 560;
+  ctx.fillStyle = `rgba(8,10,24,${(ui.dim == null ? 0.55 : ui.dim) * clamp(o.t / 0.35, 0, 1)})`; ctx.fillRect(0, 0, W, H);
+  // Götti stands beside the tablet and points at it, Chili cheers next to him
+  const hop = Math.abs(Math.sin(o.t * 9)) * 26 * (1 - u), gx0 = -(1 - u) * 220;
+  shadow(130 + gx0, 508, 60, 0.35); oGoetti(130 + gx0, 504 - hop, 1.25, !o.solved || (o.solvedT || 0) < 1.5);
+  { const cj = o.solved || (o.say && o.say.who === 'chili' && o.t - o.say.at < o.say.t) ? Math.abs(Math.sin(T * 9)) * 14 : 0; shadow(52 + gx0, 510, 24, 0.3); chiliFx.joy = cj > 0 ? 1 : 0; oChili(52 + gx0, 506 - cj - hop, 0.85, T * 12, false); chiliFx.joy = 0; }
+  if (o.say) { // speech bubble above Götti / Chili
+    const sy = o.t - o.say.at; if (sy > 0 && sy < o.say.t) {
+      const al = clamp(sy * 5, 0, 1) * clamp((o.say.t - sy) * 5, 0, 1), tx = o.say.who === 'chili' ? 56 : 120; setFont(20); const bw = Math.min(ctx.measureText(o.say.text).width + 30, 200), bx = clamp(tx, bw / 2 + 8, 226 - bw / 2), by = 262 - (o.say.who === 'chili' ? 0 : 0);
+      ctx.save(); ctx.globalAlpha = al; rr(bx - bw / 2, by - 19, bw, 38, 17); ctx.fillStyle = '#fffdf6'; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = '#6b4a2b'; ctx.stroke(); ctx.fillStyle = '#fffdf6'; ctx.beginPath(); ctx.moveTo(tx - 10, by + 17); ctx.lineTo(tx, by + 34); ctx.lineTo(tx + 10, by + 17); ctx.fill(); txt(o.say.text, bx, by + 1, 20, '#3b2410'); ctx.restore();
+    }
+  }
+  ctx.save(); ctx.translate(o.shake > 0 ? Math.sin(T * 60) * 8 * o.shake : 0, ty);
+  stoneTablet(236, 30, 700, 480, ui.wi);
+  // rune medallion: dim until the riddle is solved, then it glows gold
+  const rx = 296, ry = 96, glow = o.solved ? Math.min(1, o.solvedT * 3) : 0;
+  if (glow > 0) { const g = ctx.createRadialGradient(rx, ry, 10, rx, ry, 70); g.addColorStop(0, `rgba(255,224,120,${0.8 * glow})`); g.addColorStop(1, 'rgba(255,224,120,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(rx, ry, 70, 0, Math.PI * 2); ctx.fill(); }
+  if (ui.emblem) drawEmblem(ui.wi, rx, ry - 4, 29); // quiz: the theme's emblem, ringed in gold
+  else {
+  circle(rx, ry, 34, '#4a525e'); circle(rx, ry, 29, glow > 0 ? '#ffd34d' : '#6a7380'); ctx.strokeStyle = glow > 0 ? '#7a5400' : '#2f353e'; ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(rx, ry - 17); ctx.lineTo(rx, ry + 17); ctx.moveTo(rx - 14, ry - 8); ctx.lineTo(rx, ry + 2); ctx.lineTo(rx + 14, ry - 8); ctx.moveTo(rx - 11, ry + 12); ctx.lineTo(rx + 11, ry + 12); ctx.stroke();
+  }
+  const carve = (t, x, y, sz, al = 'left', col = '#f4ecd4') => { txt(t, x + 1.5, y + 2, sz, 'rgba(0,0,0,.55)', al); txt(t, x, y, sz, col, al); };
+  setFont(22); const tw = ctx.measureText(ui.title).width + 34; // title on an engraved plaque
+  rr(338, 61.5, tw, 38, 14); ctx.fillStyle = 'rgba(255,255,255,.22)'; ctx.fill(); rr(338, 60, tw, 38, 14); ctx.fillStyle = 'rgba(16,20,28,.5)'; ctx.fill();
+  carve(ui.title, 355, 80, 22, 'left', '#f2de9c');
+  if (ui.pips) ui.pips.forEach((st, i) => { // quiz: one dot per question (gold = right first time, silver = with help, ringed = this one)
+    const px = 790 + i * 26, cur = i === ui.at, gold = st === 'gold', help = st === 'help'; circle(px, 77.5, 10, 'rgba(255,255,255,.22)'); circle(px, 76, 10, '#2a3038');
+    const pg = ctx.createRadialGradient(px - 2.5, 73, 1, px, 76, 8); pg.addColorStop(0, gold ? '#fff3b8' : help ? '#ffffff' : '#7d8591'); pg.addColorStop(1, gold ? '#dc9a08' : help ? '#8f9cac' : '#3b424c'); ctx.fillStyle = pg; ctx.beginPath(); ctx.arc(px, 76, 7.6, 0, Math.PI * 2); ctx.fill();
+    if (cur) { ctx.strokeStyle = '#ffe9a8'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(px, 76, 12 + Math.sin(T * 6), 0, Math.PI * 2); ctx.stroke(); }
+  });
+  const qs = wrapLines(r.q, 600, 28).length > 3 ? 24 : 28, ql = wrapLines(r.q, 600, qs), by = Math.max(236, 150 + ql.length * (qs + 6) + 14);
+  { // the question sits in an engraved panel: darker stone, shadow along its top edge, a light lip below
+    const qy0 = 150 - qs / 2 - 10, qh = (ql.length - 1) * (qs + 6) + qs + 20;
+    rr(264, qy0 + 2, 632, qh, 16); ctx.fillStyle = 'rgba(255,255,255,.2)'; ctx.fill(); rr(264, qy0, 632, qh, 16); ctx.fillStyle = 'rgba(14,18,26,.4)'; ctx.fill();
+    ctx.save(); rr(264, qy0, 632, qh, 16); ctx.clip(); const ig = ctx.createLinearGradient(0, qy0, 0, qy0 + 16); ig.addColorStop(0, 'rgba(0,0,0,.4)'); ig.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = ig; ctx.fillRect(264, qy0, 632, 16); ctx.restore();
+  }
+  ql.forEach((l, i) => carve(l, 276, 150 + i * (qs + 6), qs, 'left'));
+  if (!o.solved) {
+    o.lock = Math.max(0, (o.lock || 0) - DT); const locked = o.lock > 0;
+    o.order.forEach((ai, j) => {
+      const bad = o.wrong.includes(ai), y = by + j * 74, x = 290;
+      buttons.push({ x, y, w: 590, h: 62, cb: () => { if (!bad && !locked) answer(ai, o); }, label: r.a[ai] });
+      answerPlate(x, y, 590, 62, r.a[ai], j, bad ? 2 : locked ? 1 : 0);
+    });
+    if (!o.hinted && !o.wrong.length) button('💡 Tipp', 612, 52, 146, 40, () => {
+      const bads = [0, 1, 2].filter(i => i !== r.ok); o.wrong.push(bads[Math.floor(Math.random() * 2)]); o.hinted = true;
+      if (!o.quiz && save.amber >= 2) { save.amber -= 2; writeSave(); } o.msg = 'Chili schnuppert: Diese Antwort stimmt nicht!'; SFX.dig();
+    }, { size: 17, color: '#ffe08a' });
+    if (o.msg) carve(locked ? o.msg.replace(/ \(.*\)$/, '') + ' – warte kurz …' : o.msg, 586, 486, 20, 'center', '#ffb4a8');
+  } else {
+    const sy = Math.max(236, 150 + (ql.length - 1) * (qs + 6) + qs / 2 + 14); // a long question pushes the answer banner down instead of being covered by it
+    rr(290, sy, 590, 64, 26); ctx.fillStyle = vgrad(sy, sy + 64, '#c6f4b0', '#8fd678', '#5fb85a'); ctx.fill();
+    ctx.save(); rr(290, sy, 590, 64, 26); ctx.clip(); ctx.fillStyle = 'rgba(255,255,255,.34)'; ctx.fillRect(290, sy, 590, 26); ctx.restore();
+    ctx.lineWidth = 3; rr(290, sy, 590, 64, 26); ctx.strokeStyle = '#2e6a22'; ctx.stroke(); rr(294, sy + 4, 582, 56, 22); ctx.lineWidth = 1.3; ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.stroke();
+    for (const [sx, sy2, ss] of [[318, sy + 14, 9], [850, sy + 48, 8], [836, sy + 10, 6]]) { const tw2 = 0.5 + 0.5 * Math.sin(T * 5 + sx); ctx.fillStyle = `rgba(255,255,255,${0.5 + 0.5 * tw2})`; ctx.beginPath(); for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4, rd = k % 2 ? ss * 0.28 : ss * (0.7 + 0.5 * tw2); ctx.lineTo(sx + Math.cos(a) * rd, sy2 + Math.sin(a) * rd); } ctx.closePath(); ctx.fill(); }
+    txt('✓ ' + r.a[r.ok], 585, sy + 33, 30, '#17420f');
+    const ws = wrapLines(r.why, 610, 24).length > 2 ? 20 : 24, wy = Math.max(340, sy + 90);
+    wrapLines(r.why, 610, ws).forEach((l, i) => carve(l, 585, wy + i * (ws + 6), ws, 'center'));
+    button(ui.doneLabel, 585 - 140, 424, 280, 62, ui.onDone, { size: 28, icon: icon('play') });
+    if (o.pts > 0) { ctx.globalAlpha = clamp(o.solvedT * 4, 0, 1); drawAmber(770, 456, 17); carve('+' + o.pts, 796, 457, 32, 'left', '#ffe08a'); ctx.globalAlpha = 1; } // quiz: the amber this answer paid
+  }
+  ctx.restore();
+  if (o.t < 0.6) buttons.length = b0; // no taps while the tablet is still dropping in
 }
 function drawOverlay() {
   const o = G.overlay, th = WORLDS[G.wi];
@@ -788,51 +980,7 @@ function drawOverlay() {
     txt('Chili meint: Nochmal ab dem letzten Fähnchen!', W / 2, 300, 22, '#6b4a2b', 'center', 'normal');
     button('Nochmal!', 290, 340, 200, 62, retry); button('Kalender', 510, 340, 160, 62, () => go('map'), { color: '#e0d2b0' });
   } else if (o.type === 'riddle') {
-    const r = o.r, b0 = buttons.length; o.shake = Math.max(0, o.shake - DT); o.solvedT = o.solved ? (o.solvedT || 0) + DT : 0; o.t += DT;
-    // entrance: the tablet drops in from above and bounces once on landing, Götti and Chili hop in from the left
-    const u = clamp(o.t / 0.6, 0, 1), bn = u < 0.55 ? (u / 0.55) ** 2 : u < 0.8 ? 1 - 0.07 * Math.sin((u - 0.55) / 0.25 * Math.PI) : 1 - 0.015 * Math.sin((u - 0.8) / 0.2 * Math.PI), ty = -(1 - bn) * 560;
-    ctx.fillStyle = `rgba(8,10,24,${0.55 * clamp(o.t / 0.35, 0, 1)})`; ctx.fillRect(0, 0, W, H);
-    // Götti stands beside the tablet and points at it, Chili cheers next to him
-    const hop = Math.abs(Math.sin(o.t * 9)) * 26 * (1 - u), gx0 = -(1 - u) * 220;
-    shadow(130 + gx0, 508, 60, 0.35); oGoetti(130 + gx0, 504 - hop, 1.25, !o.solved || (o.solvedT || 0) < 1.5);
-    { const cj = o.solved || (o.say && o.say.who === 'chili' && o.t - o.say.at < o.say.t) ? Math.abs(Math.sin(T * 9)) * 14 : 0; shadow(52 + gx0, 510, 24, 0.3); chiliFx.joy = cj > 0 ? 1 : 0; oChili(52 + gx0, 506 - cj - hop, 0.85, T * 12, false); chiliFx.joy = 0; }
-    if (o.say) { // speech bubble above Götti / Chili
-      const sy = o.t - o.say.at; if (sy > 0 && sy < o.say.t) {
-        const al = clamp(sy * 5, 0, 1) * clamp((o.say.t - sy) * 5, 0, 1), tx = o.say.who === 'chili' ? 56 : 120; setFont(20); const bw = Math.min(ctx.measureText(o.say.text).width + 30, 200), bx = clamp(tx, bw / 2 + 8, 226 - bw / 2), by = 262 - (o.say.who === 'chili' ? 0 : 0);
-        ctx.save(); ctx.globalAlpha = al; rr(bx - bw / 2, by - 19, bw, 38, 17); ctx.fillStyle = '#fffdf6'; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = '#6b4a2b'; ctx.stroke(); ctx.fillStyle = '#fffdf6'; ctx.beginPath(); ctx.moveTo(tx - 10, by + 17); ctx.lineTo(tx, by + 34); ctx.lineTo(tx + 10, by + 17); ctx.fill(); txt(o.say.text, bx, by + 1, 20, '#3b2410'); ctx.restore();
-      }
-    }
-    ctx.save(); ctx.translate(o.shake > 0 ? Math.sin(T * 60) * 8 * o.shake : 0, ty);
-    stoneTablet(236, 30, 700, 480);
-    // rune medallion: dim until the riddle is solved, then it glows gold
-    const rx = 296, ry = 96, glow = o.solved ? Math.min(1, o.solvedT * 3) : 0;
-    if (glow > 0) { const g = ctx.createRadialGradient(rx, ry, 10, rx, ry, 70); g.addColorStop(0, `rgba(255,224,120,${0.8 * glow})`); g.addColorStop(1, 'rgba(255,224,120,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(rx, ry, 70, 0, Math.PI * 2); ctx.fill(); }
-    circle(rx, ry, 34, '#4a525e'); circle(rx, ry, 29, glow > 0 ? '#ffd34d' : '#6a7380'); ctx.strokeStyle = glow > 0 ? '#7a5400' : '#2f353e'; ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(rx, ry - 17); ctx.lineTo(rx, ry + 17); ctx.moveTo(rx - 14, ry - 8); ctx.lineTo(rx, ry + 2); ctx.lineTo(rx + 14, ry - 8); ctx.moveTo(rx - 11, ry + 12); ctx.lineTo(rx + 11, ry + 12); ctx.stroke();
-    const carve = (t, x, y, sz, al = 'left', col = '#f4ecd4') => { txt(t, x + 1.5, y + 2, sz, 'rgba(0,0,0,.55)', al); txt(t, x, y, sz, col, al); };
-    carve('Göttis Rätsel-Tor', 350, 80, 22, 'left', '#d9c58a');
-    const qs = wrapLines(r.q, 600, 28).length > 3 ? 24 : 28, ql = wrapLines(r.q, 600, qs), by = Math.max(236, 150 + ql.length * (qs + 6) + 14);
-    ql.forEach((l, i) => carve(l, 276, 150 + i * (qs + 6), qs, 'left'));
-    if (!o.solved) {
-      o.lock = Math.max(0, (o.lock || 0) - DT); const locked = o.lock > 0;
-      o.order.forEach((ai, j) => {
-        const bad = o.wrong.includes(ai), y = by + j * 74, x = 290;
-        button(r.a[ai], x, y, 590, 62, () => { if (!bad && !locked) answer(ai); }, { color: bad ? '#d99a9a' : locked ? '#cdbf9a' : '#e8c26a', size: 30, disabled: false });
-        circle(x + 36, y + 31, 20, bad ? '#8a3b3b' : '#5b3b22'); circle(x + 36, y + 31, 16, bad ? '#b25a5a' : '#7a5230'); txt(bad ? '✗' : 'ABC'[j], x + 36, y + 32, 22, '#ffe9a8');
-      });
-      if (!o.hinted && !o.wrong.length) button('💡 Tipp', 612, 52, 146, 40, () => {
-        const bads = [0, 1, 2].filter(i => i !== r.ok); o.wrong.push(bads[Math.floor(Math.random() * 2)]); o.hinted = true;
-        if (save.amber >= 2) { save.amber -= 2; writeSave(); } o.msg = 'Chili schnuppert: Diese Antwort stimmt nicht!'; SFX.dig();
-      }, { size: 17, color: '#ffe08a' });
-      if (o.msg) carve(locked ? o.msg.replace(/ \(.*\)$/, '') + ' – warte kurz …' : o.msg, 586, 486, 20, 'center', '#ffb4a8');
-    } else {
-      rr(290, 236, 590, 64, 26); ctx.fillStyle = vgrad(236, 300, '#b9f0a2', '#8fd678'); ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = '#2e6a22'; ctx.stroke();
-      txt('✓ ' + r.a[r.ok], 585, 269, 30, '#17420f');
-      const ws = wrapLines(r.why, 610, 24).length > 2 ? 20 : 24;
-      wrapLines(r.why, 610, ws).forEach((l, i) => carve(l, 585, 340 + i * (ws + 6), ws, 'center'));
-      button('Tor öffnen!', 585 - 140, 424, 280, 62, openGate, { size: 28, icon: icon('play') });
-    }
-    ctx.restore();
-    if (o.t < 0.6) buttons.length = b0; // no taps while the tablet is still dropping in
+    drawRiddleTablet(o, { title: 'Göttis Rätsel-Tor', wi: G.wi, doneLabel: 'Tor öffnen!', onDone: openGate });
   } else if (o.type === 'complete') {
     o.t += DT; const lv = LEVELS[G.li];
     panel(150, 24, 660, 492);

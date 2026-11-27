@@ -270,6 +270,7 @@ function musicOpts() { // vol: fade target (pause and results duck the song, dea
   const o = { vol: 1, lift: 0, danger: false };
   if (scene === 'ending') { if (E && E.phase === 'party') o.vol = 0.55; return o; } // the jingle plays on top
   if (scene === 'candles') { o.vol = 0.5; return o; } // the song steps back for the candle chimes
+  if (scene === 'quiz') { const ov = Q && Q.phase === 'ask' ? Q.o : null; if (ov) { o.vol = ov.solved ? 0.7 : 0.4; o.think = !ov.solved; } else o.vol = 0.8; return o; } // quiz: like a riddle gate, the song steps back and soft celesta notes carry the thinking
   if (scene !== 'play' || !G) return o;
   const ov = G.overlay;
   if (ov && ov.type !== 'riddle') { o.vol = ov.type === 'pause' || ov.type === 'complete' ? 0.25 : 0; return o; }

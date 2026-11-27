@@ -51,6 +51,7 @@ docs/                    architecture, development and maintenance docs, screens
 ## Testing
 Tests live in `tests/` and run in headless Chromium with service workers blocked.
 - `game.spec.js`: scenes, shop, riddles, endless run, save migration, music engine.
+- `quiz.spec.js`: riddle data integrity and the Götti-Quiz.
 - `levels.spec.js`: an autoplayer (`PLAY`) that must finish **every** level, plus bots for the four bosses.
 - `calendar.spec.js`: door logic with a mocked clock.
 - Use `game.open(saveOverrides)` from `tests/helpers.js` to start with a given save; set `G.startT = 0` and clear `G.coach` to skip intro and tutorial freezes.

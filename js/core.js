@@ -32,9 +32,9 @@ const SAVE_KEY = 'olisDinoRettung.v1';
 // A stored field of the wrong type is dropped so it falls back to its default: a damaged, hand-edited or
 // imported save must not be able to crash the game later.
 const SAVE_TYPES = { rexName: 's', babyName: 's', fabioName: 's', oliName: 's', nick: 's',
-  unlocked: 'n', amber: 'n', treasureNew: 'n', volMusic: 'n', volSfx: 'n', dailyLast: 'n', dailyStreak: 'n', dailyBoardDay: 'n', dailyBest: 'n', master: 'n', masterNew: 'n', chestSeen: 'n', afterNew: 'n', riddleVer: 'n', candles: 'n',
+  unlocked: 'n', amber: 'n', treasureNew: 'n', volMusic: 'n', volSfx: 'n', dailyLast: 'n', dailyStreak: 'n', dailyBoardDay: 'n', dailyBest: 'n', master: 'n', masterNew: 'n', chestSeen: 'n', afterNew: 'n', riddleVer: 'n', candles: 'n', quizDay: 'n', quizAmber: 'n',
   finished: 'f', muted: 'f', tutorialDone: 'f', calm: 'f', installHint: 'f',
-  eggs: 'a', medals: 'a', treasures: 'a', tTries: 'a', riddleSeen: 'a', lvE: 'a', lvM: 'a', lvDone: 'a', gifts: 'a', newGifts: 'a', best: 'a', board: 'a', bookSeen: 'a',
+  eggs: 'a', medals: 'a', treasures: 'a', tTries: 'a', riddleSeen: 'a', quizSeen: 'a', quizBest: 'a', lvE: 'a', lvM: 'a', lvDone: 'a', gifts: 'a', newGifts: 'a', best: 'a', board: 'a', bookSeen: 'a',
   learned: 'o', owned: 'o', equip: 'o', storySeen: 'o' };
 const isObj = v => v !== null && typeof v === 'object' && !Array.isArray(v);
 function saveFieldOk(kind, v) {
@@ -55,6 +55,9 @@ function buildSave(raw) { // defaults + stored fields + migrations
   if (!s.gifts) s.gifts = []; if (!s.newGifts) s.newGifts = []; if (s.dayOverride === undefined) s.dayOverride = null;
   s.learned = Object.assign({ duck: 0, stomp: 0, fire: 0, dash: 0, swim: 0, glide: 0 }, s.learned);
   while (s.riddleSeen.length < 8) s.riddleSeen.push([]);
+  if (!s.quizSeen) s.quizSeen = []; while (s.quizSeen.length < 8) s.quizSeen.push([]); // Götti-Quiz: riddles asked per theme (kept apart from the level gates' riddleSeen)
+  if (!s.quizBest) s.quizBest = []; while (s.quizBest.length < 9) s.quizBest.push(0); // best 'right first time' count (0-5) per theme, index 8 = mixed round
+  if (!s.quizDay) s.quizDay = 0; if (!s.quizAmber) s.quizAmber = 0; // amber earned by the quiz on day quizDay (dayKey), capped per day
   while (s.tTries.length < 4) s.tTries.push(0); // per treasure: how often its level was finished without finding it (drives the hints)
   if (!s.owned) s.owned = { skin: [0], hat: [0], fire: [0] };
   if (!s.equip) s.equip = { skin: 0, hat: 0, fire: 0 };
@@ -76,7 +79,8 @@ function buildSave(raw) { // defaults + stored fields + migrations
   if (!s.board) s.board = []; while (s.board.length < 9) s.board.push([]); if (!s.nick) s.nick = '';
   // rows of the per-level / per-theme tables must be arrays of the right shape
   for (const t of [s.lvE, s.lvM, s.eggs, s.medals]) for (let i = 0; i < t.length; i++) { if (!Array.isArray(t[i])) t[i] = []; while (t[i].length < 3) t[i].push(0); }
-  for (const t of [s.riddleSeen]) for (let i = 0; i < t.length; i++) if (!Array.isArray(t[i])) t[i] = [];
+  for (const t of [s.riddleSeen, s.quizSeen]) for (let i = 0; i < t.length; i++) if (!Array.isArray(t[i])) t[i] = [];
+  s.quizBest = s.quizBest.map(v => Number.isFinite(v) ? v : 0);
   s.board = s.board.map(row => Array.isArray(row) ? row.filter(e => isObj(e) && typeof e.n === 'string' && Number.isFinite(e.s)) : []);
   return s;
 }

@@ -333,30 +333,39 @@ function revealEgg(s) {
   burst(s.x, GROUND - 5, 20, ['#8b5a2b', '#a0703a', '#ffe08a'], 260, 900, 7, 0.8);
 }
 const lastRiddle = {}, GATE_INTRO = 1.8, GATE_RUNES = [0.4, 0.85, 1.3]; // seconds of build-up before the riddle appears; when each rune lights
-function openRiddle() {
-  toasts = []; const pool = WORLDS[G.wi].riddles;
-  if (!Array.isArray(save.riddleSeen) || save.riddleVer !== 2) { save.riddleSeen = [[], [], [], []]; save.riddleVer = 2; }
-  // difficulty `d` (1 easy, 2 medium, 3 hard): the world's first level asks easy ones, the second easy or medium, special days (boss or treasure door) hard ones
-  const lv = LEVELS[G.li], special = !!lv && (!!lv.boss || lv.treasure >= 0 || lv.sub === 2), tiers = special ? [3] : lv && lv.sub === 0 ? [1] : [1, 2];
-  let cands = pool.map((_, i) => i).filter(i => tiers.includes(pool[i].d || 2)); if (!cands.length) cands = pool.map((_, i) => i);
-  let seen = (save.riddleSeen[G.wi] || []).filter(i => i < pool.length);
+// Picks a riddle index: among the pool's riddles of the wanted difficulty tiers (the whole pool if a tier is empty) it prefers ones not in `seen`
+// (the oldest repeats come back once all were seen), never the one asked last and never one in `skip`. Returns the pick and the updated seen list.
+function pickRiddle(pool, tiers, seen, skip = []) {
+  const all = pool.map((_, i) => i).filter(i => !skip.includes(i));
+  let cands = all.filter(i => tiers.includes(pool[i].d || 2)); if (!cands.length) cands = all;
+  seen = seen.filter(i => i < pool.length);
   const prev = seen[seen.length - 1];
   if (cands.every(i => seen.includes(i))) seen = seen.filter(i => !cands.includes(i));
   let free = cands.filter(i => !seen.includes(i));
   if (free.length > 1) free = free.filter(i => i !== prev);
   const k = free[Math.floor(Math.random() * free.length)];
-  seen = seen.filter(i => i !== k); seen.push(k); save.riddleSeen[G.wi] = seen; writeSave();
-  const r = pool[k]; lastRiddle[G.wi] = r;
+  seen = seen.filter(i => i !== k); seen.push(k);
+  return { k, seen };
+}
+function openRiddle() {
+  toasts = []; const pool = WORLDS[G.wi].riddles;
+  if (!Array.isArray(save.riddleSeen) || save.riddleVer !== 2) { save.riddleSeen = [[], [], [], []]; save.riddleVer = 2; }
+  // difficulty `d` (1 easy, 2 medium, 3 hard): the world's first level asks easy ones, the second easy or medium, special days (boss or treasure door) hard ones
+  const lv = LEVELS[G.li], special = !!lv && (!!lv.boss || lv.treasure >= 0 || lv.sub === 2), tiers = special ? [3] : lv && lv.sub === 0 ? [1] : [1, 2];
+  const pk = pickRiddle(pool, tiers, save.riddleSeen[G.wi] || []);
+  save.riddleSeen[G.wi] = pk.seen; writeSave();
+  const r = pool[pk.k]; lastRiddle[G.wi] = r;
   G.overlay = { type: 'riddle', r, order: [0, 1, 2].sort(() => Math.random() - 0.5), wrong: [], msg: '', shake: 0, solved: false, lock: 0, hinted: false, t: 0, tries: 0, say: { who: 'goetti', text: 'Rätsel-Zeit!', at: 0.55, t: 2.2 } };
 }
-function answer(i) {
-  const o = G.overlay, r = o.r;
-  if (i === r.ok) { SFX.right(); SFX.riddleWin(); o.solved = true; o.msg = ''; o.say = { who: 'chili', text: pick(['Juhu, geschafft!', 'Du bist so schlau!', 'Hoppla, richtig!']), at: o.t + 0.2, t: 2.4 }; burst(G.cam + W / 2, 200, 40, ['#ffd740', '#ff5252', '#69f0ae', '#40c4ff', '#fff'], 450, 600, 7, 1.2); }
+// `o` is the riddle state: the gate's overlay (G.overlay) or a quiz question (o.quiz). In the quiz a miss never costs amber and the burst is drawn in screen space.
+function answer(i, o = G.overlay) {
+  const r = o.r, bx = (o.quiz ? 0 : G.cam) + W / 2;
+  if (i === r.ok) { SFX.right(); SFX.riddleWin(); o.solved = true; o.msg = ''; o.say = { who: 'chili', text: pick(['Juhu, geschafft!', 'Du bist so schlau!', 'Hoppla, richtig!']), at: o.t + 0.2, t: 2.4 }; burst(bx, 200, 40, ['#ffd740', '#ff5252', '#69f0ae', '#40c4ff', '#fff'], 450, 600, 7, 1.2); if (o.quiz) quizSolved(o); }
   else {
-    // gentle on kids: the first miss is free and short, only repeated misses cost one amber
+    // gentle on kids: the first miss is free and short, only repeated misses cost one amber (not in the quiz)
     SFX.wrong(); if (!o.wrong.includes(i)) o.wrong.push(i); o.msg = (r.wrongMsg && r.wrongMsg[i]) || (r.trick ? 'Achtung, Trickfrage! Lies nochmal genau.' : 'Nicht ganz – denk nochmal nach!'); o.shake = 0.4;
     o.lock = 1; o.tries++; o.say = { who: 'chili', text: pick(['Nicht schlimm!', 'Du schaffst das!', 'Probier nochmal!', 'Fast! Weiter so!']), at: o.t, t: 2 }; setTimeout(() => SFX.chirp(), 250);
-    if (o.tries > 1 && save.amber > 0) { save.amber--; writeSave(); o.msg += ' (−1 Bernstein)'; }
+    if (!o.quiz && o.tries > 1 && save.amber > 0) { save.amber--; writeSave(); o.msg += ' (−1 Bernstein)'; }
   }
 }
 function openGate() { G.overlay = null; G.gateOpening = true; SFX.gateRumble(); G.shake = Math.max(G.shake, 0.35); toast('Das Tor geht auf!', '#9cff8a'); burst(G.L.gateX - 10, GROUND - 200, 50, ['#ffd740', '#ff5252', '#69f0ae', '#40c4ff', '#fff'], 500, 700, 8, 1.4); }
