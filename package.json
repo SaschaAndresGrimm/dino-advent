@@ -2,7 +2,7 @@
   "name": "dino-advent",
   "version": "1.0.0",
   "description": "Oli & Fabios Dino-Advent: a browser advent-calendar game with 24 daily dino levels",
-  "license": "MIT",
+  "license": "PolyForm-Noncommercial-1.0.0",
   "private": true,
   "repository": { "type": "git", "url": "git+https://github.com/SaschaAndresGrimm/dino-advent.git" },
   "engines": { "node": ">=20" },

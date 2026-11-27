@@ -74,4 +74,4 @@ Quick start: `npm install && npx playwright install chromium && npm run serve`, 
 
 ## Credits
 
-A Christmas present for Oli and Fabio. Licensed under the [MIT License](LICENSE). Plain HTML, Canvas 2D and synthesised sound: no build step, no external assets, no tracking.
+A Christmas present for Oli and Fabio. Licensed under the [PolyForm Noncommercial License 1.0.0](LICENSE): free for noncommercial use only. Plain HTML, Canvas 2D and synthesised sound: no build step, no external assets, no tracking.
