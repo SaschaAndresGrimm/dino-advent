@@ -79,15 +79,16 @@ const SFX = {
   jump() { tone(330, 0.16, 'square', 0.07, 660); },
   jump2() { tone(500, 0.16, 'square', 0.07, 950); },
   roar() { // a real roar: a sharp breath, a chopped (growling) throat that swells up and falls away, a bright rasp, a sub boom and a rumbling tail
-    bus = 'sfx'; duck(0.25, 0.9); // never on the music bus (a stray bus would make it as quiet as a faded song) noise(0.16, 0.55, 2600, 0, 'bandpass'); noise(1.2, 0.5, 1100, 0.03, 'lowpass', 0.12); noise(0.9, 0.22, 2400, 0.1, 'bandpass', 0.15);
-    tone(85, 1.3, 'sawtooth', 0.3, null, 0, { att: 0.07, hold: 1, det: 14, lp: 1100, lpTo: 260, path: [[0.22, 190], [0.7, 150], [1.3, 52]], am: [34, 0.65] });
-    tone(170, 1.2, 'square', 0.1, null, 0.02, { att: 0.07, hold: 1, lp: 3000, lpTo: 600, path: [[0.22, 380], [0.7, 300], [1.2, 105]], am: [58, 0.8] });
-    tone(58, 1.15, 'sine', 0.32, 36, 0, { att: 0.04 }); noise(0.6, 0.2, 260, 0.85); },
+    bus = 'sfx'; duck(0.25, 0.9); // never on the music bus (a stray bus would make it as quiet as a faded song)
+    noise(0.16, 0.55, 2600, 0, 'bandpass'); noise(0.12, 0.5, 900, 0, 'lowpass'); noise(1.2, 0.5, 1100, 0.03, 'lowpass', 0.03); noise(0.9, 0.22, 2400, 0.1, 'bandpass', 0.05); // the first 50 ms already hit hard: the sound must start the moment the button is pressed
+    tone(85, 1.3, 'sawtooth', 0.3, null, 0, { att: 0.012, hold: 1, det: 14, lp: 1100, lpTo: 260, path: [[0.22, 190], [0.7, 150], [1.3, 52]], am: [34, 0.65] });
+    tone(170, 1.2, 'square', 0.1, null, 0, { att: 0.012, hold: 1, lp: 3000, lpTo: 600, path: [[0.22, 380], [0.7, 300], [1.2, 105]], am: [58, 0.8] });
+    tone(58, 1.15, 'sine', 0.32, 36, 0, { att: 0.01 }); noise(0.6, 0.2, 260, 0.85); },
   roarWater() { // the roar underwater: muffled and bubbly, but as big as the land roar (a deep chopped growl, a sub boom, a surge of water, bubbles on top)
-    bus = 'sfx'; duck(0.3, 0.8); noise(0.14, 0.45, 1800, 0, 'bandpass'); noise(1.0, 0.6, 420, 0.02, 'lowpass', 0.1);
-    tone(80, 1.1, 'sawtooth', 0.34, null, 0, { att: 0.06, hold: 1, det: 14, lp: 700, lpTo: 200, path: [[0.2, 170], [0.6, 135], [1.1, 50]], am: [30, 0.6] });
-    tone(160, 0.9, 'square', 0.1, null, 0.02, { att: 0.06, hold: 1, lp: 1200, lpTo: 400, path: [[0.2, 340], [0.9, 100]], am: [52, 0.7] });
-    tone(55, 1.0, 'sine', 0.34, 34, 0, { att: 0.04 }); noise(0.5, 0.2, 200, 0.7);
+    bus = 'sfx'; duck(0.3, 0.8); noise(0.14, 0.45, 1800, 0, 'bandpass'); noise(1.0, 0.6, 420, 0.02, 'lowpass', 0.03);
+    tone(80, 1.1, 'sawtooth', 0.34, null, 0, { att: 0.012, hold: 1, det: 14, lp: 700, lpTo: 200, path: [[0.2, 170], [0.6, 135], [1.1, 50]], am: [30, 0.6] });
+    tone(160, 0.9, 'square', 0.1, null, 0, { att: 0.012, hold: 1, lp: 1200, lpTo: 400, path: [[0.2, 340], [0.9, 100]], am: [52, 0.7] });
+    tone(55, 1.0, 'sine', 0.34, 34, 0, { att: 0.01 }); noise(0.5, 0.2, 200, 0.7);
     for (let i = 0; i < 6; i++) { const f = 420 + Math.random() * 520; tone(f, 0.08, 'sine', 0.06, f * 1.8, 0.06 + i * 0.07); } },
   dash() { noise(0.28, 0.35, 2600); tone(300, 0.25, 'sawtooth', 0.07, 900); },
   amber() { tone(1250, 0.07, 'sine', 0.08); tone(1680, 0.1, 'sine', 0.07, null, 0.05); },

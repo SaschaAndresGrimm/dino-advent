@@ -198,6 +198,33 @@ test('roar: 3 s cooldown, smashes boulders but not small rocks', async ({ game }
   expect(r).toEqual({ cd: 3, rock: false, boulder: true });
 });
 
+test('walking enemies turn round at a pit instead of crossing it', async ({ game }) => {
+  await game.open();
+  await game.start(6);
+  const r = await game.eval(() => {
+    const d = window.__dino, G = d.G, p = G.p, out = {};
+    G.L.obs.length = 0; G.L.pits.length = 0; G.L.pits.push({ x: p.wx + 400, w: 140 }); p.inv = 99; G.startT = 0;
+    for (const type of ['raptor', 'compy', 'hopper']) G.L.obs.push({ type, x: p.wx + 700, w: 56, h: 60, spd: 120, ph: 0, hp: 0, alpha: 1 });
+    let min = 1e9; for (let i = 0; i < 360; i++) { d.updatePlay(1 / 60); for (const o of G.L.obs) if (!o.dead) min = Math.min(min, o.x); }
+    out.min = min - (p.wx + 540); out.dirs = G.L.obs.map(o => o.dir);
+    return out;
+  });
+  expect(r.min).toBeGreaterThan(-4); // nobody got past the edge of the pit (right side at +540)
+  expect(r.dirs).toEqual([1, 1, 1]);
+});
+
+test('roar: a press during the cooldown makes no sound and no shock wave', async ({ game }) => {
+  await game.open();
+  await game.start(6);
+  const r = await game.eval(() => {
+    const d = window.__dino, G = d.G, p = G.p; let n = 0; const orig = d.SFX.roar; d.SFX.roar = () => { n++; };
+    G.startT = 0; p.roarCd = 0; d.roar(); const first = n; const cd = p.roarCd;
+    d.roar(); d.roar(); d.SFX.roar = orig;
+    return { first, after: n, same: p.roarCd === cd };
+  });
+  expect(r).toEqual({ first: 1, after: 1, same: true });
+});
+
 test('roar: forgiving timing (early press, late press, reach)', async ({ game }) => {
   await game.open();
   await game.start(6);

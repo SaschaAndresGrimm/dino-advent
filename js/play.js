@@ -113,6 +113,11 @@ function shootFire() {
 }
 const CEILING_HAZARDS = ['low']; // overhangs: fireballs and the dash pass underneath instead of destroying them
 const ROAR_BREAKS = ['boulder', 'rollrock', 'plant'], ROAR_REACH = 420, ROAR_GRACE = 0.22, ROAR_WHIFF = 0.7, ROAR_TARGETS = ['raptor', 'ptero', 'sword', 'hopper', 'jelly', 'urchin']; // what a roar smashes, how far ahead it reaches, how long a touching rock waits for a late roar, the short cooldown after a roar that hit nothing
+function cliffStep(o, step) { // walking enemies never walk into an abyss: at the edge of a pit they turn round (o.dir: -1 = towards Rex, 1 = away)
+  const dir = o.dir || -1, nx = o.x + dir * step, edge = nx + dir * 34, inPit = x => G.L.pits.some(q => x > q.x && x < q.x + q.w);
+  if (inPit(edge) && !inPit(o.x)) { o.dir = -dir; return o.x; }
+  return nx;
+}
 function roarSmash(o) {
   o.dead = true; SFX.smash();
   if (o.type === 'plant') { burst(o.x, GROUND - 30, 20, ['#5fbf4a', '#2f7a2c', '#fff'], 360, 700, 8, 0.8); return; }
@@ -123,14 +128,13 @@ function roarSmash(o) {
 function roarWave() { // the roar is a shock wave, not a single instant: while it lasts it also smashes rocks that come into reach (an early press is not wasted)
   const p = G.p; for (const o of G.L.obs) if (!o.dead && ROAR_BREAKS.includes(o.type)) { const d = o.x - p.wx; if (d > -40 && d < ROAR_REACH) roarSmash(o); }
 }
-let roarSndAt = 0; // when the last roar sound started (ms): a press during the cooldown still roars, but not more often than this
-function roarSound(water) { audio(); roarSndAt = performance.now(); if (water) SFX.roarWater(); else SFX.roar(); } // audio() wakes a context the browser suspended, so the roar can never be mute
+function roarSound(water) { audio(); if (water) SFX.roarWater(); else SFX.roar(); } // audio() wakes a context the browser suspended, so the roar can never be mute
 function roar() {
   const p = G.p;
   if (G.coach) { if (G.coach.type !== 'roar') return; G.coach = null; p.roarCd = 0; }
   if (p.fireT > 0 && !G.boss) { shootFire(); return; }
   if (G.boss && G.boss.state === 'duel') { G.boss.meter = Math.min(1, G.boss.meter + 0.2); roarSound(); G.shake = Math.max(G.shake, 0.35); G.rings.push({ x: p.wx + 80, y: p.y - 100, r: 20, a: 1, c: '255,220,120' }); p.roarT = 0.3; return; }
-  if (p.roarCd > 0 || G.startT > 0.3) { if (p.roarCd > 0 && performance.now() - roarSndAt > 600) roarSound(G.L.swim); return; } // cooling down: no shock wave, but Fabio's BRÜLL always gets a roar
+  if (p.roarCd > 0 || G.startT > 0.3) return; // cooling down (the button is grey): no roar, no sound
   const sw = G.L.swim;
   const sc0 = G.L.secret, ahead = Math.max(...[-1e9, ...G.L.obs.filter(o => !o.dead && !o.scared).map(o => { const d = o.x - p.wx; return d < -40 ? -1e9 : ROAR_BREAKS.includes(o.type) ? (d < ROAR_REACH + G.L.speed * 0.55 ? 1 : -1e9) : ROAR_TARGETS.includes(o.type) && d < ROAR_REACH ? 1 : -1e9; })]) > 0 || (sc0 && sc0.kind === 'tree' && sc0.state === 'idle' && sc0.x - p.wx > -80 && sc0.x - p.wx < 640);
   p.roarT = 0.55; p.roarMax = G.boss ? 1.0 : ahead ? 3.0 : ROAR_WHIFF; p.roarCd = p.roarMax; // a roar that hit nothing (pressed far too early) only cools down briefly, so it can be repeated in time
@@ -526,7 +530,7 @@ function updatePlay(dt) {
       case 'raptor': case 'ptero': case 'compy':
         if (o.flat) { o.flat -= dt; if (o.flat <= 0) { o.flat = 0; o.scared = true; o.vx = 300; o.vy = -300; } break; }
         if (o.scared) { o.x += o.vx * dt; o.vy += 900 * dt; if (o.type !== 'ptero') o.yOff = (o.yOff || 0) + o.vy * dt; else o.y += (o.vy - 300) * dt; o.alpha -= dt * 1.3; o.ph += dt * 18; if (o.alpha <= 0) o.dead = true; break; }
-        if (d < 760 || o.minion) { o.x -= o.spd * dt; o.ph += dt * (o.type === 'ptero' ? 9 : o.type === 'compy' ? 20 : 15); }
+        if (d < 760 || o.minion) { if (o.type === 'ptero') o.x -= o.spd * dt; else o.x = cliffStep(o, o.spd * dt); o.ph += dt * (o.type === 'ptero' ? 9 : o.type === 'compy' ? 20 : 15); }
         if (o.type === 'compy') {
           hb = { x: o.x - 20, y: GROUND - 46, w: 40, h: 44 };
           if (p.inv <= 0 && overlap(pb, hb) && p.vy > 0 && p.y <= hb.y + 30) { squashCompy(o, true); hb = null; }
@@ -538,7 +542,7 @@ function updatePlay(dt) {
       case 'hopper':
         if (o.flat) { o.flat -= dt; if (o.flat <= 0) { o.flat = 0; o.scared = true; o.vx = 300; o.vy = -300; } break; }
         if (o.scared) { o.x += o.vx * dt; o.vy += 900 * dt; o.yOff = (o.yOff || 0) + o.vy * dt; o.alpha = (o.alpha == null ? 1 : o.alpha) - dt * 1.3; if (o.alpha <= 0) o.dead = true; break; }
-        if (d < 800) { o.x -= 95 * dt; o.hp += dt; }
+        if (d < 800) { o.x = cliffStep(o, 95 * dt); o.hp += dt; }
         o.hy = 120 * Math.abs(Math.sin(o.hp * 3.3));
         hb = { x: o.x - 22, y: GROUND - 46 - o.hy, w: 44, h: 44 };
         if (p.inv <= 0 && overlap(pb, hb) && p.vy > 0 && p.y <= hb.y + 28) { o.flat = 0.9; panAt(o.x, SFX.boing); burst(o.x, GROUND - o.hy - 20, 10, ['#9be26a', '#fff'], 220, 600, 6, 0.5); L.amb.push({ x: o.x + 60, y: GROUND - 110, got: false }); p.vy = -720; p.jumps = 1; p.stomp = false; p.spin = 1; hb = null; }
