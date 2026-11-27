@@ -61,6 +61,7 @@ Run both check and test before every commit. Playwright needs `npx playwright in
 
 ## Testing pitfalls
 - `tests/levels.spec.js` has a bot (`PLAY`) that must be able to finish every level. New obstacles usually need a rule there. If it fails with `done:false, steps:60000` the bot is stuck: step it in small chunks and print position, nearby pits/platforms/obstacles.
+- **Fonts differ between machines:** CI (and some tablets) fall back to a wider font than the dev machine's Trebuchet. Never size text or write tests from raw measured widths: wrap and shrink with `fitText`/`fitSize`/`txtFit` (`js/playdraw.js`) and let tests check the fitted result (see `tests/quiz.spec.js`). To reproduce CI locally, temporarily set `FONT` in `js/core.js` to `"DejaVu Sans"`.
 - Tests run with service workers blocked and a fake clock only where they say so (`calendar.spec.js`).
 - Use `game.open(saveOverrides)` from `tests/helpers.js`; set `G.startT = 0` and clear `G.coach` to skip intro and tutorial freezes.
 - Screenshots for visual checks: `page.screenshot` in a temporary spec; set `G.freeze = 9` to hold a frame still. Delete temporary specs afterwards.

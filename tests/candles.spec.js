@@ -81,6 +81,7 @@ test('candles: tapping the wreath on the map replays the last candle without pay
   await game.open({ candles: 2, dayOverride: 9, amber: 10 });
   await game.eval(() => window.__dino.go('map'));
   expect((await state(game)).scene).toBe('map');
+  await page.waitForFunction(() => window.__dino.buttons.length > 0); // the buttons exist after the first drawn frame; a click before that misses the wreath
   await page.mouse.click(570, 50);
   expect(await state(game)).toMatchObject({ scene: 'candles', k: 1, candles: 2 });
   await page.waitForFunction(() => window.__dino.C.phase === 'wait', null, { timeout: 6000 }); // no dialog in a replay

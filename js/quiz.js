@@ -141,16 +141,16 @@ function quizCard(i, x, y, w, h) { // a theme card: the emblem, the name and the
   plateBody(x, y, w, h, 20, open ? 0 : 1);
   ctx.globalAlpha = open ? 1 : 0.4; drawEmblem(i, cx, y + 41, 32); ctx.globalAlpha = 1;
   if (!open) ico('lock', cx, y + 41, 28);
-  txt(th.name, cx, y + 87, 20, open ? '#2b1a00' : '#7a705a');
+  txtFit(th.name, cx, y + 87, 20, open ? '#2b1a00' : '#7a705a', 132);
   for (let k = 0; k < QUIZ_LEN; k++) drawStar(cx - 32 + k * 16, y + 106, 6.5, k < best ? '#e8a010' : 'rgba(90,60,20,.25)');
 }
 function drawQuizPicker() {
   drawQuizBackdrop(-1); quizHeroes();
-  panel(150, 24, 660, 492); txt('Götti-Quiz', W / 2, 62, 40, '#3b2410'); txt('Fünf Rätsel pro Runde – schaffst du alle gleich beim ersten Mal?', W / 2, 96, 17, '#6b4a2b', 'center', 'normal');
+  panel(150, 24, 660, 492); txt('Götti-Quiz', W / 2, 62, 40, '#3b2410'); txtFit('Fünf Rätsel pro Runde – schaffst du alle gleich beim ersten Mal?', W / 2, 96, 17, '#6b4a2b', 580, 'center', 'normal');
   WORLDS.forEach((th, i) => quizCard(i, 169 + (i % 4) * 158, 112 + Math.floor(i / 4) * 136, 148, 126));
   { const b = save.quizBest[8] || 0; button('Alle Themen gemischt' + (b ? ' · ' + b + ' von 5' : ''), 180, 384, 600, 44, () => startQuiz(-1), { size: 21, color: '#ffb27a', icon: icon('star') }); }
   const left = quizLeft();
-  txt(left > 0 ? `3 Bernstein für jede Antwort, die du gleich weisst. Heute noch bis zu ${left} zu holen!` : 'Für heute ist der Quiz-Bernstein aufgebraucht – spielen darfst du trotzdem!', W / 2, 446, 15, '#8a5a00', 'center', 'normal');
+  txtFit(left > 0 ? `3 Bernstein für jede Antwort, die du gleich weisst. Heute noch bis zu ${left} zu holen!` : 'Für heute ist der Quiz-Bernstein aufgebraucht – spielen darfst du trotzdem!', W / 2, 446, 15, '#8a5a00', 600, 'center', 'normal');
   button('Zurück', W / 2 - 80, 458, 160, 40, () => go('map'), { size: 20, color: '#e0d2b0', icon: icon('back') });
 }
 function drawQuizAsk() {
@@ -168,7 +168,7 @@ function drawQuizDone() {
   const b0 = buttons.length; Q.t += DT;
   panel(150, 24, 660, 492);
   otxt(Q.perfect ? 'Alle gleich richtig!' : 'Quiz geschafft!', W / 2, 70, 44, '#ffd34d', '#3b1d00', 10);
-  { const nm = Q.wi >= 0 ? WORLDS[Q.wi].name : 'Alle Themen gemischt'; setFont(20, 'normal'); const nw = ctx.measureText(nm).width; txt(nm, W / 2 + 22, 114, 20, '#6b4a2b', 'center', 'normal'); if (Q.wi >= 0) drawEmblem(Q.wi, W / 2 - nw / 2 - 2, 114, 18); else drawStar(W / 2 - nw / 2 - 2, 114, 17, '#e8a010'); }
+  { const nm = Q.wi >= 0 ? WORLDS[Q.wi].name : 'Alle Themen gemischt', nf = fitSize(nm, 300, 20, 12, 'normal'), nw = ctx.measureText(nm).width; txt(nm, W / 2 + 22, 114, nf, '#6b4a2b', 'center', 'normal'); if (Q.wi >= 0) drawEmblem(Q.wi, W / 2 - nw / 2 - 2, 114, 18); else drawStar(W / 2 - nw / 2 - 2, 114, 17, '#e8a010'); }
   Q.res.forEach((st, i) => { // the five medals pop in one after the other
     const x = W / 2 - 128 + i * 64, u = Q.t - 0.3 - i * 0.24, sc = u < 0 ? 0 : u < 0.22 ? u / 0.22 * 1.3 : u < 0.36 ? 1.3 - (u - 0.22) / 0.14 * 0.3 : 1, gold = st === 'gold';
     if (u > 0 && !Q.popped[i]) { Q.popped[i] = 1; tone([523, 659, 784, 988, 1175][i], 0.25, 'triangle', 0.12); burst(x, 172, gold ? 20 : 10, gold ? ['#ffd34d', '#fff', '#e8a317'] : ['#dfe6ee', '#fff'], 260, 420, 5, 0.8); }
@@ -179,12 +179,12 @@ function drawQuizDone() {
   });
   if (Q.perfect && Q.t > 1.6 && !Q.conf) { Q.conf = 1; burst(W / 2, 110, 70, ['#ffd740', '#ff5252', '#69f0ae', '#40c4ff', '#fff'], 520, 640, 7, 1.5); SFX.right(); }
   ctx.globalAlpha = clamp((Q.t - 0.9) * 2, 0, 1);
-  txt(`${Q.first} von ${QUIZ_LEN} gleich beim ersten Mal richtig`, W / 2, 230, 26, '#3b2410');
+  txtFit(`${Q.first} von ${QUIZ_LEN} gleich beim ersten Mal richtig`, W / 2, 230, 26, '#3b2410', 580);
   txt(Q.newBest ? 'Neuer Rekord!' : `Rekord: ${Math.max(Q.prevBest, Q.first)} von ${QUIZ_LEN}`, W / 2, 266, 22, Q.newBest ? '#2e7d32' : '#6b4a2b');
   drawAmber(W / 2 - 52, 320, 20); txt(`+${Q.gained}`, W / 2 + 4, 320, 34, '#8a5a00', 'left');
   if (Q.bonus > 0) txt(`Bonus für alle fünf: +${Q.bonus}`, W / 2, 360, 17, '#2e7d32');
-  if (Q.capped) txt('Für heute ist der Quiz-Bernstein aufgebraucht – spielen darfst du trotzdem!', W / 2, 390, 15, '#8a5a00', 'center', 'normal');
-  else if (!Q.perfect) txt('Silber heisst: mit Tipp oder zweitem Versuch. Mach es gleich richtig für den vollen Bernstein!', W / 2, 390, 14, '#6b4a2b', 'center', 'normal');
+  if (Q.capped) txtFit('Für heute ist der Quiz-Bernstein aufgebraucht – spielen darfst du trotzdem!', W / 2, 390, 15, '#8a5a00', 600, 'center', 'normal');
+  else if (!Q.perfect) txtFit('Silber heisst: mit Tipp oder zweitem Versuch. Mach es gleich richtig für den vollen Bernstein!', W / 2, 390, 14, '#6b4a2b', 600, 'center', 'normal');
   ctx.globalAlpha = 1;
   button('Nochmal!', 190, 424, 190, 58, () => startQuiz(Q.wi), { size: 24 });
   button('Anderes Thema', 392, 424, 230, 58, () => openQuizPicker(), { size: 20, color: '#ffe08a' });

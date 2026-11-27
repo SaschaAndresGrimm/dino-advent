@@ -18,11 +18,11 @@ test('riddle data: every riddle is well formed, fits the tablet and has enough o
         if (!r.why || !/[.!)]$/.test(r.why)) bad.push(id + ': why');
         if (/ß/.test(r.q + r.a.join('') + r.why)) bad.push(id + ': Swiss spelling (no ß)');
         if (seenQ.has(r.q)) bad.push(id + ': duplicate question'); seenQ.add(r.q);
-        // layout: the question takes at most 4 lines (24 px), a solved explanation at most 3 lines (20 px), an answer must fit its button
-        if (wrapLines(r.q, 600, 24).length > 4) bad.push(id + ': question too long');
-        if (wrapLines(r.why, 610, 20).length > 3) bad.push(id + ': explanation too long');
-        setFont(30); if (r.a.some(a => ctx.measureText(a).width > 470)) bad.push(id + ': answer too wide');
-        if (wrapLines('✓ ' + r.a[0], 560, 30).length > 1) bad.push(id + ': solved answer too wide');
+        // layout (independent of the device font, the game shrinks text to fit): a question takes at most 4 lines, an explanation 3, an answer fits its plate
+        if (fitText(r.q, 600, RIDDLE_Q_STEPS).lines.length > 4) bad.push(id + ': question too long');
+        if (fitText(r.why, 610, RIDDLE_WHY_STEPS).lines.length > 3) bad.push(id + ': explanation too long');
+        for (const a of r.a) { fitSize(a, 440, 30, 18); if (ctx.measureText(a).width > 440) bad.push(id + ': answer too wide'); }
+        fitSize('✓ ' + r.a[0], 540, 30, 18); if (ctx.measureText('✓ ' + r.a[0]).width > 540) bad.push(id + ': solved answer too wide');
       });
       tiers.push(c);
     });
@@ -131,13 +131,15 @@ test('quiz: broken quiz fields in the save fall back to defaults', async ({ game
   expect(r).toEqual({ seen: 8, best: 9, ok: true, day: 0, amber: 0 });
 });
 
-test('quiz: Götti\'s lines fit his speech bubble', async ({ game }) => {
+test('quiz: Götti\'s lines and the title fit their bubble and plaque on any font', async ({ game }) => {
   await game.open();
-  const wide = await game.eval(() => { setFont(20); return [QUIZ_SAY.first, ...QUIZ_SAY.hard, ...QUIZ_SAY.next].filter(t => ctx.measureText(t).width > 168); });
-  expect(wide).toEqual([]);
-  // the title plaque (x 338) must end before the Tipp button (x 612)
-  const tw = await game.eval(() => { setFont(22); return Math.max(...['Göttis Quiz · 5 / 5', 'Göttis Rätsel-Tor'].map(t => 338 + ctx.measureText(t).width + 34)); });
-  expect(tw).toBeLessThan(606);
+  const r = await game.eval(() => {
+    const wide = [QUIZ_SAY.first, ...QUIZ_SAY.hard, ...QUIZ_SAY.next].filter(t => { fitSize(t, 168, 20, 12); return ctx.measureText(t).width > 168; });
+    const ends = ['Göttis Quiz · 5 / 5', 'Göttis Rätsel-Tor'].map(t => { fitSize(t, 236, 22, 14); return 338 + ctx.measureText(t).width + 34; }); // the plaque must end before the Tipp button (x 612)
+    return { wide, max: Math.max(...ends) };
+  });
+  expect(r.wide).toEqual([]);
+  expect(r.max).toBeLessThan(606);
 });
 
 test('quiz: a question pays once and cannot be skipped by a double tap', async ({ game }) => {

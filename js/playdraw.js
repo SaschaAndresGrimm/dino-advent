@@ -869,6 +869,12 @@ function stoneTablet(x, y, w, h, wi = 0) {
   tabletAccent(wi, w, h);
   ctx.restore();
 }
+// Text that has to fit on any device font (the fallback font of a tablet or a CI machine can be 15% wider than the one this was drawn with):
+// fitText picks the largest [size, maxLines] step whose wrapped text stays within its line limit (else the last step); fitSize shrinks a single line to a width.
+const RIDDLE_Q_STEPS = [[28, 3], [24, 4], [21, 4], [18, 4]], RIDDLE_WHY_STEPS = [[24, 2], [20, 3], [17, 3], [15, 3]]; // [font size, max lines] for a question (600 px wide) and its explanation (610 px)
+function fitText(s, maxW, steps) { for (const [size, lines] of steps) { const l = wrapLines(s, maxW, size); if (l.length <= lines) return { size, lines: l }; } const size = steps[steps.length - 1][0]; return { size, lines: wrapLines(s, maxW, size) }; }
+function fitSize(s, maxW, size, min = 12, weight = 'bold') { setFont(size, weight); while (size > min && ctx.measureText(s).width > maxW) { size--; setFont(size, weight); } return size; }
+function txtFit(s, x, y, size, color, maxW, align = 'center', weight = 'bold') { txt(s, x, y, fitSize(s, maxW, size, 10, weight), color, align, weight); }
 // Parchment-and-gold plate (answers, theme cards). state: 0 normal, 1 locked/dimmed, 2 wrong
 function plateBody(x, y, w, h, r, state) {
   ctx.save(); ctx.fillStyle = 'rgba(0,0,0,.34)'; rr(x, y + 5, w, h, r); ctx.fill(); ctx.restore();
@@ -887,7 +893,7 @@ function answerPlate(x, y, w, h, label, j, state) {
   const gg = ctx.createRadialGradient(gx - 6, gy - 7, 2, gx, gy, 17); gg.addColorStop(0, gc[0]); gg.addColorStop(0.55, gc[1]); gg.addColorStop(1, gc[2]); ctx.fillStyle = gg; ctx.beginPath(); ctx.arc(gx, gy, 16.5, 0, Math.PI * 2); ctx.fill();
   ell(gx - 5.5, gy - 8, 6.5, 3, -0.6, 'rgba(255,255,255,.65)'); ctx.strokeStyle = 'rgba(255,255,255,.22)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(gx, gy, 11, 0.3, 2.6); ctx.stroke();
   const gl = state === 2 ? '✗' : 'ABC'[j]; txt(gl, gx + 1, gy + 2.5, 22, 'rgba(0,0,0,.45)'); txt(gl, gx, gy + 1, 22, '#fff');
-  txt(label, x + w / 2 + 16, y + h / 2 + 1, 30, state === 2 ? '#6a4a46' : '#2b1a00');
+  txt(label, x + w / 2 + 16, y + h / 2 + 1, fitSize(label, 440, 30, 18), state === 2 ? '#6a4a46' : '#2b1a00');
 }
 // The stone riddle tablet: Götti and Chili, the question, three answers, the hint and the solved panel. Used by the level gate (drawOverlay) and the quiz scene.
 // ui: { title, wi (theme: tints the stone and picks its decoration), emblem? (theme emblem instead of the rune coin), dim? (backdrop darkening, default .55), doneLabel, onDone, pips?: ['gold'|'help'|'', ...], at?: index of the current question }
@@ -902,8 +908,8 @@ function drawRiddleTablet(o, ui) {
   { const cj = o.solved || (o.say && o.say.who === 'chili' && o.t - o.say.at < o.say.t) ? Math.abs(Math.sin(T * 9)) * 14 : 0; shadow(52 + gx0, 510, 24, 0.3); chiliFx.joy = cj > 0 ? 1 : 0; oChili(52 + gx0, 506 - cj - hop, 0.85, T * 12, false); chiliFx.joy = 0; }
   if (o.say) { // speech bubble above Götti / Chili
     const sy = o.t - o.say.at; if (sy > 0 && sy < o.say.t) {
-      const al = clamp(sy * 5, 0, 1) * clamp((o.say.t - sy) * 5, 0, 1), tx = o.say.who === 'chili' ? 56 : 120; setFont(20); const bw = Math.min(ctx.measureText(o.say.text).width + 30, 200), bx = clamp(tx, bw / 2 + 8, 226 - bw / 2), by = 262 - (o.say.who === 'chili' ? 0 : 0);
-      ctx.save(); ctx.globalAlpha = al; rr(bx - bw / 2, by - 19, bw, 38, 17); ctx.fillStyle = '#fffdf6'; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = '#6b4a2b'; ctx.stroke(); ctx.fillStyle = '#fffdf6'; ctx.beginPath(); ctx.moveTo(tx - 10, by + 17); ctx.lineTo(tx, by + 34); ctx.lineTo(tx + 10, by + 17); ctx.fill(); txt(o.say.text, bx, by + 1, 20, '#3b2410'); ctx.restore();
+      const al = clamp(sy * 5, 0, 1) * clamp((o.say.t - sy) * 5, 0, 1), tx = o.say.who === 'chili' ? 56 : 120, sf = fitSize(o.say.text, 168, 20, 12); const bw = Math.min(ctx.measureText(o.say.text).width + 30, 200), bx = clamp(tx, bw / 2 + 8, 226 - bw / 2), by = 262 - (o.say.who === 'chili' ? 0 : 0);
+      ctx.save(); ctx.globalAlpha = al; rr(bx - bw / 2, by - 19, bw, 38, 17); ctx.fillStyle = '#fffdf6'; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = '#6b4a2b'; ctx.stroke(); ctx.fillStyle = '#fffdf6'; ctx.beginPath(); ctx.moveTo(tx - 10, by + 17); ctx.lineTo(tx, by + 34); ctx.lineTo(tx + 10, by + 17); ctx.fill(); txt(o.say.text, bx, by + 1, sf, '#3b2410'); ctx.restore();
     }
   }
   ctx.save(); ctx.translate(o.shake > 0 ? Math.sin(T * 60) * 8 * o.shake : 0, ty);
@@ -916,15 +922,15 @@ function drawRiddleTablet(o, ui) {
   circle(rx, ry, 34, '#4a525e'); circle(rx, ry, 29, glow > 0 ? '#ffd34d' : '#6a7380'); ctx.strokeStyle = glow > 0 ? '#7a5400' : '#2f353e'; ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(rx, ry - 17); ctx.lineTo(rx, ry + 17); ctx.moveTo(rx - 14, ry - 8); ctx.lineTo(rx, ry + 2); ctx.lineTo(rx + 14, ry - 8); ctx.moveTo(rx - 11, ry + 12); ctx.lineTo(rx + 11, ry + 12); ctx.stroke();
   }
   const carve = (t, x, y, sz, al = 'left', col = '#f4ecd4') => { txt(t, x + 1.5, y + 2, sz, 'rgba(0,0,0,.55)', al); txt(t, x, y, sz, col, al); };
-  setFont(22); const tw = ctx.measureText(ui.title).width + 34; // title on an engraved plaque
+  const tf = fitSize(ui.title, 236, 22, 14), tw = ctx.measureText(ui.title).width + 34; // title on an engraved plaque (shrinks to stay clear of the Tipp button)
   rr(338, 61.5, tw, 38, 14); ctx.fillStyle = 'rgba(255,255,255,.22)'; ctx.fill(); rr(338, 60, tw, 38, 14); ctx.fillStyle = 'rgba(16,20,28,.5)'; ctx.fill();
-  carve(ui.title, 355, 80, 22, 'left', '#f2de9c');
+  carve(ui.title, 355, 80, tf, 'left', '#f2de9c');
   if (ui.pips) ui.pips.forEach((st, i) => { // quiz: one dot per question (gold = right first time, silver = with help, ringed = this one)
     const px = 790 + i * 26, cur = i === ui.at, gold = st === 'gold', help = st === 'help'; circle(px, 77.5, 10, 'rgba(255,255,255,.22)'); circle(px, 76, 10, '#2a3038');
     const pg = ctx.createRadialGradient(px - 2.5, 73, 1, px, 76, 8); pg.addColorStop(0, gold ? '#fff3b8' : help ? '#ffffff' : '#7d8591'); pg.addColorStop(1, gold ? '#dc9a08' : help ? '#8f9cac' : '#3b424c'); ctx.fillStyle = pg; ctx.beginPath(); ctx.arc(px, 76, 7.6, 0, Math.PI * 2); ctx.fill();
     if (cur) { ctx.strokeStyle = '#ffe9a8'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(px, 76, 12 + Math.sin(T * 6), 0, Math.PI * 2); ctx.stroke(); }
   });
-  const qs = wrapLines(r.q, 600, 28).length > 3 ? 24 : 28, ql = wrapLines(r.q, 600, qs), by = Math.max(236, 150 + ql.length * (qs + 6) + 14);
+  const qf = fitText(r.q, 600, RIDDLE_Q_STEPS), qs = qf.size, ql = qf.lines, by = Math.max(236, 150 + ql.length * (qs + 6) + 14);
   { // the question sits in an engraved panel: darker stone, shadow along its top edge, a light lip below
     const qy0 = 150 - qs / 2 - 10, qh = (ql.length - 1) * (qs + 6) + qs + 20;
     rr(264, qy0 + 2, 632, qh, 16); ctx.fillStyle = 'rgba(255,255,255,.2)'; ctx.fill(); rr(264, qy0, 632, qh, 16); ctx.fillStyle = 'rgba(14,18,26,.4)'; ctx.fill();
@@ -949,9 +955,9 @@ function drawRiddleTablet(o, ui) {
     ctx.save(); rr(290, sy, 590, 64, 26); ctx.clip(); ctx.fillStyle = 'rgba(255,255,255,.34)'; ctx.fillRect(290, sy, 590, 26); ctx.restore();
     ctx.lineWidth = 3; rr(290, sy, 590, 64, 26); ctx.strokeStyle = '#2e6a22'; ctx.stroke(); rr(294, sy + 4, 582, 56, 22); ctx.lineWidth = 1.3; ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.stroke();
     for (const [sx, sy2, ss] of [[318, sy + 14, 9], [850, sy + 48, 8], [836, sy + 10, 6]]) { const tw2 = 0.5 + 0.5 * Math.sin(T * 5 + sx); ctx.fillStyle = `rgba(255,255,255,${0.5 + 0.5 * tw2})`; ctx.beginPath(); for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4, rd = k % 2 ? ss * 0.28 : ss * (0.7 + 0.5 * tw2); ctx.lineTo(sx + Math.cos(a) * rd, sy2 + Math.sin(a) * rd); } ctx.closePath(); ctx.fill(); }
-    txt('✓ ' + r.a[r.ok], 585, sy + 33, 30, '#17420f');
-    const ws = wrapLines(r.why, 610, 24).length > 2 ? 20 : 24, wy = Math.max(340, sy + 90);
-    wrapLines(r.why, 610, ws).forEach((l, i) => carve(l, 585, wy + i * (ws + 6), ws, 'center'));
+    txtFit('✓ ' + r.a[r.ok], 585, sy + 33, 30, '#17420f', 540);
+    const wf = fitText(r.why, 610, RIDDLE_WHY_STEPS), ws = wf.size, wy = Math.max(340, sy + 90);
+    wf.lines.forEach((l, i) => carve(l, 585, wy + i * (ws + 6), ws, 'center'));
     button(ui.doneLabel, 585 - 140, 424, 280, 62, ui.onDone, { size: 28, icon: icon('play') });
     if (o.pts > 0) { ctx.globalAlpha = clamp(o.solvedT * 4, 0, 1); drawAmber(770, 456, 17); carve('+' + o.pts, 796, 457, 32, 'left', '#ffe08a'); ctx.globalAlpha = 1; } // quiz: the amber this answer paid
   }
