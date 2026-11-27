@@ -8,7 +8,7 @@ function go(s) {
   if (s === 'tmap') tmapT = 0;
   settingsOpen = false;
   if (scene === 'shop' && s !== 'shop' && save.newGifts.length) { save.newGifts = []; writeSave(); }
-  scene = s; shopConfirm = null; wishShow = -1; endlessPick = false; doorOverlay = null; parentMode = false; titlePress = 0; fadeT = 1; if (s === 'shop') { shopTab = 0; shopSel = save.equip.skin; shopPage = Math.floor(shopSel / 8); shopTalk = { t: 4, text: 'Willkommen! Such dir etwas aus.' }; } parts = []; dialog = null; toasts = [];
+  scene = s; shopConfirm = null; wishShow = -1; endlessPick = false; doorOverlay = null; parentMode = false; titlePress = 0; fadeT = 1; if (s === 'shop') { shopTab = 0; shopSel = save.equip.skin; shopPage = -1; shopTalk = { t: 4, text: 'Willkommen! Such dir etwas aus.' }; } parts = []; dialog = null; toasts = [];
   if (s === 'map' && save.masterNew && save.treasureNew < 0 && !save.afterNew) { save.masterNew = 0; writeSave(); mapFW = 9; SFX.right(); startDialog([
     { who: 'goetti', text: 'Unglaublich, {oli} und {fabio}! Alle 72 Medaillen! Ihr seid die grössten Dino-Meister der Welt!' },
     { who: 'fabio', text: 'Wir sind Meister! Wir sind Meister!' },
@@ -16,7 +16,7 @@ function go(s) {
     { who: 'papi', text: 'Und {rex} strahlt wie Gold!' },
     { who: 'goetti', text: 'Dafür habe ich etwas ganz Besonderes: den Dino-Meister-Anzug und die Meister-Krone. {rex} trägt sie schon – im Laden kannst du sie jederzeit wechseln!' },
   ]); }
-  if (s === 'map' && save.afterNew > 0 && save.treasureNew < 0) { const d = save.afterNew; save.afterNew = 0; writeSave(); startDialog(DAY_AFTER[d] || [], () => { if (d === 6 || d === 12 || d === 18) { tmapNew = d / 6 - 1; go('tmap'); } }); }
+  if (s === 'map' && save.afterNew > 0 && save.treasureNew < 0) { const d = save.afterNew; save.afterNew = 0; writeSave(); startDialog(DAY_AFTER[d] || [], () => { if (d === 6 || d === 12 || d === 18) { tmapNew = d / 6 - 1; go('tmap'); } }, false, { wi: LEVELS[d - 1].wi, boss: LEVELS[d - 1].boss || null, ko: true }); }
   if (s === 'map' && save.treasureNew >= 0) { const k = save.treasureNew; save.treasureNew = -1; writeSave(); chestPop[k] = 1; startDialog([{ who: k === 3 ? 'kiwi' : 'goetti', text: k === 3 ? 'Kiwi! Kiwi! (Kiwi hüpft vor Freude.)' : TREASURES[k].line }].concat(k === 3 ? [{ who: 'goetti', text: TREASURES[3].line }] : []), () => { if (chestFull() && !save.chestSeen) { save.chestSeen = 1; writeSave(); startDialog([{ who: 'goetti', text: 'Meine Schatzkiste ist wieder voll! Gitarre, Velo, Angel und Kiwi – danke, ihr zwei!' }, { who: 'kiwi', text: 'Kiwi! Kiwi! (Kiwi macht einen Freudentanz.)' }], () => chestParty()); } }); }
   if (s === 'map') queueCandle(); // an Advent candle is due: Rex lights it (after any dialog that is already running)
 }
@@ -389,7 +389,7 @@ function finishLevel() {
   if (DAY_AFTER[lv.day] && !wasDone) save.afterNew = lv.day;
   if (!save.master && medalTotal() >= 72) { save.master = 1; save.masterNew = 1; const si = SKINS.findIndex(x => x.gift === 25), hi = HATS.findIndex(x => x.gift === 25); if (!save.owned.skin.includes(si)) save.owned.skin.push(si); if (!save.owned.hat.includes(hi)) save.owned.hat.push(hi); save.equip.skin = si; save.equip.hat = hi; save.newGifts.push('skin:' + si, 'hat:' + hi); }
   save.amber += G.amber; writeSave();
-  G.overlay = { type: 'complete', t: 0, popped: [], cpopped: [] }; SFX.victory(!!lv.boss);
+  G.overlay = { type: 'complete', t: 0, popped: [], cpopped: [], epopped: [], amberShown: 0 }; SFX.victory(!!lv.boss);
 }
 
 function nearMiss(o, hb, pb, p) { // clearing a hazard by a hair pays 2 amber
@@ -473,7 +473,7 @@ function updatePlay(dt) {
   p.inv -= dt; p.roarT -= dt; p.roarCd -= dt;
   if (p.roarT > 0 && !G.boss && !L.swim) roarWave();
   if (p.bubT > 0) { p.bubT -= dt; const wx = p.wx + 80 + (1 - p.bubT / 0.5) * 280; burst(wx, p.y - 100 + (Math.random() - 0.5) * 170, 2, ['#e8ffff', '#bfeaff', '#fff'], 60, -170, 6, 0.9); } // the wave front travels about 280 px ahead
-  G.cam = p.wx - (p.lungeOff || 0) - 270 + G.nudge;
+  G.cam = p.wx - (p.lungeOff || 0) - (270 - ARENA_SHIFT * (G.arena || 0)) + G.nudge; // in a boss arena Rex slides left so the whole boss fits on screen
   if (G.endless) { let tr = 1; for (const tx of L.tierX) if (p.wx >= tx) tr++; if (tr > G.tier) { G.tier = tr; SFX.power(); G.shake = Math.max(G.shake, 0.3); toast(['', '', 'Stufe 2 – mehr Gegner!', 'Stufe 3 – neue Gefahren!', 'Stufe 4 – doppelte Gefahren!'][tr] || `Stufe ${tr} – nur für Profis!`, '#ff9a5a'); }
     G.score = Math.max(G.score, Math.floor((p.wx - 200) / 25) + G.amber * 3); if (G.score >= G.heartAt) { G.heartAt += 500; if (p.hearts < G.maxH) { p.hearts++; SFX.heart(); toast('Ein Herz zurück!', '#ff8a9a'); } else toast(G.score + ' Punkte!', '#ffe08a'); } }
   // tips, checkpoints

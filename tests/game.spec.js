@@ -360,7 +360,10 @@ test('finishing a level shows results and the button returns to the map', async 
   await game.eval(() => { const G = window.__dino.G; G.atGate = true; G.gateOpening = true; G.gateOpen = 1; G.stopped = false; G.p.wx = G.L.gateX + 250; });
   await page.waitForFunction(() => window.__dino.G.overlay && window.__dino.G.overlay.type === 'complete');
   await page.waitForTimeout(300);
-  await page.mouse.click(480, 453);
+  await page.mouse.click(480, 453);                      // the reveal is still running: the first tap only skips ahead ...
+  expect(await game.eval(() => window.__dino.scene)).toBe('play');
+  await page.waitForTimeout(500);
+  await page.mouse.click(480, 453);                      // ... and now the button is there
   expect(await game.eval(() => window.__dino.scene)).toBe('map');
   expect(await game.eval(() => window.__dino.save.lvDone[0])).toBe(1);
   expect(game.errors).toEqual([]);
@@ -1067,4 +1070,69 @@ test('day 1 teaches the double jump: the high ledge needs two taps and the coach
   expect(r.single).toBe(false);
   expect(r.dbl).toBe(true);
   expect(r.seq.slice(0, 2)).toEqual(['jump', 'djump']);
+});
+
+test('toasts show one at a time: a waiting message takes over after about a second', async ({ game }) => {
+  await game.open();
+  await game.start(0);
+  const r = await game.eval(() => {
+    toasts = []; toast('eins'); toast('zwei'); toast('drei'); toast('zwei'); // a duplicate of a waiting toast is ignored
+    const seen = [], len0 = toasts.length;
+    for (let i = 0; i < 360; i++) { drawToasts(); const s = toasts[0] ? toasts[0].text : ''; if (seen[seen.length - 1] !== s) seen.push(s); }
+    return { len0, seen };
+  });
+  expect(r.len0).toBe(3);
+  expect(r.seen).toEqual(['eins', 'zwei', 'drei', '']); // never two at once, in order, and the queue empties by itself
+});
+
+test('boss arena: Rex slides left on screen so the boss is not cropped', async ({ game, page }) => {
+  await game.open({ babyName: 'Mini', treasures: [0, 0, 0, 1] }); // baby and Kiwi follow, so their fade-out is drawn too
+  await game.start(5);
+  const r = await game.eval(() => {
+    const G = window.__dino.G, p = G.p; p.wx = G.L.bossX; G.bossStarted = true; G.stopped = true; G.boss = G.boss || null;
+    const before = (window.__dino.updatePlay(0.016), p.wx - G.cam);
+    for (let i = 0; i < 120; i++) window.__dino.updatePlay(1 / 60);
+    return { before, arena: G.arena, after: p.wx - G.cam };
+  });
+  expect(r.arena).toBeGreaterThan(0.95);
+  expect(r.after).toBeLessThan(r.before - 60); // ARENA_SHIFT is 75
+  expect(r.after).toBeGreaterThan(150);          // Chili at 145 px behind Rex must stay on screen
+  await page.waitForTimeout(300);
+  expect(game.errors).toEqual([]);
+});
+
+test('Oli and Fabio react: cheering and ouch faces draw without errors in every riding pose', async ({ game, page }) => {
+  await game.open();
+  await game.start(0);
+  await game.eval(() => { const G = window.__dino.G; G.p.hitT = 0.4; G.chili.joy = 5; });
+  await page.waitForTimeout(250);
+  await game.eval(() => { const G = window.__dino.G; G.p.hitT = 0; G.chili.joy = 5; window.__dino.duckDown('k'); });
+  await page.waitForTimeout(250);
+  expect(game.errors).toEqual([]);
+});
+
+test('shop shows what you own and can buy, plus one door gift as a teaser (and the 72-medal prize)', async ({ game, page }) => {
+  await game.open({ amber: 130 });
+  await game.eval(() => window.__dino.go('shop'));
+  await page.waitForTimeout(300);
+  const r = await game.eval(() => { const d = window.__dino, tab = SHOP_TABS[2], v = shopVisible(tab); return { v, gifts: v.filter(i => tab.list[i].gift).map(i => tab.list[i].gift), c: d.shopCard(v[1]) }; });
+  expect(r.v[0]).toBe(0);                                  // what you own comes first
+  expect(r.gifts.filter(g => g !== 25).length).toBe(1);    // only one door gift on show ...
+  expect(Math.min(...r.gifts.filter(g => g !== 25))).toBe(2); // ... the nearest one
+  expect(r.gifts).toContain(25);                           // ... and the prize for 72 medals
+  expect(r.v.length).toBeLessThan(10);
+  await page.mouse.click(...r.c);
+  expect(await game.eval(() => window.__dino.save.equip.hat)).toBe(0); // selecting previews, nothing is bought or worn yet
+  expect(game.errors).toEqual([]);
+});
+
+test('dialogs with a picture dim the screen and draw the place or boss; the arrow advances', async ({ game, page }) => {
+  await game.open({ storySeen: {} });
+  await game.eval(() => { window.__dino.go('map'); window.__dino.launchLevel(5); });
+  await page.waitForTimeout(700);
+  expect(await game.eval(() => !!window.__dino.dialog && !!window.__dino.dialog.pic && window.__dino.dialog.pic.boss)).toBe('crab');
+  await page.mouse.click(480, 300);                          // first tap completes the typewriter line
+  await page.mouse.click(480, 300);                          // second tap goes on
+  await page.waitForTimeout(200);
+  expect(game.errors).toEqual([]);
 });

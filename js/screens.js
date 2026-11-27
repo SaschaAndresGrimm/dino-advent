@@ -4,25 +4,38 @@
 // Dialog & name entry
 // =====================================================================
 let dialog = null;
-function startDialog(lines, done, top) { dialog = { lines, i: 0, t: 0, done, top }; }
+function startDialog(lines, done, top, pic) { dialog = { lines, i: 0, t: 0, age: 0, done, top, pic }; } // pic: { wi, boss?, ko? } puts a picture of the place (or the boss) above the box and dims the screen behind it
 function advanceDialog() {
   const l = dialog.lines[dialog.i];
   if (dialog.t * 40 < fmt(l.text).length) { dialog.t = 999; return; }
   SFX.click(); dialog.i++; dialog.t = 0;
   if (dialog.i >= dialog.lines.length) { const d = dialog.done; dialog = null; if (d) d(); }
 }
+function drawDialogPic(pic, age) { // a round window onto the place Götti is talking about; the boss steps out in front of it
+  const u = clamp(age * 3.2, 0, 1), e = 1 - (1 - u) * (1 - u), s = 0.55 + 0.45 * e;
+  ctx.save(); ctx.globalAlpha = u; ctx.translate(W / 2, 168 + Math.sin(T * 1.7) * 3); ctx.scale(s, s);
+  glow(0, 0, 190, '255,236,190', 0.35);
+  drawEmblem(pic.wi, 0, 0, 104);
+  if (pic.boss) {
+    const k = pic.boss, bo = { dmg: pic.ko ? 1 : 0, ko: !!pic.ko, wid: 'dlg' }; ctx.save(); ctx.translate(0, 112); shadow(0, 0, k === 'king' ? 84 : 70, 0.35);
+    if (k === 'crab') drawCrabKing(-8, 0, 0.78, T * 2, true, bo); else if (k === 'kraken') drawKraken(0, 0, 0.66, T * 2, true, bo); else if (k === 'queen') drawQueen(10, 0, 0.78, T * 2, true, bo); else oRaptor(0, 0, 1.05, T * 2, true, { col: '#8b1a1a', dark: '#4a0a0a', crown: true, dmg: pic.ko ? 1 : 0, ko: !!pic.ko, wid: 'dlg' });
+    ctx.restore();
+  }
+  ctx.restore();
+}
 function drawDialog() {
   if (!dialog) return;
-  dialog.t += DT;
+  dialog.t += DT; dialog.age += DT;
+  if (dialog.pic && !dialog.top) { ctx.fillStyle = `rgba(8,10,30,${0.5 * clamp(dialog.age * 3, 0, 1)})`; ctx.fillRect(0, 0, W, H); drawDialogPic(dialog.pic, dialog.age - 0.1); }
   const l = dialog.lines[dialog.i], s = fmt(l.text), n = Math.floor(dialog.t * 40);
-  const bx = 40, bw = W - 80, bh = 150, by = dialog.top ? 20 : H - 170;
+  const bx = 40, bw = W - 80, bh = 150, by = dialog.top ? 20 : H - 170, done = n >= s.length;
   woodFrame(bx, by, bw, bh, 22);
-  drawPortrait(l.who, bx + 78, by + bh / 2, 56);
+  drawPortrait(l.who, bx + 78, by + bh / 2 + (done ? 0 : Math.sin(T * 14) * 1.5), 60);
   const nm = typeof WHO[l.who] === 'function' ? WHO[l.who]() : WHO[l.who];
-  setFont(20); const nw = ctx.measureText(nm).width + 26; rr(bx + 150, by - 16, nw, 32, 14); ctx.fillStyle = '#6b4a2b'; ctx.fill(); txt(nm, bx + 150 + nw / 2, by, 20, '#fff7e0');
-  let fs = 26, lines = wrapLines(s, bw - 200, fs); if (lines.length > 3) { fs = 22; lines = wrapLines(s, bw - 200, fs); } let left = n; const lh = lines.length > 3 ? 29 : 34;
-  lines.forEach((ln, i) => { if (left <= 0) return; txt(ln.slice(0, left), bx + 150, by + 38 + i * lh, fs, '#3b2410', 'left'); left -= ln.length + 1; });
-  if (n >= s.length && Math.sin(T * 6) > 0) txt('weiter ▶', bx + bw - 70, by + bh - 22, 18, '#8a6a3a');
+  setFont(22); const nw = ctx.measureText(nm).width + 28; rr(bx + 150, by - 17, nw, 34, 15); ctx.fillStyle = '#6b4a2b'; ctx.fill(); txt(nm, bx + 150 + nw / 2, by, 22, '#fff7e0');
+  let fs = 28, lines = wrapLines(s, bw - 250, fs); if (lines.length > 3) { fs = 24; lines = wrapLines(s, bw - 250, fs); } if (lines.length > 3) { fs = 21; lines = wrapLines(s, bw - 250, fs); } let left = n; const lh = fs + 7;
+  lines.forEach((ln, i) => { if (left <= 0) return; txt(ln.slice(0, left), bx + 150, by + 40 + i * lh, fs, '#3b2410', 'left'); left -= ln.length + 1; });
+  { const ax = bx + bw - 44, ay = by + bh - 40, pz = done ? 1 + 0.08 * Math.sin(T * 6) : 0.9; ctx.save(); ctx.translate(ax, ay); ctx.scale(pz, pz); ctx.globalAlpha = done ? 1 : 0.55; circle(0, 0, 24, '#f4b400'); ctx.lineWidth = 3; ctx.strokeStyle = '#7a4a00'; ctx.stroke(); ctx.fillStyle = '#3b1d00'; ctx.beginPath(); ctx.moveTo(-6, -10); ctx.lineTo(11, 0); ctx.lineTo(-6, 10); ctx.closePath(); ctx.fill(); ctx.restore(); } // a big "go on" arrow: no reading needed
 }
 const nameBox = document.getElementById('nameBox'), nameInput = document.getElementById('nameInput'), nameOk = document.getElementById('nameOk'), nameLabel = document.getElementById('nameLabel');
 function nameOpen() { return nameBox.style.display === 'flex'; }
@@ -114,7 +127,7 @@ function drawTitle() {
   drawBackground(0, cam); drawGround(0, EMPTY, cam);
   shadow(436, GROUND + 2, 26, 0.3); shadow(286, GROUND + 2, 70, 0.3);
   oChili(430, GROUND - Math.abs(Math.sin(T * 9)) * 14, 1.4, T * 9);
-  oRex(280, GROUND, 1.3, T * 13, 0.12 + 0.12 * Math.sin(T * 2), Object.assign(rexLook(0), { rider: true }));
+  oRex(280, GROUND, 1.2, T * 13, 0.12 + 0.12 * Math.sin(T * 2), Object.assign(rexLook(0), { rider: true }));
   if (save.babyName) oBaby(120, GROUND - Math.abs(Math.sin(T * 10)) * 9, 1, T * 10);
   drawAmbient(0); drawForeground(0, cam); vignette(0);
   logo(W / 2, 96);

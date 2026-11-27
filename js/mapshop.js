@@ -184,13 +184,19 @@ function drawMap() { // the advent calendar
   drawChest();
   if (save.candles > 0) { drawWreath(570, 62, 0.26, save.candles, -1); buttons.push({ x: 520, y: 14, w: 100, h: 72, silent: true, cb: () => { SFX.click(); startCandle(true); } }); } // the Adventskranz fills up with the Sundays; tap it and Rex lights the last candle again
   button(save.muted ? 'Aus' : 'Ton', W - 130, 16, 112, 42, () => { settingsOpen = true; }, { size: 20, color: '#e0d2b0', icon: icon(save.muted ? 'mute' : 'sound') });
-  button('Dino-Buch', 24, H - 82, 210, 60, () => { bookSel = -1; go('book'); }, { icon: icon('book') });
-  { const unread = bookUnread(); if (unread) { ctx.save(); ctx.translate(204, H - 80 + Math.sin(T * 6 + 1) * 2); ctx.rotate(0.22); rr(-32, -11, 64, 22, 6); ctx.fillStyle = '#e53935'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#fff'; ctx.stroke(); txt(unread > 9 ? '9+ NEU' : unread > 1 ? `${unread} NEU` : 'NEU', 0, 1, 14, '#fff'); ctx.restore(); } }
-  button('Laden', 24, H - 150, 210, 56, () => go('shop'), { color: '#ffe08a', icon: icon('amber') });
-  if (save.newGifts.length) { ctx.save(); ctx.translate(214, H - 146 + Math.sin(T * 6) * 2); ctx.rotate(0.3); rr(-24, -11, 48, 22, 6); ctx.fillStyle = '#e53935'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#fff'; ctx.stroke(); txt('NEU', 0, 1, 14, '#fff'); ctx.restore(); }
-  if (save.lvDone.some(Boolean) || save.finished) { button('Endlos', W - 262, H - 150, 150, 56, () => { endlessPick = true; }, { color: '#9fd3ff', icon: icon('loop'), size: 24 }); button('', W - 104, H - 150, 84, 56, () => { boardTab = -1; go('board'); }, { color: '#ffe08a' }); ico('trophy', W - 62, H - 130, 26); txt('Rekorde', W - 62, H - 105, 14, '#2b1a00'); }
-  if (save.lvDone.some(Boolean) || save.finished) button('Quiz', W - 262, H - 82, 150, 60, () => { SFX.click(); openQuizPicker(); }, { size: 24, color: '#ffe08a', icon: icon('star') }); // Götti-Quiz: riddles without a level (bottom right, where the Finale button used to be)
-  button('', W - 104, H - 82, 84, 60, () => { tmapNew = -1; go('tmap'); }, { color: '#f2dfb0' }); ico('scroll', W - 62, H - 61, 28); txt('Karte', W - 62, H - 34, 14, '#2b1a00');
+  // one dock, one style: shop and book on the left, four equal tiles on the right (the icons carry the colour, red dots show what is new)
+  const DOCK = '#f0e0b6', badge = (n, x, y) => { ctx.save(); ctx.translate(x, y + Math.sin(T * 6 + x) * 1.6); const sc = 1 + 0.06 * Math.sin(T * 6 + x); ctx.scale(sc, sc); circle(0, 0, 15, '#e53935'); ctx.lineWidth = 2.5; ctx.strokeStyle = '#fff'; ctx.stroke(); txt(n > 9 ? '9+' : String(n), 0, 1, n > 9 ? 14 : 17, '#fff'); ctx.restore(); };
+  button('Dino-Buch', 24, H - 82, 210, 60, () => { bookSel = -1; go('book'); }, { icon: icon('book'), color: DOCK });
+  { const unread = bookUnread(); if (unread) badge(unread, 222, H - 80); }
+  button('Laden', 24, H - 150, 210, 56, () => go('shop'), { color: DOCK, icon: icon('amber') });
+  if (save.newGifts.length) badge(save.newGifts.length, 222, H - 146);
+  const played = save.lvDone.some(Boolean) || save.finished, RX1 = W - 282, RX2 = W - 142, TW1 = 130, TW2 = 124;
+  if (played) {
+    button('Endlos', RX1, H - 150, TW1, 56, () => { endlessPick = true; }, { color: DOCK, icon: icon('loop'), size: 20 });
+    button('Rekorde', RX2, H - 150, TW2, 56, () => { boardTab = -1; go('board'); }, { color: DOCK, icon: icon('trophy'), size: 16 });
+    button('Quiz', RX1, H - 82, TW1, 60, () => { SFX.click(); openQuizPicker(); }, { size: 20, color: DOCK, icon: icon('star') }); // Götti-Quiz: riddles without a level
+  }
+  button('Karte', RX2, H - 82, TW2, 60, () => { tmapNew = -1; go('tmap'); }, { color: DOCK, icon: icon('scroll'), size: 20 });
   if (endlessPick) drawEndlessPicker();
   if (mapFW > 0) { mapFW -= DT; if (Math.random() < 0.09) { const c = ['#ff5252', '#ffd740', '#69f0ae', '#40c4ff', '#ea80fc', '#fff']; burst(100 + Math.random() * 760, 70 + Math.random() * 280, 36, [c[Math.floor(Math.random() * 6)], '#fff'], 300, 160, 5, 1.4); tone(220 + Math.random() * 220, 0.3, 'triangle', 0.04, 80); } }
   drawParts(0);
@@ -289,6 +295,14 @@ function shopCounter() { // the counter Götti stands behind
   ctx.strokeStyle = 'rgba(0,0,0,.22)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(48, 400); ctx.lineTo(48, 450); ctx.moveTo(96, 400); ctx.lineTo(96, 450); ctx.stroke();
   drawAmber(110, 377, 9); drawAmber(124, 381, 8); rr(10, 366, 20, 22, 5); ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.fill(); ctx.strokeStyle = '#6b4a2b'; ctx.lineWidth = 2; ctx.stroke(); drawAmber(20, 380, 6);
 }
+// Which items the shop shows, in order: everything owned, then what can be bought (affordable first), then ONE door gift as a teaser (plus the 72-medal prize),
+// so the shelf is full of things to try and not of locks. Indices stay the item's own; only the layout changes.
+function shopVisible(tab) {
+  const { key, list } = tab, own = [], buy = [], gifts = [];
+  list.forEach((it, i) => { if (save.owned[key].includes(i)) own.push(i); else if (it.gift) gifts.push(i); else buy.push(i); });
+  const can = i => (list[i].cost || 0) <= save.amber, next = gifts.filter(i => list[i].gift !== 25).sort((a, b) => list[a].gift - list[b].gift)[0], prize = gifts.find(i => list[i].gift === 25);
+  return [...own, ...buy.filter(can), ...buy.filter(i => !can(i)), ...[next, prize].filter(i => i != null)];
+}
 function drawShop() {
   // wall, awning, counter
   shopScene();
@@ -309,16 +323,19 @@ function drawShop() {
     if (cyc > 0.06 && cyc < 0.85) { const q = (cyc - 0.06) / 0.79, bx = mx + 14 + q * 150, by = my + 6 + q * 26, fa = 1 - q * q, fl = 1 + 0.12 * Math.sin(T * 45); ctx.globalAlpha = fa; const g = ctx.createRadialGradient(bx, by, 2, bx, by, 34 * fl); g.addColorStop(0, 'rgba(255,255,235,1)'); g.addColorStop(0.3, `rgba(${f.a},1)`); g.addColorStop(0.65, `rgba(${f.b},.85)`); g.addColorStop(1, `rgba(${f.c},0)`); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(bx, by, 34 * fl, 0, Math.PI * 2); ctx.fill(); for (let k = 1; k <= 3; k++) { ctx.globalAlpha = fa * 0.5 / k; circle(bx - k * 14, by - k * 3 + Math.sin(T * 30 + k) * 3, 13 - k * 2.5, f.ball); } ctx.globalAlpha = 1; }
     ctx.restore();
   }
-  if (tab.eq.length > 1) kidNames().forEach((nm, n) => button(nm, 152 + n * 112, 494, 104, 34, () => { shopWho = n; SFX.click(); }, { size: 17, color: shopWho === n ? '#ffd34d' : '#d9c9a0' })); // whose outfit the preview tries on
+  if (tab.eq.length > 1) ['oli', 'fabio'].forEach((who, n) => { const cx = 58 + n * 86, cy = 502, on = shopWho === n, bob = on ? Math.sin(T * 6) * 2 : 0; // whose outfit the preview tries on: two big faces
+    if (on) { circle(cx, cy + bob, 34, `rgba(255,211,77,${0.6 + 0.2 * Math.sin(T * 5)})`); }
+    drawPortrait(who, cx, cy + bob, on ? 28 : 24); if (!on) { ctx.globalAlpha = 0.35; circle(cx, cy, 24, '#3b2410'); ctx.globalAlpha = 1; }
+    buttons.push({ x: cx - 36, y: cy - 36, w: 72, h: 72, cb: () => { shopWho = n; SFX.click(); }, label: kidNames()[n] }); });
   oGoetti(62, 420, 0.95, shopTalk.t > 0); shopCounter();
   if (shopTalk.t > 0 || true) { shopTalk.t = Math.max(0, shopTalk.t - DT); const lines = wrapLines(shopTalk.text, 230, 18); const bh = 20 + lines.length * 22; rr(20, 215 - bh + 10, 262, bh, 14); ctx.fillStyle = '#fffaf0'; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = '#6b4a2b'; ctx.stroke(); ctx.fillStyle = '#fffaf0'; ctx.beginPath(); ctx.moveTo(52, 225); ctx.lineTo(76, 225); ctx.lineTo(70, 252); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.fillRect(54, 223, 20, 4); lines.forEach((l, i) => txt(l, 151, 215 - bh + 32 + i * 22, 18, '#3b2410', 'center', 'normal')); }
   // tabs
-  SHOP_TABS.forEach((tb, i) => button(tb.lb, 440 + i * 84, 118, 80, 44, () => { shopTab = i; shopWho = 0; shopSel = tb.eq.length ? save.equip[tb.eq[0]] : 0; shopPage = Math.floor(shopSel / 8); shopSay(fmt(tb.say)); }, { size: 18, color: i === shopTab ? '#ffd34d' : '#d9c9a0' }));
-  // item cards: 8 per page (4 x 2), gifts from the calendar show the door they come from
-  const PER = 8, pages = Math.ceil(list.length / PER); shopPage = clamp(shopPage, 0, pages - 1);
-  list.forEach((it, i) => {
-    if (Math.floor(i / PER) !== shopPage) return;
-    const j = i % PER, x = 440 + (j % 4) * 126, y = 166 + Math.floor(j / 4) * 104, w = 118, h = 100, owned = save.owned[key].includes(i), who = tab.eq.filter(k => save.equip[k] === i), eq = who.length > 0, cost = it.cost || 0, can = !it.gift && save.amber >= cost, sel = shopSel === i;
+  SHOP_TABS.forEach((tb, i) => button(tb.lb, 440 + i * 84, 118, 80, 44, () => { shopTab = i; shopWho = 0; shopSel = tb.eq.length ? save.equip[tb.eq[0]] : 0; shopPage = -1; shopSay(fmt(tb.say)); }, { size: 18, color: i === shopTab ? '#ffd34d' : '#d9c9a0' }));
+  // item cards: 8 per page (4 x 2); the one door gift on show says which door it comes from
+  const vis = shopVisible(tab), PER = 8, pages = Math.ceil(vis.length / PER); if (!vis.includes(shopSel)) shopSel = vis[0]; if (shopPage < 0) shopPage = Math.floor(vis.indexOf(shopSel) / PER); shopPage = clamp(shopPage, 0, pages - 1);
+  vis.forEach((i, vi) => {
+    const it = list[i]; if (Math.floor(vi / PER) !== shopPage) return;
+    const j = vi % PER, x = 440 + (j % 4) * 126, y = 166 + Math.floor(j / 4) * 104, w = 118, h = 100, owned = save.owned[key].includes(i), who = tab.eq.filter(k => save.equip[k] === i), eq = who.length > 0, cost = it.cost || 0, can = !it.gift && save.amber >= cost, sel = shopSel === i;
     if (sel) { rr(x - 4, y - 4, w + 8, h + 8, 16); ctx.fillStyle = `rgba(255,211,77,${0.5 + 0.15 * Math.sin(T * 5)})`; ctx.fill(); }
     ctx.save(); rr(x, y + 3, w, h, 14); ctx.fillStyle = 'rgba(0,0,0,.22)'; ctx.fill(); ctx.restore();
     rr(x, y, w, h, 14); ctx.fillStyle = eq ? '#d4f2bd' : owned ? '#fffaf0' : it.gift ? (it.gift === 25 ? '#fff0b8' : '#ece4f6') : can ? '#fff0c8' : '#e8dec8'; ctx.fill(); ctx.lineWidth = sel ? 4 : 3; ctx.strokeStyle = sel ? '#e8a317' : eq ? '#2e7d32' : '#8a6a3a'; ctx.stroke();
@@ -330,9 +347,9 @@ function drawShop() {
     else if (key === 'chili') { chiliAcc = i; drawChili(x + w / 2 - 10, y + 64, 0.95, 0); chiliAcc = null; }
     else if (key === 'wish') it.icon(x + w / 2, y + 34, 0.8);
     else drawFlameIcon(fireOf(i), x + w / 2, y + 36, 0.98);
-    if (!owned) { ctx.fillStyle = it.gift ? 'rgba(90,70,130,.30)' : 'rgba(120,110,90,.34)'; ctx.fillRect(x, y, w, 70); }
+    if (!owned && (it.gift || !can)) { ctx.fillStyle = it.gift ? 'rgba(90,70,130,.30)' : 'rgba(120,110,90,.2)'; ctx.fillRect(x, y, w, 70); } // door gifts are tinted and locked; things you can buy stay bright (greyed a little while you save up)
     ctx.restore();
-    if (!owned) { circle(x + w - 18, y + 18, 13, 'rgba(40,30,20,.78)'); ico('lock', x + w - 18, y + 18, 16); }
+    if (!owned && it.gift) { circle(x + w - 18, y + 18, 13, 'rgba(40,30,20,.78)'); ico('lock', x + w - 18, y + 18, 16); }
     if (save.newGifts.includes(key + ':' + i)) { ctx.save(); ctx.translate(x + 24, y + 16); ctx.rotate(-0.3); rr(-18, -9, 36, 18, 5); ctx.fillStyle = '#e53935'; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = '#fff'; ctx.stroke(); txt('NEU', 0, 1, 12, '#fff'); ctx.restore(); }
     const nm = it.n === 'Auto' ? 'Automatik' : it.n; txt(nm, x + w / 2, y + 77, nm.length > 9 ? 12 : 14, '#3b2410');
     const pill = (c0, c1, tc) => { rr(x + 12, y + 84, w - 24, 13, 6.5); ctx.fillStyle = vgrad(y + 84, y + 97, c0, c1); ctx.fill(); ctx.lineWidth = 1.2; ctx.strokeStyle = 'rgba(0,0,0,.25)'; ctx.stroke(); return tc; };
@@ -347,14 +364,14 @@ function drawShop() {
   // buy / equip bar
   const it = list[shopSel], owned = save.owned[key].includes(shopSel), eq = tab.eq.length > 0 && save.equip[tab.eq[0]] === shopSel, cost = it.cost || 0, can = !it.gift && save.amber >= cost, BY = 412;
   if (owned && key === 'wish') button('Gutschein ansehen', 440, BY, 496, 52, () => { wishShow = shopSel; SFX.click(); }, { color: '#ffe08a', size: 24 });
-  else if (owned && tab.eq.length > 1) tab.eq.forEach((k, n) => { const on = save.equip[k] === shopSel, nm = kidNames()[n]; button(on ? nm + ' ✓' : nm + ' anziehen', 440 + n * 252, BY, 244, 52, () => { if (on) return; save.equip[k] = shopSel; shopWho = n; writeSave(); SFX.right(); shopSay(fmt(n ? 'Sieht super aus, {fabio}!' : 'Sieht super aus, {oli}!')); shopBounce = 1; burst(262, 330, 26, ['#fff', '#ffe08a', '#ffd34d'], 280, 300, 5, 0.9); }, on ? { disabled: true, size: 20 } : { color: '#9be38a', size: 20 }); });
+  else if (owned && tab.eq.length > 1) tab.eq.forEach((k, n) => { const on = save.equip[k] === shopSel, nm = kidNames()[n]; button(on ? nm + ' ✓' : nm + ' anziehen', 440 + n * 252, BY, 244, 52, () => { if (on) return; save.equip[k] = shopSel; shopWho = n; writeSave(); SFX.right(); shopSay(fmt(n ? 'Sieht super aus, {fabio}!' : 'Sieht super aus, {oli}!')); shopBounce = 1; burst(262, 330, 26, ['#fff', '#ffe08a', '#ffd34d'], 280, 300, 5, 0.9); }, on ? { disabled: true, size: 20, icon: (cx, cy, s) => drawPortrait(['oli', 'fabio'][n], cx, cy, s * 0.5) } : { color: '#9be38a', size: 20, icon: (cx, cy, s) => drawPortrait(['oli', 'fabio'][n], cx, cy, s * 0.5) }); });
   else if (eq) button('Angelegt', 440, BY, 496, 52, () => {}, { disabled: true, icon: icon('check'), size: 26 });
   else if (owned) button('Anlegen', 440, BY, 496, 52, () => { save.equip[tab.eq[0]] = shopSel; writeSave(); SFX.right(); shopSay('Sieht super aus!'); shopBounce = 1; burst(262, 330, 26, ['#fff', '#ffe08a', '#ffd34d'], 280, 300, 5, 0.9); }, { color: '#9be38a', size: 26 });
   else if (it.gift) button(it.gift === 25 ? 'Mit allen 72 Medaillen' : `Aus Tür ${it.gift} im Kalender`, 440, BY, 496, 52, () => { SFX.wrong(); shopSay(it.gift === 25 ? `Du hast ${medalTotal()} von 72 Medaillen.` : `Öffne am ${it.gift}. Dezember die Tür ${it.gift}!`); }, { disabled: true, size: 22 });
   else if (can) button(`Kaufen  ·  ${cost}`, 440, BY, 496, 52, () => { shopConfirm = { key, sel: shopSel, cost, name: key === 'wish' ? 'Gutschein: ' + it.n : it.n, eq: tab.eq }; SFX.click(); }, { size: 26, icon: icon('amber') });
   else button('Zu wenig Bernstein', 440, BY, 496, 52, () => { SFX.wrong(); toast('Noch zu wenig Bernstein!', '#ffb4a8'); shopSay('Sammle noch etwas Bernstein!'); }, { disabled: true, size: 24 });
   button('Zurück', W - 224, H - 56, 200, 46, () => go('map'), { size: 24, icon: icon('back') });
-  if (!owned && !it.gift && key !== 'wish') { ctx.font = 'bold 15px sans-serif'; const lbl = 'Vorschau – noch nicht gekauft', pw = 214; rr(262 - pw / 2, 462, pw, 28, 14); ctx.fillStyle = 'rgba(40,24,10,.78)'; ctx.fill(); txt(lbl, 262, 477, 15, '#ffe9b0'); }
+  if (!owned && !it.gift && key !== 'wish') { ctx.font = 'bold 15px sans-serif'; const lbl = 'Vorschau – noch nicht gekauft', pw = 214; rr(300 - pw / 2, 462, pw, 28, 14); ctx.fillStyle = 'rgba(40,24,10,.78)'; ctx.fill(); txt(lbl, 300, 477, 15, '#ffe9b0'); }
   if (shopConfirm) { // are you sure? nothing is bought by accident
     buttons.length = 0; const sc = shopConfirm;
     ctx.fillStyle = 'rgba(8,10,24,.62)'; ctx.fillRect(0, 0, W, H); woodFrame(290, 150, 380, 240, 24);

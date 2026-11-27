@@ -48,6 +48,8 @@ function drawOli(x, y, ph, hat, o = {}) {
   ell(cx + 3, cy + 5, fb ? 3.6 : 2.4, fb ? 2.4 : 1.5, 0, fb ? 'rgba(255,110,110,.42)' : 'rgba(255,120,110,.3)');
   if (!fb) { ctx.fillStyle = '#d9a073'; for (const [dx, dy] of [[4, 3.6], [6.5, 4.6], [2.2, 5.2]]) circle(cx + dx, cy + dy, 0.5, '#d9a073'); }
   ctx.strokeStyle = '#b5483a'; ctx.lineWidth = 1.3; ctx.beginPath(); ctx.arc(cx + 5.5, cy + 6.4, fb ? 3.2 : 2.5, 0.3, Math.PI * 0.75); ctx.stroke();
+  if (o.mood === 'cheer') { ctx.fillStyle = '#7a2018'; ctx.beginPath(); ctx.arc(cx + 5.5, cy + 5.4, fb ? 3.8 : 3.1, 0, Math.PI); ctx.closePath(); ctx.fill(); ell(cx + 5.5, cy + 7.6, fb ? 2 : 1.6, 1, 0, '#ff8f8f'); ctx.strokeStyle = '#b8862a'; ctx.lineWidth = 1.3; ctx.beginPath(); ctx.moveTo(cx + 3, cy - 5.6); ctx.quadraticCurveTo(cx + 6, cy - 7.4, cx + 9, cy - 5.6); ctx.stroke(); } // expression pop: laughing, brows up
+  else if (o.mood === 'ouch') { ell(cx + 5.5, cy + 7.2, fb ? 2.3 : 1.9, fb ? 3 : 2.5, 0, '#7a2018'); ctx.strokeStyle = '#b8862a'; ctx.lineWidth = 1.3; ctx.beginPath(); ctx.moveTo(cx + 3, cy - 5.8); ctx.quadraticCurveTo(cx + 6, cy - 7.8, cx + 9, cy - 6.4); ctx.stroke(); circle(cx + 6.4, cy + 1.2, fb ? 2.1 : 1.6, '#fff'); circle(cx + 6.8, cy + 1.2, 0.9, '#14283f'); } // ouch: round mouth, startled eye
   // hats sit on the hairline (brim just above the eyebrows) and cover the top curls
   const HY = y - 57;
   if (capped && hat !== 'astro') { ell(x + 3, HY + 11, 13, 2.6, 0, 'rgba(60,30,10,.16)'); circle(x - 9, y - 41, 4.4, hairD); curl(x - 12, y - 41, 4.6); curl(x - 11, y - 34, 4); }
@@ -146,6 +148,8 @@ function rexMouth(duck) {
   const c = Math.cos(DUCK_ROT), sn = Math.sin(DUCK_ROT);
   return [lx * c - ly * sn, lx * sn + ly * c + DUCK_DY];
 }
+const RIDER_SCALE_DUCK = 1.2; // the crouched pose is rotated forward, so the boys stay smaller there or their heads poke out past Rex's snout
+const RIDER_SCALE = 1.42; // Oli and Fabio on Rex's back (was 1.15): faces and reactions have to read on a tablet
 function drawRex(x, y, s, ph, jaw, o = {}) {
   ctx.save(); ctx.translate(x, y); ctx.scale(o.flip ? -s : s, s);
   if (o.alpha != null) ctx.globalAlpha = o.alpha;
@@ -213,10 +217,11 @@ function drawRex(x, y, s, ph, jaw, o = {}) {
   if (o.rider) {
     rr(-24, -96, 48, 11, 5); ctx.fillStyle = '#c0392b'; ctx.fill(); ctx.fillStyle = '#f4c542'; ctx.fillRect(-22, -87, 34, 2.5); ctx.strokeStyle = 'rgba(255,230,180,.6)'; ctx.lineWidth = 0.9; ctx.setLineDash([3, 2.5]); ctx.beginPath(); ctx.moveTo(-20, -93); ctx.lineTo(10, -93); ctx.stroke(); ctx.setLineDash([]);
     const lean = o.duck ? 0 : (o.lean || 0) + (o.air ? (vyn < 0 ? 0.12 : -0.08) : 0) - (jaw > 0.5 ? 0.16 : 0) - hurt * 0.3;
-    ctx.save(); if (o.duck) { ctx.translate(-4, -86); ctx.rotate(0.9); } else { ctx.translate(-4, -92); ctx.rotate(lean); } ctx.scale(1.15, 1.15);
+    ctx.save(); if (o.duck) { ctx.translate(-4, -86); ctx.rotate(0.9); } else { ctx.translate(-4, -92); ctx.rotate(lean); } const rs = o.duck ? RIDER_SCALE_DUCK : RIDER_SCALE; ctx.scale(rs, rs);
     // Fabio sits in front of Oli, smaller; Oli's rein arm wraps round him
-    const fab = () => { ctx.save(); ctx.translate(27, 11); ctx.scale(0.72, 0.72); drawOli(0, 0, ph + 0.6, o.hat2 !== undefined ? o.hat2 : o.hat, { vy: o.vy, dive: o.dive, kid: 'fabio', hold: true, jacket: save.equip.fabioJacket }); ctx.restore(); };
-    drawOli(0, 0, ph, o.hat, { vy: o.vy, dive: o.dive, front: fab, jacket: save.equip.jacket }); ctx.restore();
+    const mood = hurt > 0.3 ? 'ouch' : (jaw > 0.5 || o.joy) ? 'cheer' : null; // the boys react: ouch on a hit, laughing on a roar or a find
+    const fab = () => { ctx.save(); ctx.translate(27, 11); ctx.scale(0.72, 0.72); drawOli(0, 0, ph + 0.6, o.hat2 !== undefined ? o.hat2 : o.hat, { vy: o.vy, dive: o.dive, kid: 'fabio', hold: true, mood, jacket: save.equip.fabioJacket }); ctx.restore(); };
+    drawOli(0, 0, ph, o.hat, { vy: o.vy, dive: o.dive, mood, front: fab, jacket: save.equip.jacket }); ctx.restore();
   }
   ctx.restore(); ctx.globalAlpha = 1;
 }
@@ -729,13 +734,14 @@ function drawHeart(x, y, s, full) {
 
 function drawPortrait(who, cx, cy, r, still) {
   ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2);
-  const bg = { kiwi: '#e8f5d0', goetti: '#cfe3b0', chili: '#ffe0c2', rex: '#bfe6cf', mami: '#ead7f5', papi: '#d3e6fb', fabio: '#ffe6c4' }[who] || '#eee';
+  const bg = { oli: '#d3e6fb', kiwi: '#e8f5d0', goetti: '#cfe3b0', chili: '#ffe0c2', rex: '#bfe6cf', mami: '#ead7f5', papi: '#d3e6fb', fabio: '#ffe6c4' }[who] || '#eee';
   ctx.fillStyle = bg; ctx.fill(); ctx.clip();
   if (who === 'goetti') { drawGoettiHead(cx, cy + r * 0.03, r * 0.58); }
   else if (who === 'chili') { const s = r / 26; drawChili(cx - 10 * s, cy + 30 * s, s, still ? 0 : T * 3); }
   else if (who === 'rex') { const s = r / 42; drawRex(cx - 88 * s, cy + 104 * s, s * 0.95, 0, 0.3 + 0.2 * Math.sin(T * 8)); }
   else if (who === 'mami' || who === 'papi') { const s = r / 34; drawLongneck(cx - 72 * s, cy + 146 * s, s, who === 'mami' ? '#b07cc6' : '#4f8fd6', T * 2); }
   else if (who === 'kiwi') { const s = r / 22; drawKiwi(cx - 16 * s, cy + 22 * s, s, T * 6); }
+  else if (who === 'oli') { const k = r / 21; ctx.save(); ctx.translate(cx - 8 * k, cy + 44 * k); ctx.scale(k, k); drawOli(0, 0, 0.5, null, { kid: 'oli', hold: true, jacket: save.equip.jacket }); ctx.restore(); }
   else if (who === 'fabio') { const k = r / 21; ctx.save(); ctx.translate(cx - 8 * k, cy + 44 * k); ctx.scale(k, k); drawOli(0, 0, 0.5, null, { kid: 'fabio', hold: true, jacket: save.equip.fabioJacket }); ctx.restore(); }
   ctx.restore();
   ctx.lineWidth = 4; ctx.strokeStyle = '#6b4a2b'; ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke();

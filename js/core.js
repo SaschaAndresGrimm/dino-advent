@@ -4,6 +4,7 @@
 // Setup
 // =====================================================================
 const W = 960, H = 540, GROUND = 440, GRAV = 2300;
+const ARENA_SHIFT = 75; // px Rex slides left on screen in a boss arena (G.arena 0..1), so the boss on the right is not cropped
 const FONT = '"Trebuchet MS","Segoe UI",system-ui,sans-serif';
 // Shown on the title screen. The deploy workflow replaces the literal with '<commit> · <date>'; locally it reads 'dev'.
 const BUILD = 'dino-advent-build';

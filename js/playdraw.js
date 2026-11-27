@@ -487,9 +487,10 @@ function drawPlay() {
     }
     if (st === 'crouch' || st === 'leap') { const lx = b.landX - cam; ctx.globalAlpha = 0.45 + 0.3 * Math.sin(T * 16); ell(lx, GROUND + 2, 100, 16, 0, 'rgba(255,50,20,.7)'); ctx.globalAlpha = 1; otxt('!', lx, GROUND - 36, 44, '#ff5252', '#000', 7); }
     if (rage) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; const g = ctx.createRadialGradient(bx, by - 120, 20, bx, by - 120, 260); g.addColorStop(0, `rgba(255,110,30,${0.35 + 0.15 * Math.sin(T * 9)})`); g.addColorStop(1, 'rgba(255,60,0,0)'); ctx.fillStyle = g; ctx.fillRect(bx - 270, by - 380, 540, 440); ctx.restore(); if (Math.random() < 0.35) burst(b.x - 60 + Math.random() * 140, GROUND - Math.random() * 200, 1, ['#ff9a3c', '#ffd34d', '#555'], 80, -160, 6, 0.9); }
+    { const kg = { king: ['255,120,50', 0.34, 300], kraken: ['150,200,255', 0.2, 260], queen: ['255,210,160', 0.16, 280], crab: ['255,170,110', 0.14, 240] }[b.kind]; if (kg && st !== 'flee') glow(bx, by - 120, kg[2], kg[0], kg[1] * (0.85 + 0.15 * Math.sin(T * 2.4))); } // a backlight so even the dark bosses stand out from the arena
     ctx.save(); if (b.flash > 0 && Math.sin(T * 40) > 0) ctx.globalAlpha = 0.4;
     shadow(bx, GROUND + 2, 80 * (1 - clamp(-b.y / 300, 0, 0.6)), 0.3);
-    ctx.translate(bx + ({ crab: -40, queen: -110, kraken: -20 }[b.kind] || 0), by); let rot = 0, sy = 1, sx = 0;
+    ctx.translate(bx + ({ crab: -40, queen: -110, kraken: -20, king: -40 }[b.kind] || 0), by); let rot = 0, sy = 1, sx = 0;
     const ant = b.tele ? clamp(1 - b.tele.t / b.tele.max, 0, 1) : 0, br = Math.sin(T * 2.4); let bsx = 1;
     if (st !== 'flee' && st !== 'crouch') { sy = 1 + 0.014 * br - 0.1 * ant; bsx = 1 - 0.01 * br + 0.05 * ant; rot = -0.05 * ant; } // idle breathing, and a crouch-and-lean-back before every attack
     if (st === 'crouch') sy = 0.84 + 0.02 * Math.sin(T * 30); if (st === 'tired') rot = -0.13; if (st === 'stagger' || st === 'duel') sx = Math.sin(T * 60) * (st === 'duel' ? 4 : 2.5);
@@ -498,7 +499,7 @@ function drawPlay() {
     if (st !== 'flee') { ctx.rotate(b.kind === 'king' ? 0 : rot); ctx.scale(bsx, sy); }
     const BC = [['#8b1a1a', '#4a0a0a'], ['#7a3a1a', '#3d1a08'], ['#5a2a7a', '#2a0f40'], ['#b01c10', '#5a0a04']][b.phase] || ['#8b1a1a', '#4a0a0a'];
     const anim = st === 'taunt' || st === 'tired' ? (b.kind === 'king' ? 0 : b.ph * 0.5) : b.ph, face = st !== 'flee';
-    const dmg = bossDmg(b), ko = st === 'flee'; if (b.kind === 'crab') drawCrabKing(0, 0, 1.5, anim, face, { dmg, ko }); else if (b.kind === 'kraken') drawKraken(0, 0, 1.45, anim, face, { dmg, ko }); else if (b.kind === 'queen') drawQueen(0, 0, 1.7, anim, face, { dmg, ko }); else oRaptor(0, 0, 2.3, anim, face, { col: BC[0], dark: BC[1], crown: true, dmg, ko });
+    const dmg = bossDmg(b), ko = st === 'flee'; if (b.kind === 'crab') drawCrabKing(0, 0, 1.5, anim, face, { dmg, ko }); else if (b.kind === 'kraken') drawKraken(0, 0, 1.45, anim, face, { dmg, ko }); else if (b.kind === 'queen') drawQueen(0, 0, 1.7, anim, face, { dmg, ko }); else oRaptor(0, 0, 2.05, anim, face, { col: BC[0], dark: BC[1], crown: true, dmg, ko });
     ctx.restore();
     if (b.tele) { const u = 1 - b.tele.t / b.tele.max, fl = save.calm || Math.sin(T * 40) > -0.2 ? 1 : 0.5; glow(bx - 60, GROUND - 130 + b.y, 240, '255,70,40', 0.55 * fl * (0.4 + 0.6 * u)); ctx.globalAlpha = fl; otxt('!', bx - 70, GROUND - 250 + b.y, 54 + 10 * u, '#ff5252', '#000', 8); ctx.globalAlpha = 1; }
     if (b.volley && b.volley.warned && b.state === 'volley') { const wy = b.volley.warnY, mx = clamp(bx - 170, 560, W - 130); ctx.globalAlpha = 0.65 + 0.35 * Math.sin(T * 30); circle(mx, wy, 20, '#e53935'); ctx.fillStyle = '#e53935'; ctx.beginPath(); ctx.moveTo(mx - 34, wy); ctx.lineTo(mx - 20, wy - 11); ctx.lineTo(mx - 20, wy + 11); ctx.fill(); ctx.globalAlpha = 1; otxt('!', mx, wy + 1, 26, '#fff', '#7a0000', 4); } // where the next shot will fly
@@ -518,9 +519,12 @@ function drawPlay() {
   if (c.dig) otxt('!', c.wx - cam + 20, c.y - 70 - Math.abs(Math.sin(T * 10)) * 6, 36, '#ffd34d', '#3b1d00', 6);
   // baby + kiwi followers
   for (const [k, on, r] of [['kiwi', save.treasures[3], 16], ['baby', save.babyName, 18]]) if (on) { // they hop where Rex hopped (see updateFollowers)
-    const f = G.fol[k], fx = p.wx - FOL[k];
+    const f = G.fol[k], fx = p.wx - FOL[k], vis = 1 - (G.arena || 0); // in a boss arena Rex slides left and these two would be cut off at the screen edge, so they step out of the picture
+    if (vis < 0.04) continue;
+    ctx.globalAlpha = vis;
     if (supported(L, fx)) shadow(fx - cam + 4, GROUND, r * clamp(1 - (GROUND - f.y) / 200, 0.4, 1), 0.25);
     squashed(fx - cam, f.y, f.land / 0.14, f.tilt, () => { if (k === 'kiwi') oKiwi(fx - cam, f.y, 1.0, f.ph * 1.3); else oBaby(fx - cam, f.y, 0.8, f.ph); });
+    ctx.globalAlpha = 1;
   }
   // player
   { let sy = GROUND; for (const pl of L.plats) if (p.wx + 20 > pl.x && p.wx - 20 < pl.x + pl.w && pl.y >= p.y - 2) sy = Math.min(sy, pl.y); if (sy < GROUND || supported(L, p.wx)) shadow(p.wx - cam + 4, sy + 2, 52 * clamp(1 - (sy - p.y) / 260, 0.35, 1), 0.3); }
@@ -542,7 +546,7 @@ function drawPlay() {
   if (p.gliding) { const gx2 = p.wx - cam + 4, gy2 = p.y - 205; ctx.fillStyle = vgrad(gy2 - 28, gy2 + 6, '#ff6a5a', '#c0302a'); ctx.beginPath(); ctx.moveTo(gx2 - 70, gy2 + 8); ctx.quadraticCurveTo(gx2, gy2 - 52, gx2 + 70, gy2 + 8); ctx.quadraticCurveTo(gx2, gy2 - 6, gx2 - 70, gy2 + 8); ctx.fill(); ctx.strokeStyle = '#4a0a08'; ctx.lineWidth = 3; ctx.stroke(); ctx.fillStyle = '#fff'; for (const dx of [-42, -14, 14, 42]) { ctx.beginPath(); ctx.moveTo(gx2 + dx, gy2 + 1); ctx.quadraticCurveTo(gx2 + dx * 0.6, gy2 - 36, gx2 + dx * 0.4, gy2 - 40); ctx.quadraticCurveTo(gx2 + dx * 0.5, gy2 - 20, gx2 + dx + 12, gy2 + 3); ctx.fill(); } ctx.strokeStyle = 'rgba(40,20,10,.7)'; ctx.lineWidth = 2; for (const dx of [-60, -20, 20, 60]) { ctx.beginPath(); ctx.moveTo(gx2 + dx, gy2 + 6); ctx.lineTo(gx2 + 4 + dx * 0.05, p.y - 150); ctx.stroke(); } }
   if (p.dashT > 0) { ctx.save(); const px = p.wx - cam + 4; ctx.translate(px + dOff, p.y); ctx.rotate(0.1); ctx.scale(1.12, 0.92); ctx.translate(-px, -p.y); }
   glow(p.wx - cam + 10, p.y - 70, 170, REX_LIGHT[G.wi] || REX_LIGHT[0], 0.2);
-  if (!(p.inv > 0 && Math.sin(T * 30) > 0.3)) oRex(p.wx - cam,  p.y, 0.92, p.ph, p.roarT > 0 || p.breathT > 0 ? 1 : 0.05, Object.assign(rexLook(G.wi), { rider: true, vy: p.vy, sq: p.anti > 0 ? p.anti / 0.09 * 0.13 : !p.onGround ? -clamp(Math.abs(p.vy) / 1400, 0, 1) * 0.1 : (p.land > 0 ? p.land / 0.16 * 0.14 : 0), hurt: p.hitT > 0 && !G.overlay ? p.hitT / 0.45 : 0, air: !p.onGround, duck: p.duck, stomp: p.stomp && p.spin >= 1, fire: p.fireT > 0 }));
+  if (!(p.inv > 0 && Math.sin(T * 30) > 0.3)) oRex(p.wx - cam,  p.y, 0.92, p.ph, p.roarT > 0 || p.breathT > 0 ? 1 : 0.05, Object.assign(rexLook(G.wi), { rider: true, vy: p.vy, sq: p.anti > 0 ? p.anti / 0.09 * 0.13 : !p.onGround ? -clamp(Math.abs(p.vy) / 1400, 0, 1) * 0.1 : (p.land > 0 ? p.land / 0.16 * 0.14 : 0), hurt: p.hitT > 0 && !G.overlay ? p.hitT / 0.45 : 0, air: !p.onGround, duck: p.duck, stomp: p.stomp && p.spin >= 1, fire: p.fireT > 0, joy: G.chili.joy > 0 }));
   if (p.dashT > 0) ctx.restore();
   if (G.shield && !G.overlay) { const sx = p.wx - cam + 4, sy = p.y - 84, pu = 1 + 0.03 * Math.sin(T * 5); ctx.save(); ctx.translate(sx, sy); ctx.scale(pu, pu); const sg = ctx.createRadialGradient(0, 0, 36, 0, 0, 116); sg.addColorStop(0, 'rgba(150,220,255,.04)'); sg.addColorStop(1, 'rgba(150,220,255,.34)'); ctx.fillStyle = sg; ctx.beginPath(); ctx.ellipse(0, 0, 124, 102, 0, 0, Math.PI * 2); ctx.fill(); ctx.strokeStyle = 'rgba(210,240,255,.85)'; ctx.lineWidth = 3; ctx.stroke(); ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.beginPath(); ctx.ellipse(-64, -52, 18, 8, -0.7, 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
   if (spinA) ctx.restore();
@@ -652,6 +656,13 @@ function scrollBox(x, y, w, h) { // parchment scroll with wooden rolls at both e
   ctx.strokeStyle = 'rgba(150,100,40,.14)'; ctx.lineWidth = 1.2; for (let i = 1; i < 3; i++) { ctx.beginPath(); ctx.moveTo(x + 22, y + h * i / 3); ctx.lineTo(x + w - 22, y + h * i / 3 + 1.5); ctx.stroke(); }
   for (const rx of [x, x + w - 16]) { const rg = ctx.createLinearGradient(rx, 0, rx + 16, 0); rg.addColorStop(0, '#9a6a34'); rg.addColorStop(0.45, '#f0cf8e'); rg.addColorStop(1, '#8a5a2a'); rr(rx, y - 4, 16, h + 8, 8); ctx.fillStyle = rg; ctx.fill(); ctx.lineWidth = 2.5; ctx.strokeStyle = '#5a3a1a'; ctx.stroke(); }
 }
+let rexMarkerC = null, rexMarkerKey = '';
+function rexMarker() { // the player's marker on the progress bar: Rex's face in a ring, painted once per skin and theme
+  const key = save.equip.skin + '|' + G.wi; if (rexMarkerC && rexMarkerKey === key) return rexMarkerC;
+  const R = 2, S = 30, c = document.createElement('canvas'), old = ctx; c.width = c.height = S * R; ctx = c.getContext('2d');
+  try { ctx.scale(R, R); const r = S / 2 - 2, s = r / 42; ctx.beginPath(); ctx.arc(S / 2, S / 2, r, 0, Math.PI * 2); ctx.fillStyle = '#bfe6cf'; ctx.fill(); ctx.save(); ctx.clip(); drawRex(S / 2 - 88 * s, S / 2 + 104 * s, s * 0.95, 0, 0.25, rexLook(G.wi)); ctx.restore(); ctx.lineWidth = 2.4; ctx.strokeStyle = '#fff'; ctx.beginPath(); ctx.arc(S / 2, S / 2, r, 0, Math.PI * 2); ctx.stroke(); } catch (e) { /* the marker is cosmetic */ } finally { ctx = old; }
+  rexMarkerKey = key; return (rexMarkerC = c);
+}
 function drawHUD() {
   const p = G.p, th = WORLDS[G.wi];
   const bossBar = !!(G.boss && G.boss.state !== 'enter' && !G.golden && !G.bossDone); // boss health replaces the egg pill
@@ -663,13 +674,14 @@ function drawHUD() {
   if (!G.endless && !(G.bossStarted && !G.golden && !G.bossDone)) { // progress bar: how far to the gate, with flags, eggs, boss
     const L = G.L, x0 = W / 2 - 160, bw = 320, y0 = 74, span = L.gateX - 420;
     const fx = v => x0 + clamp((v - 200) / span, 0, 1) * bw;
-    rr(x0 - 5, y0 - 5, bw + 10, 16, 8); ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fill();
-    rr(x0, y0, Math.max(6, fx(p.wx) - x0), 6, 3); ctx.fillStyle = '#ffd34d'; ctx.fill();
-    for (const c of L.cps) { const x = fx(c.x); ctx.fillStyle = c.on ? '#ffd34d' : '#eee'; ctx.fillRect(x - 1, y0 - 9, 2, 15); ctx.beginPath(); ctx.moveTo(x + 1, y0 - 9); ctx.lineTo(x + 10, y0 - 6); ctx.lineTo(x + 1, y0 - 3); ctx.fill(); }
-    for (const e of L.eggs) if (!e.got) drawEgg(fx(e.x), y0 + 3, 6, e.hidden ? 'rgba(255,255,255,.55)' : th.egg, th.eggSpot);
-    if (L.bossX) { circle(fx(L.bossX), y0 + 3, 7, '#c62828'); ctx.lineWidth = 2; ctx.strokeStyle = '#ffd700'; ctx.stroke(); }
-    otxt('?', x0 + bw + 12, y0 + 3, 18, '#ffd34d', '#000', 4);
-    circle(fx(p.wx), y0 + 3, 8, '#2e8b57'); ctx.lineWidth = 2.5; ctx.strokeStyle = '#fff'; ctx.stroke();
+    rr(x0 - 8, y0 - 9, bw + 16, 26, 13); ctx.fillStyle = 'rgba(0,0,0,.42)'; ctx.fill();
+    rr(x0, y0 - 1, bw, 10, 5); ctx.fillStyle = 'rgba(255,255,255,.14)'; ctx.fill(); // the track, so the way ahead is visible too
+    rr(x0, y0 - 1, Math.max(10, fx(p.wx) - x0), 10, 5); ctx.fillStyle = vgrad(y0 - 1, y0 + 9, '#ffe27a', '#f0a81c'); ctx.fill();
+    for (const c of L.cps) { const x = fx(c.x); ctx.fillStyle = c.on ? '#ffd34d' : '#eee'; ctx.fillRect(x - 1.5, y0 - 13, 3, 20); ctx.beginPath(); ctx.moveTo(x + 1.5, y0 - 13); ctx.lineTo(x + 13, y0 - 9); ctx.lineTo(x + 1.5, y0 - 5); ctx.fill(); }
+    for (const e of L.eggs) if (!e.got) drawEgg(fx(e.x), y0 + 4, 8.5, e.hidden ? 'rgba(255,255,255,.55)' : th.egg, th.eggSpot);
+    if (L.bossX) { circle(fx(L.bossX), y0 + 4, 9, '#c62828'); ctx.lineWidth = 2.5; ctx.strokeStyle = '#ffd700'; ctx.stroke(); }
+    otxt('?', x0 + bw + 14, y0 + 4, 20, '#ffd34d', '#000', 4);
+    { const m = rexMarker(), mx = clamp(fx(p.wx), x0, x0 + bw); ctx.drawImage(m, mx - 15, y0 + 4 - 15 + Math.sin(T * 6) * 0.8, 30, 30); } // Rex's own face rides along the bar
   }
   if (G.boss && G.boss.state !== 'enter' && !G.golden && !G.bossDone) { // boss health: four phase segments, or the duel meter
     const b = G.boss, x0 = W / 2 - 190, y0 = 34;
@@ -706,8 +718,9 @@ function drawHUD() {
   }
   const target = G.L.obs.some(o => !o.dead && !o.scared && (o.type === 'raptor' || o.type === 'ptero' || o.type === 'boulder') && o.x - p.wx > 0 && o.x - p.wx < 360) || (G.boss && (G.boss.state === 'tired' || G.boss.state === 'duel' || (G.boss.state === 'charge' && G.boss.x - p.wx < 390)));
   if (ready && target) { ctx.globalAlpha = 0.5 + 0.3 * Math.sin(T * 14); circle(rx, ry, 82 + 6 * Math.sin(T * 14), '#ffd34d'); ctx.globalAlpha = 1; }
-  actBtn(rx, ry, 66, ready ? '#d63a28' : '#6a6a6a', 'roar', 'BRÜLL!', 24);
-  if (!ready) { ctx.strokeStyle = '#ffd34d'; ctx.lineWidth = 7; ctx.beginPath(); ctx.arc(rx, ry, 60, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * (1 - p.roarCd / (p.roarMax || 0.85))); ctx.stroke(); }
+  const arena = G.arena || 0, br = Math.round(66 - 12 * arena); // smaller in a boss arena so it covers less of the boss (the touch area stays the same)
+  ctx.globalAlpha = 1 - 0.18 * arena * (target ? 0 : 1); actBtn(rx, ry, br, ready ? '#d63a28' : '#6a6a6a', 'roar', 'BRÜLL!', Math.round(24 - 3 * arena)); ctx.globalAlpha = 1;
+  if (!ready) { ctx.strokeStyle = '#ffd34d'; ctx.lineWidth = 7; ctx.beginPath(); ctx.arc(rx, ry, br - 6, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * (1 - p.roarCd / (p.roarMax || 0.85))); ctx.stroke(); }
   buttons.push({ x: rx - 80, y: ry - 80, w: 160, h: 160, cb: roar, silent: true });
 }
 function drawCoach() {
@@ -969,9 +982,9 @@ function drawOverlay() {
   if (settingsOpen && o.type === 'pause') { drawSettings(); return; }
   if (o.type === 'pause') {
     panel(280, 100, 400, 350); txt('Pause', W / 2, 155, 44, '#3b2410');
-    button('Weiter spielen', 330, 200, 300, 64, () => { G.overlay = null; });
+    button('Weiter spielen', 330, 200, 300, 64, () => { G.overlay = null; }, { icon: icon('play') });
     button('Einstellungen', 330, 284, 300, 56, () => { settingsOpen = true; }, { color: '#e0d2b0', size: 24, icon: icon('gear') });
-    button('Zum Kalender', 330, 360, 300, 64, () => go('map'), { color: '#e0d2b0' });
+    button('Zum Kalender', 330, 360, 300, 64, () => go('map'), { color: '#e0d2b0', icon: icon('home') });
   } else if (o.type === 'endover') {
     o.t += DT; panel(220, 90, 520, 360); drawPortrait('chili', W / 2, 160, 46);
     txt('Endlos-Lauf zu Ende!', W / 2, 232, 32, '#3b2410');
@@ -984,39 +997,47 @@ function drawOverlay() {
     panel(220, 110, 520, 320); drawPortrait('chili', W / 2, 180, 50, true);
     txt('Oh nein! Nicht aufgeben!', W / 2, 262, 32, '#3b2410');
     txt('Chili meint: Nochmal ab dem letzten Fähnchen!', W / 2, 300, 22, '#6b4a2b', 'center', 'normal');
-    button('Nochmal!', 290, 340, 200, 62, retry); button('Kalender', 510, 340, 160, 62, () => go('map'), { color: '#e0d2b0' });
+    button('Nochmal!', 290, 340, 200, 62, retry, { icon: icon('loop') }); button('Kalender', 510, 340, 160, 62, () => go('map'), { color: '#e0d2b0', icon: icon('home'), size: 24 });
   } else if (o.type === 'riddle') {
     drawRiddleTablet(o, { title: 'Göttis Rätsel-Tor', wi: G.wi, doneLabel: 'Tor öffnen!', onDone: openGate });
   } else if (o.type === 'complete') {
     o.t += DT; const lv = LEVELS[G.li];
+    // the reveal runs in steps (title, eggs, card, medals, amber); a tap anywhere skips ahead, and the button waits until it is over
+    const nNew = G.newMedals.length, revealEnd = Math.max(1.5, G.newCard ? 1.5 : 0, nNew ? 1.5 + 0.45 * (G.newMedals[nNew - 1]) + 0.5 : 0), ready = o.t >= revealEnd;
+    if (!ready) buttons.push({ x: 0, y: 0, w: W, h: H, silent: true, cb: () => { o.t = revealEnd; } });
     panel(150, 24, 660, 492);
-    otxt(`Tür ${lv.day} geschafft!`, W / 2, 70, 44, '#ffd34d', '#3b1d00', 10);
+    { const tu = clamp(o.t * 4, 0, 1), tp = tu < 1 ? 0.5 + 0.6 * tu : 1 + 0.03 * Math.sin(T * 3); ctx.save(); ctx.translate(W / 2, 70); ctx.scale(tp, tp); ctx.globalAlpha = tu; otxt(`Tür ${lv.day} geschafft!`, 0, 0, 44, '#ffd34d', '#3b1d00', 10); ctx.restore(); }
     // the day's dino card pops in (first time), flanked by the three eggs and the amber haul
-    const u = G.newCard ? clamp((o.t - 0.3) * 3, 0, 1) : 1;
+    const u = G.newCard ? clamp((o.t - 1.0) * 3, 0, 1) : 1;
     if (G.newCard && u > 0 && !o.cpopped.includes(0)) { o.cpopped.push(0); SFX.egg(); burst(G.cam + W / 2, 146, 34, ['#fff3b0', '#ffd740', th.egg, th.eggSpot], 340, 500, 6, 1); }
-    for (let k = 0; k < 3; k++) { const got = G.eggsGot[k] || save.lvE[G.li][k]; drawEgg(W / 2 - 290 + k * 52, 150, 21, got ? th.egg : '#ddd', got ? th.eggSpot : '#ccc', got ? 0.4 : 0, Math.sin(T * 3 + k) * (got ? 0.1 : 0)); }
-    txt(`${save.lvE[G.li].filter(Boolean).length} von 3 Eiern`, W / 2 - 238, 196, 16, '#6b4a2b', 'center', 'normal');
+    for (let k = 0; k < 3; k++) { // the three eggs drop in one after the other; the ones found ring a little bell
+      const got = G.eggsGot[k] || save.lvE[G.li][k], eu = clamp((o.t - 0.2 - k * 0.25) * 4, 0, 1); if (eu <= 0) continue;
+      if (got && !o.epopped.includes(k)) { o.epopped.push(k); [660, 784, 988][k] && tone([660, 784, 988][k], 0.2, 'triangle', 0.1); burst(G.cam + W / 2 - 290 + k * 52, 150, 8, ['#fff3b0', th.egg], 160, 300, 4, 0.5); }
+      ctx.save(); ctx.translate(W / 2 - 290 + k * 52, 150 - (1 - eu) * 24); ctx.globalAlpha = eu; const ep = eu < 1 ? 0.6 + 0.4 * eu : 1; ctx.scale(ep, ep); drawEgg(0, 0, 21, got ? th.egg : '#ddd', got ? th.eggSpot : '#ccc', got ? 0.4 : 0, Math.sin(T * 3 + k) * (got ? 0.1 : 0)); ctx.restore();
+    }
+    ctx.globalAlpha = clamp((o.t - 0.9) * 4, 0, 1); txt(`${save.lvE[G.li].filter(Boolean).length} von 3 Eiern`, W / 2 - 238, 198, 19, '#6b4a2b', 'center', 'normal'); ctx.globalAlpha = 1;
     if (u <= 0) drawEgg(W / 2, 148, 30, th.egg, th.eggSpot, 0.6, Math.sin(T * 14) * 0.2);
     else { const sc = G.newCard ? (u < 1 ? 0.3 + u * 0.95 : 1 + 0.03 * Math.sin(T * 6)) : 1; ctx.save(); ctx.translate(W / 2, 152); ctx.rotate((hash(G.li * 3 + 1) - 0.5) * 0.08); ctx.scale(sc * 1.3, sc * 1.3); rr(-62, -46, 124, 92, 12); ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.save(); ctx.translate(2, 4); ctx.fill(); ctx.restore(); ctx.fillStyle = '#fffaf0'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#8a6a3a'; ctx.stroke(); rr(-56, -40, 112, 62, 8); ctx.fillStyle = th.sky[1]; ctx.fill(); drawCardArt(G.li, 0, -10, 104, false); txt(FACTS[G.li].name, 0, 36, FACTS[G.li].name.length > 11 ? 14 : 17, '#2b1a00'); if (G.newCard && u >= 1) { ctx.save(); ctx.translate(46, -42); ctx.rotate(0.35); rr(-20, -10, 40, 20, 5); ctx.fillStyle = '#e53935'; ctx.fill(); txt('NEU', 0, 1, 13, '#fff'); ctx.restore(); } ctx.restore(); }
     if (u >= 1) { // the card is a door into the Dino-Buch, and its headline fact is read out right here
       const pz = 1 + 0.06 * Math.sin(T * 5); ctx.save(); ctx.translate(W / 2 - 74, 106); ctx.rotate(-0.3); ctx.scale(pz, pz); rr(-28, -10, 56, 20, 6); ctx.fillStyle = '#ffc400'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#7a4a00'; ctx.stroke(); txt('Lesen', 0, 1, 13, '#3b1d00'); ctx.restore();
       buttons.push({ x: W / 2 - 80, y: 100, w: 160, h: 128, cb: () => openBookCard(G.li) });
-      const hl = wrapLines(FACTS[G.li].text.split('|')[0], 520, 14); ctx.save(); ctx.globalAlpha = G.newCard ? clamp((o.t - 1.3) * 2, 0, 1) : 1; drawBulb(W / 2 - 290, 346 + (hl.length - 1) * 8); hl.slice(0, 2).forEach((l, i) => txt(l, W / 2 + 10, 346 + i * 17, 14, '#3b2410', 'center')); ctx.restore();
     }
-    drawAmber(W / 2 + 232, 150, 20); txt('+' + G.amber, W / 2 + 232, 190, 22, '#8a5a00');
+    { const au = clamp((o.t - 0.4) / 1.1, 0, 1), shown = Math.round(G.amber * au); if (shown !== o.amberShown) { if (shown % 3 === 0 || shown === G.amber) tone(900 + 600 * au, 0.04, 'square', 0.035); o.amberShown = shown; } // the haul counts up with ticks
+      const ap = au < 1 ? 1 + 0.08 * Math.sin(T * 30) : 1; ctx.save(); ctx.translate(W / 2 + 232, 150); ctx.scale(ap, ap); drawAmber(0, 0, 22); ctx.restore(); txt('+' + shown, W / 2 + 232, 192, 26, '#8a5a00'); }
     for (let k = 0; k < 3; k++) {
       const x = W / 2 - 200 + k * 200, on = save.lvM[G.li][k], isNew = G.newMedals.includes(k);
-      const uu = isNew ? clamp((o.t - 0.5 - k * 0.45) * 3, 0, 1) : 1;
+      const uu = isNew ? clamp((o.t - 1.5 - k * 0.45) * 3, 0, 1) : 1;
       if (isNew && uu > 0 && !o.popped.includes(k)) { o.popped.push(k); [784, 988, 1175, 1568].forEach((f, j) => tone(f, 0.25, 'triangle', 0.12, null, j * 0.06)); burst(G.cam + x, 250, 25, ['#ffd34d', '#fff', '#e8a317'], 300, 400, 6, 0.9); }
       const sc = isNew ? (uu < 1 ? uu * 1.35 : 1 + 0.05 * Math.sin(T * 6)) : 1;
       ctx.save(); ctx.translate(x, 262); ctx.scale(sc, sc); drawMedal(0, 0, 26, k, on && uu > 0); ctx.restore();
-      txt(MEDALS[k][0], x, 306, 19, on ? '#3b2410' : '#999');
-      txt(G.earned[k] ? 'geschafft!' : k === 2 ? `${G.amber} von ${Math.ceil(G.L.ambTotal * 0.8)}` : MEDALS[k][1], x, 328, 15, G.earned[k] ? '#2e7d32' : '#8a6a3a', 'center', 'normal');
+      txt(MEDALS[k][0], x, 308, 22, on ? '#3b2410' : '#999');
+      txt(G.earned[k] ? 'geschafft!' : k === 2 ? `${G.amber} von ${Math.ceil(G.L.ambTotal * 0.8)}` : MEDALS[k][1], x, 333, 18, G.earned[k] ? '#2e7d32' : '#8a6a3a', 'center', 'normal');
       if (isNew && uu >= 1) txt('NEU!', x + 32, 232, 16, '#e53935');
     }
     if (G.newTreasure) { drawTreasure(G.L.treasure.k, W / 2 - 200, 380, 0.8); txt(TREASURES[G.L.treasure.k].name + ' gefunden!', W / 2 + 20, 384, 26, '#2e7d32'); }
     else { const tk = lv.treasure; const nextOpen = lv.day < 24 && lv.day === adventDay(); const missing = 3 - save.lvE[G.li].filter(Boolean).length;
-      txt(nextOpen && TEASERS[lv.day] ? TEASERS[lv.day] : nextOpen ? `Morgen öffnet sich Tür ${lv.day + 1} – bis dann!` : tk >= 0 && !save.treasures[tk] ? TREASURES[tk].hint : missing ? 'Chili schnuppert: Hier sind noch Eier versteckt!' : 'Super gemacht!', W / 2, 384, 19, '#6b4a2b', 'center', 'normal'); }
+      const msg = nextOpen && TEASERS[lv.day] ? TEASERS[lv.day] : nextOpen ? `Morgen öffnet sich Tür ${lv.day + 1} – bis dann!` : tk >= 0 && !save.treasures[tk] ? TREASURES[tk].hint : missing ? 'Chili schnuppert: Hier sind noch Eier versteckt!' : 'Super gemacht!';
+      ctx.globalAlpha = clamp((o.t - 2.0) * 3, 0, 1); const ml = wrapLines(msg, 540, 22); ml.slice(0, 2).forEach((l, i) => txt(l, W / 2, 384 + i * 26 - (ml.length > 1 ? 10 : 0), 22, '#6b4a2b', 'center', 'normal')); ctx.globalAlpha = 1; }
     { const hop = Math.abs(Math.sin(T * 7)) * 16, hop2 = Math.abs(Math.sin(T * 7 + 1.2)) * 14; shadow(240, 506, 52 - hop * 0.6, 0.25); shadow(752, 506, 22, 0.25);
       oRex(240, 502 - hop, 0.55, T * 8, 0.85, Object.assign(rexLook(G.wi), { rider: true, vy: -200 }));
       chiliFx.joy = 1; oChili(752, 504 - hop2, 1.0, T * 12, true); chiliFx.joy = 0;
@@ -1025,7 +1046,9 @@ function drawOverlay() {
       const kk = lv.boss, bo = { dmg: 1, ko: true, wid: 'res' }; shadow(668, 508, kk === 'king' ? 62 : 48, 0.25);
       if (kk === 'crab') drawCrabKing(668, 506, 0.45, T * 2, true, bo); else if (kk === 'kraken') drawKraken(668, 506, 0.3, T * 2, true, bo); else if (kk === 'queen') drawQueen(668, 506, 0.45, T * 2, true, bo); else oRaptor(668, 506, 0.6, T * 2, true, { col: '#b01c10', dark: '#4a0a0a', crown: true, dmg: 1, ko: true, wid: 'res' });
     }
-    if (lv.day === 24) button('Weiter!', W / 2 - 120, 422, 240, 62, () => startEnding(), { color: '#e57373', textColor: '#fff' });
-    else button('Zum Kalender', W / 2 - 120, 422, 240, 62, () => go('map'));
+    if (ready) { const bp = Math.min(1, (o.t - revealEnd) * 4); ctx.save(); ctx.globalAlpha = bp; ctx.translate(0, (1 - bp) * 14);
+      if (lv.day === 24) button('Weiter!', W / 2 - 120, 422, 240, 62, () => startEnding(), { color: '#e57373', textColor: '#fff', icon: icon('play') });
+      else button('Zum Kalender', W / 2 - 130, 422, 260, 62, () => go('map'), { icon: icon('home') });
+      ctx.restore(); }
   }
 }

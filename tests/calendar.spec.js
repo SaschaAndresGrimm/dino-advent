@@ -75,6 +75,8 @@ test('finishing day 24 leads to the ending, which marks the game as finished', a
   await game.eval(() => { const G = window.__dino.G; G.atGate = true; G.gateOpening = true; G.gateOpen = 1; G.stopped = false; G.p.wx = G.L.gateX - 100; G.bossStarted = true; G.bossDone = true; });
   await page.waitForFunction(() => window.__dino.G.overlay && window.__dino.G.overlay.type === 'complete');
   await page.waitForTimeout(300);
+  await click(page, 480, 453);   // the reveal is still running: this tap only skips ahead
+  await page.waitForTimeout(500);
   await click(page, 480, 453);   // "Weiter!"
   expect(await game.eval(() => window.__dino.scene)).toBe('ending');
 });

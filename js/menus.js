@@ -39,7 +39,7 @@ const DOORS = { cols: 8, w: 100, h: 80, gx: 12, gy: 8, x0: 34, y0: 96 };
 function doorRect(i) { const c = i % DOORS.cols, r = Math.floor(i / DOORS.cols); return { x: DOORS.x0 + c * (DOORS.w + DOORS.gx), y: DOORS.y0 + r * (DOORS.h + DOORS.gy), w: DOORS.w, h: DOORS.h }; }
 function drawDoor(i, today) {
   const { x, y, w, h } = doorRect(i), lv = LEVELS[i], day = i + 1, th = WORLDS[lv.wi], open = day <= today, opened = save.gifts.includes(day) || !giftFor(day) && save.lvDone[i], done = save.lvDone[i], isToday = day === today && !done;
-  const pulse = isToday ? 1.1 + 0.04 * Math.sin(T * 5) : 1;
+  const pulse = isToday ? 1.16 + 0.03 * Math.sin(T * 5) : 1; // today's door is the biggest thing on the board
   ctx.save(); ctx.translate(x + w / 2, y + h / 2); ctx.scale(pulse, pulse); ctx.translate(-w / 2, -h / 2);
   if (isToday) { const g = ctx.createRadialGradient(w / 2, h / 2, 20, w / 2, h / 2, 100); g.addColorStop(0, `rgba(255,230,140,${0.8 + 0.2 * Math.sin(T * 4)})`); g.addColorStop(1, 'rgba(255,230,140,0)'); ctx.fillStyle = g; ctx.fillRect(-60, -60, w + 120, h + 120); for (let k = 0; k < 5; k++) { const a = T * 1.6 + k * 1.2566, sx = w / 2 + Math.cos(a) * (w * 0.62), sy = h / 2 + Math.sin(a) * (h * 0.7); drawStar(sx, sy, 4.5 + 2 * Math.sin(T * 7 + k), k % 2 ? '#fff' : '#ffe27a'); } }
   // frame (arched top) in the colour of the theme
@@ -50,7 +50,7 @@ function drawDoor(i, today) {
   if (done || (open && opened)) { // the door stands open: a view of the level's theme
     ctx.save(); ctx.beginPath(); ctx.moveTo(ix, h); ctx.lineTo(ix, iy + 18); ctx.quadraticCurveTo(ix, iy, w / 2, iy); ctx.quadraticCurveTo(ix + iw, iy, ix + iw, iy + 18); ctx.lineTo(ix + iw, h); ctx.closePath(); ctx.clip();
     drawDoorScene(i, ix, iy, iw, ih, !done); if (!done) { ctx.fillStyle = 'rgba(10,10,30,.18)'; ctx.fillRect(ix, iy, iw, ih); } ctx.restore();
-    if (done) { drawCardArt(i, w / 2, h * 0.47, 66, false); }
+    if (done) { drawCardArt(i, w / 2, h * 0.46, 78, false); }
     ctx.fillStyle = '#6a4a2b'; ctx.beginPath(); ctx.moveTo(ix, h); ctx.lineTo(ix, iy + 18); ctx.lineTo(ix + 12, iy + 24); ctx.lineTo(ix + 12, h); ctx.closePath(); ctx.fill(); // the opened door leaf
   } else { // closed wooden door
     ctx.beginPath(); ctx.moveTo(ix, h); ctx.lineTo(ix, iy + 18); ctx.quadraticCurveTo(ix, iy, w / 2, iy); ctx.quadraticCurveTo(ix + iw, iy, ix + iw, iy + 18); ctx.lineTo(ix + iw, h); ctx.closePath();
@@ -59,13 +59,19 @@ function drawDoor(i, today) {
     if (open) { ctx.save(); ctx.beginPath(); ctx.moveTo(ix, h); ctx.lineTo(ix, iy + 18); ctx.quadraticCurveTo(ix, iy, w / 2, iy); ctx.quadraticCurveTo(ix + iw, iy, ix + iw, iy + 18); ctx.lineTo(ix + iw, h); ctx.closePath(); ctx.clip(); ctx.globalAlpha = 0.32; ctx.fillStyle = th.far; ctx.fillRect(ix, iy, iw, ih); ctx.restore(); // theme tint
       const pw = isToday ? 70 : 44, ph = isToday ? 30 : 26, py = isToday ? h * 0.57 : h * 0.56, sc2 = doorScene(i, false) || doorScene(i, true); ctx.save(); rr(w / 2 - pw / 2, py, pw, ph, 8); ctx.clip(); if (isToday) ctx.drawImage(sc2, 0, 14, sc2.width, sc2.height - 28, w / 2 - pw / 2, py, pw, ph); else ctx.drawImage(sc2, w / 2 - pw / 2, py, pw, ph); ctx.restore(); rr(w / 2 - pw / 2, py, pw, ph, 8); ctx.lineWidth = isToday ? 3 : 2; ctx.strokeStyle = isToday ? '#ffd34d' : '#2b1a0c'; ctx.stroke(); }
     circle(w - 14, h * 0.5, 3.4, open ? '#ffd34d' : '#9a8a78');
+    if (!open) { // locked: frosted glass with the animal waiting behind it, so the door builds anticipation
+      ctx.save(); ctx.beginPath(); ctx.moveTo(ix, h); ctx.lineTo(ix, iy + 18); ctx.quadraticCurveTo(ix, iy, w / 2, iy); ctx.quadraticCurveTo(ix + iw, iy, ix + iw, iy + 18); ctx.lineTo(ix + iw, h); ctx.closePath(); ctx.clip();
+      ctx.globalAlpha = 0.5; ctx.fillStyle = vgrad(iy, h, '#cfe6ff', '#8fb4e0'); ctx.fillRect(ix, iy, iw, ih); ctx.globalAlpha = 0.5; drawCardArt(i, w / 2, h * 0.68, 58, true); ctx.globalAlpha = 1;
+      ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = 1; ctx.beginPath(); for (const [fx0, fy0, fx1, fy1] of [[ix, h, ix + 22, h - 14], [ix + iw, h, ix + iw - 20, h - 18], [ix + 4, iy + 22, ix + 16, iy + 30], [ix + iw - 3, iy + 24, ix + iw - 15, iy + 32]]) { ctx.moveTo(fx0, fy0); ctx.lineTo(fx1, fy1); } ctx.stroke();
+      const tw = 0.5 + 0.5 * Math.sin(T * 2.2 + i * 1.7); ctx.globalAlpha = tw; drawStar(ix + iw * 0.78, iy + ih * 0.62, 3.5, '#fff'); ctx.globalAlpha = 1; ctx.restore();
+    }
   }
   // number tag
   if (!done) { const ny = isToday ? h * 0.36 : h * 0.36; circle(w / 2, ny, isToday ? 14 : 16, open ? '#fff3c0' : 'rgba(255,255,255,.7)'); ctx.lineWidth = 2; ctx.strokeStyle = open ? '#a06a00' : '#6a5a4a'; ctx.stroke(); txt(String(day), w / 2, ny + 1, isToday ? 19 : 20, open ? '#7a3a00' : '#6a5a4a'); }
   else { circle(w - 14, 22, 13, '#fff7e0'); ctx.lineWidth = 2; ctx.strokeStyle = '#2b1a0c'; ctx.stroke(); txt(String(day), w - 14, 23, 15, '#3b2410'); }
-  if (!open) ico('lock', w / 2, h * 0.72, 20);
-  if (isToday) { ctx.save(); ctx.shadowColor = '#ffd34d'; ctx.shadowBlur = 10 + 6 * Math.sin(T * 5); ctx.strokeStyle = '#ffd34d'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(0, h); ctx.lineTo(0, 22); ctx.quadraticCurveTo(0, 0, w / 2, 0); ctx.quadraticCurveTo(w, 0, w, 22); ctx.lineTo(w, h); ctx.stroke(); ctx.restore(); ctx.save(); ctx.translate(w / 2, 1 + Math.sin(T * 5) * 1.2); rr(-32, -12, 64, 24, 7); ctx.fillStyle = '#e53935'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#fff'; ctx.stroke(); txt('HEUTE', 0, 1, 15, '#fff'); ctx.restore(); }
-  if (done) { rr(w / 2 - 44, h - 30, 88, 27, 13); ctx.fillStyle = 'rgba(30,18,8,.68)'; ctx.fill(); for (let k = 0; k < 3; k++) drawMedal(w / 2 - 26 + k * 26, h - 16.5, 10, k, save.lvM[i][k]); }
+  if (!open) { circle(w - 17, h - 15, 12, 'rgba(40,52,84,.78)'); ico('lock', w - 17, h - 15, 16); }
+  if (isToday) { ctx.save(); ctx.shadowColor = '#ffd34d'; ctx.shadowBlur = 10 + 6 * Math.sin(T * 5); ctx.strokeStyle = '#ffd34d'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(0, h); ctx.lineTo(0, 22); ctx.quadraticCurveTo(0, 0, w / 2, 0); ctx.quadraticCurveTo(w, 0, w, 22); ctx.lineTo(w, h); ctx.stroke(); ctx.restore(); ctx.save(); ctx.translate(w / 2, 1 + Math.sin(T * 5) * 1.2); rr(-32, -12, 64, 24, 7); ctx.fillStyle = '#e53935'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#fff'; ctx.stroke(); txt('HEUTE', 0, 1, 15, '#fff'); ctx.restore(); ctx.save(); ctx.translate(w - 9, h - 4 + Math.sin(T * 6) * 2); circle(0, 0, 15, '#e53935'); ctx.lineWidth = 2.5; ctx.strokeStyle = '#fff'; ctx.stroke(); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.moveTo(-4, -7); ctx.lineTo(8, 0); ctx.lineTo(-4, 7); ctx.closePath(); ctx.fill(); ctx.restore(); }
+  if (done) { rr(w / 2 - 25, h - 21, 50, 16, 8); ctx.fillStyle = 'rgba(30,18,8,.62)'; ctx.fill(); for (let k = 0; k < 3; k++) drawMedal(w / 2 - 15 + k * 15, h - 13, 6, k, save.lvM[i][k]); } // compact: the medals are a progress hint, not the door's main picture
   if (lv.boss && open) { drawStar(14, h - 14, 9, '#ff6a3a'); }
   if (open && worldMedalsDone(lv.wi)) { ctx.save(); ctx.shadowColor = '#ffd34d'; ctx.shadowBlur = 8 + 4 * Math.sin(T * 3 + i); ctx.strokeStyle = '#ffd34d'; ctx.lineWidth = 3.5; ctx.beginPath(); ctx.moveTo(0, h); ctx.lineTo(0, 22); ctx.quadraticCurveTo(0, 0, w / 2, 0); ctx.quadraticCurveTo(w, 0, w, 22); ctx.lineTo(w, h); ctx.stroke(); ctx.restore(); }
   ctx.restore();

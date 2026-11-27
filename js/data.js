@@ -333,7 +333,7 @@ const medalTotal = () => save.lvM.flat().reduce((a, b) => a + b, 0);
 const worldMedalsDone = wi => LEVELS.filter(l => l.wi === wi).every(l => save.lvM[l.li].every(Boolean));
 function launchLevel(i) { // first time a day starts, Götti briefs the player (a short dialog on the map)
   const day = i + 1, lines = DAY_STORY[day];
-  if (lines && !save.storySeen[day]) { save.storySeen[day] = 1; writeSave(); startDialog(lines, () => startLevel(i)); } else startLevel(i);
+  if (lines && !save.storySeen[day]) { save.storySeen[day] = 1; writeSave(); startDialog(lines, () => startLevel(i), false, { wi: LEVELS[i].wi, boss: LEVELS[i].boss || null }); } else startLevel(i);
 }
 // =====================================================================
 // Advent calendar: 24 levels, a new one opens every day from 1 December

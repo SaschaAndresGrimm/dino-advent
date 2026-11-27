@@ -51,6 +51,7 @@ function ico(kind, cx, cy, s) { // UI icons: ink outline, gradient fill and a gl
   else if (kind === 'lock') { ctx.lineWidth = 6; ctx.strokeStyle = INK; ctx.beginPath(); ctx.arc(0, -5, 7, Math.PI, 0); ctx.lineTo(7, -2); ctx.moveTo(-7, -5); ctx.lineTo(-7, -2); ctx.stroke(); ctx.lineWidth = 3; ctx.strokeStyle = '#d8dce6'; ctx.beginPath(); ctx.arc(0, -5, 7, Math.PI, 0); ctx.lineTo(7, -2); ctx.moveTo(-7, -5); ctx.lineTo(-7, -2); ctx.stroke(); rr(-11, -4, 22, 18, 4); fillOut('#ffe27a', '#d89a18'); circle(0, 4, 3, INK); ctx.fillStyle = INK; ctx.fillRect(-1.2, 4, 2.4, 6); ctx.fillStyle = 'rgba(255,255,255,.5)'; ctx.fillRect(-8, -2, 9, 2.2); }
   else if (kind === 'check') { ctx.lineWidth = 9; ctx.strokeStyle = 'rgba(255,255,255,.9)'; ctx.beginPath(); ctx.moveTo(-9, 1); ctx.lineTo(-3, 8); ctx.lineTo(10, -8); ctx.stroke(); ctx.lineWidth = 6; ctx.strokeStyle = '#2e9a3a'; ctx.stroke(); ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(190,255,190,.8)'; ctx.beginPath(); ctx.moveTo(-8, 0); ctx.lineTo(-3, 6); ctx.stroke(); }
   else if (kind === 'play') { ctx.beginPath(); ctx.moveTo(-8, -12); ctx.lineTo(12, 0); ctx.lineTo(-8, 12); ctx.closePath(); fillOut('#5a3a10', '#2b1a00', 2); ctx.fillStyle = 'rgba(255,255,255,.3)'; ctx.beginPath(); ctx.moveTo(-6, -9); ctx.lineTo(4, -4); ctx.lineTo(-6, -4); ctx.closePath(); ctx.fill(); }
+  else if (kind === 'home') { ctx.beginPath(); ctx.moveTo(-15, -1); ctx.lineTo(0, -14); ctx.lineTo(15, -1); ctx.lineTo(10, -1); ctx.lineTo(10, 13); ctx.lineTo(-10, 13); ctx.lineTo(-10, -1); ctx.closePath(); fillOut('#ffe9a8', '#e0a040'); rr(-3.5, 3, 7, 10, 2); ctx.fillStyle = '#8a4a1a'; ctx.fill(); ctx.lineWidth = 1.4; ctx.strokeStyle = INK; ctx.stroke(); }
   else if (kind === 'gear') { ctx.beginPath(); for (let i = 0; i < 16; i++) { const a = i / 16 * Math.PI * 2, r = i % 2 ? 10 : 14; const a2 = a + Math.PI / 16; ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r); ctx.lineTo(Math.cos(a2) * r, Math.sin(a2) * r); } ctx.closePath(); fillOut('#c8d0dc', '#7a8698'); circle(0, 0, 5, '#4a5568'); ctx.lineWidth = 2; ctx.strokeStyle = INK; ctx.stroke(); circle(0, 0, 2, '#e8edf4'); }
   else if (kind === 'sound' || kind === 'mute') { ctx.beginPath(); ctx.moveTo(-13, -5); ctx.lineTo(-7, -5); ctx.lineTo(0, -12); ctx.lineTo(0, 12); ctx.lineTo(-7, 5); ctx.lineTo(-13, 5); ctx.closePath(); fillOut('#f4d27a', '#c88a28', 2.2); if (kind === 'sound') { ctx.strokeStyle = INK; ctx.lineWidth = 5; for (const r of [6, 11]) { ctx.beginPath(); ctx.arc(1, 0, r, -0.9, 0.9); ctx.stroke(); } ctx.strokeStyle = '#4a9aea'; ctx.lineWidth = 2.6; for (const r of [6, 11]) { ctx.beginPath(); ctx.arc(1, 0, r, -0.9, 0.9); ctx.stroke(); } } else { ctx.strokeStyle = INK; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(5, -6); ctx.lineTo(14, 6); ctx.moveTo(14, -6); ctx.lineTo(5, 6); ctx.stroke(); ctx.strokeStyle = '#e04a3a'; ctx.lineWidth = 3; ctx.stroke(); } }
   else if (kind === 'pause') { for (const sx of [-8, 3]) { rr(sx, -11, 6.5, 22, 2.5); fillOut('#ffffff', '#c8d0dc', 2); } }
@@ -109,9 +110,21 @@ function drawEmbers() {
 // toasts & tips
 let toasts = [];
 const BOSS_QUIET = /Fähnchen|Helfer kommen|Noch \d Mal|erschöpft|Boss selbst/; // the boss bar and the roar prompt already say this
-function toast(text, color = '#fff') { const inBoss = scene === 'play' && G && G.boss; if (scene === 'play' && G && G.L && G.L.bossX && G.p.wx >= G.L.bossX - 5 && BOSS_QUIET.test(text)) return; if (inBoss) toasts.length = 0; const ex = toasts.find(q => q.text === text); if (ex) { ex.t = 2.6; return; } toasts.push({ text, color, t: 2.6 }); if (toasts.length > 3) toasts.shift(); }
+// One toast is visible at a time; the rest wait in line (a shown toast gives way after 0.9 s when another is waiting), so messages never pile up over the heroes.
+function toast(text, color = '#fff') {
+  const inBoss = scene === 'play' && G && G.boss;
+  if (scene === 'play' && G && G.L && G.L.bossX && G.p.wx >= G.L.bossX - 5 && BOSS_QUIET.test(text)) return;
+  if (inBoss) toasts.length = 0;
+  const ex = toasts.find(q => q.text === text); if (ex) { if (ex === toasts[0]) ex.t = 2.4; return; }
+  toasts.push({ text, color, t: 2.4, age: 0 });
+  if (toasts.length > 3) toasts.splice(1, 1); // keep the newest, drop the oldest one that is still waiting
+}
 function drawToasts() {
-  const inBoss = scene === 'play' && G && G.boss, ty = inBoss ? 78 : 196;
-  toasts.forEach((t, i) => { t.t -= DT; const a = clamp(t.t * 2, 0, 1); ctx.globalAlpha = a; const fs = inBoss ? 19 : 24, bh = inBoss ? 32 : 40, sp = inBoss ? 38 : 46; setFont(fs); const w = ctx.measureText(t.text).width + 36; rr(W / 2 - w / 2, ty + i * sp, w, bh, bh / 2); ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.fill(); txt(t.text, W / 2, ty + bh / 2 + 1 + i * sp, fs, t.color); ctx.globalAlpha = 1; });
-  toasts = toasts.filter(t => t.t > 0);
+  const inBoss = scene === 'play' && G && G.boss, ty = inBoss ? 78 : scene === 'play' ? 100 : 196, t = toasts[0]; // in a level: just under the progress bar, clear of the heroes
+  if (!t) return;
+  t.t -= DT; t.age += DT; if (toasts.length > 1 && t.age > 0.9) t.t = Math.min(t.t, 0.35);
+  const a = clamp(Math.min(t.t * 3, t.age * 6), 0, 1), pop = 1 + 0.08 * Math.max(0, 1 - t.age * 5), fs = inBoss ? 19 : 23, bh = inBoss ? 32 : 38;
+  setFont(fs); const w = ctx.measureText(t.text).width + 36;
+  ctx.save(); ctx.globalAlpha = a; ctx.translate(W / 2, ty + bh / 2); ctx.scale(pop, pop); rr(-w / 2, -bh / 2, w, bh, bh / 2); ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.fill(); txt(t.text, 0, 1, fs, t.color); ctx.restore();
+  toasts = toasts.filter(q => q.t > 0);
 }
