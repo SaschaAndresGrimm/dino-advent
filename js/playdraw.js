@@ -198,6 +198,7 @@ function drawObstacle(o, cam, th) {
       ctx.fillStyle = '#5f7591'; rr(x - 75, -10, 150, 64, 20); ctx.fill(); ell(x, 50, 70, 10, 0, '#dfefff');
       ctx.fillStyle = 'rgba(200,235,255,.95)';
       const ice = (pts) => { ctx.beginPath(); pts.forEach(([px, py], i) => i ? ctx.lineTo(px, py) : ctx.moveTo(px, py)); ctx.closePath(); ctx.fillStyle = '#c9ecff'; ctx.fill(); ctx.lineJoin = 'round'; ctx.lineWidth = 3.5; ctx.strokeStyle = '#1d4a78'; ctx.stroke(); };
+      if (o.dead) break; // shot or smashed: only the ceiling stub remains
       if (o.state === 'hang') { const tipX = x + Math.sin(T * 30) * (o.x - G.p.wx < 600 ? 1.5 : 0); ice([[x - 16, 52], [x + 16, 52], [tipX, 122]]); ctx.fillStyle = 'rgba(255,255,255,.7)'; ctx.beginPath(); ctx.moveTo(x - 9, 56); ctx.lineTo(x - 3, 56); ctx.lineTo(tipX - 2, 100); ctx.fill(); }
       else if (o.state === 'fall') { ice([[x - 16, o.y - 74], [x + 16, o.y - 74], [x, o.y]]); }
       else { shadow(x, GROUND + 2, 30, 0.3); ice([[x - 22, GROUND], [x - 14, GROUND - 30], [x - 4, GROUND - 56], [x + 5, GROUND - 34], [x + 13, GROUND - 42], [x + 22, GROUND]]); ctx.fillStyle = 'rgba(255,255,255,.75)'; ctx.beginPath(); ctx.moveTo(x - 12, GROUND - 6); ctx.lineTo(x - 9, GROUND - 28); ctx.lineTo(x - 4, GROUND - 48); ctx.lineTo(x - 3, GROUND - 6); ctx.fill(); }
@@ -467,7 +468,7 @@ function drawPlay() {
   drawGate(L, cam);
   for (const a of L.amb) if (!a.got) { const x = a.x - cam; if (x > -20 && x < W + 20) { const y = a.y + Math.sin(T * 4 + a.x) * 3; glow(x, y, 26, '255,190,70', 0.4 + 0.15 * Math.sin(T * 5 + a.x)); drawAmber(x, y, 10); } }
   for (const e of L.eggs) if (!e.hidden && !e.got) { const x = e.x - cam; if (x > -60 && x < W + 60) { const ey = e.y + Math.sin(T * 3 + e.k) * 5; glow(x, ey, 56, '255,240,170', 0.45 + 0.15 * Math.sin(T * 4)); drawEgg(x, ey, 24, th.egg, th.eggSpot, 0.8 + 0.2 * Math.sin(T * 5), Math.sin(T * 2) * 0.1); } }
-  for (const o of L.obs) if (!o.dead && o.type !== 'low') drawObstacle(o, cam, th);
+  for (const o of L.obs) if ((!o.dead || o.type === 'icicle') && o.type !== 'low') drawObstacle(o, cam, th); // a destroyed icicle still leaves its ceiling stub
   drawSecret(L, cam);
   for (const h of L.hearts) if (!h.got) { const x = h.x - cam; if (x > -60 && x < W + 60) { const y = h.y + Math.sin(T * 3 + h.x) * 6, pu = 1 + 0.08 * Math.sin(T * 6); const g = ctx.createRadialGradient(x, y, 4, x, y, 52); g.addColorStop(0, 'rgba(255,120,150,.6)'); g.addColorStop(1, 'rgba(255,120,150,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, 52, 0, Math.PI * 2); ctx.fill(); drawHeart(x, y, 1.9 * pu, true); for (let k = 0; k < 3; k++) { const a = T * 2 + k * 2.1; ctx.globalAlpha = 0.5 + 0.5 * Math.sin(T * 6 + k); drawStar(x + Math.cos(a) * 30, y + Math.sin(a) * 22, 4, '#fff6b0'); } ctx.globalAlpha = 1; } }
   for (const pp of L.peppers) if (!pp.got) { const x = pp.x - cam; if (x > -40 && x < W + 40) { const y = pp.y + Math.sin(T * 4 + pp.x) * 5; const g = ctx.createRadialGradient(x, y, 4, x, y, 44); g.addColorStop(0, 'rgba(255,150,40,.65)'); g.addColorStop(1, 'rgba(255,90,20,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, 44, 0, Math.PI * 2); ctx.fill(); drawPepper(x, y, 1.1, 0.4 + Math.sin(T * 3) * 0.2); } }

@@ -803,6 +803,40 @@ test('fireballs and the dash pass under a ceiling overhang without destroying it
   expect(r).toEqual({ flewUnder: true, afterFire: true, fireHurt: false, rockSmashed: true, afterDash: true, dashHurt: false });
 });
 
+test('fire cannot reach icicles high up, a landed icicle can be shot, and a shot icicle leaves its ceiling stub', async ({ game }) => {
+  await game.open({ learned: { duck: 1, stomp: 1, fire: 1, dash: 1, swim: 1, glide: 1 } });
+  await game.start(2);
+  const r = await game.eval(() => {
+    const d = window.__dino, G = d.G, p = G.p, L = G.L, step = n => { for (let i = 0; i < n; i++) d.updatePlay(1 / 60); };
+    L.obs = []; L.pits.length = 0; L.plats.length = 0; p.hearts = 99; p.inv = 999; p.fireT = 5;
+    const fire = (fy, ice) => { L.obs = [ice]; G.fireballs = [{ x: ice.x - 100, y: fy, vx: 950, vy: 0, life: 1.1 }]; p.wx = ice.x - 700; for (let i = 0; i < 20; i++) { p.wx = ice.x - 700; step(1); } };
+    const hang = { type: 'icicle', x: 600, y: 120, vy: 0, state: 'hang' }; fire(150, hang);
+    const high = { type: 'icicle', x: 600, y: 140, vy: 0, state: 'fall' }; fire(400, high);         // a falling icicle far above the fireball
+    const stuck = { type: 'icicle', x: 600, y: 440, vy: 0, state: 'stuck' }; fire(400, stuck);
+    const out = { hangAlive: !hang.dead, highAlive: !high.dead, stuckShot: !!stuck.dead };
+    // a shot icicle still draws its ceiling stub: the pixel under it differs from the same frame without the icicle
+    G.freeze = 9; L.obs = [stuck]; stuck.dead = true; G.cam = stuck.x - 300; p.wx = G.cam + 270;
+    const cv = document.querySelector('canvas'), c2 = cv.getContext('2d'), px = () => { d.drawPlay(); const k = cv.width / 960; return Array.from(c2.getImageData(Math.round(300 * k), Math.round(30 * k), 1, 1).data).join(); };
+    const withStub = px(); L.obs = []; out.stub = withStub !== px();
+    return out;
+  });
+  expect(r).toEqual({ hangAlive: true, highAlive: true, stuckShot: true, stub: true });
+});
+
+test('a stomp coming down on a raptor knocks it away and costs no heart', async ({ game }) => {
+  await game.open({ learned: { duck: 1, stomp: 1, fire: 1, dash: 1, swim: 1, glide: 1 } });
+  await game.start(0);
+  const r = await game.eval(() => {
+    const d = window.__dino, G = d.G, p = G.p, L = G.L, step = n => { for (let i = 0; i < n; i++) d.updatePlay(1 / 60); };
+    G.startT = 0; G.coach = null; L.obs = []; L.pits.length = 0; L.plats.length = 0; p.hearts = 3; p.inv = 0;
+    const rap = { type: 'raptor', x: 260, spd: 0, ph: 0, alpha: 1 }; L.obs.push(rap);
+    p.wx = 250; p.y = 330; p.vy = 900; p.onGround = false; p.stomp = true; p.spin = 1;
+    step(40);
+    return { hearts: p.hearts, scared: !!rap.scared };
+  });
+  expect(r).toEqual({ hearts: 3, scared: true });
+});
+
 test('a missed treasure gets clearer hints: tip after one miss, glints after two; a found treasure stops the count', async ({ game }) => {
   await game.open();
   const r = await game.eval(() => {

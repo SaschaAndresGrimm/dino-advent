@@ -457,7 +457,8 @@ function updatePlay(dt) {
       const dx = o.x - f.x; let hit = false;
       if (CEILING_HAZARDS.includes(o.type)) { if (f.under !== o && Math.abs(dx) < o.w / 2) { f.under = o; noise(0.18, 0.07, 1800); for (let k = 0; k < 6; k++) { const l = 0.25 + Math.random() * 0.2; G.flames.push({ x: f.x, y: f.y + (Math.random() - 0.5) * 16, vx: 150 + Math.random() * 150, vy: 20 + Math.random() * 60, life: l, max: l, r: 3 + Math.random() * 3 }); } } continue; } // the fireball flies under the overhang
       if (o.type === 'ptero') hit = Math.abs(dx) < 40 && Math.abs(o.y - f.y) < 60;
-      else if (o.type !== 'geyser' && o.type !== 'pad' && !(o.type === 'icicle' && o.state === 'hang')) hit = Math.abs(dx) < 40;
+      else if (o.type === 'icicle' || o.type === 'meteor') hit = o.state !== 'hang' && o.state !== 'wait' && Math.abs(dx) < 40 && Math.abs(o.y - (o.type === 'icicle' ? 30 : 0) - f.y) < 70; // only a fireball at the same height hits them: hanging icicles and waiting meteors at the top are out of reach, a falling one is hit where it is
+      else if (o.type !== 'geyser' && o.type !== 'pad') hit = Math.abs(dx) < 40;
       if (!hit) continue;
       f.life = 0; burst(f.x, f.y, 18, ['#ffb030', '#ff5a1f', '#fff3a0', '#555'], 300, 400, 8, 0.7);
       if (o.type === 'raptor' || o.type === 'ptero' || o.type === 'compy' || o.type === 'hopper') { o.scared = true; o.vx = 420; o.vy = -360; }
@@ -537,7 +538,10 @@ function updatePlay(dt) {
           break;
         }
         if (o.type === 'ptero') { o.y = o.baseY + Math.sin(T * 4 + o.x * 0.01) * 8; hb = { x: o.x - 28, y: o.y - 14, w: 56, h: 26 }; }
-        else hb = { x: o.x - 26, y: GROUND - 62, w: 52, h: 60 };
+        else {
+          hb = { x: o.x - 26, y: GROUND - 62, w: 52, h: 60 };
+          if (o.type === 'raptor' && p.stomp && p.y <= hb.y + 40 && overlap(pb, hb)) { o.scared = true; o.vx = 380; o.vy = -320; hb = null; } // a stomp coming down on a raptor wins: it is knocked away before it can hurt
+        }
         break;
       case 'hopper':
         if (o.flat) { o.flat -= dt; if (o.flat <= 0) { o.flat = 0; o.scared = true; o.vx = 300; o.vy = -300; } break; }
